@@ -1,0 +1,96 @@
+import React from "react";
+import logo from "../../public/assets/logos/logo_white.png";
+import { BiRightArrowAlt } from "react-icons/bi";
+import linkedin from "../../public/assets/logos/linkedin.svg";
+import twitter from "../../public/assets/logos/twitter.svg";
+import instagram from "../../public/assets/logos/instagram.svg";
+import { CiLocationOn } from "react-icons/ci";
+
+const Footer = () => {
+  return (
+    <div className="bg-footer-bg bg-cover w-full bg-no-repeat bg-[#00122F] text-white lg:px-[50px] px-4">
+      <div className="flex flex-col lg:flex-row justify-between max-w-[1340px] mx-auto pt-[45px] lg:pb-[100px] pb-[60px]">
+        <div className=" ">
+          <img
+            src={logo.src}
+            alt="logo"
+            className="w-[351px] h-[351px] object-contain mt-[-8.7rem] ml-[-7rem]"
+          />
+          <div className="mt-[-9rem] leading-[30px] mb-[9rem] lg:mb-0">
+            We provide you with the best options for your election,
+            <br />
+            all our features are carefully crafted
+            <br /> to give our users a seamless election journey.
+          </div>
+        </div>
+        <div className="lg:text-xl tex-base mt-[-7rem] lg:mt-0">
+          <div className="footer-link flex items-center lg:gap-[28.31px] gap-4 mb-6">
+            <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%] ">
+              <BiRightArrowAlt />
+            </span>
+            <div>About Us</div>
+          </div>
+          <div className="footer-link flex items-center lg:gap-[28.31px] gap-4 mb-6">
+            <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%]">
+              <BiRightArrowAlt />
+            </span>
+            <div>Votar Plans</div>
+          </div>
+          <div className="footer-link flex items-center lg:gap-[28.31px] gap-4">
+            <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%]">
+              <BiRightArrowAlt />
+            </span>
+            <div> Contact Us</div>
+          </div>
+        </div>
+        <div className="lg:text-xl text-base my-7 lg:my-0">
+          <div className="lg:mb-6 mb-4 font-bold lg:text-2xl text-xl">
+            Locations
+          </div>
+          <div className="mb-3 flex gap-3">
+            <span className="text-3xl">
+              <CiLocationOn />
+            </span>
+            <div>
+              No 20 Fair-view estate
+              <br />
+              Lagos Island, Lagos state.
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-3xl">
+              <CiLocationOn />
+            </span>
+            <div>
+              No 1, Ooni crownland estate
+              <br />
+              Damico, Ile-Ife, Osun state.
+            </div>
+          </div>
+        </div>
+        <div className="flex lg:flex-col flex-row gap-4 lg:gap-0">
+          <div className="mb-4">
+            <img src={linkedin.src} alt="twitter" />
+          </div>
+          <div className="mb-4">
+            <img src={twitter.src} alt="twitter" />
+          </div>
+          <div>
+            <img src={instagram.src} alt="twitter" />
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-3 justify-between items-center lg:text-xl text-sm max-w-[1340px] mx-auto pb-6">
+        <div>
+          <span className="lg:pr-3 pr-1">&copy;</span>Konzi tech
+        </div>
+        <div className="flex items-center lg:gap-[67px] gap-8">
+          <div>Privacy Policy</div>
+          <div>Terms and Conditions</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Footer;

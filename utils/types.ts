@@ -1,0 +1,95 @@
+export interface PostItem {
+  title: string;
+  author: string;
+  categories: string[];
+  content: string;
+  description: string;
+  guid: string;
+  link: string;
+  pubDate: string;
+  thumbnail: string;
+  enclosure: {};
+}
+
+export interface searchDemo {
+  title: string;
+  id: string;
+  description: string;
+  image: string;
+}
+export interface Media {
+  type: "file" | "image" | "video";
+  data: File[];
+}
+export interface Details {
+  dets: string;
+  media: File[];
+}
+export interface Candidate {
+  name: string;
+  nickname: string;
+  details: string;
+  image: File[];
+  media: Media;
+  vote: number;
+}
+export interface Position {
+  name: string;
+  showPictures: boolean;
+  allowAbstain: boolean;
+  candidates: Candidate[];
+}
+
+export interface StyledTabsProps {
+  children?: React.ReactNode;
+  value: number;
+  onChange: (event: React.SyntheticEvent, newValue: number) => void;
+}
+
+export interface StyledTabProps {
+  label: string;
+}
+
+export type propsType = {
+  tracked: {
+    oldData: any;
+    newData: any;
+    changedData: string[];
+  }[];
+  index: number;
+};
+
+export type TrackeChanges = {
+  oldData: any;
+  newData: any;
+  changedData: string[];
+};
+
+export type TableRowTypes = {
+  id: string | number;
+  name: string;
+  subGroup: string;
+  phone: string;
+  email: string;
+};
+export type CardRowTypess = {
+  id: string | number;
+  name: string;
+  status: string;
+  cardHolder: string;
+  cardNumber: string;
+  expires: string;
+};
+
+export interface ExportToExcelProps {
+  excelData: {
+    id: number;
+    name: string;
+    subGroup: string;
+    phone: string;
+    email: string;
+  }[];
+  fileName: string;
+  children: React.ReactNode;
+  className: string;
+}
