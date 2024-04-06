@@ -80,9 +80,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
                   sx={{ width: 50, height: 50 }}
                 />
               )}
-              {user.user.data.userName && (
-                <Avatar alt={user.user.data.userName} src="" />
-              )}
+              {user.user && <Avatar alt={user.user.data.userName} src="" />}
             </div>
             <div
               className={`font-semibold text-sm lg:text-base ${
