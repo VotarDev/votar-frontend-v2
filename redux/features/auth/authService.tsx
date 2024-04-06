@@ -1,8 +1,8 @@
 import httpService from "@/utils/axios";
 import setAuthToken from "@/utils/setAuthToken";
 
-const signinurl = "/auth/login";
-const signupurl = "/auth/signup";
+const signinurl = "/user/login";
+const signupurl = "/user/signup";
 
 const login = (data: any) => {
   return httpService.post(signinurl, data);

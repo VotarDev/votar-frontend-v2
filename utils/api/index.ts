@@ -6,8 +6,10 @@ const googleUrl = "/auth/google";
 const mediumUrl =
   "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@votarhq";
 const freeElectionUrl = "/election/free";
-const usersUrl = "/auth/users";
-const updateUserUrl = "/auth/users";
+const usersUrl = "/user/get-profile";
+const updateUserUrl = "/user/profile-update";
+const emailUpdateUrl = "/user/verify-email";
+const googleAuthUrl = "/auth/google";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -39,4 +41,12 @@ export const createFreeElection = (data: any) => {
 
 export const updateProfile = (data: any, id: any) => {
   return httpService.put(updateUserUrl + `/${id}`, data);
+};
+
+export const verifyEmail = (data: any) => {
+  return httpService.post(emailUpdateUrl, data);
+};
+
+export const googleAuthentication = () => {
+  return httpService.get(googleAuthUrl);
 };

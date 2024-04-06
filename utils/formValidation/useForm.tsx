@@ -40,6 +40,14 @@ const useForm = (callback: any) => {
           setErrors(newObj);
         }
         break;
+      case "phoneNumber":
+        if (!value.length) {
+          setErrors({ ...errors, phoneNumber: "Phone number is required" });
+        } else {
+          let newObj = omit(errors, "phoneNumber");
+          setErrors(newObj);
+        }
+        break;
       case "email":
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
         if (!value.length) {
@@ -64,7 +72,7 @@ const useForm = (callback: any) => {
           setErrors(newObj);
         }
         break;
-      case "confirm password":
+      case "confirmPassword":
         if (!value.length) {
           setErrors({ ...errors, confirmPassword: "Password is required" });
           //@ts-ignore

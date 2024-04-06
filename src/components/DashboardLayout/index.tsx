@@ -7,6 +7,7 @@ import { useCurrentUser } from "@/utils/hooks";
 import { useDispatch } from "react-redux";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
+import setAuthToken from "@/utils/setAuthToken";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -18,10 +19,12 @@ const DashboardLayout = ({ children }: any) => {
 
   useEffect(() => {
     const getUser = async () => {
+      if (user) setAuthToken(user.data.data.cookie);
       setIsLoading(true);
       try {
-        const userId = user.user._id ? user.user._id : user.user.id;
+        const userId = user.data.data._id ? user.data.data._id : user.data.data;
         const { data } = await getUserData(userId);
+
         if (data) {
           dispatch(userData(data));
           setIsLoading(false);

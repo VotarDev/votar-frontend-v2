@@ -37,12 +37,19 @@ const SignupComponent = () => {
   };
 
   useEffect(() => {
-    if (success) router.push("/dashboard");
+    if (success) router.push("/otp");
   }, [success, router]);
 
   const signUpHandler = async () => {
     // setIsLoading(true);
-    const userData = { name, username, email, password };
+    const userData = {
+      NIN: 123456,
+      userName: username,
+      phoneNumber,
+      email,
+      password,
+      confirmPassword,
+    };
     // console.log(userData);
 
     //@ts-ignore
@@ -68,7 +75,8 @@ const SignupComponent = () => {
   // console.log(values);
 
   //@ts-ignore
-  const { name, username, email, password } = values;
+  const { name, username, email, phoneNumber, password, confirmPassword } =
+    values;
 
   return (
     <div className="flex justify-center items-center flex-col lg:my-0 my-8 lg:py-0 lg:w-[30vw] w-full font-proximaNova">
@@ -132,6 +140,21 @@ const SignupComponent = () => {
             }}
           />
         </div>
+        <div className="mb-5">
+          <TextField
+            variant="standard"
+            label="Phone Number"
+            onChange={handleChange}
+            value={phoneNumber}
+            name="phoneNumber"
+            error={errors["phoneNumber"] ? true : false}
+            helperText={errors["phoneNumber"]}
+            className="w-full"
+            InputLabelProps={{
+              style: { color: "#bfbfbf" },
+            }}
+          />
+        </div>
         <div className="mb-5 relative">
           <TextField
             variant="standard"
@@ -159,7 +182,8 @@ const SignupComponent = () => {
             variant="standard"
             label={"Confirm Password "}
             onChange={handleChange}
-            name="confirm password"
+            name="confirmPassword"
+            value={confirmPassword}
             error={errors["confirmPassword"] ? true : false}
             helperText={errors["confirmPassword"]}
             className="w-full text-sm"

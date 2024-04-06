@@ -36,6 +36,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
     }
     router.push("/signin");
   };
+  console.log(user);
 
   return (
     <div
@@ -79,7 +80,9 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
                   sx={{ width: 50, height: 50 }}
                 />
               )}
-              {user.user.username && <Avatar alt={user.user.username} src="" />}
+              {user.user.data.userName && (
+                <Avatar alt={user.user.data.userName} src="" />
+              )}
             </div>
             <div
               className={`font-semibold text-sm lg:text-base ${
@@ -87,11 +90,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
               } ${!opener && "lg:hidden"}`}
             >
               <div className="capitalize">
-                Hey,{" "}
-                <span>
-                  {user && user.user.username}
-                  {data && <>{data.user?.name}</>}
-                </span>
+                Hey, <span>{user.user && user.user.data.userName}</span>
               </div>
               <div className="sm text-[#696969]">@loremIpsum</div>
             </div>

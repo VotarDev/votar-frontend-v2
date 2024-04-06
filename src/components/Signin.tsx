@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { googleAuth } from "@/utils/api";
 import { signIn, useSession } from "next-auth/react";
+import { useCurrentUser } from "@/utils/hooks";
 import useForm from "@/utils/formValidation/useForm";
 
 const SigninComponent = () => {
@@ -25,6 +26,7 @@ const SigninComponent = () => {
   );
   const dispatch = useDispatch();
   const router = useRouter();
+  const user = useCurrentUser();
   const { data } = useSession();
 
   const eyeHanlder = () => {

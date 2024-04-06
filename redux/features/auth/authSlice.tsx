@@ -26,14 +26,15 @@ const initialState = {
 //login user
 
 export const login = createAsyncThunk(
-  `${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`,
+  `${process.env.NEXT_PUBLIC_BASE_URL}/user/login`,
   async (userdata, thunkAPI) => {
     try {
       const { data } = await authService.login(userdata);
       if (data) {
-        setAuthToken(data.token);
+        setAuthToken(data.data.data.cookie);
         localStorage.setItem("user", JSON.stringify(data));
-        toast.success(data?.message);
+        toast.success(data.data?.message);
+        console.log(data.data.data.cookie);
       }
       return data;
     } catch (error: any) {
@@ -52,14 +53,15 @@ export const login = createAsyncThunk(
 // register user
 
 export const register = createAsyncThunk(
-  `${process.env.NEXT_PUBLIC_BASE_URL}/auth/signup`,
+  `${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`,
   async (userdata, thunkAPI) => {
     try {
       const { data } = await authService.signup(userdata);
       if (data) {
         localStorage.setItem("user", JSON.stringify(data));
-        toast.success(data?.message);
+        toast.success(data.data?.message);
       }
+      console.log(data);
       return data;
     } catch (error: any) {
       const message =

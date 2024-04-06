@@ -8,6 +8,7 @@ import Footer from "@/src/components/Footer";
 import Head from "next/head";
 import Chat from "@/src/components/Chat";
 import Nav from "@/src/components/Nav";
+import FetchAppData from "@/src/components/general/FetchAppData";
 
 export default function Home() {
   return (
@@ -35,6 +36,7 @@ export default function Home() {
         <meta property="og:type" content="website" />
         <meta property="og:locale" content="en_US" />
       </Head>
+      <FetchAppData />
       <Nav />
       <Hero />
       <Logos />
