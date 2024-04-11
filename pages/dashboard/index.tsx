@@ -116,8 +116,12 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log(context);
 
-export async function getServerSideProps(context: any) {
-  console.log(context.res);
-}
+  return {
+    props: {},
+  };
+};
+
+export default Dashboard;
