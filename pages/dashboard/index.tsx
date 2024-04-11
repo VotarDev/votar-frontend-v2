@@ -128,7 +128,7 @@ export const getServerSideProps: GetServerSideProps = async (
 ) => {
   const parsedUrl = url.parse(context.req.url || "", true);
 
-  let token: string | undefined;
+  let token: string | null = null;
 
   if (typeof parsedUrl.query.token === "string") {
     token = parsedUrl.query.token;
@@ -136,8 +136,10 @@ export const getServerSideProps: GetServerSideProps = async (
     token = parsedUrl.query.token[0];
   }
 
-  // Log the token value
-  console.log("Token:", token);
+  if (token === undefined) {
+    // Set a default value or handle the case as needed
+    token = null;
+  }
   return {
     props: { token },
   };

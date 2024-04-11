@@ -30,6 +30,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
 
   const handleLogout = async () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     dispatch(logout());
     if (data) {
       return await signOut();

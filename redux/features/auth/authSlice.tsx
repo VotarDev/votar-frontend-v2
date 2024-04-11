@@ -34,6 +34,7 @@ export const login = createAsyncThunk(
       if (data) {
         setAuthToken(data.data.data.cookie);
         localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("token", data.data.data.cookie);
         toast.success(data.data?.message);
         console.log(data.data.data.cookie);
       }
