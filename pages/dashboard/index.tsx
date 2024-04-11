@@ -1,5 +1,5 @@
 // import withAuth from "@/hoc/withAuth";
-import React from "react";
+import React, { useEffect } from "react";
 import { logout } from "@/redux/features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
@@ -25,7 +25,7 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 
-const Dashboard = () => {
+const Dashboard = ({ token }: { token?: string }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const users = useCurrentUser();
@@ -38,6 +38,12 @@ const Dashboard = () => {
     signOut();
     router.push("/signin");
   };
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem("token", token);
+    }
+  }, [token]);
+  console.log(token);
   return (
     <ProtectedRoutes>
       <DashboardLayout>
@@ -125,17 +131,15 @@ export const getServerSideProps: GetServerSideProps = async (
   let token: string | undefined;
 
   if (typeof parsedUrl.query.token === "string") {
-    token = parsedUrl.query.token as string;
+    token = parsedUrl.query.token;
   } else if (Array.isArray(parsedUrl.query.token)) {
     token = parsedUrl.query.token[0];
   }
 
-  if (token) {
-    localStorage.setItem("token", token);
-  }
-
+  // Log the token value
+  console.log("Token:", token);
   return {
-    props: {},
+    props: { token },
   };
 };
 
