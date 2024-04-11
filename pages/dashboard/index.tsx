@@ -23,6 +23,7 @@ import Link from "next/link";
 import Chat from "@/src/components/Chat";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps } from "next";
+import url from "url";
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -117,7 +118,13 @@ const Dashboard = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  console.log(req);
+  const parsedUrl = url.parse(req.url || "", true);
+
+  const { query } = parsedUrl;
+
+  const token = query.token;
+
+  console.log(token);
 
   return {
     props: {},
