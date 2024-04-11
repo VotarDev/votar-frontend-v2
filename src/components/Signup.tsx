@@ -6,7 +6,9 @@ import useForm from "@/utils/formValidation/useForm";
 import { useDispatch, useSelector } from "react-redux";
 import { register } from "@/redux/features/auth/authSlice";
 import { useRouter } from "next/router";
-import { googleAuth } from "@/utils/api";
+import { googleAuthentication } from "@/utils/api";
+
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 
 import {
   TextField,
@@ -16,15 +18,20 @@ import {
   Checkbox,
 } from "@mui/material";
 import { signIn } from "next-auth/react";
+import axios from "axios";
+import authService from "@/redux/features/auth/authService";
+
+import { toast } from "react-hot-toast";
 
 const SignupComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCPassword, setShowcpassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { loading, userData, error, success, message } = useSelector(
-    (state: any) => state.auth
-  );
+  // const { loading, userData, error, success, message } = useSelector(
+  //   (state: any) => state.auth
+  // );
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -36,12 +43,8 @@ const SignupComponent = () => {
     setShowcpassword(!showCPassword);
   };
 
-  useEffect(() => {
-    if (success) router.push("/otp");
-  }, [success, router]);
-
   const signUpHandler = async () => {
-    // setIsLoading(true);
+    setLoading(true);
     const userData = {
       NIN: 123456,
       userName: username,
@@ -53,19 +56,66 @@ const SignupComponent = () => {
     // console.log(userData);
 
     //@ts-ignore
-    dispatch(register(userData));
+    try {
+      const { data } = await authService.signup(userData);
+      if (data) {
+        setIsLoading(false);
+        router.push("/signin/otp");
+        toast.success(data.data?.message);
+      }
+    } catch (e: any) {
+      toast.error(e.response.data.message || e.message);
+    }
   };
+
+  // const googleLogin = useGoogleLogin({
+  //   flow: "auth-code",
+  //   onSuccess: async (codeResponse) => {
+  //     console.log(codeResponse);
+  //     const tokens = await axios.post(
+  //       "https://votar-api.onrender.com/app:v1/auth/google",
+  //       {
+  //         code: codeResponse.code,
+  //       }
+  //     );
+  //     const userData = {
+  //       NIN: 123456,
+  //       userName: username,
+  //       phoneNumber,
+  //       email,
+  //       password,
+  //       confirmPassword,
+  //     };
+  //     const tokens = await googleAuthentication(userData);
+
+  //     console.log(tokens);
+  //   },
+  //   onError: (errorResponse) => console.log(errorResponse),
+  // });
 
   const googleAuthHandler = async () => {
     // const url = process.env.NEXT_PUBLIC_URL;
     // console.log(url);
     // signIn("google", { callbackUrl: `${url}/dashboard` });
+    const userData = {
+      NIN: 123456,
+      userName: username,
+      phoneNumber,
+      email,
+      password,
+      confirmPassword,
+    };
     try {
-      const data = await googleAuth();
-      if (!data) {
-        throw new Error("Failed to sign in with Google");
+      setIsLoading(true);
+      const data = await googleAuthentication(userData);
+      if (data && data.data) {
+        // Redirect the user to the Google authentication URL
+        window.location.href = data.data;
+      } else {
+        console.error("Google authentication failed");
       }
-      router.replace("/dashboard");
+      setIsLoading(false);
+      console.log(data.data);
     } catch (e: any) {
       console.log(e);
     }
@@ -80,8 +130,8 @@ const SignupComponent = () => {
 
   return (
     <div className="flex justify-center items-center flex-col lg:my-0 my-8 lg:py-0 lg:w-[30vw] w-full font-proximaNova">
-      <form onSubmit={handleSubmit} className="flex flex-col w-full ">
-        <div className="flex gap-2 mb-5">
+      <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2">
+        <div className="flex gap-2">
           <TextField
             variant="standard"
             label="Firstname"
@@ -110,7 +160,7 @@ const SignupComponent = () => {
             }}
           />
         </div>
-        <div className="mb-5">
+        <div className="">
           <TextField
             variant="standard"
             label="Email"
@@ -125,7 +175,7 @@ const SignupComponent = () => {
             }}
           />
         </div>
-        <div className="mb-5">
+        <div className="">
           <TextField
             variant="standard"
             label="Username"
@@ -140,7 +190,7 @@ const SignupComponent = () => {
             }}
           />
         </div>
-        <div className="mb-5">
+        <div className="">
           <TextField
             variant="standard"
             label="Phone Number"
@@ -155,7 +205,7 @@ const SignupComponent = () => {
             }}
           />
         </div>
-        <div className="mb-5 relative">
+        <div className="relative">
           <TextField
             variant="standard"
             label="Password"
@@ -177,7 +227,7 @@ const SignupComponent = () => {
             {showPassword ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
           </span>
         </div>
-        <div className="mb-5 relative">
+        <div className=" relative">
           <TextField
             variant="standard"
             label={"Confirm Password "}
@@ -198,18 +248,6 @@ const SignupComponent = () => {
           >
             {showCPassword ? <BsFillEyeFill /> : <BsFillEyeSlashFill />}
           </span>
-        </div>
-        <div className="mb-5">
-          <TextField
-            variant="standard"
-            label="Referrer (Optional)"
-            onChange={handleChange}
-            name="referral"
-            className="w-full"
-            InputLabelProps={{
-              style: { color: "#bfbfbf" },
-            }}
-          />
         </div>
         <div className="text-[#454545]">
           <FormGroup>
@@ -233,7 +271,7 @@ const SignupComponent = () => {
         </div>
 
         <button
-          className="bg-[#015CE9] text-white h-[52px] rounded mt-3 flex items-center justify-center gap-2 font-proximaNova transition ease-out duration-150 hover:scale-[1.03]"
+          className="bg-[#015CE9] text-white h-[52px] rounded flex items-center justify-center gap-2 font-proximaNova transition ease-out duration-150 hover:scale-[1.03]"
           disabled={loading}
         >
           {loading && (
@@ -247,7 +285,17 @@ const SignupComponent = () => {
         </button>
       </form>
 
-      <button className="my-3 border border-[#015CE9] h-[52px] rounded mt-7 w-full text-[#454545] font-proximaNova flex items-center justify-center">
+      <button
+        className=" border border-[#015CE9] h-[52px] rounded mt-7 w-full text-[#454545] font-proximaNova flex items-center justify-center gap-3"
+        disabled={isLoading}
+      >
+        {isLoading && (
+          <CircularProgress
+            color="primary"
+            className="ml-[-2rem] text-blue-700"
+            size={20}
+          />
+        )}
         <span className="flex items-center gap-4" onClick={googleAuthHandler}>
           <img src={google.src} alt="google" />
           Sign up with google

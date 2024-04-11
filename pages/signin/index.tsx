@@ -1,15 +1,15 @@
 import React, { useState, FormEvent, useEffect } from "react";
-import logo from "../public/assets/logos/logo_white-1.png";
-import illustration from "../public/assets/illustrations/illustration-4.svg";
+import logo from "../../public/assets/logos/logo_white-1.png";
+import illustration from "../../public/assets/illustrations/illustration-4.svg";
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Button from "@/src/components/HomePage/Button";
-import google from "../public/assets/logos/google.svg";
+import google from "../../public/assets/logos/google.svg";
 import { BsFillEyeFill, BsFillEyeSlashFill } from "react-icons/bs";
 import setAuthToken from "@/utils/setAuthToken";
 import { signup } from "@/utils/api";
 import { CustomTabPanel, a11yProps } from "@/src/components/Tab";
-import { Box, Tab, Tabs } from "@mui/material";
+import { Box, Tab, Tabs, styled } from "@mui/material";
 
 const SignupComponent = dynamic(() => import("@/src/components/Signup"), {
   ssr: false,
@@ -18,6 +18,44 @@ const SigninComponent = dynamic(() => import("@/src/components/Signin"), {
   ssr: false,
 });
 import dynamic from "next/dynamic";
+import { StyledTabProps, StyledTabsProps } from "@/utils/types";
+
+const StyledTabs = styled((props: StyledTabsProps) => (
+  <Tabs
+    {...props}
+    TabIndicatorProps={{
+      children: <span className="MuiTabs-indicatorSpan" />,
+    }}
+  />
+))({
+  "& .MuiTabs-indicator": {
+    display: "flex",
+    justifyContent: "center",
+    backgroundColor: "#015CE9",
+  },
+  "& .MuiTabs-indicatorSpan": {
+    maxWidth: 40,
+    width: "100%",
+    backgroundColor: "#015CE9",
+  },
+});
+
+const StyledTab = styled((props: StyledTabProps) => (
+  <Tab disableRipple {...props} />
+))(({ theme }) => ({
+  textTransform: "none",
+  fontWeight: theme.typography.fontWeightMedium,
+  fontSize: theme.typography.pxToRem(18),
+  marginRight: theme.spacing(4),
+  paddingBottom: theme.spacing(0),
+  color: "#696969",
+  "&.Mui-selected": {
+    color: "#015CE9",
+  },
+  "&.Mui-focusVisible": {
+    backgroundColor: "rgba(100, 95, 228, 0.32)",
+  },
+}));
 
 const Signin = () => {
   const searchParams = useSearchParams();
@@ -47,24 +85,16 @@ const Signin = () => {
       </div>
       <div className="flex justify-center items-center lg:w-[60%] flex-col max-w-[1024px] mx-auto lg:my-0 my-8 lg:py-0 font-proximaNova">
         <div className="w-full">
-          <Tabs
-            value={tabValue}
-            onChange={handleChange}
-            aria-label="basic tabs example"
-            TabIndicatorProps={{
-              style: {
-                backgroundColor: "#2B77ED",
-              },
-            }}
-            centered
-          >
-            <Tab
-              label="Log In"
-              {...a11yProps(0)}
-              sx={{ marginRight: "4rem" }}
-            />
-            <Tab label="Sign Up" {...a11yProps(1)} />
-          </Tabs>
+          <div className="w-full h-full flex flex-col items-center">
+            <StyledTabs
+              value={tabValue}
+              onChange={handleChange}
+              aria-label="styled tabs example"
+            >
+              <StyledTab label="Log In" {...a11yProps(0)} />
+              <StyledTab label="Sign Up" {...a11yProps(1)} />
+            </StyledTabs>
+          </div>
 
           <div className="flex justify-center">
             <CustomTabPanel value={tabValue} index={0}>

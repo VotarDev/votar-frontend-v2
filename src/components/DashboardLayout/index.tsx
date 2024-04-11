@@ -1,4 +1,4 @@
-import withAuth from "@/hoc/withAuth";
+// import withAuth from "@/hoc/withAuth";
 import React, { useEffect, useState } from "react";
 import SideBar from "../SideBar";
 import Header from "../Header";
@@ -10,6 +10,7 @@ import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import setAuthToken from "@/utils/setAuthToken";
 
 import { CircularProgress } from "@mui/material";
+import ProtectedRoutes from "../ProtectedRoutes";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -54,7 +55,7 @@ const DashboardLayout = ({ children }: any) => {
   //   );
 
   return (
-    <>
+    <ProtectedRoutes>
       {isClient && (
         <div className="overflow-auto">
           <div className="flex">
@@ -76,8 +77,8 @@ const DashboardLayout = ({ children }: any) => {
           </div>
         </div>
       )}
-    </>
+    </ProtectedRoutes>
   );
 };
 
-export default withAuth(DashboardLayout);
+export default DashboardLayout;

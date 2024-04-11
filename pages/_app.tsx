@@ -5,10 +5,12 @@ import localFont from "next/font/local";
 import store from "@/redux/store";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
-import { ThemeProvider, createTheme } from "@mui/material";
+
 import { SessionProvider } from "next-auth/react";
 import AppContext from "@/src/context/AppContext";
 import { Position } from "@/utils/types";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 
 const proxima = localFont({
   src: [
@@ -61,14 +63,16 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <AppContext.Provider value={value}>
       <Provider store={store}>
-        <SessionProvider session={pageProps.session}>
-          <div className={`${proxima.variable} font-proximaNova `}>
-            <ThemeProvider theme={THEME}>
-              <Toaster />
-              <Component {...pageProps} />
-            </ThemeProvider>
-          </div>
-        </SessionProvider>
+        <GoogleOAuthProvider clientId="12194768072-ftkkte0iqtopa81s1n3u39jdje2ktv3b.apps.googleusercontent.com">
+          <SessionProvider session={pageProps.session}>
+            <div className={`${proxima.variable} font-proximaNova `}>
+              <ThemeProvider theme={THEME}>
+                <Toaster />
+                <Component {...pageProps} />
+              </ThemeProvider>
+            </div>
+          </SessionProvider>
+        </GoogleOAuthProvider>
       </Provider>
     </AppContext.Provider>
   );

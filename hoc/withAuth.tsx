@@ -8,17 +8,14 @@ export default function withAuth(Component: NextComponentType) {
   return function ProtectedRoute({ ...props }) {
     const router = useRouter();
     const user = useCurrentUser();
-    const { data, status } = useSession();
 
+    console.log(user);
     useEffect(() => {
-      if (status === "loading") {
-        return;
-      }
-      if (!user && !data) {
+      if (user == null) {
         // window.location.href = "/signin";
         router.push("/signin");
       }
-    }, [router, user, data, status]);
+    }, [router, user]);
 
     return <Component {...props} />;
   };

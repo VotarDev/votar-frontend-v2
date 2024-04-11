@@ -47,6 +47,6 @@ export const verifyEmail = (data: any) => {
   return httpService.post(emailUpdateUrl, data);
 };
 
-export const googleAuthentication = () => {
-  return httpService.get(googleAuthUrl);
+export const googleAuthentication = (data: any) => {
+  return httpService.get(googleAuthUrl, data);
 };

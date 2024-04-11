@@ -17,6 +17,7 @@ if (typeof window !== "undefined") {
 const initialState = {
   loading: false,
   userData: users ? users : null,
+  isVerified: false,
   userToken: null,
   error: false,
   success: false,
@@ -58,7 +59,7 @@ export const register = createAsyncThunk(
     try {
       const { data } = await authService.signup(userdata);
       if (data) {
-        localStorage.setItem("user", JSON.stringify(data));
+        // localStorage.setItem("user", JSON.stringify(data));
         toast.success(data.data?.message);
       }
       console.log(data);
@@ -104,6 +105,7 @@ const authSlice = createSlice({
       .addCase(login.fulfilled, (state, action: any) => {
         state.loading = false;
         state.success = true;
+        state.isVerified = true;
         //@ts-ignore
         state.userData = action.payload;
         state.userToken = action.payload.token;
@@ -112,6 +114,7 @@ const authSlice = createSlice({
       .addCase(login.rejected, (state, action: any) => {
         state.loading = false;
         state.error = true;
+        state.isVerified = false;
         state.success = false;
         state.userData = null;
         state.userToken = null;
@@ -121,11 +124,13 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(register.fulfilled, (state, action) => {
+        state.isVerified = false;
         state.loading = false;
         state.success = true;
         state.userData = action.payload;
       })
       .addCase(register.rejected, (state, action) => {
+        state.isVerified = false;
         state.loading = false;
         state.error = true;
         state.success = false;
