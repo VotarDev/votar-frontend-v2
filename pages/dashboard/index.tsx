@@ -22,7 +22,7 @@ import cardBg from "../../public/assets/images/card-bg.png";
 import Link from "next/link";
 import Chat from "@/src/components/Chat";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 
 const Dashboard = () => {
@@ -117,14 +117,22 @@ const Dashboard = () => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res }) => {
-  const parsedUrl = url.parse(req.url || "", true);
+export const getServerSideProps: GetServerSideProps = async (
+  context: GetServerSidePropsContext
+) => {
+  const parsedUrl = url.parse(context.req.url || "", true);
 
-  const { query } = parsedUrl;
+  let token: string | undefined;
 
-  const token = query.token;
+  if (typeof parsedUrl.query.token === "string") {
+    token = parsedUrl.query.token as string;
+  } else if (Array.isArray(parsedUrl.query.token)) {
+    token = parsedUrl.query.token[0];
+  }
 
-  console.log(token);
+  if (token) {
+    localStorage.setItem("token", token);
+  }
 
   return {
     props: {},
