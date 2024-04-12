@@ -109,12 +109,12 @@ const SignupComponent = () => {
       setIsLoading(true);
       const data = await googleAuthentication(userData);
       console.log(data);
-      // if (data && data.data) {
-      //   // Redirect the user to the Google authentication URL
-      //   window.location.href = data.data;
-      // } else {
-      //   console.error("Google authentication failed");
-      // }
+      if (data && data.data) {
+        // Redirect the user to the Google authentication URL
+        window.location.href = data.data;
+      } else {
+        console.error("Google authentication failed");
+      }
       setIsLoading(false);
       console.log(data.data);
     } catch (e: any) {
