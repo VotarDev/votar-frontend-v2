@@ -55,7 +55,7 @@ const DashboardLayout = ({ children }: any) => {
   //   );
 
   return (
-    <ProtectedRoutes>
+    <>
       {isClient && (
         <div className="overflow-auto">
           <div className="flex">
@@ -77,7 +77,7 @@ const DashboardLayout = ({ children }: any) => {
           </div>
         </div>
       )}
-    </ProtectedRoutes>
+    </>
   );
 };
 

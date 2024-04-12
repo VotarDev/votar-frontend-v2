@@ -10,7 +10,7 @@ function ProtectedRoutes({ children }: any) {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
-      if (!token && router.pathname !== "/signin") {
+      if (!token) {
         router.push("/signin");
       }
     }
