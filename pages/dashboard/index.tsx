@@ -32,12 +32,18 @@ const Dashboard = ({ token }: { token?: string }) => {
   const { data } = useSession();
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-    } else {
-      router.push("/signin");
+    if (typeof window !== "undefined") {
+      const tokenLocal = localStorage.getItem("token");
+      if (!tokenLocal && !token) {
+        // If token does not exist, redirect to signin page
+        router.push("/signin");
+      }
     }
-  }, [token]);
+    if (typeof token === "string") {
+      localStorage.setItem("token", token);
+    }
+  }, [router]);
+
   console.log(token);
   return (
     <DashboardLayout>
