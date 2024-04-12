@@ -24,14 +24,15 @@ import Chat from "@/src/components/Chat";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
+import setAuthToken from "@/utils/setAuthToken";
 
-const Dashboard = ({ token, id }: { token?: string; id: any }) => {
+const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const users = useCurrentUser();
   const { data } = useSession();
 
-  console.log(id);
+  console.log(userInfo);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -45,6 +46,11 @@ const Dashboard = ({ token, id }: { token?: string; id: any }) => {
       localStorage.setItem("token", token);
     }
   }, [router]);
+
+  useEffect(() => {
+    if (userInfo.token) setAuthToken(userInfo.token);
+    if (userInfo.user) console.log(JSON.parse(userInfo.user));
+  }, []);
 
   console.log(token);
   return (
@@ -143,7 +149,7 @@ export const getServerSideProps: GetServerSideProps = async (
     token = null;
   }
   return {
-    props: { token, id: parsedUrl.query },
+    props: { token, userInfo: parsedUrl.query },
   };
 };
 
