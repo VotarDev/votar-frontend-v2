@@ -25,6 +25,7 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 import setAuthToken from "@/utils/setAuthToken";
+import { userData } from "@/redux/features/userProfile/userProfileSlice";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
@@ -32,7 +33,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const users = useCurrentUser();
   const { data } = useSession();
 
-  console.log(userInfo);
+  console.log(JSON.parse(userInfo.user ? userInfo.user : null));
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -49,8 +50,8 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
 
   useEffect(() => {
     if (userInfo.token) setAuthToken(userInfo.token);
-    if (userInfo.user) console.log(JSON.parse(userInfo.user));
-  }, []);
+    if (userInfo.user) dispatch(userData(JSON.parse(userInfo.user)));
+  }, [dispatch, userInfo]);
 
   console.log(token);
   return (
