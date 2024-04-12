@@ -25,11 +25,13 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 
-const Dashboard = ({ token }: { token?: string }) => {
+const Dashboard = ({ token, id }: { token?: string; id: any }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const users = useCurrentUser();
   const { data } = useSession();
+
+  console.log(id);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -126,6 +128,7 @@ export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
   const parsedUrl = url.parse(context.req.url || "", true);
+  console.log(parsedUrl.query);
 
   let token: string | null = null;
 
@@ -140,7 +143,7 @@ export const getServerSideProps: GetServerSideProps = async (
     token = null;
   }
   return {
-    props: { token },
+    props: { token, id: parsedUrl.query },
   };
 };
 

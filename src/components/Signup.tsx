@@ -116,7 +116,7 @@ const SignupComponent = () => {
         console.error("Google authentication failed");
       }
       setIsLoading(false);
-      console.log(data.data);
+      console.log(data);
     } catch (e: any) {
       console.log(e);
     }
