@@ -25,27 +25,25 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 
-const Dashboard = ({ token }: { token?: string }) => {
+const Dashboard = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const users = useCurrentUser();
   const { data } = useSession();
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("user");
-    }
-    dispatch(logout());
-    signOut();
-    router.push("/signin");
-  };
+
   useEffect(() => {
-    if (token) {
+    const { token } = router.query;
+
+    if (typeof token === "string") {
       localStorage.setItem("token", token);
-    } else {
+    }
+    const isAuthenticated = !!localStorage.getItem("token");
+
+    if (!isAuthenticated) {
       router.push("/signin");
     }
-  }, [token]);
-  console.log(token);
+  }, [router]);
+
   return (
     <DashboardLayout>
       <div className="w-full flex">
