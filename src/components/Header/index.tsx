@@ -15,6 +15,7 @@ const Header = () => {
         Welcome,{" "}
         <span>
           {user.user.data && <>{user.user.data.userName}</>}
+          {user.username && <>{user.username}</>}
           {/* {data && data?.user?.name?.split(" ")[0]} */}
         </span>
         {/* {users && users.user.username
