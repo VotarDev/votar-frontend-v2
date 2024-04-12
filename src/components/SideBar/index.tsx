@@ -94,7 +94,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
                 Hey,{" "}
                 <span>
                   {user.user.data && user.user.data.userName}{" "}
-                  {user.username && <>{user.username}</>}
+                  {user.user.username && <>{user.user.username}</>}
                 </span>
               </div>
               <div className="sm text-[#696969]">@loremIpsum</div>
