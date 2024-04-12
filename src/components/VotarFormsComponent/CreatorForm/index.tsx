@@ -69,7 +69,7 @@ const CreatorForm = () => {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText("http://localhost:3000/usersForm");
+    navigator.clipboard.writeText("http://votar.ng/usersForm");
     toast.success("Link copied to clipboard");
   };
 
