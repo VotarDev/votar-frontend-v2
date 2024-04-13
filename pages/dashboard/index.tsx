@@ -50,7 +50,10 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
 
   useEffect(() => {
     if (userInfo.token) setAuthToken(userInfo.token);
-    if (userInfo.user) dispatch(userData(JSON.parse(userInfo.user)));
+    if (userInfo.user) {
+      dispatch(userData(JSON.parse(userInfo.user)));
+      localStorage.setItem("user", JSON.stringify(userInfo.user));
+    }
   }, [dispatch, userInfo]);
 
   console.log(token);

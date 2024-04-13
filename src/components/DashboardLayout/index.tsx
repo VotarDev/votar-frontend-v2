@@ -27,7 +27,12 @@ const DashboardLayout = ({ children }: any) => {
       setIsLoading(true);
       setSuccess(false);
       try {
-        const userId = user.data.data._id ? user.data.data._id : user.data.data;
+        const userId = user.data.data._id
+          ? user.data.data._id
+          : user.data.data
+          ? user.data.data
+          : user.id;
+        console.log(userId);
         const { data } = await getUserData(userId);
         console.log(data);
         if (data) {
