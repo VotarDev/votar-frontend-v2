@@ -52,7 +52,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     if (userInfo.token) setAuthToken(userInfo.token);
     if (userInfo.user) {
       dispatch(userData(JSON.parse(userInfo.user)));
-      localStorage.setItem("user", JSON.stringify(userInfo.user));
+      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [dispatch, userInfo]);
 
