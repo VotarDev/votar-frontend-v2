@@ -66,18 +66,10 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
             }`}
           >
             <div className="flex justify-center">
-              {data && (
+              {user.user.picture && (
                 <Avatar
-                  alt={
-                    data.user?.name !== null && data !== undefined
-                      ? data.user?.name
-                      : ""
-                  }
-                  src={
-                    imageLink !== null && imageLink !== undefined
-                      ? imageLink
-                      : ""
-                  }
+                  alt={user.user.username}
+                  src={user.user.picture}
                   sx={{ width: 50, height: 50 }}
                 />
               )}
