@@ -4,6 +4,7 @@ import DashboardLayout from "@/src/components/DashboardLayout";
 import withAuth from "@/hoc/withAuth";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import CreatorForm from "@/src/components/VotarFormsComponent/CreatorForm";
+import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 
 const CreateForm = () => {
   const router = useRouter();
@@ -15,16 +16,18 @@ const CreateForm = () => {
     }
   }, [id]);
   return (
-    <DashboardLayout>
-      <div>
-        <ElectionHeader
-          electionTitle={electionName}
-          textContent=" Election Details Form"
-        />
-      </div>
-      <CreatorForm />
-    </DashboardLayout>
+    <ProtectedRoutes>
+      <DashboardLayout>
+        <div>
+          <ElectionHeader
+            electionTitle={electionName}
+            textContent=" Election Details Form"
+          />
+        </div>
+        <CreatorForm />
+      </DashboardLayout>
+    </ProtectedRoutes>
   );
 };
 
-export default withAuth(CreateForm);
+export default CreateForm;

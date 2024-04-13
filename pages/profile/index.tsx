@@ -5,6 +5,7 @@ import ProfileHeader from "@/src/components/Profile/Header";
 import ProfileBody from "@/src/components/Profile/Body";
 import CardHeader from "@/src/components/CardDetailComponent/CardHeader";
 import CardsList from "@/src/components/CardDetailComponent/CardsList";
+import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 
 const Profile = () => {
   const [cards, setCards] = useState([
@@ -18,15 +19,17 @@ const Profile = () => {
     },
   ]);
   return (
-    <DashboardLayout>
-      <ProfileHeader />
-      <ProfileBody />
-      <div>
-        <CardHeader />
-        <CardsList cards={cards} setNewCard={setCards} />
-      </div>
-    </DashboardLayout>
+    <ProtectedRoutes>
+      <DashboardLayout>
+        <ProfileHeader />
+        <ProfileBody />
+        <div>
+          <CardHeader />
+          <CardsList cards={cards} setNewCard={setCards} />
+        </div>
+      </DashboardLayout>
+    </ProtectedRoutes>
   );
 };
 
-export default withAuth(Profile);
+export default Profile;

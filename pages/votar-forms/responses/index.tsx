@@ -27,4 +27,4 @@ const Responses = () => {
   );
 };
 
-export default withAuth(Responses);
+export default Responses;

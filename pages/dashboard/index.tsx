@@ -38,7 +38,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const tokenLocal = localStorage.getItem("token");
-      if (!tokenLocal && !token) {
+      if (!token && !tokenLocal) {
         // If token does not exist, redirect to signin page
         router.push("/signin");
       }
