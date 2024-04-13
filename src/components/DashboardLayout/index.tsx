@@ -21,6 +21,7 @@ const DashboardLayout = ({ children }: any) => {
   const user = useCurrentUser();
   const dispatch = useDispatch();
 
+  console.log(user);
   useEffect(() => {
     const getUser = async () => {
       if (user) setAuthToken(user.data.data.cookie);
@@ -32,7 +33,7 @@ const DashboardLayout = ({ children }: any) => {
           : user.data.data
           ? user.data.data
           : user.id;
-        console.log(user);
+
         const { data } = await getUserData(userId);
         console.log(data);
         if (data) {
