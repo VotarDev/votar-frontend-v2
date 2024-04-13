@@ -50,6 +50,7 @@ const OtpSection = () => {
     setLoading(true);
     setSuccess(false);
     const otpString = otp.join("");
+    console.log(user.data.data.email);
     try {
       const { data } = await verifyEmail({
         otp: otpString,
