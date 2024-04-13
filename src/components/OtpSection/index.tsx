@@ -45,7 +45,8 @@ const OtpSection = () => {
     if (success) router.push("/signin");
   }, [success, router]);
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = async (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
     if (user) setAuthToken(user.data.data.cookie);
     setLoading(true);
     setSuccess(false);
