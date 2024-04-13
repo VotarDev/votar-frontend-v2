@@ -17,6 +17,7 @@ import { useUser } from "@/utils/hooks";
 import logoutIcon from "../../../public/assets/icons/log out.svg";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { Tooltip } from "@mui/material";
+import { userData } from "@/redux/features/userProfile/userProfileSlice";
 
 const SideBar = ({ opener }: { opener?: boolean }) => {
   const { data, status } = useSession();
@@ -32,6 +33,8 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     dispatch(logout());
+    dispatch(userData({}));
+
     if (data) {
       return await signOut();
     }
