@@ -12,7 +12,7 @@ import {
   FormControlLabel,
   FormGroup,
 } from "@mui/material";
-import { googleAuth } from "@/utils/api";
+import { googleAuth, googleAuthentication } from "@/utils/api";
 import { signIn, useSession } from "next-auth/react";
 import { useCurrentUser } from "@/utils/hooks";
 import useForm from "@/utils/formValidation/useForm";
@@ -46,20 +46,26 @@ const SigninComponent = () => {
   };
 
   const googleAuthHandler = async () => {
-    // setIsLoading(true);
-    // try {
-    //   const { data } = await googleAuth();
-
-    //   if (data) {
-    //     router.push("/dashboard");
-    //   }
-    //   setIsLoading(false);
-    // } catch (error: any) {
-    //   console.log(error);
-    // }
-    const url = process.env.NEXT_PUBLIC_URL;
-    console.log(url);
-    signIn("google", { callbackUrl: `${url}/dashboard` });
+    const userData = {
+      NIN: 123456,
+      email,
+      password,
+    };
+    try {
+      setIsLoading(true);
+      const data = await googleAuthentication(userData);
+      console.log(data);
+      if (data && data.data) {
+        // Redirect the user to the Google authentication URL
+        window.location.href = data.data;
+      } else {
+        console.error("Google authentication failed");
+      }
+      setIsLoading(false);
+      console.log(data);
+    } catch (e: any) {
+      console.log(e);
+    }
   };
   const { handleChange, values, errors, handleSubmit } = useForm(loginHandler);
   //@ts-ignore
@@ -144,10 +150,17 @@ const SigninComponent = () => {
       </form>
 
       <button
-        className=" border border-[#015CE9] h-[52px] rounded mt-5 w-full text-[#454545] font-proximaNova flex justify-center items-center"
+        className=" border border-[#015CE9] h-[52px] rounded mt-5 w-full text-[#454545] font-proximaNova flex justify-center items-center gap-3"
         onClick={googleAuthHandler}
-        disabled={loading ? true : false}
+        disabled={isLoading}
       >
+        {isLoading && (
+          <CircularProgress
+            color="primary"
+            className="ml-[-2rem] text-blue-700"
+            size={20}
+          />
+        )}
         <span className="flex items-center gap-4">
           <img src={google.src} alt="google" />
           Sign in with google

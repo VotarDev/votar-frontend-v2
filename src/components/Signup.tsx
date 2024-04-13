@@ -291,6 +291,7 @@ const SignupComponent = () => {
       <button
         className=" border border-[#015CE9] h-[52px] rounded mt-7 w-full text-[#454545] font-proximaNova flex items-center justify-center gap-3"
         disabled={isLoading}
+        onClick={googleAuthHandler}
       >
         {isLoading && (
           <CircularProgress
@@ -299,7 +300,7 @@ const SignupComponent = () => {
             size={20}
           />
         )}
-        <span className="flex items-center gap-4" onClick={googleAuthHandler}>
+        <span className="flex items-center gap-4">
           <img src={google.src} alt="google" />
           Sign up with google
         </span>
