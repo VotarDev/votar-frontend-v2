@@ -21,19 +21,16 @@ const DashboardLayout = ({ children }: any) => {
   const user = useCurrentUser();
   const dispatch = useDispatch();
 
-  console.log(user.id);
+  console.log(user);
 
   useEffect(() => {
     const getUser = async () => {
-      if (user) setAuthToken(user.data.data.cookie);
+      if (user) setAuthToken(user.data ? user.data.data.cookie : null);
       setIsLoading(true);
       setSuccess(false);
       try {
-        const userId = user.data.data._id
-          ? user.data.data._id
-          : user.data.data
-          ? user.data.data
-          : user.id;
+        const userId = user.data.data._id ? user.data.data._id : user.data.data;
+
         const { data } = await getUserData(userId);
         console.log(data);
         if (data) {

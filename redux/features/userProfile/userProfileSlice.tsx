@@ -1,7 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+let users = null;
+
+if (typeof window !== "undefined") {
+  const userObject = localStorage.getItem("user");
+  if (userObject) {
+    users = JSON.parse(userObject);
+  } else {
+    users = null;
+  }
+}
+
 const initialState = {
-  user: {},
+  user: users ? users : {},
 };
 
 export const userProfileSlice = createSlice({
