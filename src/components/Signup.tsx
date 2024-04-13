@@ -60,6 +60,7 @@ const SignupComponent = () => {
       const { data } = await authService.signup(userData);
       if (data) {
         setIsLoading(false);
+        localStorage.setItem("user", JSON.stringify(data));
         router.push("/signin/otp");
         toast.success(data.data?.message);
       }
