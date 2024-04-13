@@ -27,11 +27,11 @@ const SignupComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showCPassword, setShowcpassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
 
-  // const { loading, userData, error, success, message } = useSelector(
-  //   (state: any) => state.auth
-  // );
+  const { loading, userData, error, success, message } = useSelector(
+    (state: any) => state.auth
+  );
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -44,7 +44,7 @@ const SignupComponent = () => {
   };
 
   const signUpHandler = async () => {
-    setLoading(true);
+    // setLoading(true);
     const userData = {
       NIN: 123456,
       userName: username,
@@ -56,17 +56,18 @@ const SignupComponent = () => {
     // console.log(userData);
 
     //@ts-ignore
-    try {
-      const { data } = await authService.signup(userData);
-      if (data) {
-        setIsLoading(false);
-        localStorage.setItem("user", JSON.stringify(data));
-        router.push("/signin/otp");
-        toast.success(data.data?.message);
-      }
-    } catch (e: any) {
-      toast.error(e.response.data.message || e.message);
-    }
+    dispatch(register(userData));
+    // try {
+    //   const { data } = await authService.signup(userData);
+    //   if (data) {
+    //     setIsLoading(false);
+    //     localStorage.setItem("user", JSON.stringify(data));
+    //     router.push("/signin/otp");
+    //     toast.success(data.data?.message);
+    //   }
+    // } catch (e: any) {
+    //   toast.error(e.response.data.message || e.message);
+    // }
   };
 
   // const googleLogin = useGoogleLogin({

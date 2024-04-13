@@ -59,8 +59,10 @@ export const register = createAsyncThunk(
   async (userdata, thunkAPI) => {
     try {
       const { data } = await authService.signup(userdata);
+
       if (data) {
-        // localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("user", JSON.stringify(data));
+        window.location.href = "/signin/otp";
         toast.success(data.data?.message);
       }
       console.log(data);
