@@ -32,7 +32,7 @@ const DashboardLayout = ({ children }: any) => {
           : user.data.data
           ? user.data.data
           : user.id;
-        console.log(userId);
+        console.log(user.data.id);
         const { data } = await getUserData(userId);
         console.log(data);
         if (data) {
