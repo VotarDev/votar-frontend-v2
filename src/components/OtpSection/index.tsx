@@ -47,7 +47,7 @@ const OtpSection = () => {
 
   const handleVerifyOtp = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (user) setAuthToken(user.data.data.cookie);
+    if (user) setAuthToken(user.data ? user.data.data.cookie : null);
     setLoading(true);
     setSuccess(false);
     const otpString = otp.join("");
