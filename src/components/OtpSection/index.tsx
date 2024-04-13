@@ -47,7 +47,6 @@ const OtpSection = () => {
 
   const handleVerifyOtp = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    // if (user) setAuthToken(user.data ? user.data.data.cookie : null);
     setLoading(true);
     setSuccess(false);
     const otpString = otp.join("");
@@ -56,9 +55,11 @@ const OtpSection = () => {
         otp: otpString,
         email: user.data.data.email,
       });
-      setSuccess(true);
-      toast.success("Email verified successfully");
-      console.log(data);
+      if (data) {
+        setSuccess(true);
+        toast.success("Email verified successfully");
+        console.log(data);
+      }
     } catch (error: any) {
       toast.error(error.response.data.message);
     } finally {
