@@ -1,8 +1,7 @@
 import React from "react";
 import DashboardLayout from "@/src/components/DashboardLayout";
 import EditCardDetails from "@/src/components/CardDetailComponent/EditCardDetails";
-import BillingAddressDetails from "@/src/components/CardDetailComponent/BillingAddressDetails";
-import withAuth from "@/hoc/withAuth";
+
 import BillingAddress from "@/src/components/CardDetailComponent/AddCardComponent/BillingAddress";
 
 const EditCard = () => {
@@ -16,4 +15,4 @@ const EditCard = () => {
   );
 };
 
-export default withAuth(EditCard);
+export default EditCard;

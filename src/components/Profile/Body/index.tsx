@@ -11,6 +11,8 @@ import { GiCheckMark } from "react-icons/gi";
 import { IoCopy } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { updateProfile } from "@/utils/api";
+import { userData } from "@/redux/features/userProfile/userProfileSlice";
+import { useDispatch } from "react-redux";
 
 interface User {
   fullname: string;
@@ -21,10 +23,11 @@ interface User {
 }
 
 const ProfileBody = () => {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [userImage, setUserImage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const dispatch = useDispatch();
   const [error, setError] = useState("");
   const users = useCurrentUser();
   const router = useRouter();
@@ -37,11 +40,10 @@ const ProfileBody = () => {
     address: "",
     referralId: "",
   });
-  console.log(userInput);
 
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
-    if (file) setSelectedImage(URL.createObjectURL(file));
+    if (file) setSelectedImage(file);
   };
   const handleInputChange = (e: any) => {
     setUserInput((prevInput) => ({
@@ -50,26 +52,31 @@ const ProfileBody = () => {
     }));
   };
 
+  console.log(selectedImage);
+
   const getUser = async () => {
-    if (users) setAuthToken(users.token);
+    if (users) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
     try {
-      const userId = users.user._id ? users.user._id : users.user.id;
-      console.log(userId);
+      const userId = users.data.data._id
+        ? users.data.data._id
+        : users.data.data;
 
       const { data } = await getUserData(userId);
+
       if (data) {
-        console.log(data);
+        console.log(data.data);
+        dispatch(userData(data));
         setUserInput((prev) => ({
           ...prev,
-          fullname: data.username,
-          email: data.email,
-          number: data.phoneNumber ? data.phoneNumber : "",
-          address: data.homeAddress ? data.homeAddress : "",
-          referralId: data.referralId ? data.referralId : "",
+          fullname: data.data.userName,
+          email: data.data.email,
+          number: data.data.phoneNumber ? data.data.phoneNumber : "",
+          address: data.data.homeAddress ? data.data.homeAddress : "",
+          referralId: data.data.referal_id ? data.data.referal_id : "",
         }));
         console.log(data.verified);
-        setIsVerified(data.verified);
+        setIsVerified(data.data.email_verified);
 
         setIsLoading(false);
       }
@@ -83,16 +90,18 @@ const ProfileBody = () => {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const userId = users.user._id ? users.user._id : users.user.id;
+      const userId = users.data.data._id
+        ? users.data.data._id
+        : users.data.data;
       const { fullname, email, number, address, referralId } = userInput;
-      const userData = {
-        username: fullname,
-        email,
-        phoneNumber: number,
-        homeAddress: address,
-        referralId,
-      };
-      const { data } = await updateProfile(userData, userId);
+      const formData = new FormData();
+      formData.append("userName", fullname);
+      formData.append("country", "Nigeria");
+      if (selectedImage) {
+        formData.append("avatar", selectedImage);
+      }
+
+      const { data } = await updateProfile(formData, userId);
       if (data) {
         console.log(data);
         toast.success(data.message);
@@ -103,6 +112,7 @@ const ProfileBody = () => {
       toast.error(e.message);
       console.log(e);
     }
+    getUser();
   };
   const handleCopy = async () => {
     if (inputRef.current) {
@@ -140,7 +150,7 @@ const ProfileBody = () => {
         <div className="flex justify-center flex-col items-center">
           <label htmlFor="imageInput" className="relative">
             <Avatar
-              src={selectedImage || userImage}
+              src={selectedImage ? URL.createObjectURL(selectedImage) : ""}
               sx={{ width: 150, height: 150 }}
             />
             <div className="absolute bottom-3 right-[-5px] text-xl text-white cursor-pointer w-10 h-10 bg-[#015CE9] flex items-center justify-center rounded-full">
