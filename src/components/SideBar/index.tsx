@@ -77,7 +77,10 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
                 />
               )}
               {user.user.data && (
-                <Avatar alt={user.user.data.userName} src="" />
+                <Avatar
+                  alt={user.user.data.userName}
+                  src={user.user.data.profile_picture}
+                />
               )}
             </div>
             <div

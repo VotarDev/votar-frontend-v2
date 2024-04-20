@@ -20,6 +20,7 @@ interface User {
   number: string;
   address: string;
   referralId: string;
+  profilePicture: string;
 }
 
 const ProfileBody = () => {
@@ -39,6 +40,7 @@ const ProfileBody = () => {
     number: "",
     address: "",
     referralId: "",
+    profilePicture: "",
   });
 
   const handleImageChange = (e: any) => {
@@ -74,6 +76,7 @@ const ProfileBody = () => {
           number: data.data.phoneNumber ? data.data.phoneNumber : "",
           address: data.data.homeAddress ? data.data.homeAddress : "",
           referralId: data.data.referal_id ? data.data.referal_id : "",
+          profilePicture: data.data.profile_picture,
         }));
         console.log(data.verified);
         setIsVerified(data.data.email_verified);
@@ -150,7 +153,11 @@ const ProfileBody = () => {
         <div className="flex justify-center flex-col items-center">
           <label htmlFor="imageInput" className="relative">
             <Avatar
-              src={selectedImage ? URL.createObjectURL(selectedImage) : ""}
+              src={
+                selectedImage
+                  ? URL.createObjectURL(selectedImage)
+                  : userInput.profilePicture
+              }
               sx={{ width: 150, height: 150 }}
             />
             <div className="absolute bottom-3 right-[-5px] text-xl text-white cursor-pointer w-10 h-10 bg-[#015CE9] flex items-center justify-center rounded-full">

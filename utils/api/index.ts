@@ -40,7 +40,11 @@ export const createFreeElection = (data: any) => {
 };
 
 export const updateProfile = (data: any, id: any) => {
-  return httpService.put(updateUserUrl + `/${id}`, data);
+  return httpService.put(updateUserUrl + `/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const verifyEmail = (data: any) => {
