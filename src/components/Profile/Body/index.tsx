@@ -69,7 +69,6 @@ const ProfileBody = () => {
       const { data } = await getUserData(userId);
 
       if (data) {
-        console.log(data.data);
         dispatch(userData(data));
         setUserInput((prev) => ({
           ...prev,
