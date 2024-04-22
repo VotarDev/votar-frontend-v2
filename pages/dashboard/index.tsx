@@ -33,7 +33,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const users = useCurrentUser();
   const { data } = useSession();
 
-  console.log(JSON.parse(userInfo.user ? userInfo.user : null));
+  // console.log(JSON.parse(userInfo.user ? userInfo.user : null));
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -56,7 +56,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     }
   }, [dispatch, userInfo]);
 
-  console.log(token);
   return (
     <DashboardLayout>
       <div className="w-full flex">
