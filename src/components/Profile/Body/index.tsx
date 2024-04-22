@@ -31,7 +31,7 @@ const ProfileBody = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState("");
   const users = useCurrentUser();
-  const googleUser = useUser();
+  const user = useUser();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -58,15 +58,15 @@ const ProfileBody = () => {
   console.log(selectedImage);
 
   const getUser = async () => {
-    if (users) setAuthToken(users.data ? users.data.data.cookie : null);
+    if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
+    console.log(user.user.username);
     try {
       const userId = users.data.data._id
         ? users.data.data._id
         : users.data.data
         ? users.data.data
-        : googleUser.user.id;
-      console.log(googleUser.user.username);
+        : user.user.id;
 
       const { data } = await getUserData(userId);
 
