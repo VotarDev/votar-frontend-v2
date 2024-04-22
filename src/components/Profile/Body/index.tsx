@@ -65,7 +65,8 @@ const ProfileBody = () => {
         : users.data.data
         ? users.data.data
         : users.user.id;
-      console.log(users);
+      console.log(users.user.id);
+      console.log(users.id);
       const { data } = await getUserData(userId);
 
       if (data) {

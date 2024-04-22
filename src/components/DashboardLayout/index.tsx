@@ -21,7 +21,7 @@ const DashboardLayout = ({ children }: any) => {
   const user = useCurrentUser();
   const dispatch = useDispatch();
 
-  console.log(user);
+  // console.log(user);
 
   useEffect(() => {
     const getUser = async () => {
@@ -32,7 +32,7 @@ const DashboardLayout = ({ children }: any) => {
         const userId = user.data.data._id ? user.data.data._id : user.data.data;
 
         const { data } = await getUserData(userId);
-        console.log(data);
+        // console.log(data);
         if (data) {
           dispatch(userData(data));
           setIsLoading(false);
