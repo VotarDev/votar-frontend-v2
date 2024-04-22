@@ -40,7 +40,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
     }
     router.push("/signin");
   };
-  console.log(user);
+  console.log(user.user.id);
 
   return (
     <div

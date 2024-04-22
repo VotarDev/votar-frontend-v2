@@ -66,7 +66,7 @@ const ProfileBody = () => {
         : users.data.data
         ? users.data.data
         : googleUser.user.id;
-      console.log(googleUser.user);
+      console.log(googleUser.user.username);
 
       const { data } = await getUserData(userId);
 
