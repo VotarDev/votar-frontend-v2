@@ -43,11 +43,6 @@ const ProfileBody = () => {
     referralId: "",
     profilePicture: "",
   });
-  const userId = users.data.data._id
-    ? users.data.data._id
-    : users.data.data
-    ? users.data.data
-    : user.user.id;
 
   console.log(user.user.username);
   const handleImageChange = (e: any) => {
@@ -64,6 +59,12 @@ const ProfileBody = () => {
   console.log(selectedImage);
 
   const getUser = async () => {
+    const userId = users.data.data._id
+      ? users.data.data._id
+      : users.data.data
+      ? users.data.data
+      : user.user.id;
+
     if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
 
