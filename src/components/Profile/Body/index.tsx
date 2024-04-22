@@ -43,7 +43,13 @@ const ProfileBody = () => {
     referralId: "",
     profilePicture: "",
   });
+  const userId = users.data.data._id
+    ? users.data.data._id
+    : users.data.data
+    ? users.data.data
+    : user.user.id;
 
+  console.log(user.user.username);
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) setSelectedImage(file);
@@ -60,14 +66,8 @@ const ProfileBody = () => {
   const getUser = async () => {
     if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
-    console.log(user.user.username);
-    try {
-      const userId = users.data.data._id
-        ? users.data.data._id
-        : users.data.data
-        ? users.data.data
-        : user.user.id;
 
+    try {
       const { data } = await getUserData(userId);
 
       if (data) {
