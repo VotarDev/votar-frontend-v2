@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Avatar from "@mui/material/Avatar";
 import { MdEdit } from "react-icons/md";
-import { useCurrentUser } from "@/utils/hooks";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { getUserData } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
@@ -31,6 +31,7 @@ const ProfileBody = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState("");
   const users = useCurrentUser();
+  const googleUser = useUser();
   const router = useRouter();
   const [isVerified, setIsVerified] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -64,10 +65,10 @@ const ProfileBody = () => {
         ? users.data.data._id
         : users.data.data
         ? users.data.data
-        : users.user.user.id;
-      console.log(users.user.user.id);
-      console.log(users.user.id);
-      console.log(users);
+        : googleUser.user.id;
+      console.log(googleUser.user.id);
+      console.log(googleUser);
+
       const { data } = await getUserData(userId);
 
       if (data) {
