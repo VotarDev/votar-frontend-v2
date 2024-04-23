@@ -62,10 +62,9 @@ const ProfileBody = () => {
       [e.target.name]: e.target.value,
     }));
   };
-  useEffect(() => {}, []);
 
   const getUser = async () => {
-    if (users && token) {
+    if (users) {
       if (users.data) {
         setAuthToken(users.data.data.cookie);
       }

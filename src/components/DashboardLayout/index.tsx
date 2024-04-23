@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import SideBar from "../SideBar";
 import Header from "../Header";
 import { getUserData } from "@/utils/api";
-import { useCurrentUser } from "@/utils/hooks";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 import { useDispatch } from "react-redux";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
@@ -19,8 +19,15 @@ const DashboardLayout = ({ children }: any) => {
   const [error, setError] = useState("");
   const [opener, setOpener] = useState(true);
   const [token, setToken] = useState<string | null>("");
-  const user = useCurrentUser();
+  const users = useCurrentUser();
+  const user = useUser();
   const dispatch = useDispatch();
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   // console.log(user);
   useEffect(() => {
@@ -32,14 +39,18 @@ const DashboardLayout = ({ children }: any) => {
 
   useEffect(() => {
     const getUser = async () => {
-      if (user) setAuthToken(user.data ? user.data.data.cookie : token);
-      console.log(token);
-      setIsLoading(true);
-      setSuccess(false);
+      if (users) {
+        if (users.data) {
+          setAuthToken(users.data.data.cookie);
+        }
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
       try {
-        const userId = user.data.data._id ? user.data.data._id : user.data.data;
-
-        const { data } = await getUserData(userId);
+        const { data } = await getUserData(USER_ID);
         // console.log(data);
         if (data) {
           dispatch(userData(data));
@@ -52,7 +63,7 @@ const DashboardLayout = ({ children }: any) => {
       }
     };
     getUser();
-  }, [dispatch, user]);
+  }, [dispatch, users]);
 
   useEffect(() => {
     setIsClient(true);

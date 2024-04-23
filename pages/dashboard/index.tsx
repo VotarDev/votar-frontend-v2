@@ -45,6 +45,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     }
     if (typeof token === "string") {
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [router]);
 
@@ -52,7 +53,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     if (userInfo.token) setAuthToken(userInfo.token);
     if (userInfo.user) {
       dispatch(userData(JSON.parse(userInfo.user)));
-      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [dispatch, userInfo]);
 
