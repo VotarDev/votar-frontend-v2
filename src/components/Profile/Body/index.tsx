@@ -58,15 +58,11 @@ const ProfileBody = () => {
   console.log(selectedImage);
 
   const getUser = async () => {
-    let userId;
-    if (users.data.data._id) userId = users.data.data._id;
-    if (users.data.data) userId = users.data.data;
-    if (user.user.id) userId = user.user.id;
-    // const userId = users.data.data._id
-    //   ? users.data.data._id
-    //   : users.data.data
-    //   ? users.data.data
-    //   : user.user.id;
+    const userId = users.data.data._id
+      ? users.data.data._id
+      : users.data.data
+      ? users.data.data
+      : user.user.id;
     console.log(userId);
     if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
