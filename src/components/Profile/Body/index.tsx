@@ -44,6 +44,9 @@ const ProfileBody = () => {
     referralId: "",
     profilePicture: "",
   });
+  let USER_ID = users?.data?.data ? users?.data?.data?._id : user?.user?.id;
+
+  console.log(USER_ID);
 
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
@@ -61,7 +64,6 @@ const ProfileBody = () => {
       setToken(tokenLocal);
     }
   }, []);
-  console.log(token);
 
   const getUser = async () => {
     const userId = users.data.data._id
@@ -70,8 +72,6 @@ const ProfileBody = () => {
       ? users.data.data
       : user.user.id;
 
-    // if (users) setAuthToken(users.data ? users.data.data.cookie : null);
-    // if (token) setAuthToken(token);
     if (users && token) {
       if (users.data) {
         setAuthToken(users.data.data.cookie);
