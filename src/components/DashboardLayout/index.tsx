@@ -18,14 +18,21 @@ const DashboardLayout = ({ children }: any) => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [opener, setOpener] = useState(true);
+  const [token, setToken] = useState<string | null>("");
   const user = useCurrentUser();
   const dispatch = useDispatch();
 
   // console.log(user);
 
+  if (typeof window !== "undefined") {
+    const tokenLocal = localStorage.getItem("token");
+    setToken(tokenLocal);
+  }
+
   useEffect(() => {
     const getUser = async () => {
-      if (user) setAuthToken(user.data ? user.data.data.cookie : null);
+      if (user) setAuthToken(user.data ? user.data.data.cookie : token);
+      console.log(token);
       setIsLoading(true);
       setSuccess(false);
       try {
