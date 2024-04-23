@@ -44,7 +44,6 @@ const ProfileBody = () => {
     profilePicture: "",
   });
 
-  console.log(user.user.username);
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) setSelectedImage(file);
@@ -64,7 +63,7 @@ const ProfileBody = () => {
       : users.data.data
       ? users.data.data
       : user.user.id;
-
+    console.log(userId);
     if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
     setIsLoading(true);
 
