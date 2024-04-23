@@ -26,6 +26,7 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import url from "url";
 import setAuthToken from "@/utils/setAuthToken";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
+import { googleAuth } from "@/redux/features/auth/authSlice";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
@@ -45,7 +46,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     }
     if (typeof token === "string") {
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [router]);
 
@@ -53,6 +53,8 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     if (userInfo.token) setAuthToken(userInfo.token);
     if (userInfo.user) {
       dispatch(userData(JSON.parse(userInfo.user)));
+      dispatch(googleAuth(JSON.parse(userInfo.user)));
+      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [dispatch, userInfo]);
 

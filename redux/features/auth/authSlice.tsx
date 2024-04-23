@@ -96,6 +96,9 @@ const authSlice = createSlice({
       state.success = false;
       state.loading = false;
     },
+    googleAuth: (state, { payload }) => {
+      state.userData = payload;
+    },
     setCredentials: (state, { payload }) => {
       state.userData = payload;
     },
@@ -143,4 +146,4 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
-export const { reset, logout } = authSlice.actions;
+export const { reset, logout, googleAuth } = authSlice.actions;
