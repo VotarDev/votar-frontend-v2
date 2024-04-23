@@ -14,13 +14,10 @@ const Header = () => {
       <div className="lg:text-2xl font-semibold text-base capitalize">
         Welcome,{" "}
         <span>
-          {user.user.data && <>{user.user.data.userName}</>}
-          {user.user.username && <>{user.user.username.split(" ")[0]}</>}
+          {user.user.data && <>{user.user.data.userName.split(" ")[0]}</>}
+
           {/* {data && data?.user?.name?.split(" ")[0]} */}
         </span>
-        {/* {users && users.user.username
-          ? users.user.username.split(" ")[0]
-          : data?.user?.name?.split(" ")[0]} */}
       </div>
       <div className="flex items-center gap-4">
         <div className="relative md:flex items-center hidden">

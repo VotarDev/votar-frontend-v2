@@ -24,6 +24,7 @@
     "aos": "^3.0.0-beta.6",
     "autoprefixer": "10.4.14",
     "axios": "^1.4.0",
+    "browser-image-compression": "^2.0.2",
     "chart.js": "^4.4.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-annotation": "^3.0.1",
