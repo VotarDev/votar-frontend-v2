@@ -23,11 +23,12 @@ const DashboardLayout = ({ children }: any) => {
   const dispatch = useDispatch();
 
   // console.log(user);
-
-  if (typeof window !== "undefined") {
-    const tokenLocal = localStorage.getItem("token");
-    setToken(tokenLocal);
-  }
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const tokenLocal = localStorage.getItem("token");
+      setToken(tokenLocal);
+    }
+  }, []);
 
   useEffect(() => {
     const getUser = async () => {
