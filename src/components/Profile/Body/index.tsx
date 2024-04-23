@@ -70,7 +70,7 @@ const ProfileBody = () => {
       if (users.data) {
         setAuthToken(users.data.data.cookie);
       }
-    } else if (token) {
+    } else {
       setAuthToken(token);
     }
     setIsLoading(true);
