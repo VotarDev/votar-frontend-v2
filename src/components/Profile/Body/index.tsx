@@ -64,10 +64,8 @@ const ProfileBody = () => {
   };
 
   const getUser = async () => {
-    if (users) {
-      if (users.data) {
-        setAuthToken(users.data.data.cookie);
-      }
+    if (users.data.data) {
+      setAuthToken(users.data.data.cookie);
     } else {
       if (typeof window !== "undefined") {
         const tokenLocal = localStorage.getItem("token");
