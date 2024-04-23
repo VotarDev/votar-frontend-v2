@@ -58,12 +58,7 @@ const ProfileBody = () => {
       [e.target.name]: e.target.value,
     }));
   };
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const tokenLocal = localStorage.getItem("token");
-      setToken(tokenLocal);
-    }
-  }, []);
+  useEffect(() => {}, []);
 
   const getUser = async () => {
     if (users && token) {
@@ -71,7 +66,10 @@ const ProfileBody = () => {
         setAuthToken(users.data.data.cookie);
       }
     } else {
-      setAuthToken(token);
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
     }
     setIsLoading(true);
 
