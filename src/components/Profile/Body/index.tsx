@@ -33,6 +33,7 @@ const ProfileBody = () => {
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
+  const [token, setToken] = useState<string | null>("");
   const [isVerified, setIsVerified] = useState(true);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [userInput, setUserInput] = useState<User>({
@@ -54,8 +55,14 @@ const ProfileBody = () => {
       [e.target.name]: e.target.value,
     }));
   };
-
-  console.log(selectedImage);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const tokenLocal = localStorage.getItem("token");
+      console.log(tokenLocal);
+      setToken(tokenLocal);
+    }
+  }, []);
+  console.log(token);
 
   const getUser = async () => {
     const userId = users.data.data._id
@@ -64,7 +71,8 @@ const ProfileBody = () => {
       ? users.data.data
       : user.user.id;
     console.log(userId);
-    if (users || user) setAuthToken(users.data ? users.data.data.cookie : null);
+    if (users || user)
+      setAuthToken(users.data ? users.data.data.cookie : token);
     setIsLoading(true);
 
     try {
@@ -81,7 +89,6 @@ const ProfileBody = () => {
           referralId: data.data.referal_id ? data.data.referal_id : "",
           profilePicture: data.data.profile_picture,
         }));
-        console.log(data.verified);
         setIsVerified(data.data.email_verified);
 
         setIsLoading(false);
@@ -163,6 +170,12 @@ const ProfileBody = () => {
               }
               sx={{ width: 150, height: 150 }}
             />
+            {user.user.picture && (
+              <Avatar
+                src={user.user.picture}
+                sx={{ width: 150, height: 150 }}
+              />
+            )}
             <div className="absolute bottom-3 right-[-5px] text-xl text-white cursor-pointer w-10 h-10 bg-[#015CE9] flex items-center justify-center rounded-full">
               <MdEdit />
             </div>
