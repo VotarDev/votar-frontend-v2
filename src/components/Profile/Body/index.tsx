@@ -66,12 +66,6 @@ const ProfileBody = () => {
   }, []);
 
   const getUser = async () => {
-    const userId = users.data.data._id
-      ? users.data.data._id
-      : users.data.data
-      ? users.data.data
-      : user.user.id;
-
     if (users && token) {
       if (users.data) {
         setAuthToken(users.data.data.cookie);
@@ -83,6 +77,7 @@ const ProfileBody = () => {
 
     try {
       const { data } = await getUserData(USER_ID);
+      console.log(data);
 
       if (data) {
         dispatch(userData(data));
@@ -109,9 +104,6 @@ const ProfileBody = () => {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const userId = users.data.data._id
-        ? users.data.data._id
-        : users.data.data;
       const { fullname, email, number, address, referralId } = userInput;
       const formData = new FormData();
       formData.append("userName", fullname);
@@ -120,7 +112,7 @@ const ProfileBody = () => {
         formData.append("avatar", selectedImage);
       }
 
-      const { data } = await updateProfile(formData, userId);
+      const { data } = await updateProfile(formData, USER_ID);
       if (data) {
         console.log(data);
         toast.success(data.message);
