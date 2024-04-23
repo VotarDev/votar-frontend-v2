@@ -44,7 +44,11 @@ const ProfileBody = () => {
     referralId: "",
     profilePicture: "",
   });
-  let USER_ID = users?.data?.data ? users?.data?.data?._id : user?.user?.id;
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   console.log(USER_ID);
 
