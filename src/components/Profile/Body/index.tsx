@@ -82,7 +82,7 @@ const ProfileBody = () => {
     setIsLoading(true);
 
     try {
-      const { data } = await getUserData(userId);
+      const { data } = await getUserData(USER_ID);
 
       if (data) {
         dispatch(userData(data));
