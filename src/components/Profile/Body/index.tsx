@@ -107,6 +107,8 @@ const ProfileBody = () => {
       const formData = new FormData();
       formData.append("userName", fullname);
       formData.append("country", "Nigeria");
+      formData.append("phoneNumber", number);
+      formData.append("email", email);
       if (selectedImage) {
         formData.append("avatar", selectedImage);
       }
