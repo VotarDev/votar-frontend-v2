@@ -58,10 +58,9 @@ const ProfileBody = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const tokenLocal = localStorage.getItem("token");
-      console.log(tokenLocal);
       setToken(tokenLocal);
     }
-  }, []);
+  }, [token]);
   console.log(token);
 
   const getUser = async () => {
@@ -167,15 +166,12 @@ const ProfileBody = () => {
                 selectedImage
                   ? URL.createObjectURL(selectedImage)
                   : userInput.profilePicture
+                  ? userInput.profilePicture
+                  : user.user.picture
               }
               sx={{ width: 150, height: 150 }}
             />
-            {user.user.picture && (
-              <Avatar
-                src={user.user.picture}
-                sx={{ width: 150, height: 150 }}
-              />
-            )}
+
             <div className="absolute bottom-3 right-[-5px] text-xl text-white cursor-pointer w-10 h-10 bg-[#015CE9] flex items-center justify-center rounded-full">
               <MdEdit />
             </div>
