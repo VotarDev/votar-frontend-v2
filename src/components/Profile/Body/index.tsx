@@ -60,7 +60,7 @@ const ProfileBody = () => {
       const tokenLocal = localStorage.getItem("token");
       setToken(tokenLocal);
     }
-  }, [token]);
+  }, []);
   console.log(token);
 
   const getUser = async () => {
@@ -69,9 +69,16 @@ const ProfileBody = () => {
       : users.data.data
       ? users.data.data
       : user.user.id;
-    console.log(userId);
-    if (users || user)
-      setAuthToken(users.data ? users.data.data.cookie : token);
+
+    // if (users) setAuthToken(users.data ? users.data.data.cookie : null);
+    // if (token) setAuthToken(token);
+    if (users && token) {
+      if (users.data) {
+        setAuthToken(users.data.data.cookie);
+      }
+    } else if (token) {
+      setAuthToken(token);
+    }
     setIsLoading(true);
 
     try {
