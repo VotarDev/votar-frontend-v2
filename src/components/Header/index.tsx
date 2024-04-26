@@ -14,8 +14,7 @@ const Header = () => {
       <div className="lg:text-2xl font-semibold text-base capitalize">
         Welcome,{" "}
         <span>
-          {user.user.data && <>{user.user.data.userName.split(" ")[0]}</>}
-
+          {user?.user?.data?.userName && user.user.data.userName.split(" ")[0]}{" "}
           {/* {data && data?.user?.name?.split(" ")[0]} */}
         </span>
       </div>

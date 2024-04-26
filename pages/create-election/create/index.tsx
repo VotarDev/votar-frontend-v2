@@ -10,8 +10,8 @@ import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElecti
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useRouter } from "next/router";
 import StepHeader from "@/src/components/CreateElection/StepHeader";
-import { createFreeElection } from "@/utils/api";
-import { useCurrentUser } from "@/utils/hooks";
+import { createFreeElection, createElection } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
@@ -37,6 +37,7 @@ const Create = () => {
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTIme, setEndTime] = useState("");
+  const [logo, setLogo] = useState(null);
   const [numberofCandidate, setNumberofCandidate] = useState(0);
   const [numberofFreeVote, setNumberofFreeVote] = useState(0);
   const [pricePerVote, setPricePerVote] = useState(0);
@@ -44,6 +45,9 @@ const Create = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { setpreview } = useContext(AppContext);
+  const users = useCurrentUser();
+  const user = useUser();
+  const router = useRouter();
 
   //ballot
   const [positions, setPositions] = useState<Position[]>([
@@ -56,9 +60,12 @@ const Create = () => {
   }
 
   //ballot
-  const user = useCurrentUser();
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
-  const router = useRouter();
   const steps = [
     "Details",
     "Ballot",
@@ -89,12 +96,9 @@ const Create = () => {
             setEndTime={setEndTime}
             candidateNo={numberofCandidate}
             setCandidateNo={setNumberofCandidate}
-            freeVote={numberofFreeVote}
-            setFreeVote={setNumberofFreeVote}
             description={description}
             setDescription={setDescription}
-            pricePerVote={pricePerVote}
-            setPricePerVote={setPricePerVote}
+            setLogo={setLogo}
           />
         );
       case 2:
@@ -115,14 +119,22 @@ const Create = () => {
     let newStep = currentStep;
 
     setIsLoading(true);
-    const detailsData = {
-      electionName,
-      startDate,
-      endDate,
-      startTime,
-      endTime: endTIme,
-      description,
-    };
+    // const detailsData = {
+    //   name_of_election: electionName,
+    //   start_date: startDate,
+    //   end_date: endDate,
+    //   start_time: startTime,
+    //   end_time: endTIme,
+    //   electionimage: logo,
+    // };
+
+    const detailsFormData = new FormData();
+    detailsFormData.append("name_of_election", electionName);
+    detailsFormData.append("start_date", startDate);
+    detailsFormData.append("end_date", endDate);
+    detailsFormData.append("start_time", startTime);
+    detailsFormData.append("end_time", electionName);
+    if (logo) detailsFormData.append("election-image", logo);
 
     const ballotData = {};
     const votersData = {};
@@ -134,11 +146,12 @@ const Create = () => {
     try {
       switch (steps[currentStep - 1]) {
         case "Details":
-          const { data } = await createFreeElection(detailsData);
+          const { data } = await createElection(detailsFormData, USER_ID);
           if (data) {
-            toast.success(data.message);
+            toast.success(data.status);
           }
           newStep++;
+
           break;
         case "Ballot":
           // await createFreeElection(ballotData);
@@ -198,11 +211,6 @@ const Create = () => {
         </div>
         <div>{displaySteps(currentStep)}</div>
         <div>
-          {/* <Navigations
-            handleClick={handleClick}
-            currentStep={currentStep}
-            steps={steps}
-          /> */}
           <div className="flex gap-4 justify-end smm:flex-row flex-col">
             <div>
               <button

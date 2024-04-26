@@ -50,12 +50,11 @@ const ProfileBody = () => {
     ? users?.id
     : user?.user?.id;
 
-  console.log(USER_ID);
-
   const handleImageChange = (e: any) => {
     const file = e.target.files[0];
     if (file) setSelectedImage(file);
   };
+
   const handleInputChange = (e: any) => {
     setUserInput((prevInput) => ({
       ...prevInput,

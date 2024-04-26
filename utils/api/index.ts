@@ -6,6 +6,7 @@ const googleUrl = "/auth/google";
 const mediumUrl =
   "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@votarhq";
 const freeElectionUrl = "/election/free";
+const createElectionUrl = "/user/create-election";
 const usersUrl = "/user/get-profile";
 const updateUserUrl = "/user/profile-update";
 const emailUpdateUrl = "/user/verify-email";
@@ -37,6 +38,13 @@ export const getUserData = (id: string) => {
 
 export const createFreeElection = (data: any) => {
   return httpService.post(freeElectionUrl, data);
+};
+export const createElection = (data: any, id: string) => {
+  return httpService.post(createElectionUrl + `/${id}`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const updateProfile = (data: any, id: any) => {

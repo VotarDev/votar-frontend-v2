@@ -31,18 +31,19 @@ const Details = ({
   setEndTime,
   candidateNo,
   setCandidateNo,
-  freeVote,
-  setFreeVote,
+
   description,
   setDescription,
-  pricePerVote,
-  setPricePerVote,
+
+  setLogo,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
   const [backgroundUrl, setbackgroundUrl] = useState(null);
+
   const handleImageUpload = (e: any, image: any, url: any) => {
     const file = e.target.files[0];
     if (file) {
+      setLogo(file);
       // image(file);
       const reader = new FileReader();
       reader.onload = (event: any) => {
@@ -103,22 +104,6 @@ const Details = ({
     }
   };
 
-  const freeVoteIncrement = () => {
-    setFreeVote(freeVote + 1);
-  };
-  const freeVoteDecrement = () => {
-    if (freeVote > 0) {
-      setFreeVote(freeVote - 1);
-    }
-  };
-  const votingPriceIncrement = () => {
-    setPricePerVote(pricePerVote + 1);
-  };
-  const votingPriceDecrement = () => {
-    if (pricePerVote > 0) {
-      setPricePerVote(pricePerVote - 1);
-    }
-  };
   const [checked, setChecked] = useState(false);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
