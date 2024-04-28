@@ -16,6 +16,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { Position } from "@/utils/types";
+import { formatDate } from "@/utils/util";
 import AppContext from "@/src/context/AppContext";
 
 const Create = () => {
@@ -44,7 +45,7 @@ const Create = () => {
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const { setpreview } = useContext(AppContext);
+
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -53,7 +54,6 @@ const Create = () => {
   const [positions, setPositions] = useState<Position[]>([
     { name: "", showPictures: true, allowAbstain: true, candidates: [] },
   ]);
-  setpreview(positions);
 
   if (typeof window !== "undefined") {
     localStorage.setItem("positions", JSON.stringify(positions));
@@ -117,23 +117,26 @@ const Create = () => {
 
   const handleClick = async (direction: string) => {
     let newStep = currentStep;
-
     setIsLoading(true);
-    // const detailsData = {
-    //   name_of_election: electionName,
-    //   start_date: startDate,
-    //   end_date: endDate,
-    //   start_time: startTime,
-    //   end_time: endTIme,
-    //   electionimage: logo,
-    // };
+    const [startDateString] = startDate.split(" ");
+    const [endDateString] = endDate.split(" ");
+    const [startYear, startMonth, startDay] = startDateString.split("-");
+    const [endYear, endMonth, endDay] = endDateString.split("-");
+    const formattedStartDate = formatDate(startYear, startMonth, startDay);
+    const formattedEndDate = formatDate(endYear, endMonth, endDay);
+
+    if (startTime && endTIme) {
+      console.log(`${formattedStartDate} ${startTime}`);
+      console.log(`${formattedEndDate} ${endTIme}`);
+    }
 
     const detailsFormData = new FormData();
     detailsFormData.append("name_of_election", electionName);
-    detailsFormData.append("start_date", startDate);
-    detailsFormData.append("end_date", endDate);
-    detailsFormData.append("start_time", startTime);
-    detailsFormData.append("end_time", electionName);
+    detailsFormData.append("description", description);
+    if (startTime && endTIme) {
+      detailsFormData.append("start_date", formattedStartDate);
+      detailsFormData.append("end_date", formattedEndDate);
+    }
     if (logo) detailsFormData.append("election-image", logo);
 
     const ballotData = {};
@@ -149,9 +152,9 @@ const Create = () => {
           const { data } = await createElection(detailsFormData, USER_ID);
           if (data) {
             toast.success(data.status);
+            localStorage.setItem("ElectionId", data.data.election_id);
           }
           newStep++;
-
           break;
         case "Ballot":
           // await createFreeElection(ballotData);

@@ -5,10 +5,11 @@ import { IoCopy } from "react-icons/io5";
 import { AiOutlineLink, AiOutlineEye } from "react-icons/ai";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { Election } from "@/utils/types";
 
-const Header = () => {
+const Header = ({ electionDetails }: { electionDetails: Election }) => {
   const textRef = useRef<HTMLElement | null>(null);
-
+  console.log(electionDetails);
   const handleCopyClick = async () => {
     if (textRef.current) {
       const selectedText = textRef.current.innerText;
@@ -29,14 +30,17 @@ const Header = () => {
         <div className="absolute w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-0"></div>
         <div className="z-10 flex flex-col gap-2">
           <div className="flex justify-center">
-            <img src={logo.src} alt="logo" className="rounded-full" />
+            <img
+              src={electionDetails.association_logo}
+              alt="logo"
+              className="rounded-full w-20 h-20 "
+            />
           </div>
           <div className="lg:text-3xl text-base font-semibold">
-            Most Beautiful Girl In Nigeria
+            {electionDetails.name_of_election}
           </div>
           <div className="max-w-[35rem] mx-auto lg:text-base text-xs leading-5">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Totam
-            voluptate veritatis ea? Veniam, rem vitae?
+            {electionDetails.description}
           </div>
         </div>
         <div className="absolute lg:right-10 lg:top-10 top-2 right-2">
@@ -50,7 +54,8 @@ const Header = () => {
       <div className="lg:mt-10 mt-5 flex lg:justify-end items-center lg:gap-10 gap-2 flex-wrap justify-center">
         <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
           <div>
-            Election ID: <span ref={textRef}>ELE20057</span>
+            Election ID:{" "}
+            <span ref={textRef}>{electionDetails.election_id}</span>
           </div>
           <div onClick={handleCopyClick} className="cursor-pointer">
             <IoCopy />

@@ -93,3 +93,24 @@ export interface ExportToExcelProps {
   children: React.ReactNode;
   className: string;
 }
+
+export type Election = {
+  association_logo: string;
+  author_id: string;
+  createdAt: string;
+  description: string;
+  election_id: string;
+  election_notification: string;
+  end_date: string;
+  end_time: number;
+  max_number_candidate: number;
+  name_of_election: string;
+  other_details: string;
+  primary_color: string;
+  secondary_color: string;
+  start_date: string;
+  start_time: number;
+  updatedAt: string;
+  _id: string;
+  __v: number;
+};

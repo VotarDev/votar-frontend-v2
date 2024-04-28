@@ -1049,3 +1049,22 @@ export function shortenText(inputText: string) {
 //     Math.random() * 256
 //   )}, ${Math.floor(Math.random() * 256)}, 1)`;
 // };
+
+export function formatDate(year: string, month: string, day: string) {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const monthName = months[parseInt(month) - 1];
+  return `${monthName} ${day}, ${year}`;
+}

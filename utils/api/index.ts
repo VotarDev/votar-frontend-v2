@@ -11,6 +11,7 @@ const usersUrl = "/user/get-profile";
 const updateUserUrl = "/user/profile-update";
 const emailUpdateUrl = "/user/verify-email";
 const googleAuthUrl = "/auth/google";
+const getElectionIdUrl = "/user/get-electionById";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -45,6 +46,10 @@ export const createElection = (data: any, id: string) => {
       "Content-Type": "multipart/form-data",
     },
   });
+};
+
+export const getElectionById = (data: any, id: string) => {
+  return httpService.post(getElectionIdUrl + `/${id}`, data);
 };
 
 export const updateProfile = (data: any, id: any) => {

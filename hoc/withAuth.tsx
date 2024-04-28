@@ -9,7 +9,6 @@ export default function withAuth(Component: NextComponentType) {
     const router = useRouter();
     const user = useCurrentUser();
 
-    console.log(user);
     useEffect(() => {
       if (user == null) {
         // window.location.href = "/signin";

@@ -31,10 +31,8 @@ const Details = ({
   setEndTime,
   candidateNo,
   setCandidateNo,
-
   description,
   setDescription,
-
   setLogo,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
@@ -314,7 +312,7 @@ const Details = ({
                 id="time"
                 onChange={(e) =>
                   setStartTime(
-                    moment(e.target.value, "HH:mm").format("hh:mm A")
+                    moment(e.target.value, "HH:mm:ss").format("HH:mm:ss")
                   )
                 }
               />
@@ -327,7 +325,9 @@ const Details = ({
                 className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
                 id="time"
                 onChange={(e) =>
-                  setEndTime(moment(e.target.value, "HH:mm").format("hh:mm A"))
+                  setEndTime(
+                    moment(e.target.value, "HH:mm:ss").format("HH:mm:ss")
+                  )
                 }
               />
             </div>
