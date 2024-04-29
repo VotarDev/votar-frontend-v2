@@ -26,17 +26,17 @@ export interface Details {
   media: File[];
 }
 export interface Candidate {
-  name: string;
-  nickname: string;
-  details: string;
-  image: File[];
+  candidate_name: string;
+  candidate_nickname: string;
+  more_details: string;
+  candidate_image: File[];
   media: Media;
-  vote: number;
+  votes: number;
 }
 export interface Position {
-  name: string;
-  showPictures: boolean;
-  allowAbstain: boolean;
+  name_of_position: string;
+  show_pictures: boolean;
+  allow_abstain: boolean;
   candidates: Candidate[];
 }
 

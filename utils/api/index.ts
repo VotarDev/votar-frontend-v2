@@ -12,6 +12,8 @@ const updateUserUrl = "/user/profile-update";
 const emailUpdateUrl = "/user/verify-email";
 const googleAuthUrl = "/auth/google";
 const getElectionIdUrl = "/user/get-electionById";
+const createCandidateUrl = "/user/create-candidate/";
+const createVotarFormsUrl = "/user/create-votar-form";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -48,6 +50,10 @@ export const createElection = (data: any, id: string) => {
   });
 };
 
+export const createCandidate = (data: any) => {
+  return httpService.post(createCandidateUrl, data);
+};
+
 export const getElectionById = (data: any, id: string) => {
   return httpService.post(getElectionIdUrl + `/${id}`, data);
 };
@@ -66,4 +72,8 @@ export const verifyEmail = (data: any) => {
 
 export const googleAuthentication = (data: any) => {
   return httpService.get(googleAuthUrl, data);
+};
+
+export const createVotarForms = (data: any, id: string) => {
+  return httpService.post(createVotarFormsUrl + `/${id}`, data);
 };

@@ -8,6 +8,10 @@ import { useRouter } from "next/router";
 import Modal from "@/src/components/Modal";
 import EditModal from "./EditModal";
 import { toast } from "react-hot-toast";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import { createVotarForms } from "@/utils/api";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
 
 interface Item {
   id: number;
@@ -18,9 +22,14 @@ const CreatorForm = () => {
   const [subGroup, setSubGroup] = useState<Item[]>([]);
   const [toggleAddSubGroup, setToggleAddSubGroup] = useState<boolean>(false);
   const [openEdit, setOpenEdit] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [newItemContent, setNewItemContent] = useState<string>("Add option");
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const users = useCurrentUser();
+  const user = useUser();
   const router = useRouter();
+
+  console.log(subGroup[0].option);
 
   const option = subGroup.map((item) => {
     return { value: item.option, label: item.option };
@@ -48,6 +57,12 @@ const CreatorForm = () => {
     setEditingItemId(null);
   };
 
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
+
   //   const editItem = (itemId: number, newContent: string) => {
   //     setSubGroup((prevItems) =>
   //       prevItems.map((item) =>
@@ -64,8 +79,34 @@ const CreatorForm = () => {
     setSubGroup((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
-  const formHandler = (e: React.FormEvent<HTMLFormElement>) => {
+  const formHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
+    }
+    try {
+      if (typeof window !== "undefined") {
+        const electionId = localStorage.getItem("ElectionId");
+        const formData = {
+          electionId: electionId,
+          subGroup: subGroup[0].option,
+        };
+        const { data } = await createVotarForms(formData, USER_ID);
+        if (data) {
+          toast.success(data.status);
+          console.log(data);
+          setIsLoading(false);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const copyLink = () => {
@@ -204,28 +245,43 @@ const CreatorForm = () => {
               className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
             />
           </div>
-        </div>
-        <div className="mt-5 flex justify-end gap-3 py-5">
-          <button
-            className="p-4 h-12 outline-none flex items-center justify-center border border-blue-700 text-blue-700 rounded-lg gap-2 text-lg"
-            onClick={() => copyLink()}
-          >
-            <span className="text-3xl">
-              <BsLink />
-            </span>
-            Copy Link
-          </button>
-          <button
-            className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
-            onClick={handleViewResponse}
-          >
-            View Response
-            <span className="text-3xl">
-              <IoIosArrowRoundForward />
-            </span>
-          </button>
+          <div className="flex justify-center">
+            <button
+              className="p-4 w-40 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
+              disabled={isLoading}
+            >
+              <span>Create Form</span>
+              {isLoading && (
+                <CircularProgress
+                  color="inherit"
+                  className=" text-white"
+                  size={20}
+                />
+              )}
+            </button>
+          </div>
         </div>
       </form>
+      <div className="mt-5 flex justify-end gap-3 py-5">
+        <button
+          className="p-4 h-12 outline-none flex items-center justify-center border border-blue-700 text-blue-700 rounded-lg gap-2 text-lg"
+          onClick={() => copyLink()}
+        >
+          <span className="text-3xl">
+            <BsLink />
+          </span>
+          Copy Link
+        </button>
+        <button
+          className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
+          onClick={handleViewResponse}
+        >
+          View Response
+          <span className="text-3xl">
+            <IoIosArrowRoundForward />
+          </span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -10,14 +10,17 @@ import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElecti
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useRouter } from "next/router";
 import StepHeader from "@/src/components/CreateElection/StepHeader";
-import { createFreeElection, createElection } from "@/utils/api";
+import {
+  createFreeElection,
+  createElection,
+  createCandidate,
+} from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
-import AppContext from "@/src/context/AppContext";
 
 const Create = () => {
   let step = 1;
@@ -52,7 +55,12 @@ const Create = () => {
 
   //ballot
   const [positions, setPositions] = useState<Position[]>([
-    { name: "", showPictures: true, allowAbstain: true, candidates: [] },
+    {
+      name_of_position: "",
+      show_pictures: true,
+      allow_abstain: true,
+      candidates: [],
+    },
   ]);
 
   if (typeof window !== "undefined") {
@@ -145,7 +153,14 @@ const Create = () => {
     const payData = {};
     const monitorElectionData = {};
 
-    if (user) setAuthToken(user.token);
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
+    }
     try {
       switch (steps[currentStep - 1]) {
         case "Details":

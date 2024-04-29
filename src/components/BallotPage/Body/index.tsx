@@ -12,19 +12,24 @@ function Body({ positions, setPositions }: any) {
   const handleAddPosition = () => {
     setPositions([
       ...positions,
-      { name: "", showPictures: true, allowAbstain: true, candidates: [] },
+      {
+        name_of_position: "",
+        show_pictures: true,
+        allow_abstain: true,
+        candidates: [],
+      },
     ]);
   };
 
   const handleAddCandidate = (positionIndex: number) => {
     const updatedPositions = [...positions];
     updatedPositions[positionIndex].candidates.push({
-      name: "",
-      nickname: "",
-      details: "",
-      image: [],
+      candidate_name: "",
+      candidate_nickname: "",
+      more_details: "",
+      candidate_image: [],
       media: { type: "file", data: [] },
-      vote: 0,
+      votes: 0,
     });
     setPositions(updatedPositions);
   };
@@ -51,7 +56,7 @@ function Body({ positions, setPositions }: any) {
     positionIndex: number
   ) => {
     const updatedPosition = [...positions];
-    updatedPosition[positionIndex].showPictures = event.target.checked;
+    updatedPosition[positionIndex].show_pictures = event.target.checked;
     setPositions(updatedPosition);
   };
 
@@ -60,7 +65,7 @@ function Body({ positions, setPositions }: any) {
     positionIndex: number
   ) => {
     const updatedPosition = [...positions];
-    updatedPosition[positionIndex].allowAbstain = event.target.checked;
+    updatedPosition[positionIndex].allow_abstain = event.target.checked;
     setPositions(updatedPosition);
   };
 
@@ -76,8 +81,8 @@ function Body({ positions, setPositions }: any) {
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
 
-      if (!candidate.image) {
-        candidate.image = [];
+      if (!candidate.candidate_image) {
+        candidate.candidate_image = [];
       }
 
       const fileArray = Array.from(files);
@@ -99,7 +104,10 @@ function Body({ positions, setPositions }: any) {
 
       // Wait for all Base64 conversions to complete
       Promise.all(base64Images).then((base64Array) => {
-        candidate.image = [...candidate.image, ...base64Array];
+        candidate.candidate_image = [
+          ...candidate.candidate_image,
+          ...base64Array,
+        ];
         setPositions(updatedPositions);
       });
     }
@@ -190,7 +198,9 @@ function Body({ positions, setPositions }: any) {
               <div>
                 <img src={leftline.src} alt="line" className="w-14 lg:w-full" />
               </div>
-              {position.name ? position.name : `Position ${positionIndex + 1}`}
+              {position.name_of_position
+                ? position.name_of_position
+                : `Position ${positionIndex + 1}`}
               <div>
                 <img
                   src={rightline.src}
@@ -206,9 +216,11 @@ function Body({ positions, setPositions }: any) {
                 <input
                   type="text"
                   placeholder="Position Name"
-                  value={position.name}
+                  value={position.name_of_position}
                   className="lg:w-96 w-full h-12 rounded border border-stone-900 outline-none p-4"
-                  onChange={(e) => handleInputChange(e, positionIndex, "name")}
+                  onChange={(e) =>
+                    handleInputChange(e, positionIndex, "name_of_position")
+                  }
                 />
               </div>
               <div className="flex lg:mt-6 mt-2 lg:gap-2 flex-wrap gap-0">
@@ -216,7 +228,7 @@ function Body({ positions, setPositions }: any) {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={position.showPictures}
+                        checked={position.show_pictures}
                         disableRipple
                         onChange={(e) => handleShowPicture(e, positionIndex)}
                         inputProps={{ "aria-label": "controlled" }}
@@ -241,7 +253,7 @@ function Body({ positions, setPositions }: any) {
                   <FormControlLabel
                     control={
                       <Checkbox
-                        checked={position.allowAbstain}
+                        checked={position.allow_abstain}
                         onChange={(e) => handleAllowAbstain(e, positionIndex)}
                         disableRipple
                         inputProps={{ "aria-label": "controlled" }}
@@ -264,13 +276,13 @@ function Body({ positions, setPositions }: any) {
             {position.candidates.map((candidate, candidateIndex) => (
               <div key={candidateIndex} className="w-full">
                 <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
-                  {candidate.name
-                    ? candidate.name
+                  {candidate.candidate_name
+                    ? candidate.candidate_name
                     : `Candidate ${candidateIndex + 1}`}{" "}
                 </div>
                 <div
                   className={`flex items-center lg:flex-row flex-col ${
-                    position.showPictures ? "gap-[42px]" : "gap-0"
+                    position.show_pictures ? "gap-[42px]" : "gap-0"
                   } lg:mt-10 mt-5 `}
                 >
                   {/** Handling media uploads */}
@@ -279,9 +291,9 @@ function Body({ positions, setPositions }: any) {
                       htmlFor={`image-upload-${positionIndex}-${candidateIndex}`}
                       className="relative cursor-pointer"
                     >
-                      {position.showPictures && (
+                      {position.show_pictures && (
                         <>
-                          {candidate.image.length === 0 ? (
+                          {candidate.candidate_image.length === 0 ? (
                             <img
                               src={placeholder.src}
                               alt="Upload Image"
@@ -290,9 +302,11 @@ function Body({ positions, setPositions }: any) {
                           ) : (
                             <img
                               src={`${
-                                candidate.image[candidate.image.length - 1]
+                                candidate.candidate_image[
+                                  candidate.candidate_image.length - 1
+                                ]
                               }`}
-                              alt={`Image for ${candidate.name}`}
+                              alt={`Image for ${candidate.candidate_name}`}
                               className="max-w-[256px] w-full h-64 rounded-lg object-cover"
                             />
                           )}
@@ -318,13 +332,13 @@ function Body({ positions, setPositions }: any) {
                         <input
                           type="text"
                           placeholder="Candidate Name"
-                          value={candidate.name}
+                          value={candidate.candidate_name}
                           className="w-full h-12 rounded border border-stone-900 outline-none p-4"
                           onChange={(e) =>
                             handleInputChange(
                               e,
                               positionIndex,
-                              "name" as keyof Position,
+                              "candidate_name" as keyof Position,
                               candidateIndex
                             )
                           }
@@ -335,13 +349,13 @@ function Body({ positions, setPositions }: any) {
                         <input
                           type="text"
                           placeholder="Candidate NickName"
-                          value={candidate.nickname}
+                          value={candidate.candidate_nickname}
                           className="w-full h-12 rounded border border-stone-900 outline-none p-4"
                           onChange={(e) =>
                             handleInputChange(
                               e,
                               positionIndex,
-                              "nickname" as keyof Position,
+                              "candidate_nickname" as keyof Position,
                               candidateIndex
                             )
                           }
@@ -352,13 +366,13 @@ function Body({ positions, setPositions }: any) {
                       <label htmlFor="detials">More details</label>
                       <textarea
                         placeholder="Candidate Details"
-                        value={candidate.details}
+                        value={candidate.more_details}
                         className="w-full h-36 rounded border border-stone-900 outline-none p-4"
                         onChange={(e) =>
                           handleInputChange(
                             e,
                             positionIndex,
-                            "details" as keyof Position,
+                            "more_details" as keyof Position,
                             candidateIndex
                           )
                         }
@@ -383,7 +397,7 @@ function Body({ positions, setPositions }: any) {
                                     candidate.media.data.length - 1
                                   ]
                                 }`}
-                                alt={`Image for ${candidate.name}`}
+                                alt={`Image for ${candidate.candidate_name}`}
                                 className="w-20 h-20 object-contain"
                               />
                             ) : candidate.media.type === "video" ? (

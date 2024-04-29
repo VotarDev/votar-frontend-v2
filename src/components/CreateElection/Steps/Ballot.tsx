@@ -22,7 +22,7 @@ const Ballot = ({ positions, setPositions }: any) => {
 
   useEffect(() => {
     const getElection = async () => {
-      setIsLoading(false);
+      setIsLoading(true);
       if (users?.data) {
         setAuthToken(users.data.data.cookie);
       } else {
@@ -38,7 +38,7 @@ const Ballot = ({ positions, setPositions }: any) => {
           const { data } = await getElectionById(electionData, USER_ID);
           if (data) {
             setElection(data.data);
-            setIsLoading(true);
+            setIsLoading(false);
           }
         }
       } catch (e: any) {
