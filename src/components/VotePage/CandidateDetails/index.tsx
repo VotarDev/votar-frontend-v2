@@ -7,26 +7,23 @@ const CandidateDetails = ({ details }: any) => {
   return (
     <div className="bg-white rounded-lg min-h-[20rem] w-full m-auto flex items-center justify-center flex-col gap-5 p-4">
       <div>
-        {details[0].media.type === "video" && (
+        {details.media.type === "video" && (
           <video controls>
-            <source
-              src={details[0].media.data[0]}
-              type={getMimeTypeFromBase64(details[0].media.data[0])}
-            />
+            <source src={`${URL.createObjectURL(details.media.docs)}`} />
             Your browser does not support the video tag.
           </video>
         )}
       </div>
       <div>
-        {details[0].media.type === "image" && (
+        {details.media.type === "image" && (
           <img
-            src={details[0].media.data[0]}
+            src={`${URL.createObjectURL(details.media.docs)}`}
             alt=""
             className="w-40 h-40 object-cover"
           />
         )}
       </div>
-      <div>{details[0].dets}</div>
+      <div>{details.more_details}</div>
     </div>
   );
 };

@@ -48,16 +48,16 @@ const VoteBody = () => {
       const candidate = updatedData[positionIndex].candidates[candidateIndex];
       if (candidate) {
         if (increment) {
-          candidate.vote++;
+          candidate.votes++;
         } else {
-          candidate.vote--;
+          candidate.votes--;
         }
       }
       setVotingData(updatedData);
     }
   };
   const handleSelectCandidate = (candidate: Candidate) => {
-    if (selectedCandidates.includes(candidate) && candidate.vote <= 0) {
+    if (selectedCandidates.includes(candidate) && candidate.votes <= 0) {
       setSelectedCandidates((prevCandidates) =>
         prevCandidates.filter((c) => c !== candidate)
       );
@@ -99,7 +99,7 @@ const VoteBody = () => {
                         className="w-14 lg:w-full"
                       />
                     </div>
-                    <div>{preview.name}</div>
+                    <div>{preview.name_of_position}</div>
                     <div>
                       <img
                         src={rightline.src}
@@ -126,25 +126,21 @@ const VoteBody = () => {
                         )}
 
                         <div>
-                          {preview.showPictures && (
+                          {preview.show_pictures && (
                             <div className="mb-3">
                               <img
-                                src={`${
-                                  candidate.image.length > 0
-                                    ? candidate.image[
-                                        candidate.image.length - 1
-                                      ]
-                                    : avatar.src
-                                }`}
+                                src={`${URL.createObjectURL(
+                                  candidate.profile
+                                )}`}
                                 className="w-[269px] h-[269px] object-cover rounded"
-                                alt={`Image for ${candidate.name}`}
+                                alt={`Image for ${candidate.candidate_name}`}
                               />
                             </div>
                           )}
                           <div className="capitalize">
-                            <div>{candidate.name}</div>
+                            <div>{candidate.candidate_name}</div>
                             <div className="text-base">
-                              ({candidate.nickname})
+                              ({candidate.candidate_nickname})
                             </div>
                           </div>
                           <div
@@ -157,21 +153,21 @@ const VoteBody = () => {
                             <div>
                               <button
                                 className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                  candidate.vote <= 0
+                                  candidate.votes <= 0
                                     ? "cursor-not-allowed opacity-50"
                                     : ""
                                 }`}
                                 onClick={() =>
                                   handleVote(index, candidateIndex, false)
                                 }
-                                disabled={candidate.vote <= 0}
+                                disabled={candidate.votes <= 0}
                               >
                                 <span className="text-xl">
                                   <AiOutlineMinus />
                                 </span>
                               </button>
                             </div>
-                            <div>{candidate.vote}</div>
+                            <div>{candidate.votes}</div>
                             <div>
                               <button
                                 className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100`}
@@ -190,7 +186,7 @@ const VoteBody = () => {
                     ))}
                   </div>
                   <div>
-                    {preview.allowAbstain && (
+                    {preview.allow_abstain && (
                       <div className="flex justify-center items-center">
                         <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl mb-10 uppercase">
                           Abstain
