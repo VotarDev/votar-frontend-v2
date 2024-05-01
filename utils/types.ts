@@ -19,7 +19,7 @@ export interface searchDemo {
 }
 export interface Media {
   type: "file" | "image" | "video";
-  data: File[];
+  docs: Blob | MediaSource;
 }
 export interface Details {
   dets: string;
@@ -29,9 +29,11 @@ export interface Candidate {
   candidate_name: string;
   candidate_nickname: string;
   more_details: string;
-  candidate_image: File[];
+  profile: Blob | MediaSource;
   media: Media;
   votes: number;
+  filename: string;
+  docsname: string;
 }
 export interface Position {
   name_of_position: string;
@@ -113,4 +115,9 @@ export type Election = {
   updatedAt: string;
   _id: string;
   __v: number;
+};
+
+export type OptionTypes = {
+  label: string;
+  value: string;
 };

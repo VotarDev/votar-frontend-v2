@@ -14,12 +14,13 @@ import {
   createFreeElection,
   createElection,
   createCandidate,
+  createTestCandidate,
 } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
-import { Position } from "@/utils/types";
+import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
 
 const Create = () => {
@@ -36,7 +37,10 @@ const Create = () => {
   const [electionName, setElectionName] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
-  const [primaryColor, setPrimaryColor] = useState(null);
+  const [primaryColor, setPrimaryColor] = useState<OptionTypes | null>(null);
+  const [secondaryColor, setSecondaryColor] = useState<OptionTypes | null>(
+    null
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -96,6 +100,8 @@ const Create = () => {
             setBackground={setBackgroundImage}
             primaryColor={primaryColor}
             setPrimaryColor={setPrimaryColor}
+            secondaryColor={secondaryColor}
+            setSecondaryColor={setSecondaryColor}
             startDate={startDate}
             setDate={setStartDate}
             endDate={endDate}
@@ -141,6 +147,10 @@ const Create = () => {
     const detailsFormData = new FormData();
     detailsFormData.append("name_of_election", electionName);
     detailsFormData.append("description", description);
+    if (primaryColor)
+      detailsFormData.append("primary_color", primaryColor?.value);
+    if (secondaryColor)
+      detailsFormData.append("secondary_color", secondaryColor?.value);
     if (startTime && endTIme) {
       detailsFormData.append("start_date", formattedStartDate);
       detailsFormData.append("end_date", formattedEndDate);
@@ -172,8 +182,35 @@ const Create = () => {
           newStep++;
           break;
         case "Ballot":
-          // await createFreeElection(ballotData);
-          newStep++;
+          console.log(positions);
+
+          if (users?.data) {
+            setAuthToken(users.data.data.cookie);
+          } else {
+            if (typeof window !== "undefined") {
+              const tokenLocal = localStorage.getItem("token");
+              setAuthToken(tokenLocal);
+            }
+          }
+          const ballotData = await createCandidate({
+            allow_abstain: true,
+            show_pictures: true,
+            candidates: [
+              {
+                candidate_name: "Tobi Faniran",
+                candidate_nickname: "Fantee",
+                docsname: "",
+                filename: "",
+                name_of_position: "President",
+              },
+            ],
+          });
+          if (ballotData.data) {
+            console.log(ballotData.data);
+          }
+          await createFreeElection(ballotData);
+
+          // newStep++;
           break;
         case "Voters Page":
           await createFreeElection(votersData);

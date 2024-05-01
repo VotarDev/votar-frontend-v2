@@ -21,6 +21,7 @@ interface Item {
 const CreatorForm = () => {
   const [subGroup, setSubGroup] = useState<Item[]>([]);
   const [toggleAddSubGroup, setToggleAddSubGroup] = useState<boolean>(false);
+  const [formLink, setFormLink] = useState("");
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [newItemContent, setNewItemContent] = useState<string>("Add option");
@@ -28,8 +29,6 @@ const CreatorForm = () => {
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
-
-  console.log(subGroup[0].option);
 
   const option = subGroup.map((item) => {
     return { value: item.option, label: item.option };
@@ -79,8 +78,7 @@ const CreatorForm = () => {
     setSubGroup((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
-  const formHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const formHandler = async () => {
     setIsLoading(true);
     if (users?.data) {
       setAuthToken(users.data.data.cookie);
@@ -100,6 +98,7 @@ const CreatorForm = () => {
         const { data } = await createVotarForms(formData, USER_ID);
         if (data) {
           toast.success(data.status);
+          setFormLink(data.data.votar_form_link);
           console.log(data);
           setIsLoading(false);
         }
@@ -110,7 +109,7 @@ const CreatorForm = () => {
   };
 
   const copyLink = () => {
-    navigator.clipboard.writeText("http://votar.ng/usersForm");
+    navigator.clipboard.writeText(formLink ?? "");
     toast.success("Link copied to clipboard");
   };
 
@@ -123,7 +122,7 @@ const CreatorForm = () => {
         <span className="font-bold">INSTRUCTION:</span> Please Fill in your
         Details Correctly
       </div>
-      <form onSubmit={formHandler} className="pt-20">
+      <form className="pt-20">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
             <label htmlFor="id">ID</label>
@@ -156,12 +155,12 @@ const CreatorForm = () => {
               </div>
               {!toggleAddSubGroup && (
                 <div className="">
-                  <button
+                  <div
                     onClick={() => setToggleAddSubGroup(true)}
-                    className="flex items-center justify-center outline-none text-xl font-semibold"
+                    className="cursor-pointer flex items-center justify-center outline-none text-xl font-semibold"
                   >
                     + Add Sub-Group
-                  </button>
+                  </div>
                 </div>
               )}
               {toggleAddSubGroup && (
@@ -210,18 +209,18 @@ const CreatorForm = () => {
                       )}
                     </AnimatePresence>
                     <div className="flex items-center justify-between gap-2">
-                      <button
+                      <div
                         onClick={addItem}
-                        className="bg-blue-700 text-zinc-200 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
+                        className="cursor-pointer bg-blue-700 text-zinc-200 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
                       >
                         Add +
-                      </button>
-                      <button
+                      </div>
+                      <div
                         onClick={() => setToggleAddSubGroup(false)}
-                        className="bg-zinc-200 text-slate-900 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
+                        className="cursor-pointer bg-zinc-200 text-slate-900 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
                       >
                         Close
-                      </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -247,6 +246,7 @@ const CreatorForm = () => {
           </div>
           <div className="flex justify-center">
             <button
+              onClick={formHandler}
               className="p-4 w-40 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
               disabled={isLoading}
             >

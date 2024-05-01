@@ -36,7 +36,6 @@ export const login = createAsyncThunk(
         localStorage.setItem("user", JSON.stringify(data));
         localStorage.setItem("token", data.data.data.cookie);
         toast.success(data.data?.message);
-        console.log(data.data.data.cookie);
       }
       return data;
     } catch (error: any) {
@@ -65,7 +64,6 @@ export const register = createAsyncThunk(
         window.location.href = "/signin/otp";
         toast.success(data.data?.message);
       }
-      console.log(data);
       return data;
     } catch (error: any) {
       const message =

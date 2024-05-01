@@ -27,8 +27,10 @@ function Body({ positions, setPositions }: any) {
       candidate_name: "",
       candidate_nickname: "",
       more_details: "",
-      candidate_image: [],
-      media: { type: "file", data: [] },
+      profile: null,
+      filename: "",
+      docsname: "",
+      media: { type: "file", docs: null },
       votes: 0,
     });
     setPositions(updatedPositions);
@@ -74,42 +76,17 @@ function Body({ positions, setPositions }: any) {
     positionIndex: number,
     candidateIndex: number
   ) => {
-    const { files } = e.target;
+    const file = e.target.files?.[0];
 
-    if (files) {
+    if (file) {
       const updatedPositions = [...positions];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
 
-      if (!candidate.candidate_image) {
-        candidate.candidate_image = [];
-      }
+      candidate.profile = file;
+      candidate.filename = file.name;
 
-      const fileArray = Array.from(files);
-
-      // Convert and store images as Base64 strings
-      const base64Images = fileArray.map((file) => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => {
-            if (reader.result && typeof reader.result === "string") {
-              resolve(reader.result);
-            } else {
-              resolve("");
-            }
-          };
-        });
-      });
-
-      // Wait for all Base64 conversions to complete
-      Promise.all(base64Images).then((base64Array) => {
-        candidate.candidate_image = [
-          ...candidate.candidate_image,
-          ...base64Array,
-        ];
-        setPositions(updatedPositions);
-      });
+      setPositions(updatedPositions);
     }
   };
 
@@ -123,7 +100,16 @@ function Body({ positions, setPositions }: any) {
       const updatedPositions = [...positions];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
-      const mediaType = files[0].type.split("/")[0]; // Detect media type (file, image, or video)
+      const mediaType = files[0].type.split("/")[0];
+
+      candidate.media = {
+        type: mediaType as "file" | "image" | "video",
+        docs: files[0],
+      };
+      candidate.docsname = files[0].name;
+
+      setPositions(updatedPositions);
+      // Detect media type (file, image, or video)
 
       //converting to base64
       // const reader = new FileReader();
@@ -133,27 +119,27 @@ function Body({ positions, setPositions }: any) {
       //     const base64Data = reader.result;
       //   }
       // })
-      const fileArray = Array.from(files);
-      const base64Images = fileArray.map((file) => {
-        return new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => {
-            if (reader.result && typeof reader.result === "string") {
-              resolve(reader.result);
-            } else {
-              resolve("");
-            }
-          };
-        });
-      });
-      Promise.all(base64Images).then((base64Array) => {
-        (candidate.media = {
-          type: mediaType as "file" | "image" | "video",
-          data: [...base64Array],
-        }),
-          setPositions(updatedPositions);
-      });
+      // const fileArray = Array.from(files);
+      // const base64Images = fileArray.map((file) => {
+      //   return new Promise<string>((resolve) => {
+      //     const reader = new FileReader();
+      //     reader.readAsDataURL(file);
+      //     reader.onload = () => {
+      //       if (reader.result && typeof reader.result === "string") {
+      //         resolve(reader.result);
+      //       } else {
+      //         resolve("");
+      //       }
+      //     };
+      //   });
+      // });
+      // Promise.all(base64Images).then((base64Array) => {
+      //   (candidate.media = {
+      //     type: mediaType as "file" | "image" | "video",
+      //     data: [...base64Array],
+      //   }),
+      //     setPositions(updatedPositions);
+      // });
 
       // candidate.media = {
       //   type: mediaType as "file" | "image" | "video",
@@ -168,7 +154,7 @@ function Body({ positions, setPositions }: any) {
     candidateIndex: number
   ) => {
     e.preventDefault();
-    console.log("yay");
+
     const updatedPositions = [...positions];
     const candidate =
       updatedPositions[positionIndex].candidates[candidateIndex];
@@ -176,15 +162,13 @@ function Body({ positions, setPositions }: any) {
     if (candidate) {
       // Remove the last uploaded media
 
-      candidate.media.data.pop();
+      candidate.media.docs = null;
       console.log(candidate);
       // return candidate;
     }
 
     setPositions(updatedPositions);
   };
-
-  console.log(positions);
 
   return (
     <section className="mt-12">
@@ -293,7 +277,7 @@ function Body({ positions, setPositions }: any) {
                     >
                       {position.show_pictures && (
                         <>
-                          {candidate.candidate_image.length === 0 ? (
+                          {candidate.profile === null ? (
                             <img
                               src={placeholder.src}
                               alt="Upload Image"
@@ -301,11 +285,7 @@ function Body({ positions, setPositions }: any) {
                             />
                           ) : (
                             <img
-                              src={`${
-                                candidate.candidate_image[
-                                  candidate.candidate_image.length - 1
-                                ]
-                              }`}
+                              src={`${URL.createObjectURL(candidate.profile)}`}
                               alt={`Image for ${candidate.candidate_name}`}
                               className="max-w-[256px] w-full h-64 rounded-lg object-cover"
                             />
@@ -318,7 +298,6 @@ function Body({ positions, setPositions }: any) {
                       id={`image-upload-${positionIndex}-${candidateIndex}`}
                       accept="image/*"
                       style={{ display: "none" }}
-                      multiple
                       onChange={(e) =>
                         handleImageUpload(e, positionIndex, candidateIndex)
                       }
@@ -389,28 +368,28 @@ function Body({ positions, setPositions }: any) {
                           multiple
                         />
                         <div className="image-upload">
-                          {candidate.media.data.length > 0 ? (
+                          {candidate.media.docs ? (
                             candidate.media.type === "image" ? (
                               <img
-                                src={`${
-                                  candidate.media.data[
-                                    candidate.media.data.length - 1
-                                  ]
-                                }`}
+                                src={`${URL.createObjectURL(
+                                  candidate.media.docs
+                                )}`}
                                 alt={`Image for ${candidate.candidate_name}`}
                                 className="w-20 h-20 object-contain"
                               />
                             ) : candidate.media.type === "video" ? (
-                              <video controls>
+                              <video
+                                controls
+                                className="w-20 h-20 object-contain"
+                              >
                                 <source
-                                  src={`${
-                                    candidate.media.data[
-                                      candidate.media.data.length - 1
-                                    ]
-                                  }`}
-                                  type={getMimeTypeFromBase64(
-                                    candidate.media.data[0]
-                                  )}
+                                  src={`${URL.createObjectURL(
+                                    candidate.media.docs
+                                  )}`}
+
+                                  // type={getMimeTypeFromBase64(
+                                  //   candidate.media.docs
+                                  // )}
                                 />
                                 Your browser does not support the video tag.
                               </video>
@@ -445,7 +424,7 @@ function Body({ positions, setPositions }: any) {
                             multiple
                           />
                         </div>
-                        {candidate.media.data.length > 0 && (
+                        {candidate.media.docs && (
                           <div>
                             <button
                               className="text-xl border-none outline-none bg-transparent"

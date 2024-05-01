@@ -836,6 +836,39 @@ export const candidateVotes = [
   },
 ];
 
+export const users = [
+  {
+    id: crypto.randomUUID(),
+    name: "Sam Johnson",
+    email: "johnson@gmail.com",
+    category: "election creator",
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "Esther Akindele",
+    email: "esther20@gmail.com",
+    category: "voter",
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "Silvia Bekky",
+    email: "bekky@gmail.com",
+    category: "voter",
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "James Okon",
+    email: "james100@gmail.com",
+    category: "election creator, voter",
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "Edidiong Sunday",
+    email: "eddy@gmail.com",
+    category: "election creator",
+  },
+];
+
 export const fadeInAnimation = {
   initial: {
     opacity: 0,

@@ -23,12 +23,12 @@ const EditModal: React.FC<{
           onChange={(e) => setNewContent(e.target.value)}
         />
         <div className="flex justify-center">
-          <button
+          <div
             onClick={handleEdit}
-            className="bg-blue-700 text-zinc-200 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
+            className="bg-blue-700 cursor-pointer text-zinc-200 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
           >
             Save
-          </button>
+          </div>
         </div>
       </div>
     </div>

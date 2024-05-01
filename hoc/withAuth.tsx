@@ -1,7 +1,6 @@
 import { NextComponentType } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect } from "react";
 import { useCurrentUser } from "@/utils/hooks";
 
 export default function withAuth(Component: NextComponentType) {
@@ -11,7 +10,6 @@ export default function withAuth(Component: NextComponentType) {
 
     useEffect(() => {
       if (user == null) {
-        // window.location.href = "/signin";
         router.push("/signin");
       }
     }, [router, user]);

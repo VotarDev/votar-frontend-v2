@@ -1,15 +1,9 @@
-import React, { useState, FormEvent, useEffect } from "react";
+import React, { useState } from "react";
 import logo from "../../public/assets/logos/logo_white-1.png";
 import illustration from "../../public/assets/illustrations/illustration-4.svg";
-import { usePathname, useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Button from "@/src/components/HomePage/Button";
-import google from "../../public/assets/logos/google.svg";
-import { BsFillEyeFill, BsFillEyeSlashFill } from "react-icons/bs";
-import setAuthToken from "@/utils/setAuthToken";
-import { signup } from "@/utils/api";
+import { useSearchParams } from "next/navigation";
 import { CustomTabPanel, a11yProps } from "@/src/components/Tab";
-import { Box, Tab, Tabs, styled } from "@mui/material";
+import { Tab, Tabs, styled } from "@mui/material";
 
 const SignupComponent = dynamic(() => import("@/src/components/Signup"), {
   ssr: false,
@@ -60,7 +54,6 @@ const StyledTab = styled((props: StyledTabProps) => (
 const Signin = () => {
   const searchParams = useSearchParams();
   const signup = searchParams.get("create-account");
-  console.log(signup);
   const [tabValue, setTabValue] = useState(signup ? 1 : 0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -77,10 +70,6 @@ const Signin = () => {
           <div className="flex justify-center">
             <img src={illustration.src} alt="illustration" />
           </div>
-          {/* <div className="text-white mt-10">
-            Enjoy the Votar Book experience, Lets get
-            <br /> you into VotarBook
-          </div> */}
         </div>
       </div>
       <div className="flex justify-center items-center lg:w-[60%] flex-col max-w-[1024px] mx-auto lg:my-0 my-8 lg:py-0 font-proximaNova">

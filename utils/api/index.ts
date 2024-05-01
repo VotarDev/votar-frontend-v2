@@ -12,8 +12,12 @@ const updateUserUrl = "/user/profile-update";
 const emailUpdateUrl = "/user/verify-email";
 const googleAuthUrl = "/auth/google";
 const getElectionIdUrl = "/user/get-electionById";
-const createCandidateUrl = "/user/create-candidate/";
+const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
+const testUrlForCreateCandidate =
+  "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/user/create-candidate";
+const testUrlSignin =
+  "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/auth/login";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -76,4 +80,8 @@ export const googleAuthentication = (data: any) => {
 
 export const createVotarForms = (data: any, id: string) => {
   return httpService.post(createVotarFormsUrl + `/${id}`, data);
+};
+
+export const createTestCandidate = (data: any) => {
+  return httpService.post(testUrlForCreateCandidate, data);
 };

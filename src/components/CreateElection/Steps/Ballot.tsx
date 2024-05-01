@@ -42,8 +42,8 @@ const Ballot = ({ positions, setPositions }: any) => {
           }
         }
       } catch (e: any) {
-        setError(e.response.data.message);
-        console.log(e.response.data.message);
+        setError(e?.response?.data?.message);
+        console.log(e?.response?.data?.message);
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +65,11 @@ const Ballot = ({ positions, setPositions }: any) => {
   return (
     <div className="my-[60px]">
       <Header electionDetails={election} />
-      <Body setPositions={setPositions} positions={positions} />
+      <Body
+        setPositions={setPositions}
+        positions={positions}
+        electionDetails={election}
+      />
     </div>
   );
 };

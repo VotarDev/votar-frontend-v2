@@ -54,7 +54,12 @@ const THEME = createTheme({
 
 export default function App({ Component, pageProps }: AppProps) {
   const [preview, setpreview] = useState<Position[]>([
-    { name: "", showPictures: true, allowAbstain: true, candidates: [] },
+    {
+      name_of_position: "",
+      show_pictures: true,
+      allow_abstain: true,
+      candidates: [],
+    },
   ]);
   const value = {
     preview,

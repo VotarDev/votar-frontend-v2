@@ -11,8 +11,8 @@ import { FaCaretDown } from "react-icons/fa";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import calendar from "../../../../public/assets/icons/calendar-2.svg";
 import moment from "moment";
-import Checkbox from "@mui/material/Checkbox";
 import { useSelector } from "react-redux";
+import { OptionTypes } from "@/utils/types";
 
 const Details = ({
   setElection,
@@ -23,6 +23,8 @@ const Details = ({
   setBackground,
   primaryColor,
   setPrimaryColor,
+  secondaryColor,
+  setSecondaryColor,
   startDate,
   setDate,
   endDate,
@@ -41,7 +43,13 @@ const Details = ({
   const handleImageUpload = (e: any, image: any, url: any) => {
     const file = e.target.files[0];
     if (file) {
+      const fileSizeKB = file.size / 1024;
+      if (fileSizeKB > 21) {
+        toast.error("File too Large");
+        return;
+      }
       setLogo(file);
+
       // image(file);
       const reader = new FileReader();
       reader.onload = (event: any) => {
@@ -52,7 +60,6 @@ const Details = ({
       reader.readAsDataURL(file);
     }
   };
-  // console.log(selectedImgUrl);
 
   const DropdownIndicator: React.FC<DropdownIndicatorProps> = (props) => {
     return (
@@ -66,13 +73,13 @@ const Details = ({
     return <span style={indicatorSeparatorStyle} {...innerProps} />;
   };
 
-  const primaryColors = [
+  const primaryColors: OptionTypes[] = [
     { value: "red", label: "Red" },
     { value: "yellow", label: "Yellow" },
     { value: "blue", label: "Blue" },
   ];
 
-  const secondaryColors = [
+  const secondaryColors: OptionTypes[] = [
     { value: "orange", label: "Orange" },
     { value: "green", label: "Green" },
     { value: "violet", label: "Violet" },
@@ -248,8 +255,8 @@ const Details = ({
               <div className="flex flex-col gap-1 w-full lg:w-auto">
                 <div>Choose Secondary Background Color</div>
                 <Select
-                  defaultValue={primaryColor}
-                  onChange={setPrimaryColor}
+                  defaultValue={secondaryColor}
+                  onChange={setSecondaryColor}
                   options={secondaryColors}
                   placeholder=""
                   components={{ DropdownIndicator, IndicatorSeparator }}
