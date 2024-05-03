@@ -10,6 +10,10 @@ import { TableRowTypes } from "@/utils/types";
 import ExportToExcel from "../../ExportToExcel";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
+import ExportModal from "./ExportModal";
+import ImportModal from "./ImportModal";
+import * as FileSaver from "file-saver";
+import XSLX from "sheetjs-style";
 
 interface UsersDets {
   id: number;
@@ -32,6 +36,9 @@ const ResponseTable = () => {
   ];
   const [selectedRows, setSelectedRows] = useState<TableRowTypes[]>([]);
   const [toggleExportToElection, setToggleExportToElection] = useState(false);
+  const [toggleImportElection, setToggleImportElection] =
+    useState<boolean>(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [users, setUsers] = useState<UsersDets[]>([
     {
       id: 1,
@@ -124,15 +131,81 @@ const ResponseTable = () => {
       return newObj;
     });
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (selectedFile) {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          const binaryStr = e.target?.result;
+          const workBook = XSLX.read(binaryStr, { type: "binary" });
+          const workSheetName = workBook.SheetNames[0];
+          const workSheet = workBook.Sheets[workSheetName];
+          const csvData: any = XSLX.utils.sheet_to_json(workSheet, {
+            header: 1,
+          });
+          const combinedData = [
+            ...users,
+            ...csvData
+              .slice(1)
+              .map(
+                ([id, name, subGroup, phone, email]: [
+                  number,
+                  string,
+                  string,
+                  string,
+                  string
+                ]) => ({
+                  id,
+                  name,
+                  subGroup,
+                  phone,
+                  email,
+                })
+              ),
+          ];
+          setUsers((prevUsers) => [...prevUsers, ...combinedData]);
+        }
+        handleCloseImportElection();
+      };
+
+      reader.readAsBinaryString(selectedFile);
+    }
+  };
+
+  const importFromExcel = () => {
+    const worksheet = XSLX.utils.json_to_sheet(users);
+    const newWorkbook = XSLX.utils.book_new();
+    XSLX.utils.book_append_sheet(newWorkbook, worksheet, "Sheet1");
+    XSLX.writeFile(newWorkbook, "users.xlsx");
+  };
+
   const handleOpen = () => setToggleExportToElection(true);
   const handleClose = () => setToggleExportToElection(false);
+  const handleOpenImportElection = () => setToggleImportElection(true);
+  const handleCloseImportElection = () => setToggleImportElection(false);
 
   return (
     <div className="mt-[80px]">
       <h1 className="underline text-blue-700 text-2xl text-center pb-10">
         Responses
       </h1>
-      <div className="flex justify-end items-center">
+      <div className="flex justify-between items-center">
+        <div>
+          <button
+            onClick={handleOpenImportElection}
+            className="w-72 h-16 flex justify-center items-center p-4 bg-blue-700 rounded-lg text-center text-zinc-100 text-lg"
+          >
+            Import From Excel Sheet
+          </button>
+        </div>
         <div className="flex items-center gap-5">
           <div>
             <button
@@ -202,7 +275,7 @@ const ResponseTable = () => {
                   </StyledTableCell>
 
                   <StyledTableCell align="center">
-                    {index < 10 ? `0${index + 1}` : index + 1}
+                    {index < 9 ? `0${index + 1}` : index + 1}
                   </StyledTableCell>
                   <StyledTableCell align="center">{index + 1}</StyledTableCell>
                   <StyledTableCell align="center">{row.name}</StyledTableCell>
@@ -220,41 +293,19 @@ const ResponseTable = () => {
       <AnimatePresence mode="wait">
         {toggleExportToElection && (
           <Modal key="modal" handleClose={handleClose}>
-            <div className="bg-white rounded-lg py-[24px] px-10 text-left">
-              <div className="text-xl font-semibold pb-5">
-                Export To Election
-              </div>
-              <form>
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label htmlFor="election">Select Election</label>
-                    <select
-                      name="election"
-                      id="election"
-                      className="border border-zinc-600 w-full rounded h-12 outline-none px-4 cursor-pointer"
-                    >
-                      <option value="">Select Election</option>
-                      <option value="1">Election 1</option>
-                      <option value="2">Election 2</option>
-                      <option value="3">Election 3</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="mt-5">
-                  <button className="w-full h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded">
-                    Export To Election
-                  </button>
-                </div>
-              </form>
-              <div className="flex justify-end mt-10">
-                <button
-                  onClick={handleClose}
-                  className="bg-red-500 text-white w-40 h-12 rounded flex items-center justify-center outline-none"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
+            <ExportModal handleClose={handleClose} />
+          </Modal>
+        )}
+      </AnimatePresence>
+      <AnimatePresence mode="wait">
+        {toggleImportElection && (
+          <Modal key="modal" handleClose={handleCloseImportElection}>
+            <ImportModal
+              handleClose={handleCloseImportElection}
+              handleFileUpload={handleFileUpload}
+              handleFileChange={handleFileChange}
+              selectedFile={selectedFile}
+            />
           </Modal>
         )}
       </AnimatePresence>

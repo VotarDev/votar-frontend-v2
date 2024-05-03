@@ -4,7 +4,6 @@ import Body from "../../BallotPage/Body";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { getElectionById } from "@/utils/api";
-import { Election } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 
 const Ballot = ({ positions, setPositions }: any) => {

@@ -22,6 +22,7 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
+import { json } from "stream/consumers";
 
 const Create = () => {
   let step = 1;
@@ -157,6 +158,23 @@ const Create = () => {
     }
     if (logo) detailsFormData.append("election-image", logo);
 
+    const cand = [
+      {
+        candidate_name: "Tobi Faniran",
+        candidate_nickname: "Fantee",
+        docsname: "",
+        filename: "",
+        name_of_position: "President",
+      },
+    ];
+
+    const ballotFormData = new FormData();
+    ballotFormData.append("candidates", JSON.stringify(positions));
+    ballotFormData.append(
+      "profile",
+      JSON.stringify(positions[0].candidates[0].profile)
+    );
+
     const ballotData = {};
     const votersData = {};
     const reviewData = {};
@@ -183,32 +201,10 @@ const Create = () => {
           break;
         case "Ballot":
           console.log(positions);
-
-          if (users?.data) {
-            setAuthToken(users.data.data.cookie);
-          } else {
-            if (typeof window !== "undefined") {
-              const tokenLocal = localStorage.getItem("token");
-              setAuthToken(tokenLocal);
-            }
-          }
-          const ballotData = await createCandidate({
-            allow_abstain: true,
-            show_pictures: true,
-            candidates: [
-              {
-                candidate_name: "Tobi Faniran",
-                candidate_nickname: "Fantee",
-                docsname: "",
-                filename: "",
-                name_of_position: "President",
-              },
-            ],
-          });
+          const ballotData = await createCandidate(ballotFormData);
           if (ballotData.data) {
             console.log(ballotData.data);
           }
-          await createFreeElection(ballotData);
 
           // newStep++;
           break;
