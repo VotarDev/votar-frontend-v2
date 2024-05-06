@@ -27,7 +27,7 @@ function Body({ positions, setPositions }: any) {
       candidate_name: "",
       candidate_nickname: "",
       more_details: "",
-      profile: null,
+      candidate_picture: null,
       filename: "",
       docsname: "",
       media: { type: "file", docs: null },
@@ -83,7 +83,7 @@ function Body({ positions, setPositions }: any) {
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
 
-      candidate.profile = file;
+      candidate.candidate_picture = file;
       candidate.filename = file.name;
 
       setPositions(updatedPositions);
@@ -277,7 +277,7 @@ function Body({ positions, setPositions }: any) {
                     >
                       {position.show_pictures && (
                         <>
-                          {candidate.profile === null ? (
+                          {candidate.candidate_picture === null ? (
                             <img
                               src={placeholder.src}
                               alt="Upload Image"
@@ -285,7 +285,9 @@ function Body({ positions, setPositions }: any) {
                             />
                           ) : (
                             <img
-                              src={`${URL.createObjectURL(candidate.profile)}`}
+                              src={`${URL.createObjectURL(
+                                candidate.candidate_picture
+                              )}`}
                               alt={`Image for ${candidate.candidate_name}`}
                               className="max-w-[256px] w-full h-64 rounded-lg object-cover"
                             />

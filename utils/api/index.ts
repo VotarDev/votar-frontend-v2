@@ -55,7 +55,11 @@ export const createElection = (data: any, id: string) => {
 };
 
 export const createCandidate = (data: any) => {
-  return httpService.post(createCandidateUrl, data);
+  return httpService.post(createCandidateUrl, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const getElectionById = (data: any, id: string) => {

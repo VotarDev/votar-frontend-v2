@@ -29,7 +29,7 @@ export interface Candidate {
   candidate_name: string;
   candidate_nickname: string;
   more_details: string;
-  profile: Blob | MediaSource;
+  candidate_picture: Blob | MediaSource;
   media: Media;
   votes: number;
   filename: string;

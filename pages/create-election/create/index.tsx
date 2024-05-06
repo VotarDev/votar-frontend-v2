@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import DashboardLayout from "@/src/components/DashboardLayout";
-import withAuth from "@/hoc/withAuth";
 import Details from "@/src/components/CreateElection/Steps/Details";
 import Ballot from "@/src/components/CreateElection/Steps/Ballot";
 import VotersPage from "@/src/components/CreateElection/Steps/VotersPage";
@@ -14,7 +13,6 @@ import {
   createFreeElection,
   createElection,
   createCandidate,
-  createTestCandidate,
 } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -22,7 +20,6 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
-import { json } from "stream/consumers";
 
 const Create = () => {
   let step = 1;
@@ -158,22 +155,27 @@ const Create = () => {
     }
     if (logo) detailsFormData.append("election-image", logo);
 
-    const cand = [
-      {
-        candidate_name: "Tobi Faniran",
-        candidate_nickname: "Fantee",
-        docsname: "",
-        filename: "",
-        name_of_position: "President",
-      },
-    ];
+    const allProfiles = [];
+    const allDocs = [];
 
     const ballotFormData = new FormData();
     ballotFormData.append("candidates", JSON.stringify(positions));
-    ballotFormData.append(
-      "profile",
-      JSON.stringify(positions[0].candidates[0].profile)
-    );
+    if (typeof window !== "undefined") {
+      const electionId = localStorage.getItem("ElectionId");
+      ballotFormData.append("election_id", electionId as string);
+    }
+    // ballotFormData.append("profile", allProfiles);
+    // ballotFormData.append("docs", allDocs);
+    for (const obj of positions) {
+      for (const candidate of obj.candidates) {
+        if (candidate.candidate_picture) {
+          ballotFormData.append("profile", candidate.candidate_picture as Blob);
+        }
+        if (candidate.media.docs) {
+          ballotFormData.append("docs", candidate.media.docs as Blob);
+        }
+      }
+    }
 
     const ballotData = {};
     const votersData = {};
@@ -204,6 +206,7 @@ const Create = () => {
           const ballotData = await createCandidate(ballotFormData);
           if (ballotData.data) {
             console.log(ballotData.data);
+            toast.success(ballotData.data.status);
           }
 
           // newStep++;
@@ -238,7 +241,7 @@ const Create = () => {
     // direction === "next" ? newStep++ : newStep--;
 
     // if (newStep <= 0) router.back();
-    // check if steps are within bounds
+
     newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
   };
 
@@ -295,4 +298,4 @@ const Create = () => {
   );
 };
 
-export default withAuth(Create);
+export default Create;
