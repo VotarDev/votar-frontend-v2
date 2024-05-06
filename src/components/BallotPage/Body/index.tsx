@@ -6,7 +6,6 @@ import placeholder from "../../../../public/assets/images/Placeholder.png";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Position } from "@/utils/types";
-import { getMimeTypeFromBase64 } from "@/utils/util";
 
 function Body({ positions, setPositions }: any) {
   const handleAddPosition = () => {
@@ -109,42 +108,6 @@ function Body({ positions, setPositions }: any) {
       candidate.docsname = files[0].name;
 
       setPositions(updatedPositions);
-      // Detect media type (file, image, or video)
-
-      //converting to base64
-      // const reader = new FileReader();
-      // reader.readAsDataURL(files[0]);
-      // reader.onload = (()=>{
-      //   if(reader.result && typeof reader === 'string'){
-      //     const base64Data = reader.result;
-      //   }
-      // })
-      // const fileArray = Array.from(files);
-      // const base64Images = fileArray.map((file) => {
-      //   return new Promise<string>((resolve) => {
-      //     const reader = new FileReader();
-      //     reader.readAsDataURL(file);
-      //     reader.onload = () => {
-      //       if (reader.result && typeof reader.result === "string") {
-      //         resolve(reader.result);
-      //       } else {
-      //         resolve("");
-      //       }
-      //     };
-      //   });
-      // });
-      // Promise.all(base64Images).then((base64Array) => {
-      //   (candidate.media = {
-      //     type: mediaType as "file" | "image" | "video",
-      //     data: [...base64Array],
-      //   }),
-      //     setPositions(updatedPositions);
-      // });
-
-      // candidate.media = {
-      //   type: mediaType as "file" | "image" | "video",
-      //   data: files[0],
-      // };
     }
   };
 
@@ -160,10 +123,8 @@ function Body({ positions, setPositions }: any) {
       updatedPositions[positionIndex].candidates[candidateIndex];
 
     if (candidate) {
-      // Remove the last uploaded media
-
       candidate.media.docs = null;
-      console.log(candidate);
+
       // return candidate;
     }
 
