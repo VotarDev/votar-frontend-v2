@@ -130,7 +130,7 @@ const VoteBody = () => {
                             <div className="mb-3">
                               <img
                                 src={`${URL.createObjectURL(
-                                  candidate.profile
+                                  candidate.candidate_picture
                                 )}`}
                                 className="w-[269px] h-[269px] object-cover rounded"
                                 alt={`Image for ${candidate.candidate_name}`}
