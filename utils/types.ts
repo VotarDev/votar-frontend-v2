@@ -40,6 +40,7 @@ export interface Position {
   show_pictures: boolean;
   allow_abstain: boolean;
   candidates: Candidate[];
+  election_id: string | undefined | null;
 }
 
 export interface StyledTabsProps {

@@ -59,6 +59,7 @@ export default function App({ Component, pageProps }: AppProps) {
       show_pictures: true,
       allow_abstain: true,
       candidates: [],
+      election_id: "",
     },
   ]);
   const value = {
@@ -68,16 +69,14 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <AppContext.Provider value={value}>
       <Provider store={store}>
-        <GoogleOAuthProvider clientId="12194768072-ftkkte0iqtopa81s1n3u39jdje2ktv3b.apps.googleusercontent.com">
-          <SessionProvider session={pageProps.session}>
-            <div className={`${proxima.variable} font-proximaNova `}>
-              <ThemeProvider theme={THEME}>
-                <Toaster />
-                <Component {...pageProps} />
-              </ThemeProvider>
-            </div>
-          </SessionProvider>
-        </GoogleOAuthProvider>
+        <SessionProvider session={pageProps.session}>
+          <div className={`${proxima.variable} font-proximaNova `}>
+            <ThemeProvider theme={THEME}>
+              <Toaster />
+              <Component {...pageProps} />
+            </ThemeProvider>
+          </div>
+        </SessionProvider>
       </Provider>
     </AppContext.Provider>
   );

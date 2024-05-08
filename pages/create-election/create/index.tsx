@@ -23,8 +23,14 @@ import { formatDate } from "@/utils/util";
 
 const Create = () => {
   let step = 1;
+  let election_id;
   if (typeof window !== "undefined") {
     const electionStep = localStorage.getItem("electionSteps");
+    const electionId = localStorage.getItem("ElectionId");
+    if (electionId !== null) {
+      election_id = electionId;
+    }
+
     if (electionStep !== null) {
       step = parseInt(electionStep, 10);
     } else {
@@ -50,7 +56,6 @@ const Create = () => {
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -62,6 +67,7 @@ const Create = () => {
       show_pictures: true,
       allow_abstain: true,
       candidates: [],
+      election_id,
     },
   ]);
 
@@ -137,11 +143,6 @@ const Create = () => {
     const formattedStartDate = formatDate(startYear, startMonth, startDay);
     const formattedEndDate = formatDate(endYear, endMonth, endDay);
 
-    if (startTime && endTIme) {
-      console.log(`${formattedStartDate} ${startTime}`);
-      console.log(`${formattedEndDate} ${endTIme}`);
-    }
-
     const detailsFormData = new FormData();
     detailsFormData.append("name_of_election", electionName);
     detailsFormData.append("description", description);
@@ -155,17 +156,8 @@ const Create = () => {
     }
     if (logo) detailsFormData.append("election-image", logo);
 
-    const allProfiles = [];
-    const allDocs = [];
-
     const ballotFormData = new FormData();
     ballotFormData.append("candidates", JSON.stringify(positions));
-    if (typeof window !== "undefined") {
-      const electionId = localStorage.getItem("ElectionId");
-      ballotFormData.append("election_id", electionId as string);
-    }
-    // ballotFormData.append("profile", allProfiles);
-    // ballotFormData.append("docs", allDocs);
     for (const obj of positions) {
       for (const candidate of obj.candidates) {
         if (candidate.candidate_picture) {
@@ -177,7 +169,6 @@ const Create = () => {
       }
     }
 
-    const ballotData = {};
     const votersData = {};
     const reviewData = {};
     const payData = {};
@@ -203,11 +194,11 @@ const Create = () => {
           break;
         case "Ballot":
           console.log(positions);
-          const ballotData = await createCandidate(ballotFormData);
+          const ballotData = await createCandidate(ballotFormData, USER_ID);
           if (ballotData.data) {
             toast.success(ballotData.data.status);
           }
-          newStep++;
+          // newStep++;
           break;
         case "Voters Page":
           await createFreeElection(votersData);

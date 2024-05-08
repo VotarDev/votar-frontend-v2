@@ -9,6 +9,11 @@ import { Position } from "@/utils/types";
 
 function Body({ positions, setPositions }: any) {
   const handleAddPosition = () => {
+    let election_id;
+    if (typeof window !== "undefined") {
+      const electionId = localStorage.getItem("ElectionId");
+      election_id = electionId;
+    }
     setPositions([
       ...positions,
       {
@@ -16,6 +21,7 @@ function Body({ positions, setPositions }: any) {
         show_pictures: true,
         allow_abstain: true,
         candidates: [],
+        election_id,
       },
     ]);
   };
@@ -26,6 +32,7 @@ function Body({ positions, setPositions }: any) {
       candidate_name: "",
       candidate_nickname: "",
       more_details: "",
+
       candidate_picture: null,
       filename: "",
       docsname: "",
