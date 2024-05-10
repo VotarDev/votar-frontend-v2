@@ -9,6 +9,7 @@ import {
   PiNewspaper,
   PiUsersThree,
 } from "react-icons/pi";
+import { RiCoupon2Line } from "react-icons/ri";
 import { LiaCheckSquare } from "react-icons/lia";
 import { RiUserVoiceLine } from "react-icons/ri";
 import logout from "../../../../public/assets/icons/logout-black.svg";
@@ -140,6 +141,20 @@ const AdminHeader = () => {
                   <PiUsersThree />
                 </span>
                 <span className={`${!isOpen && "hidden lg:block"}`}>Users</span>
+              </li>
+            </Link>
+            <Link href="/admin/coupon">
+              <li
+                className={`flex flex-col items-center justify-center gap-1 ${
+                  pathname === "/admin/coupon" ? "text-[#015CE9]" : ""
+                }`}
+              >
+                <span className="text-2xl">
+                  <RiCoupon2Line />
+                </span>
+                <span className={`${!isOpen && "hidden lg:block"}`}>
+                  Coupons
+                </span>
               </li>
             </Link>
           </ul>
