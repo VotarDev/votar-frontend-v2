@@ -151,27 +151,42 @@ const ResponseTable = () => {
           const csvData: any = XSLX.utils.sheet_to_json(workSheet, {
             header: 1,
           });
-          const combinedData = [
-            ...users,
-            ...csvData
-              .slice(1)
-              .map(
-                ([id, name, subGroup, phone, email]: [
-                  number,
-                  string,
-                  string,
-                  string,
-                  string
-                ]) => ({
-                  id,
-                  name,
-                  subGroup,
-                  phone,
-                  email,
-                })
-              ),
-          ];
-          setUsers((prevUsers) => [...prevUsers, ...combinedData]);
+
+          const newUserData = csvData
+            .map(
+              ([id, name, subGroup, phone, email]: [
+                number | string,
+                string,
+                string,
+                string,
+                string
+              ]) => ({
+                id,
+                name,
+                subGroup,
+                phone,
+                email,
+              })
+            )
+            .filter(
+              (newUser: any) =>
+                !users.some((existingUser) => existingUser.id === newUser.id)
+            );
+          const combinedData = [...users, ...newUserData];
+          setUsers(combinedData);
+          const seen: Record<string, boolean> = {};
+          const updatedData = combinedData.map((item) => {
+            const key = `${item.name}_${item.phone}_${item.email}`;
+
+            if (seen[key]) {
+              // This is a duplicate
+              return { ...item, isDuplicate: true } as UsersDets;
+            } else {
+              seen[key] = true;
+              return { ...item, isDuplicate: false } as UsersDets;
+            }
+          });
+          setUsers(updatedData);
         }
         handleCloseImportElection();
       };
@@ -277,7 +292,7 @@ const ResponseTable = () => {
                   <StyledTableCell align="center">
                     {index < 9 ? `0${index + 1}` : index + 1}
                   </StyledTableCell>
-                  <StyledTableCell align="center">{index + 1}</StyledTableCell>
+                  <StyledTableCell align="center">{row.id}</StyledTableCell>
                   <StyledTableCell align="center">{row.name}</StyledTableCell>
                   <StyledTableCell align="center">
                     {row.subGroup}

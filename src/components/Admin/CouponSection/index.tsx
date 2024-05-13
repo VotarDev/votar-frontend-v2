@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import AdminLayout from "../AdminLayout";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
@@ -10,6 +10,7 @@ import TableRow from "@mui/material/TableRow";
 import SwitchButton from "../AdminProfile/SwitchButton";
 import { drop } from "@/utils/util";
 import ViewElections from "./ViewElections";
+import { AnimatePresence, motion } from "framer-motion";
 
 const CouponSection = () => {
   const headers = [
@@ -19,6 +20,13 @@ const CouponSection = () => {
     "Elections",
     "Coupon Access",
   ];
+  const [isDropDown, setIsDropDown] = useState(false);
+  const [filteredOption, setFilteredOption] = useState("Coupon Code Criteria");
+  const options = ["50% off", "1000", "0", "10% off", "20% off"];
+  const filteredOptionHandler = (opt: string) => {
+    setFilteredOption(opt);
+    setIsDropDown(false);
+  };
   const couponData = [
     {
       id: 1,
@@ -68,11 +76,40 @@ const CouponSection = () => {
             className="border w-72 h-12 p-4 outline-none"
           />
         </div>
-        <div>
-          <div className="border p-4 w-72 h-12 flex items-center">
-            Coupon Code Criteria
+        <div className="relative">
+          <div
+            className="border p-4 w-72 h-12 flex items-center cursor-pointer"
+            onClick={() => setIsDropDown((dropdown) => !dropdown)}
+          >
+            {filteredOption}
           </div>
+          <AnimatePresence mode="wait">
+            {isDropDown && (
+              <motion.div
+                className="absolute top-full left-0 w-72 py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
+                variants={drop}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <div className="flex flex-col gap-2 [&>*]:cursor-pointer">
+                  {options.map((opt, index) => (
+                    <div
+                      key={index}
+                      onClick={() => filteredOptionHandler(opt)}
+                      className={`hover:bg-[#dadada] px-4 py-2 ${
+                        filteredOption == opt ? " bg-[#dadada]" : ""
+                      }`}
+                    >
+                      {opt}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+
         <div>
           <button className="bg-blue-700 w-72 h-12 flex items-center justify-center rounded-3xl text-lg text-white font-medium">
             Implement Coupon
