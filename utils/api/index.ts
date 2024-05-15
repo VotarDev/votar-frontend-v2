@@ -16,8 +16,7 @@ const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
 const testUrlForCreateCandidate =
   "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/user/create-candidate";
-const testUrlSignin =
-  "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/auth/login";
+const getFormsUrl = "/user/get-allForms";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -84,6 +83,10 @@ export const googleAuthentication = (data: any) => {
 
 export const createVotarForms = (data: any, id: string) => {
   return httpService.post(createVotarFormsUrl + `/${id}`, data);
+};
+
+export const getForms = (id: string) => {
+  return httpService.get(getFormsUrl + `/${id}`);
 };
 
 export const createTestCandidate = (data: any) => {

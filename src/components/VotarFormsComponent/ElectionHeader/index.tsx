@@ -43,7 +43,7 @@ const ElectionHeader: React.FC<ElectionHeaderProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-center items-center pt-[52px] lg:absolute static left-[55%] lg:translate-x-[-50%] lg:max-w-[50%] mx-auto w-full">
+        <div className="flex justify-center items-center top-[110px] lg:absolute static left-[60%] lg:translate-x-[-50%] lg:max-w-[50%] mx-auto w-full">
           <div className="text-center">
             <div className="flex justify-center">
               <img src={napss.src} alt="logo" />

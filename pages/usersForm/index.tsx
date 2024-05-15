@@ -1,9 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import InputSelect from "@/src/components/InputSelect";
 import { IoIosArrowRoundForward } from "react-icons/io";
+import { getForms } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
 
 const UsersForm = () => {
+  const [options, setOptions] = useState<string[]>([]);
+  const users = useCurrentUser();
+  const user = useUser();
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
+
+  useEffect(() => {
+    const getForm = async () => {
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await getForms(USER_ID);
+        if (data) {
+          console.log(
+            data.data[data.data.length - 1].subgroup.map((item: any) => {
+              return { value: item, label: item };
+            })
+          );
+          setOptions(
+            data.data[data.data.length - 1].subgroup.map((item: any) => {
+              return { value: item, label: item };
+            })
+          );
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getForm();
+  }, []);
   return (
     <div>
       <ElectionHeader electionTitle="NATIONAL ASSOCIATION OF POLITICAL SCIENCE STUDENTS" />
@@ -35,7 +78,7 @@ const UsersForm = () => {
                 <label htmlFor="subGroup">Sub-Group</label>
                 <InputSelect
                   placeholder={""}
-                  option={[]}
+                  option={options}
                   optionValue={""}
                   className={
                     "lg:w-1/3 h-10 w-full placeholder:white cursor-pointer"
