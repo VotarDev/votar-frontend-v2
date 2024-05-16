@@ -5,17 +5,29 @@ import { IoIosArrowRoundForward } from "react-icons/io";
 import { getForms } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
+import { useRouter } from "next/router";
+import { votarResponse } from "@/utils/api";
+import { OptionTypes } from "@/utils/types";
+import { CircularProgress } from "@mui/material";
+import { toast } from "react-hot-toast";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
+  const [usersOption, setUsersOption] = useState<OptionTypes | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const users = useCurrentUser();
+  const router = useRouter();
   const user = useUser();
+  const { token } = router.query;
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
     ? users?.id
     : user?.user?.id;
+
+  console.log(token);
+  console.log(usersOption);
 
   useEffect(() => {
     const getForm = async () => {
@@ -35,6 +47,7 @@ const UsersForm = () => {
               return { value: item, label: item };
             })
           );
+          console.log(data);
           setOptions(
             data.data[data.data.length - 1].subgroup.map((item: any) => {
               return { value: item, label: item };
@@ -47,6 +60,31 @@ const UsersForm = () => {
     };
     getForm();
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    const form = e.currentTarget;
+    const formdata = new FormData(form);
+    const data = {
+      id: formdata.get("id"),
+      name: formdata.get("name"),
+      subgroup: usersOption?.value,
+      phone: formdata.get("phone"),
+      email: formdata.get("email"),
+    };
+    try {
+      const response = await votarResponse(data, token as string);
+      if (response.data) {
+        setIsLoading(false);
+        toast.success("Details Submitted Successfully");
+        console.log(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+      setIsLoading(false);
+    }
+  };
   return (
     <div>
       <ElectionHeader electionTitle="NATIONAL ASSOCIATION OF POLITICAL SCIENCE STUDENTS" />
@@ -55,7 +93,7 @@ const UsersForm = () => {
           <span className="font-bold">INSTRUCTION:</span> Please Fill in your
           Details Correctly
         </div>
-        <form className="max-w-[1200px] mx-auto py-20">
+        <form className="max-w-[1200px] mx-auto py-20" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
               <label htmlFor="id">ID</label>
@@ -78,8 +116,9 @@ const UsersForm = () => {
                 <label htmlFor="subGroup">Sub-Group</label>
                 <InputSelect
                   placeholder={""}
+                  setOption={setUsersOption}
                   option={options}
-                  optionValue={""}
+                  optionValue={usersOption}
                   className={
                     "lg:w-1/3 h-10 w-full placeholder:white cursor-pointer"
                   }
@@ -104,7 +143,17 @@ const UsersForm = () => {
             </div>
           </div>
           <div className="mt-5 flex justify-end gap-3 py-5">
-            <button className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg">
+            <button
+              className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
+              disabled={isLoading}
+            >
+              {isLoading && (
+                <CircularProgress
+                  color="inherit"
+                  className=" text-white"
+                  size={20}
+                />
+              )}
               Submit Details
               <span className="text-3xl">
                 <IoIosArrowRoundForward />
