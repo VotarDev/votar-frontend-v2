@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
 
-const Header = ({ electionDetails }: { electionDetails: Election }) => {
+const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   const textRef = useRef<HTMLElement | null>(null);
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
   const handleCopyClick = async () => {
@@ -33,16 +33,16 @@ const Header = ({ electionDetails }: { electionDetails: Election }) => {
           <div className="z-10 flex flex-col gap-2">
             <div className="flex justify-center">
               <img
-                src={electionDetails.association_logo}
+                src={electionDetails?.association_logo}
                 alt="logo"
                 className="rounded-full w-20 h-20 "
               />
             </div>
             <div className="lg:text-3xl text-base font-semibold">
-              {electionDetails.name_of_election}
+              {electionDetails?.name_of_election}
             </div>
             <div className="max-w-[35rem] mx-auto lg:text-base text-xs leading-5">
-              {electionDetails.description}
+              {electionDetails?.description}
             </div>
           </div>
           <div className="absolute lg:right-10 lg:top-10 top-2 right-2">
@@ -57,7 +57,7 @@ const Header = ({ electionDetails }: { electionDetails: Election }) => {
           <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
             <div>
               Election ID:{" "}
-              <span ref={textRef}>{electionDetails.election_id}</span>
+              <span ref={textRef}>{electionDetails?.election_id}</span>
             </div>
             <div onClick={handleCopyClick} className="cursor-pointer">
               <IoCopy />
@@ -93,7 +93,7 @@ const Header = ({ electionDetails }: { electionDetails: Election }) => {
 
   if (votarPlan === "Votar Pro")
     return (
-      <div>
+      <div className="mb-10">
         <div className=" relative lg:mt-0 max-w-[1500px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">
           <div className="absolute top-0 left-0 right-0 w-full -z-10 lg:block">
             <div className="relative">
@@ -105,11 +105,11 @@ const Header = ({ electionDetails }: { electionDetails: Election }) => {
               >
                 <path
                   d="M223.063 253.106C118.294 327.151 -31.2577 284.047 -92.9374 253.24L-163.078 -78.7301L1071.92 -79.2535L1110.46 3.73015C977.63 -60.2136 645.496 24.0084 503.991 83.9872C366.019 150.446 262.27 225.397 223.063 253.106Z"
-                  fill={`${electionDetails.secondary_color}`}
+                  fill={`${electionDetails?.secondary_color}`}
                 />
                 <path
                   d="M218.063 241.106C113.294 315.151 -36.2577 272.047 -97.9374 241.24L-168.078 -90.7301L1066.92 -91.2535L1105.46 -8.26985C972.63 -72.2136 640.496 12.0084 498.991 71.9872C361.019 138.446 257.27 213.397 218.063 241.106Z"
-                  fill={`${electionDetails.primary_color}`}
+                  fill={`${electionDetails?.primary_color}`}
                 />
               </svg>
             </div>
@@ -122,20 +122,20 @@ const Header = ({ electionDetails }: { electionDetails: Election }) => {
             </div>
           </div>
 
-          <div className="flex justify-center items-center pt-[52px] lg:absolute static left-[55%] lg:translate-x-[-50%] lg:max-w-[50%] mx-auto w-full">
+          <div className="flex justify-center items-center top-[80px] lg:absolute static left-[60%] lg:translate-x-[-50%] lg:max-w-[50%] mx-auto w-full">
             <div className="text-center">
               <div className="flex justify-center">
                 <img
-                  src={electionDetails.association_logo}
+                  src={electionDetails?.association_logo}
                   alt="logo"
                   className="w-32 h-32 object-cover"
                 />
               </div>
               <div className="lg:text-[25px] font-semibold mt-3 text-2xl uppercase">
-                {electionDetails.name_of_election}
+                {electionDetails?.name_of_election}
               </div>
               <div className="lg:text-lg text-[#1E1E1E] leading-[30px] text-base mt-2">
-                {electionDetails.description}
+                {electionDetails?.description}
               </div>
             </div>
           </div>

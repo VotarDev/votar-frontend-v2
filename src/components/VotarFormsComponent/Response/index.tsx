@@ -6,14 +6,15 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { TableRowTypes } from "@/utils/types";
+import { ElectionDetails, TableRowTypes } from "@/utils/types";
 import ExportToExcel from "../../ExportToExcel";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
 import ExportModal from "./ExportModal";
 import ImportModal from "./ImportModal";
-import * as FileSaver from "file-saver";
 import XSLX from "sheetjs-style";
+import { getElections } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 
 interface UsersDets {
   id: number;
@@ -39,7 +40,10 @@ const ResponseTable = () => {
   const [toggleImportElection, setToggleImportElection] =
     useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [users, setUsers] = useState<UsersDets[]>([
+  const [elections, setElections] = useState<ElectionDetails[]>([]);
+  const users = useCurrentUser();
+  const user = useUser();
+  const [usersData, setUsersData] = useState<UsersDets[]>([
     {
       id: 1,
       name: "Amana Ona",
@@ -84,6 +88,12 @@ const ResponseTable = () => {
     },
   ]);
 
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -108,7 +118,7 @@ const ResponseTable = () => {
   useEffect(() => {
     const flagDuplicate = () => {
       const seen: Record<string, boolean> = {};
-      const updatedData = users.map((item) => {
+      const updatedData = usersData.map((item) => {
         const key = `${item.name}_${item.phone}_${item.email}`;
 
         if (seen[key]) {
@@ -119,12 +129,26 @@ const ResponseTable = () => {
           return { ...item, isDuplicate: false } as UsersDets;
         }
       });
-      setUsers(updatedData);
+      setUsersData(updatedData);
     };
     flagDuplicate();
   }, []);
 
-  const excelData = users
+  useEffect(() => {
+    const getElectionsData = async () => {
+      try {
+        const { data } = await getElections(USER_ID);
+        if (data) {
+          setElections(data.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getElectionsData();
+  }, []);
+
+  const excelData = usersData
     .filter((item) => !item.isDuplicate)
     .map((obj) => {
       const { isDuplicate, ...newObj } = obj;
@@ -170,10 +194,12 @@ const ResponseTable = () => {
             )
             .filter(
               (newUser: any) =>
-                !users.some((existingUser) => existingUser.id === newUser.id)
+                !usersData.some(
+                  (existingUser) => existingUser.id === newUser.id
+                )
             );
-          const combinedData = [...users, ...newUserData];
-          setUsers(combinedData);
+          const combinedData = [...usersData, ...newUserData];
+          setUsersData(combinedData);
           const seen: Record<string, boolean> = {};
           const updatedData = combinedData.map((item) => {
             const key = `${item.name}_${item.phone}_${item.email}`;
@@ -186,7 +212,7 @@ const ResponseTable = () => {
               return { ...item, isDuplicate: false } as UsersDets;
             }
           });
-          setUsers(updatedData);
+          setUsersData(updatedData);
         }
         handleCloseImportElection();
       };
@@ -196,7 +222,7 @@ const ResponseTable = () => {
   };
 
   const importFromExcel = () => {
-    const worksheet = XSLX.utils.json_to_sheet(users);
+    const worksheet = XSLX.utils.json_to_sheet(usersData);
     const newWorkbook = XSLX.utils.book_new();
     XSLX.utils.book_append_sheet(newWorkbook, worksheet, "Sheet1");
     XSLX.writeFile(newWorkbook, "users.xlsx");
@@ -208,7 +234,7 @@ const ResponseTable = () => {
   const handleCloseImportElection = () => setToggleImportElection(false);
 
   return (
-    <div className="mt-[80px]">
+    <div className="mt-[80px] max-w-[1500px] mx-auto">
       <h1 className="underline text-blue-700 text-2xl text-center pb-10">
         Responses
       </h1>
@@ -267,7 +293,7 @@ const ResponseTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((row, index) => (
+              {usersData.map((row, index) => (
                 <TableRow
                   key={index}
                   className={`${
@@ -308,7 +334,7 @@ const ResponseTable = () => {
       <AnimatePresence mode="wait">
         {toggleExportToElection && (
           <Modal key="modal" handleClose={handleClose}>
-            <ExportModal handleClose={handleClose} />
+            <ExportModal handleClose={handleClose} election={elections} />
           </Modal>
         )}
       </AnimatePresence>

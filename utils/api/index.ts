@@ -18,6 +18,7 @@ const testUrlForCreateCandidate =
   "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/user/create-candidate";
 const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/voter-response";
+const getElectionsUrl = "user/get-elections";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -96,4 +97,8 @@ export const getForms = (id: string) => {
 
 export const createTestCandidate = (data: any) => {
   return httpService.post(testUrlForCreateCandidate, data);
+};
+
+export const getElections = (id: string) => {
+  return httpService.get(getElectionsUrl + `/${id}`);
 };

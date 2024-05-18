@@ -18,7 +18,7 @@ interface Item {
   option: string;
 }
 
-const CreatorForm = () => {
+const CreatorForm = ({ electionId }: { electionId: string }) => {
   const [subGroup, setSubGroup] = useState<Item[]>([]);
   const [toggleAddSubGroup, setToggleAddSubGroup] = useState<boolean>(false);
   const [formLink, setFormLink] = useState("");
@@ -71,7 +71,7 @@ const CreatorForm = () => {
   //   };
 
   const handleViewResponse = () => {
-    router.push("/votar-forms/responses");
+    router.push(`/votar-forms/responses/${electionId}`);
   };
 
   const deleteItem = (itemId: number) => {

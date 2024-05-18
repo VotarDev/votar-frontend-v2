@@ -3,25 +3,21 @@ import { useRouter } from "next/router";
 import DashboardLayout from "@/src/components/DashboardLayout";
 import withAuth from "@/hoc/withAuth";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
-import CreatorForm from "@/src/components/VotarFormsComponent/CreatorForm";
-import ProtectedRoutes from "@/src/components/ProtectedRoutes";
+import ResponseTable from "@/src/components/VotarFormsComponent/Response";
+import { ElectionDetails } from "@/utils/types";
 import { getElectionById } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { ElectionDetails } from "@/utils/types";
-import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
+import Header from "@/src/components/BallotPage/Header";
 
-const CreateForm = () => {
+const Responses = () => {
   const router = useRouter();
+  const [electionID, setElectionID] = useState("");
+  const [elections, setElections] = useState<ElectionDetails | null>(null);
+  const [isFecthElection, setIsFetchElection] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
-  const [electionName, setElectionName] = useState("");
-  const [electionID, setElectionID] = useState("");
-  const [isFecthElection, setIsFetchElection] = useState(false);
-  const [election, setElection] = useState<ElectionDetails | null>(null);
-  const { id } = router.query;
-  let idType: string | string[] | undefined = id;
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -29,18 +25,12 @@ const CreateForm = () => {
     ? users?.id
     : user?.user?.id;
 
+  const { id } = router.query;
   useEffect(() => {
-    if (typeof idType === "string") {
-      setElectionName(idType);
-    } else if (Array.isArray(idType)) {
-      setElectionName(idType[0]);
-      setElectionID(idType[1]);
-    } else {
-      console.log("ID is undefined");
+    if (id) {
+      setElectionID(id[0]);
     }
-  }, [id, electionID]);
-
-  console.log(electionID);
+  }, [id]);
 
   useEffect(() => {
     const getElection = async () => {
@@ -59,7 +49,7 @@ const CreateForm = () => {
           const electionData = { election_id: electionID };
           const { data } = await getElectionById(electionData, USER_ID);
           if (data) {
-            setElection(data.data);
+            setElections(data.data);
             setIsFetchElection(false);
           }
         }
@@ -70,25 +60,22 @@ const CreateForm = () => {
     getElection();
   }, [electionID]);
 
-  console.log(electionID);
   return (
-    <ProtectedRoutes>
-      <DashboardLayout>
-        {isFecthElection ? (
-          <div className="mt-10">
-            <CircularProgress size={30} style={{ color: "#015CE9" }} />
-          </div>
-        ) : (
+    <DashboardLayout>
+      {isFecthElection ? (
+        <div className="mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      ) : (
+        <div>
           <div>
-            <div>
-              <Header electionDetails={election} />
-            </div>
-            <CreatorForm electionId={electionID} />
+            <Header electionDetails={elections} />
           </div>
-        )}
-      </DashboardLayout>
-    </ProtectedRoutes>
+          <ResponseTable />
+        </div>
+      )}
+    </DashboardLayout>
   );
 };
 
-export default CreateForm;
+export default Responses;

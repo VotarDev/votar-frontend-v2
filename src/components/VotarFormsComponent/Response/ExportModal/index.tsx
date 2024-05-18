@@ -1,6 +1,13 @@
+import { ElectionDetails } from "@/utils/types";
 import React from "react";
 
-const ExportModal = ({ handleClose }: any) => {
+const ExportModal = ({
+  handleClose,
+  election,
+}: {
+  handleClose: () => void;
+  election: ElectionDetails[];
+}) => {
   return (
     <div>
       <div className="bg-white rounded-lg py-[24px] px-10 text-left">
@@ -15,9 +22,14 @@ const ExportModal = ({ handleClose }: any) => {
                 className="border border-zinc-600 w-full rounded h-12 outline-none px-4 cursor-pointer"
               >
                 <option value="">Select Election</option>
-                <option value="1">Election 1</option>
-                <option value="2">Election 2</option>
-                <option value="3">Election 3</option>
+                {election.map((election) => (
+                  <option
+                    key={election.election_id}
+                    value={election.election_id}
+                  >
+                    {election.name_of_election}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

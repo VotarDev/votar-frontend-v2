@@ -196,9 +196,10 @@ const Create = () => {
           console.log(positions);
           const ballotData = await createCandidate(ballotFormData, USER_ID);
           if (ballotData.data) {
-            toast.success(ballotData.data.status);
+            // toast.success(ballotData.data.status);
+            toast.success("Candidates created successfully");
           }
-          // newStep++;
+          newStep++;
           break;
         case "Voters Page":
           await createFreeElection(votersData);
