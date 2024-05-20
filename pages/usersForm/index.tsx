@@ -11,6 +11,7 @@ import { ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import Header from "@/src/components/BallotPage/Header";
+import { el } from "date-fns/locale";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
@@ -30,8 +31,8 @@ const UsersForm = () => {
     ? users?.id
     : user?.user?.id;
 
-  console.log(token);
   console.log(election_id);
+
   useEffect(() => {
     const getElection = async () => {
       if (users?.data) {
@@ -45,17 +46,19 @@ const UsersForm = () => {
       setIsFetchElection(true);
       try {
         const electionData = { election_id };
-        const { data } = await getElectionById(electionData, USER_ID);
-        if (data) {
-          setElection(data.data);
-          setIsFetchElection(false);
+        if (election_id) {
+          const { data } = await getElectionById(electionData, USER_ID);
+          if (data) {
+            setElection(data.data);
+            setIsFetchElection(false);
+          }
         }
       } catch (e: any) {
         console.log(e);
       }
     };
     getElection();
-  }, []);
+  }, [election_id]);
 
   useEffect(() => {
     const getForm = async () => {
