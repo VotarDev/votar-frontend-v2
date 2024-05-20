@@ -124,18 +124,6 @@ const UsersForm = () => {
       </div>
     );
 
-  if (success)
-    return (
-      <div>
-        <Header electionDetails={election} />
-        <div className="flex items-center justify-center mt-40 w-full">
-          <div className="text-3xl text-center">
-            <p>Details Submitted Successfully</p>
-          </div>
-        </div>
-      </div>
-    );
-
   return (
     <div>
       <Header electionDetails={election} />
