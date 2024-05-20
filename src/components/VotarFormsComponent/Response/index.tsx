@@ -167,17 +167,19 @@ const ResponseTable = () => {
   useEffect(() => {
     const getVoterResponses = async () => {
       try {
-        const bodyData = { election_id: electionID };
-        const { data } = await getVoterResponse(USER_ID, bodyData);
-        if (data) {
-          console.log(data);
+        if (electionID) {
+          const bodyData = { election_id: electionID };
+          const { data } = await getVoterResponse(USER_ID, bodyData);
+          if (data) {
+            console.log(data);
+          }
         }
       } catch (error) {
         console.log(error);
       }
     };
     getVoterResponses();
-  }, []);
+  }, [electionID]);
 
   const excelData = usersData
     .filter((item) => !item.isDuplicate)
