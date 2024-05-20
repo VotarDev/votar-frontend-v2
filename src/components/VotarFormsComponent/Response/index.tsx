@@ -15,6 +15,8 @@ import ImportModal from "./ImportModal";
 import XSLX from "sheetjs-style";
 import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
+import { getVoterResponse } from "@/utils/api";
+import { useRouter } from "next/router";
 
 interface UsersDets {
   id: number;
@@ -41,8 +43,13 @@ const ResponseTable = () => {
     useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [elections, setElections] = useState<ElectionDetails[]>([]);
+  const [electionID, setElectionID] = useState("");
   const users = useCurrentUser();
   const user = useUser();
+  const router = useRouter();
+  const { id } = router.query;
+  let idType: string | string[] | undefined = id;
+
   const [usersData, setUsersData] = useState<UsersDets[]>([
     {
       id: 1,
@@ -133,6 +140,15 @@ const ResponseTable = () => {
     };
     flagDuplicate();
   }, []);
+  useEffect(() => {
+    if (Array.isArray(idType)) {
+      setElectionID(idType[0]);
+    } else {
+      console.log("ID is undefined");
+    }
+  }, []);
+
+  console.log(electionID);
 
   useEffect(() => {
     const getElectionsData = async () => {
@@ -146,6 +162,21 @@ const ResponseTable = () => {
       }
     };
     getElectionsData();
+  }, []);
+
+  useEffect(() => {
+    const getVoterResponses = async () => {
+      try {
+        const bodyData = { election_id: electionID };
+        const { data } = await getVoterResponse(USER_ID, bodyData);
+        if (data) {
+          console.log(data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getVoterResponses();
   }, []);
 
   const excelData = usersData
