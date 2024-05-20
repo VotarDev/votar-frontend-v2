@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoIosArrowRoundForward } from "react-icons/io";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { BsLink } from "react-icons/bs";
@@ -26,9 +26,12 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [newItemContent, setNewItemContent] = useState<string>("Add option");
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [electionID, setElectionID] = useState("");
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
+  const { id } = router.query;
+  let idType: string | string[] | undefined = id;
 
   const option = subGroup.map((item) => {
     return { value: item.option, label: item.option };
@@ -78,6 +81,14 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
     setSubGroup((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
+  useEffect(() => {
+    if (Array.isArray(idType)) {
+      setElectionID(idType[1]);
+    } else {
+      console.log("ID is undefined");
+    }
+  }, [electionID]);
+
   const formHandler = async () => {
     setIsLoading(true);
     if (users?.data) {
@@ -92,7 +103,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
         const formData = {
-          electionId: electionId,
+          electionId: electionID,
           subgroup: subGroup.map((item) => item.option),
         };
         const { data } = await createVotarForms(formData, USER_ID);
@@ -107,6 +118,8 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       console.log(e);
     }
   };
+
+  console.log(electionID);
 
   const copyLink = () => {
     navigator.clipboard.writeText(formLink ?? "");

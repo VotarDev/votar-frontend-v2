@@ -94,7 +94,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   if (votarPlan === "Votar Pro")
     return (
       <div className="mb-10">
-        <div className=" relative lg:mt-0 max-w-[1500px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">
+        <div className=" relative lg:mt-0 max-w-[1600px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">
           <div className="absolute top-0 left-0 right-0 w-full -z-10 lg:block">
             <div className="relative">
               <svg
@@ -122,7 +122,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
             </div>
           </div>
 
-          <div className="flex justify-center items-center top-[80px] lg:absolute static left-[60%] lg:translate-x-[-50%] lg:max-w-[50%] mx-auto w-full">
+          <div className="flex justify-center items-center top-[100px] lg:absolute static left-[55%] lg:translate-x-[-55%] lg:max-w-[50%] mx-auto w-full">
             <div className="text-center">
               <div className="flex justify-center">
                 <img

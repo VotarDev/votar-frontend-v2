@@ -2,23 +2,27 @@ import React, { useEffect, useState } from "react";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import InputSelect from "@/src/components/InputSelect";
 import { IoIosArrowRoundForward } from "react-icons/io";
-import { getForms } from "@/utils/api";
+import { getElectionById, getForms } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { useRouter } from "next/router";
 import { votarResponse } from "@/utils/api";
-import { OptionTypes } from "@/utils/types";
+import { ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
+import Header from "@/src/components/BallotPage/Header";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
   const [usersOption, setUsersOption] = useState<OptionTypes | null>(null);
+  const [election, setElection] = useState<ElectionDetails | null>(null);
+  const [isFecthElection, setIsFetchElection] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const users = useCurrentUser();
   const router = useRouter();
   const user = useUser();
-  const { token } = router.query;
+  const { token, election_id } = router.query;
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -27,7 +31,31 @@ const UsersForm = () => {
     : user?.user?.id;
 
   console.log(token);
-  console.log(usersOption);
+  console.log(election_id);
+  useEffect(() => {
+    const getElection = async () => {
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      setIsFetchElection(true);
+      try {
+        const electionData = { election_id };
+        const { data } = await getElectionById(electionData, USER_ID);
+        if (data) {
+          setElection(data.data);
+          setIsFetchElection(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+      }
+    };
+    getElection();
+  }, []);
 
   useEffect(() => {
     const getForm = async () => {
@@ -61,6 +89,8 @@ const UsersForm = () => {
     getForm();
   }, []);
 
+  console.log(election);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -77,6 +107,7 @@ const UsersForm = () => {
       const response = await votarResponse(data, token as string);
       if (response.data) {
         setIsLoading(false);
+        setSuccess(true);
         toast.success("Details Submitted Successfully");
         console.log(response.data);
       }
@@ -85,9 +116,29 @@ const UsersForm = () => {
       setIsLoading(false);
     }
   };
+
+  if (isFecthElection)
+    return (
+      <div className="mt-10 flex items-center justify-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+
+  if (success)
+    return (
+      <div>
+        <Header electionDetails={election} />
+        <div className="flex items-center justify-center mt-40 w-full">
+          <div className="text-3xl text-center">
+            <p>Details Submitted Successfully</p>
+          </div>
+        </div>
+      </div>
+    );
+
   return (
     <div>
-      <ElectionHeader electionTitle="NATIONAL ASSOCIATION OF POLITICAL SCIENCE STUDENTS" />
+      <Header electionDetails={election} />
       <div>
         <div className="text-xl text-center pt-5">
           <span className="font-bold">INSTRUCTION:</span> Please Fill in your
