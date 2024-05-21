@@ -72,9 +72,10 @@ export type TableRowTypes = {
   id: string | number;
   name: string;
   subGroup: string;
-  phone: string;
+  phoneNumber: string;
   email: string;
 };
+
 export type CardRowTypess = {
   id: string | number;
   name: string;
@@ -86,11 +87,13 @@ export type CardRowTypess = {
 
 export interface ExportToExcelProps {
   excelData: {
-    id: number;
-    name: string;
-    subGroup: string;
-    phone: string;
     email: string;
+    id: string | number;
+    name: string;
+    phoneNumber: string;
+    _id: string;
+    isDuplicate?: boolean;
+    subGroup?: string;
   }[];
   fileName: string;
   children: React.ReactNode;
@@ -139,6 +142,16 @@ export type ElectionDetails = {
   updatedAt: string;
   __v: number;
   _id: string;
+};
+
+export type VoterResponse = {
+  email: string;
+  id: string | number;
+  name: string;
+  phoneNumber: string;
+  _id: string;
+  isDuplicate?: boolean;
+  subGroup?: string;
 };
 
 export type OptionTypes = {

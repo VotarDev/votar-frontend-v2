@@ -6,7 +6,7 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { ElectionDetails, TableRowTypes } from "@/utils/types";
+import { ElectionDetails, TableRowTypes, VoterResponse } from "@/utils/types";
 import ExportToExcel from "../../ExportToExcel";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
@@ -17,6 +17,9 @@ import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { getVoterResponse } from "@/utils/api";
 import { useRouter } from "next/router";
+import { set } from "lodash";
+import { is } from "date-fns/locale";
+import { CircularProgress } from "@mui/material";
 
 interface UsersDets {
   id: number;
@@ -37,63 +40,20 @@ const ResponseTable = () => {
     "Phone Number",
     "Email",
   ];
-  const [selectedRows, setSelectedRows] = useState<TableRowTypes[]>([]);
+  const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [toggleExportToElection, setToggleExportToElection] = useState(false);
   const [toggleImportElection, setToggleImportElection] =
     useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [elections, setElections] = useState<ElectionDetails[]>([]);
   const [electionID, setElectionID] = useState("");
+  const [votarResponses, setVotarResponses] = useState<VoterResponse[]>([]);
+  const [isFetchResponse, setIsFetchResponse] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
-
-  const [usersData, setUsersData] = useState<UsersDets[]>([
-    {
-      id: 1,
-      name: "Amana Ona",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-    {
-      id: 2,
-      name: "Amana Ona",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-    {
-      id: 3,
-      name: "Amana Onana",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-    {
-      id: 4,
-      name: "Amana Ona",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-    {
-      id: 5,
-      name: "king ona",
-      subGroup: "Acting",
-      phone: "232321",
-      email: "king@gmail.com",
-    },
-    {
-      id: 5,
-      name: "king ona",
-      subGroup: "Acting",
-      phone: "232321",
-      email: "king@gmail.com",
-    },
-  ]);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -115,31 +75,30 @@ const ResponseTable = () => {
     },
   }));
 
-  const handleCheckboxChange = (row: TableRowTypes) => {
+  const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) =>
       prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
         ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
         : [...prevSelectedRows, row]
     );
   };
-  useEffect(() => {
-    const flagDuplicate = () => {
-      const seen: Record<string, boolean> = {};
-      const updatedData = usersData.map((item) => {
-        const key = `${item.name}_${item.phone}_${item.email}`;
 
-        if (seen[key]) {
-          // This is a duplicate
-          return { ...item, isDuplicate: true } as UsersDets;
-        } else {
-          seen[key] = true;
-          return { ...item, isDuplicate: false } as UsersDets;
-        }
-      });
-      setUsersData(updatedData);
-    };
-    flagDuplicate();
-  }, []);
+  const flagDuplicate = () => {
+    const seen: Record<string, boolean> = {};
+    const updatedData = votarResponses.map((item) => {
+      const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+
+      if (seen[key]) {
+        // This is a duplicate
+        return { ...item, isDuplicate: true } as VoterResponse;
+      } else {
+        seen[key] = true;
+        return { ...item, isDuplicate: false } as VoterResponse;
+      }
+    });
+    setVotarResponses(updatedData);
+  };
+
   useEffect(() => {
     if (Array.isArray(idType)) {
       setElectionID(idType[0]);
@@ -166,22 +125,42 @@ const ResponseTable = () => {
 
   useEffect(() => {
     const getVoterResponses = async () => {
+      setIsFetchResponse(true);
       try {
         if (electionID) {
           const bodyData = { election_id: electionID };
           const { data } = await getVoterResponse(USER_ID, bodyData);
           if (data) {
-            console.log(data);
+            console.log(data.data.voter_response);
+            setVotarResponses(data.data.voter_response);
+            setIsFetchResponse(false);
+            const seen: Record<string, boolean> = {};
+            const updatedData = data.data.voter_response.map(
+              (item: VoterResponse) => {
+                const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+
+                if (seen[key]) {
+                  // This is a duplicate
+                  return { ...item, isDuplicate: true } as VoterResponse;
+                } else {
+                  seen[key] = true;
+                  return { ...item, isDuplicate: false } as VoterResponse;
+                }
+              }
+            );
+            setVotarResponses(updatedData);
           }
         }
       } catch (error) {
         console.log(error);
+        setIsFetchResponse(false);
       }
     };
+
     getVoterResponses();
   }, [electionID]);
 
-  const excelData = usersData
+  const excelData = votarResponses
     .filter((item) => !item.isDuplicate)
     .map((obj) => {
       const { isDuplicate, ...newObj } = obj;
@@ -227,25 +206,25 @@ const ResponseTable = () => {
             )
             .filter(
               (newUser: any) =>
-                !usersData.some(
+                !votarResponses.some(
                   (existingUser) => existingUser.id === newUser.id
                 )
             );
-          const combinedData = [...usersData, ...newUserData];
-          setUsersData(combinedData);
+          const combinedData = [...votarResponses, ...newUserData];
+          setVotarResponses(combinedData);
           const seen: Record<string, boolean> = {};
           const updatedData = combinedData.map((item) => {
-            const key = `${item.name}_${item.phone}_${item.email}`;
+            const key = `${item.name}_${item.phoneNumber}_${item.email}`;
 
             if (seen[key]) {
               // This is a duplicate
-              return { ...item, isDuplicate: true } as UsersDets;
+              return { ...item, isDuplicate: true } as VoterResponse;
             } else {
               seen[key] = true;
-              return { ...item, isDuplicate: false } as UsersDets;
+              return { ...item, isDuplicate: false } as VoterResponse;
             }
           });
-          setUsersData(updatedData);
+          setVotarResponses(updatedData);
         }
         handleCloseImportElection();
       };
@@ -255,7 +234,7 @@ const ResponseTable = () => {
   };
 
   const importFromExcel = () => {
-    const worksheet = XSLX.utils.json_to_sheet(usersData);
+    const worksheet = XSLX.utils.json_to_sheet(votarResponses);
     const newWorkbook = XSLX.utils.book_new();
     XSLX.utils.book_append_sheet(newWorkbook, worksheet, "Sheet1");
     XSLX.writeFile(newWorkbook, "users.xlsx");
@@ -301,69 +280,80 @@ const ResponseTable = () => {
           </div>
         </div>
       </div>
-      <div className="mt-10">
-        <TableContainer sx={{ maxHeight: 700 }} className="table-scroll pb-8">
-          <Table
-            sx={{
-              minWidth: 700,
-              borderCollapse: "separate",
-              borderSpacing: "0",
-            }}
-          >
-            <TableHead>
-              <TableRow>
-                {headers.map((header, key) => {
-                  return (
-                    <StyledTableCell
-                      key={key}
-                      className=" border border-[#F5F5F5]"
-                      align="center"
-                    >
-                      {header}
-                    </StyledTableCell>
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {usersData.map((row, index) => (
-                <TableRow
-                  key={index}
-                  className={`${
-                    row.isDuplicate
-                      ? "opacity-30 bg-red-600 pointer-events-none"
-                      : ""
-                  }`}
-                >
-                  <StyledTableCell align="center">
-                    <div className="flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        checked={selectedRows.some(
-                          (selectedRow) => selectedRow.id === row.id
-                        )}
-                        onChange={() => handleCheckboxChange(row)}
-                      />
-                    </div>
-                  </StyledTableCell>
-
-                  <StyledTableCell align="center">
-                    {index < 9 ? `0${index + 1}` : index + 1}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">{row.id}</StyledTableCell>
-                  <StyledTableCell align="center">{row.name}</StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.subGroup}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">{row.phone}</StyledTableCell>
-                  <StyledTableCell align="center">{row.email}</StyledTableCell>
+      {isFetchResponse ? (
+        <div className="mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      ) : (
+        <div className="mt-10">
+          <TableContainer sx={{ maxHeight: 700 }} className="table-scroll pb-8">
+            <Table
+              sx={{
+                minWidth: 700,
+                borderCollapse: "separate",
+                borderSpacing: "0",
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  {headers.map((header, key) => {
+                    return (
+                      <StyledTableCell
+                        key={key}
+                        className=" border border-[#F5F5F5]"
+                        align="center"
+                      >
+                        {header}
+                      </StyledTableCell>
+                    );
+                  })}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
+              </TableHead>
+              <TableBody>
+                {votarResponses.map((row, index) => (
+                  <TableRow
+                    key={index}
+                    className={`${
+                      row.isDuplicate
+                        ? "opacity-30 bg-red-600 pointer-events-none"
+                        : ""
+                    }`}
+                  >
+                    <StyledTableCell align="center">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedRows.some(
+                            (selectedRow) => selectedRow.id === row.id
+                          )}
+                          onChange={() => handleCheckboxChange(row)}
+                        />
+                      </div>
+                    </StyledTableCell>
+
+                    <StyledTableCell align="center">
+                      {index < 9 ? `0${index + 1}` : index + 1}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">{row.id}</StyledTableCell>
+                    <StyledTableCell align="center">{row.name}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.subGroup}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.phoneNumber}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.email}
+                    </StyledTableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {toggleExportToElection && (
           <Modal key="modal" handleClose={handleClose}>
