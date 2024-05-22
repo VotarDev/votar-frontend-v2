@@ -45,7 +45,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
     <div
       className={`h-screen flex flex-col  border-r border-[#8E8E8E]  p-0  overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-[999] lg:relative ${
         isOpen ? "w-72" : "w-20"
-      } ${opener ? "lg:w-96 lg:pl-[58px] lg:pr-5" : "lg:w-20 lg:pl-0"}`}
+      } ${opener ? "lg:w-[330px] lg:pl-[28px] lg:pr-5" : "lg:w-20 lg:pl-0"}`}
     >
       <div className="pl-4 pr-2">
         <div

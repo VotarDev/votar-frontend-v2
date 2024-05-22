@@ -25,7 +25,8 @@ const Profile = () => {
         <ProfileBody />
         <div>
           <CardHeader />
-          <CardsList cards={cards} setNewCard={setCards} />
+          <h1 className="text-xl">Coming Soon...</h1>
+          {/* <CardsList cards={cards} setNewCard={setCards} /> */}
         </div>
       </DashboardLayout>
     </ProtectedRoutes>
