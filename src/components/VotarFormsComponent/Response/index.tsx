@@ -17,9 +17,9 @@ import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { getVoterResponse } from "@/utils/api";
 import { useRouter } from "next/router";
-import { set } from "lodash";
-import { is } from "date-fns/locale";
+
 import { CircularProgress } from "@mui/material";
+import { toast } from "react-hot-toast";
 
 interface UsersDets {
   id: number;
@@ -240,6 +240,30 @@ const ResponseTable = () => {
     XSLX.writeFile(newWorkbook, "users.xlsx");
   };
 
+  const filterDuplicates = (array: any, keys: any) => {
+    const seen = new Set();
+    return array.filter((item: any) => {
+      const compositeKey = keys.map((key: any) => item[key]).join("|");
+      const isDuplicate = seen.has(compositeKey);
+      seen.add(compositeKey);
+      return !isDuplicate;
+    });
+  };
+
+  const exportResponseToElection = () => {
+    const uniqueItems = filterDuplicates(votarResponses, [
+      "id",
+      "name",
+      "subGroup",
+      "phone",
+      "email",
+    ]);
+
+    localStorage.setItem("voter_response", JSON.stringify(uniqueItems));
+    toast.success("Responses exported successfully");
+    window.dispatchEvent(new Event("responsesExported"));
+  };
+
   const handleOpen = () => setToggleExportToElection(true);
   const handleClose = () => setToggleExportToElection(false);
   const handleOpenImportElection = () => setToggleImportElection(true);
@@ -262,7 +286,7 @@ const ResponseTable = () => {
         <div className="flex items-center gap-5">
           <div>
             <button
-              onClick={handleOpen}
+              onClick={exportResponseToElection}
               className="w-56 h-16 flex justify-center items-center p-4 text-blue-700 rounded-lg text-center bg-white text-lg border border-blue-700"
             >
               {" "}

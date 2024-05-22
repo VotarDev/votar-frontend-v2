@@ -14,12 +14,12 @@ const EditVotersInfo = ({
   const [open, setOpen] = useState(false);
   const [inputData, setInputData] = useState({
     name: selectedRow.name,
-    user_id: selectedRow.user_id,
+    id: selectedRow.id,
     subGroup: selectedRow.subGroup,
-    phone: selectedRow.phone,
+    phoneNumber: selectedRow.phoneNumber,
     email: selectedRow.email,
   });
-  const { name, subGroup, phone, email, user_id } = inputData;
+  const { name, subGroup, phoneNumber, email, id } = inputData;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputData((prev) => ({
@@ -35,7 +35,11 @@ const EditVotersInfo = ({
     const updatedUsers = users
       .filter(
         (item: any) =>
-          item.name || item.phone || item.subGroup || item.email || item.user_id
+          item.name ||
+          item.phoneNumber ||
+          item.subGroup ||
+          item.email ||
+          item.id
       )
       .map((item: any, key: number) => {
         if (key === index) {
@@ -68,10 +72,10 @@ const EditVotersInfo = ({
       defaultValue: name,
     },
     {
-      name: "user_id",
-      id: "user_id",
+      name: "id",
+      id: "id",
       label: "User ID",
-      defaultValue: user_id,
+      defaultValue: id,
     },
     {
       name: "subGroup",
@@ -80,10 +84,10 @@ const EditVotersInfo = ({
       defaultValue: subGroup,
     },
     {
-      name: "phone",
-      id: "phone",
+      name: "phoneNumber",
+      id: "phoneNumber",
       label: "Phone",
-      defaultValue: phone,
+      defaultValue: phoneNumber,
     },
     {
       name: "email",

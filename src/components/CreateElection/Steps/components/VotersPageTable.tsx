@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import EditVotersInfo from "./EditVotersInfo";
 import DropdownComponent from "./DropdownComponent";
-import { TrackeChanges } from "@/utils/types";
+import { TrackeChanges, VoterResponse } from "@/utils/types";
 import { TableRowTypes } from "@/utils/types";
 
 const VotersPageTable = () => {
@@ -40,10 +40,11 @@ const VotersPageTable = () => {
     },
   ]);
 
-  const [selectedRows, setSelectedRows] = useState<TableRowTypes[]>([]);
+  const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
+  const [responses, setResponses] = useState<VoterResponse[]>([]);
 
-  const handleCheckboxChange = (row: TableRowTypes) => {
+  const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) =>
       prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
         ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
@@ -67,11 +68,26 @@ const VotersPageTable = () => {
     },
   }));
 
+  useEffect(() => {
+    const handleResponseExported = () => {
+      if (typeof window !== "undefined") {
+        const exportedResponses = localStorage.getItem("voter_response");
+        if (exportedResponses) {
+          setResponses(JSON.parse(exportedResponses));
+        }
+      }
+    };
+
+    handleResponseExported();
+  }, []);
+
+  console.log(trackChanges.length > 0);
+
   return (
     <div className="pt-24">
       <div className="pb-3">
         Number of Voters Selected: <strong>{selectedRows.length}</strong> of{" "}
-        <strong>{users.length}</strong>
+        <strong>{responses.length}</strong>
       </div>
 
       <div>
@@ -99,7 +115,7 @@ const VotersPageTable = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map((row, index) => (
+              {responses.map((row, index) => (
                 <TableRow key={index}>
                   <StyledTableCell align="center">
                     <div className="flex items-center justify-center">
@@ -116,14 +132,14 @@ const VotersPageTable = () => {
                   <StyledTableCell align="center">
                     {index < 10 ? `0${index + 1}` : index + 1}
                   </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.user_id}
-                  </StyledTableCell>
+                  <StyledTableCell align="center">{row.id}</StyledTableCell>
                   <StyledTableCell align="center">{row.name}</StyledTableCell>
                   <StyledTableCell align="center">
                     {row.subGroup}
                   </StyledTableCell>
-                  <StyledTableCell align="center">{row.phone}</StyledTableCell>
+                  <StyledTableCell align="center">
+                    {row.phoneNumber}
+                  </StyledTableCell>
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
                     {trackChanges.length > 0 && (
@@ -132,12 +148,12 @@ const VotersPageTable = () => {
                   </StyledTableCell>
                   <StyledTableCell align="center" className="cursor-pointer">
                     <EditVotersInfo
-                      users={users}
+                      users={responses}
                       selectedRow={row}
                       index={index}
                       setTrackChanges={setTrackChanges}
                       trackChanges={trackChanges}
-                      setUsers={setUsers}
+                      setUsers={setResponses}
                     />
                   </StyledTableCell>
                 </TableRow>
