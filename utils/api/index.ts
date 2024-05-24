@@ -1,4 +1,3 @@
-import { da } from "date-fns/locale";
 import httpService from "../axios";
 
 const signupurl = "/auth/signup";
@@ -21,6 +20,7 @@ const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/voter-response";
 const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
+const updateElectionUrl = "/user/update-election";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -107,4 +107,8 @@ export const getElections = (id: string) => {
 
 export const getVoterResponse = (id: string, data: any) => {
   return httpService.post(getResponseUrl + `/${id}`, data);
+};
+
+export const updateElection = (data: any, id: string) => {
+  return httpService.put(updateElectionUrl + `/${id}`, data);
 };
