@@ -404,9 +404,10 @@ const ElectionDetail = () => {
                       </div>
                       {primaryColorToggle && (
                         <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize">
-                          {primaryColors.map((color) => (
+                          {primaryColors.map((color, index) => (
                             <div
                               className="p-3 cursor-pointer hover:bg-[#ccc]"
+                              key={index}
                               onClick={() => {
                                 setPrimaryColor(color.value);
                                 dispatch({
@@ -445,9 +446,10 @@ const ElectionDetail = () => {
                       </div>
                       {secondaryColorToggle && (
                         <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize">
-                          {secondaryColors.map((color) => (
+                          {secondaryColors.map((color, index) => (
                             <div
                               className="p-3 cursor-pointer hover:bg-[#ccc]"
+                              key={index}
                               onClick={() => {
                                 setSecondaryColor(color.value);
                                 dispatch({
