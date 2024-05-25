@@ -19,7 +19,7 @@ interface FormState {
   description: string;
   primary_color: string;
   secondary_color: string;
-  image: File | null;
+  image: File | string | null;
   imagePreview: string | null;
   start_date: string | undefined;
   end_date: string | undefined;
@@ -34,7 +34,9 @@ type Action =
   | { type: "SET_PRIMARY_COLOR"; value: string }
   | { type: "SET_SECONDARY_COLOR"; value: string }
   | { type: "SET_CANDIDATE_NO"; value: number }
-  | { type: "SET_ELECTION"; value: ElectionDetails };
+  | { type: "SET_ELECTION"; value: ElectionDetails }
+  | { type: "INCREMENT_CANDIDATE_NO"; value: number }
+  | { type: "DECREMENT_CANDIDATE_NO"; value: number };
 
 const formatDateToISO = (dateString: string | undefined) => {
   if (dateString) {
@@ -111,8 +113,7 @@ const ElectionDetail = () => {
       }
       setIsFetchElection(true);
       try {
-        if (typeof window !== "undefined") {
-          const electionId = localStorage.getItem("ElectionId");
+        if (electionID) {
           const electionData = { election_id: electionID };
           const { data } = await getElectionById(electionData, USER_ID);
           if (data) {
@@ -142,10 +143,12 @@ const ElectionDetail = () => {
 
   const handleCandidateNo = () => {
     setCandidateNo(candidateNo + 1);
+    dispatch({ type: "INCREMENT_CANDIDATE_NO", value: 1 });
   };
   const decreaseCanditateNo = () => {
     if (candidateNo > 0) {
       setCandidateNo(candidateNo - 1);
+      dispatch({ type: "DECREMENT_CANDIDATE_NO", value: 1 });
     }
   };
 
@@ -202,11 +205,22 @@ const ElectionDetail = () => {
           description: action.value.description,
           primary_color: action.value.primary_color,
           secondary_color: action.value.secondary_color,
+          image: action.value.association_logo,
           start_date: formatDateToISO(action.value.start_date),
           end_date: formatDateToISO(action.value.end_date),
           start_time: formatTimeToHHMM(Number(action.value.start_time || "")),
           end_time: formatTimeToHHMM(Number(action.value.end_time || "")),
           max_number_candidate: action.value.max_number_candidate,
+        };
+      case "INCREMENT_CANDIDATE_NO":
+        return {
+          ...state,
+          max_number_candidate: state.max_number_candidate + action.value,
+        };
+      case "DECREMENT_CANDIDATE_NO":
+        return {
+          ...state,
+          max_number_candidate: state.max_number_candidate - action.value,
         };
       default:
         return state;
@@ -554,7 +568,10 @@ const ElectionDetail = () => {
                   </div>
                   <input
                     type="text"
-                    value={election?.max_number_candidate}
+                    value={
+                      state.max_number_candidate ||
+                      election?.max_number_candidate
+                    }
                     className="w-10 outline-none text-center"
                     onChange={handleChange}
                   />
