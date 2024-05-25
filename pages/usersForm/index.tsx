@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import InputSelect from "@/src/components/InputSelect";
 import { IoIosArrowRoundForward } from "react-icons/io";
@@ -11,7 +11,6 @@ import { ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import Header from "@/src/components/BallotPage/Header";
-import { el } from "date-fns/locale";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
@@ -24,6 +23,12 @@ const UsersForm = () => {
   const router = useRouter();
   const user = useUser();
   const { token, election_id } = router.query;
+  const [formData, setFormData] = useState({
+    id: "",
+    name: "",
+    phone: "",
+    email: "",
+  });
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -113,11 +118,25 @@ const UsersForm = () => {
         setSuccess(true);
         toast.success("Details Submitted Successfully");
         console.log(response.data);
+        setFormData({
+          id: "",
+          name: "",
+          phone: "",
+          email: "",
+        });
       }
     } catch (error) {
       console.log(error);
       setIsLoading(false);
     }
+  };
+
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
   };
 
   if (isFecthElection)
@@ -142,6 +161,8 @@ const UsersForm = () => {
               <input
                 type="text"
                 name="id"
+                value={formData.id}
+                onChange={handleChange}
                 className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
               />
             </div>
@@ -150,6 +171,8 @@ const UsersForm = () => {
               <input
                 type="text"
                 name="name"
+                value={formData.name}
+                onChange={handleChange}
                 className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
               />
             </div>
@@ -172,6 +195,8 @@ const UsersForm = () => {
               <input
                 type="text"
                 name="phone"
+                value={formData.phone}
+                onChange={handleChange}
                 className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
               />
             </div>
@@ -180,6 +205,8 @@ const UsersForm = () => {
               <input
                 type="email"
                 name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
               />
             </div>
