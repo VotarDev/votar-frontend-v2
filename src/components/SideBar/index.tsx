@@ -89,7 +89,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
                   )}
                 </span>
               </div>
-              <div className="sm text-[#696969]">@loremIpsum</div>
+              <div className="sm text-[#696969]"></div>
             </div>
           </div>
           <div
@@ -101,7 +101,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
             <div className="flex justify-between">
               <div className="z-20">
                 <div className="text-xs">VotarCredits</div>
-                <div className="text-[40px]">05</div>
+                <div className="text-[40px]">#</div>
                 <div>
                   <button className="py-1 px-2 bg-white rounded-lg text-[#015CE9] outline-none text-sm">
                     Add Credits
@@ -110,7 +110,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
               </div>
               <div className="z-20">
                 <div className="text-xs">Add Voting Credits</div>
-                <div className="text-[40px]">02</div>
+                <div className="text-[40px]">#</div>
                 <div>
                   <button className="py-1 px-2 bg-white rounded-lg text-[#015CE9] outline-none text-sm">
                     Update

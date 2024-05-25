@@ -14,13 +14,13 @@ const googleAuthUrl = "/auth/google";
 const getElectionIdUrl = "/user/get-electionById";
 const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
-const testUrlForCreateCandidate =
-  "https://f5c2-105-113-61-163.ngrok-free.app/app:v1/user/create-candidate";
 const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/voter-response";
 const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
 const updateElectionUrl = "/user/update-election";
+const sendVoterCredUrl = "/user/send-votersCred";
+const setVotersUrl = "/user/set-voters";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -49,6 +49,7 @@ export const getUserData = (id: string) => {
 export const createFreeElection = (data: any) => {
   return httpService.post(freeElectionUrl, data);
 };
+
 export const createElection = (data: any, id: string) => {
   return httpService.post(createElectionUrl + `/${id}`, data, {
     headers: {
@@ -97,10 +98,6 @@ export const getForms = (id: string) => {
   return httpService.get(getFormsUrl + `/${id}`);
 };
 
-export const createTestCandidate = (data: any) => {
-  return httpService.post(testUrlForCreateCandidate, data);
-};
-
 export const getElections = (id: string) => {
   return httpService.get(getElectionsUrl + `/${id}`);
 };
@@ -111,4 +108,12 @@ export const getVoterResponse = (id: string, data: any) => {
 
 export const updateElection = (data: any, id: string) => {
   return httpService.put(updateElectionUrl + `/${id}`, data);
+};
+
+export const sendVoterCred = (data: any, id: string) => {
+  return httpService.post(sendVoterCredUrl + `/${id}`, data);
+};
+
+export const setVoters = (data: any, id: string) => {
+  return httpService.post(setVotersUrl + `/${id}`, data);
 };
