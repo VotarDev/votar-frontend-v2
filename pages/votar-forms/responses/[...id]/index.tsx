@@ -10,6 +10,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import Header from "@/src/components/BallotPage/Header";
+import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 
 const Responses = () => {
   const router = useRouter();
@@ -62,18 +63,20 @@ const Responses = () => {
 
   return (
     <DashboardLayout>
-      {isFecthElection ? (
-        <div className="mt-10">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      ) : (
-        <div>
-          <div>
-            <Header electionDetails={elections} />
+      <ProtectedRoutes>
+        {isFecthElection ? (
+          <div className="mt-10">
+            <CircularProgress size={30} style={{ color: "#015CE9" }} />
           </div>
-          <ResponseTable />
-        </div>
-      )}
+        ) : (
+          <div>
+            <div>
+              <Header electionDetails={elections} />
+            </div>
+            <ResponseTable />
+          </div>
+        )}
+      </ProtectedRoutes>
     </DashboardLayout>
   );
 };

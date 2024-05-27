@@ -17,9 +17,10 @@ import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { getVoterResponse } from "@/utils/api";
 import { useRouter } from "next/router";
-
+import { exportVoters } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
+import setAuthToken from "@/utils/setAuthToken";
 
 interface UsersDets {
   id: number;
@@ -49,6 +50,7 @@ const ResponseTable = () => {
   const [electionID, setElectionID] = useState("");
   const [votarResponses, setVotarResponses] = useState<VoterResponse[]>([]);
   const [isFetchResponse, setIsFetchResponse] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -130,9 +132,9 @@ const ResponseTable = () => {
         if (electionID) {
           const bodyData = { election_id: electionID };
           const { data } = await getVoterResponse(USER_ID, bodyData);
-          if (data) {
-            console.log(data.data.voter_response);
-            setVotarResponses(data.data.voter_response);
+          if (data.data) {
+            console.log(data.data[0].voter_response);
+            setVotarResponses(data.data[0].voter_response);
             setIsFetchResponse(false);
             const seen: Record<string, boolean> = {};
             const updatedData = data.data.voter_response.map(
@@ -161,7 +163,7 @@ const ResponseTable = () => {
   }, [electionID]);
 
   const excelData = votarResponses
-    .filter((item) => !item.isDuplicate)
+    ?.filter((item) => !item.isDuplicate)
     .map((obj) => {
       const { isDuplicate, ...newObj } = obj;
       return newObj;
@@ -242,26 +244,77 @@ const ResponseTable = () => {
 
   const filterDuplicates = (array: any, keys: any) => {
     const seen = new Set();
-    return array.filter((item: any) => {
-      const compositeKey = keys.map((key: any) => item[key]).join("|");
-      const isDuplicate = seen.has(compositeKey);
-      seen.add(compositeKey);
-      return !isDuplicate;
-    });
+    return array
+      .filter((item: any) => {
+        const compositeKey = keys.map((key: any) => item[key]).join("|");
+        const isDuplicate = seen.has(compositeKey);
+        seen.add(compositeKey);
+        return !isDuplicate;
+      })
+      .map(
+        ({
+          email,
+          name,
+          phoneNumber,
+          id,
+          subgroup,
+        }: {
+          email: string;
+          name: string;
+          phoneNumber: string;
+          id: string;
+          subgroup: string;
+        }) => ({
+          email,
+          name,
+          phoneNumber,
+          id,
+          subgroup,
+        })
+      );
   };
 
-  const exportResponseToElection = () => {
+  const exportResponseToElection = async () => {
     const uniqueItems = filterDuplicates(votarResponses, [
       "id",
       "name",
-      "subGroup",
+      "subgroup",
       "phone",
       "email",
     ]);
+    setIsExporting(true);
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
+    }
+    if (electionID) localStorage.setItem("ElectionId", electionID);
+    const responseData = {
+      voters: uniqueItems,
+      election_id: electionID,
+    };
+    console.log(responseData);
+    try {
+      const { data } = await exportVoters(responseData, USER_ID);
+      if (data) {
+        setIsExporting(false);
+        toast.success("Responses exported successfully");
+        setVotarResponses([]);
+        console.log(data);
+      }
+    } catch (e: any) {
+      console.log(e);
+      setIsExporting(false);
+    }
 
-    localStorage.setItem("voter_response", JSON.stringify(uniqueItems));
-    toast.success("Responses exported successfully");
-    window.dispatchEvent(new Event("responsesExported"));
+    console.log(uniqueItems);
+
+    // localStorage.setItem("voter_response", JSON.stringify(uniqueItems));
+    // toast.success("Responses exported successfully");
+    // window.dispatchEvent(new Event("responsesExported"));
   };
 
   const handleOpen = () => setToggleExportToElection(true);
@@ -286,11 +339,19 @@ const ResponseTable = () => {
         <div className="flex items-center gap-5">
           <div>
             <button
+              disabled={isExporting}
               onClick={exportResponseToElection}
               className="w-56 h-16 flex justify-center items-center p-4 text-blue-700 rounded-lg text-center bg-white text-lg border border-blue-700"
             >
               {" "}
               Export To Election
+              {isExporting && (
+                <CircularProgress
+                  size={20}
+                  style={{ color: "#015CE9" }}
+                  className="ml-2"
+                />
+              )}
             </button>
           </div>
           <div>
@@ -334,7 +395,7 @@ const ResponseTable = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {votarResponses.map((row, index) => (
+                {votarResponses?.map((row, index) => (
                   <TableRow
                     key={index}
                     className={`${
@@ -362,7 +423,7 @@ const ResponseTable = () => {
                     <StyledTableCell align="center">{row.id}</StyledTableCell>
                     <StyledTableCell align="center">{row.name}</StyledTableCell>
                     <StyledTableCell align="center">
-                      {row.subGroup}
+                      {row.subgroup}
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       {row.phoneNumber}

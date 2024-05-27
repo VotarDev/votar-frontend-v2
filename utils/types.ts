@@ -151,7 +151,7 @@ export type VoterResponse = {
   phoneNumber: string;
   _id: string;
   isDuplicate?: boolean;
-  subGroup?: string;
+  subgroup?: string;
 };
 
 export type OptionTypes = {

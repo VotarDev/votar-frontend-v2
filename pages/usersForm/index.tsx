@@ -107,7 +107,7 @@ const UsersForm = () => {
     const data = {
       id: formdata.get("id"),
       name: formdata.get("name"),
-      subGroup: usersOption?.value,
+      subgroup: usersOption?.value,
       phoneNumber: formdata.get("phone"),
       email: formdata.get("email"),
     };

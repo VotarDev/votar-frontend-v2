@@ -10,6 +10,9 @@ import EditVotersInfo from "./EditVotersInfo";
 import DropdownComponent from "./DropdownComponent";
 import { TrackeChanges, VoterResponse } from "@/utils/types";
 import { TableRowTypes } from "@/utils/types";
+import { getVoters } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
 
 const VotersPageTable = () => {
   const headers = [
@@ -21,28 +24,18 @@ const VotersPageTable = () => {
     "Phone Number",
     "Email",
   ];
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      user_id: "ASS/2018/034",
-      name: "Amana Ona",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-    {
-      id: 2,
-      user_id: "BSS/2019/045",
-      name: "Amana Onana",
-      subGroup: "Media",
-      phone: "08021331121",
-      email: "Amana@gmail.com",
-    },
-  ]);
 
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
+  const users = useCurrentUser();
+  const user = useUser();
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) =>
@@ -69,12 +62,34 @@ const VotersPageTable = () => {
   }));
 
   useEffect(() => {
-    const handleResponseExported = () => {
-      if (typeof window !== "undefined") {
-        const exportedResponses = localStorage.getItem("voter_response");
-        if (exportedResponses) {
-          setResponses(JSON.parse(exportedResponses));
+    const handleResponseExported = async () => {
+      // if (typeof window !== "undefined") {
+      //   const exportedResponses = localStorage.getItem("voter_response");
+      //   if (exportedResponses) {
+      //     setResponses(JSON.parse(exportedResponses));
+      //   }
+      // }
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
         }
+      }
+
+      try {
+        if (typeof window !== "undefined") {
+          const electionId = localStorage.getItem("ElectionId");
+          const { data } = await getVoters(USER_ID, {
+            election_id: electionId,
+          });
+          if (data) {
+            console.log(data.data);
+          }
+        }
+      } catch (e) {
+        console.log(e);
       }
     };
 
@@ -135,7 +150,7 @@ const VotersPageTable = () => {
                   <StyledTableCell align="center">{row.id}</StyledTableCell>
                   <StyledTableCell align="center">{row.name}</StyledTableCell>
                   <StyledTableCell align="center">
-                    {row.subGroup}
+                    {row.subgroup}
                   </StyledTableCell>
                   <StyledTableCell align="center">
                     {row.phoneNumber}

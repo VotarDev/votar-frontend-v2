@@ -21,6 +21,8 @@ const getResponseUrl = "/user/get-electionForm";
 const updateElectionUrl = "/user/update-election";
 const sendVoterCredUrl = "/user/send-votersCred";
 const setVotersUrl = "/user/set-voters";
+const exportVotersUrl = "/user/export-voters";
+const getVoterUrl = "/user/get-voters";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -116,4 +118,12 @@ export const sendVoterCred = (data: any, id: string) => {
 
 export const setVoters = (data: any, id: string) => {
   return httpService.post(setVotersUrl + `/${id}`, data);
+};
+
+export const exportVoters = (data: any, id: string) => {
+  return httpService.post(exportVotersUrl + `/${id}`, data);
+};
+
+export const getVoters = (id: string, data: any) => {
+  return httpService.post(getVoterUrl + `/${id}`, data);
 };

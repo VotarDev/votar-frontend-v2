@@ -20,6 +20,7 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
+import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 
 const Create = () => {
   let step = 1;
@@ -249,41 +250,43 @@ const Create = () => {
 
   return (
     <DashboardLayout>
-      <div className="w-full lg:px-3 px-0">
-        <div>
-          <StepHeader steps={steps} currentStep={currentStep} />
-        </div>
-        <div>{displaySteps(currentStep)}</div>
-        <div>
-          <div className="flex gap-4 justify-end smm:flex-row flex-col">
-            <div>
-              <button
-                onClick={() => handleBackButton()}
-                className="flex items-center gap-2 p-[10px] border border-[#015CE9] rounded-lg text-[#015CE9] lg:text-[18px] text-base h-[52px]"
-              >
-                {" "}
-                <span>
-                  <BsArrowLeft />
-                </span>
-                Go back
-              </button>
-            </div>
-            <div>
-              <button
-                onClick={() => handleClick("next")}
-                className="flex items-center gap-2 p-[10px] bg-[#015CE9] rounded-lg text-[#f3f3f3] lg:text-[18px] text-base h-[52px]"
-                disabled={isLoading}
-              >
-                {isLoading && <CircularProgress color="inherit" size={20} />}
-                Save Changes to Proceed
-                <span>
-                  <BsArrowRight />
-                </span>
-              </button>
+      <ProtectedRoutes>
+        <div className="w-full lg:px-3 px-0">
+          <div>
+            <StepHeader steps={steps} currentStep={currentStep} />
+          </div>
+          <div>{displaySteps(currentStep)}</div>
+          <div>
+            <div className="flex gap-4 justify-end smm:flex-row flex-col">
+              <div>
+                <button
+                  onClick={() => handleBackButton()}
+                  className="flex items-center gap-2 p-[10px] border border-[#015CE9] rounded-lg text-[#015CE9] lg:text-[18px] text-base h-[52px]"
+                >
+                  {" "}
+                  <span>
+                    <BsArrowLeft />
+                  </span>
+                  Go back
+                </button>
+              </div>
+              <div>
+                <button
+                  onClick={() => handleClick("next")}
+                  className="flex items-center gap-2 p-[10px] bg-[#015CE9] rounded-lg text-[#f3f3f3] lg:text-[18px] text-base h-[52px]"
+                  disabled={isLoading}
+                >
+                  {isLoading && <CircularProgress color="inherit" size={20} />}
+                  Save Changes to Proceed
+                  <span>
+                    <BsArrowRight />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </ProtectedRoutes>
     </DashboardLayout>
   );
 };

@@ -119,7 +119,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
               </div>
             </div>
             <div className="flex flex-col">
-              <div className="mt-4 text-sm z-20">Referals: 02</div>
+              <div className="mt-4 text-sm z-20">Referals: ##</div>
             </div>
           </div>
 
