@@ -14,7 +14,15 @@ import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 
-const VotersPageTable = () => {
+interface VotersPageTableProps {
+  selectedRows: VoterResponse[];
+  setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
+}
+
+const VotersPageTable: React.FC<VotersPageTableProps> = ({
+  selectedRows,
+  setSelectedRows,
+}) => {
   const headers = [
     "",
     "S/N",
@@ -25,7 +33,6 @@ const VotersPageTable = () => {
     "Email",
   ];
 
-  const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
   const users = useCurrentUser();
@@ -44,8 +51,6 @@ const VotersPageTable = () => {
         : [...prevSelectedRows, row]
     );
   };
-
-  // console.log(trackChanges);
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -86,6 +91,7 @@ const VotersPageTable = () => {
           });
           if (data) {
             console.log(data.data);
+            setResponses(data.data);
           }
         }
       } catch (e) {

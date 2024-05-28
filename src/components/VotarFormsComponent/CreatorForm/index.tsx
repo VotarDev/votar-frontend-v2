@@ -108,7 +108,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
         };
         const { data } = await createVotarForms(formData, USER_ID);
         if (data) {
-          toast.success(data.status);
+          toast.success("Form created succesfully");
           setFormLink(data.data.votar_form_link);
           console.log(data);
           setIsLoading(false);
@@ -116,6 +116,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       }
     } catch (e) {
       console.log(e);
+      setIsLoading(false);
     }
   };
 
