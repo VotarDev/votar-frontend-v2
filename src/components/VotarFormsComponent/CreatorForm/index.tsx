@@ -188,6 +188,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
                             type="text"
                             name="subGroup"
                             value={sub.option}
+                            disabled
                             onChange={(e) => setNewItemContent(e.target.value)}
                             className="border-b border-zinc-600 outline-none p-2"
                           />

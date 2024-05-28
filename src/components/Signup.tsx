@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { register } from "@/redux/features/auth/authSlice";
 import { useRouter } from "next/router";
 import { googleAuthentication } from "@/utils/api";
+import Link from "next/link";
 
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 
@@ -22,6 +23,7 @@ import axios from "axios";
 import authService from "@/redux/features/auth/authService";
 
 import { toast } from "react-hot-toast";
+import { set } from "lodash";
 
 const SignupComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -288,23 +290,28 @@ const SignupComponent = () => {
         </button>
       </form>
 
-      <button
-        className=" border border-[#015CE9] h-[52px] rounded mt-7 w-full text-[#454545] font-proximaNova flex items-center justify-center gap-3"
-        disabled={isLoading}
-        onClick={googleAuthHandler}
+      <Link
+        href="https://accounts.google.com/o/oauth2/v2/auth/oauthchooseaccount?response_type=code&redirect_uri=https%3A%2F%2Fvotar-api.onrender.com%2Fapp%3Av1%2Fuser%2Fauth%2Fgoogle%2Fredirect&scope=profile&client_id=138932669197-evqdb15ip2seo47a7hpeiehacg1tkp92.apps.googleusercontent.com&service=lso&o2v=2&theme=mn&ddm=0&flowName=GeneralOAuthFlow"
+        className="w-full"
       >
-        {isLoading && (
-          <CircularProgress
-            color="primary"
-            className="ml-[-2rem] text-blue-700"
-            size={20}
-          />
-        )}
-        <span className="flex items-center gap-4">
-          <img src={google.src} alt="google" />
-          Sign up with google
-        </span>
-      </button>
+        <button
+          onClick={() => setIsLoading(true)}
+          className=" border border-[#015CE9] h-[52px] rounded mt-5 w-full text-[#454545] font-proximaNova flex justify-center items-center gap-3"
+          disabled={isLoading}
+        >
+          {isLoading && (
+            <CircularProgress
+              color="primary"
+              className="ml-[-2rem] text-blue-700"
+              size={20}
+            />
+          )}
+          <span className="flex items-center gap-4">
+            <img src={google.src} alt="google" />
+            Sign in with google
+          </span>
+        </button>
+      </Link>
     </div>
   );
 };
