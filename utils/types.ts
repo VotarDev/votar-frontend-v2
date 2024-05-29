@@ -158,3 +158,27 @@ export type OptionTypes = {
   label: string;
   value: string;
 };
+
+export type DetailFormState = {
+  electionName: string;
+  description: string;
+  primary_color: string;
+  secondary_color: string;
+  image: File | string | null;
+  imagePreview: string | null;
+  start_date: string | undefined;
+  end_date: string | undefined;
+  start_time: string | number | undefined;
+  end_time: string | undefined | number;
+  max_number_candidate: number;
+};
+
+export type DetailFormAction =
+  | { type: "SET_FIELD"; field: keyof DetailFormState; value: string }
+  | { type: "SET_IMAGE"; image: File; imagePreview: string }
+  | { type: "SET_PRIMARY_COLOR"; value: string }
+  | { type: "SET_SECONDARY_COLOR"; value: string }
+  | { type: "SET_CANDIDATE_NO"; value: number }
+  | { type: "SET_ELECTION"; value: ElectionDetails }
+  | { type: "INCREMENT_CANDIDATE_NO"; value: number }
+  | { type: "DECREMENT_CANDIDATE_NO"; value: number };

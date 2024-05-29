@@ -192,7 +192,7 @@ const ResponseTable = () => {
 
           const newUserData = csvData
             .map(
-              ([id, name, subGroup, phoneNumber, email]: [
+              ([id, name, subgroup, phoneNumber, email]: [
                 number | string,
                 string,
                 string,
@@ -201,7 +201,7 @@ const ResponseTable = () => {
               ]) => ({
                 id,
                 name,
-                subGroup,
+                subgroup,
                 phoneNumber,
                 email,
               })

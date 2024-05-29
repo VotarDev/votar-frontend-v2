@@ -22,7 +22,8 @@ const UsersForm = () => {
   const users = useCurrentUser();
   const router = useRouter();
   const user = useUser();
-  const { token, election_id } = router.query;
+  const { token, electionID } = router.query;
+  const [isClient, setIsClient] = useState(false);
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -36,8 +37,6 @@ const UsersForm = () => {
     ? users?.id
     : user?.user?.id;
 
-  console.log(election_id);
-
   useEffect(() => {
     const getElection = async () => {
       if (users?.data) {
@@ -50,9 +49,10 @@ const UsersForm = () => {
       }
       setIsFetchElection(true);
       try {
-        const electionData = { election_id };
-        if (election_id) {
+        const electionData = { election_id: electionID };
+        if (electionID) {
           const { data } = await getElectionById(electionData, USER_ID);
+
           if (data) {
             setElection(data.data);
             setIsFetchElection(false);
@@ -65,7 +65,7 @@ const UsersForm = () => {
       }
     };
     getElection();
-  }, [election_id]);
+  }, [electionID]);
 
   useEffect(() => {
     const getForm = async () => {
@@ -79,6 +79,7 @@ const UsersForm = () => {
       }
       try {
         const { data } = await getForms(USER_ID);
+
         if (data) {
           console.log(
             data.data[data.data.length - 1].subgroup.map((item: any) => {
@@ -99,7 +100,9 @@ const UsersForm = () => {
     getForm();
   }, []);
 
-  console.log(election);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -150,89 +153,96 @@ const UsersForm = () => {
 
   return (
     <div>
-      <Header electionDetails={election} />
-      <div>
-        <div className="text-xl text-center pt-5">
-          <span className="font-bold">INSTRUCTION:</span> Please Fill in your
-          Details Correctly
-        </div>
-        <form className="max-w-[1200px] mx-auto py-20" onSubmit={handleSubmit}>
-          <div className="flex flex-col gap-8">
-            <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-              <label htmlFor="id">ID</label>
-              <input
-                type="text"
-                name="id"
-                value={formData.id}
-                onChange={handleChange}
-                className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-              />
+      {isClient && (
+        <>
+          <Header electionDetails={election} />
+          <div>
+            <div className="text-xl text-center pt-5">
+              <span className="font-bold">INSTRUCTION:</span> Please Fill in
+              your Details Correctly
             </div>
-            <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-              <label htmlFor="name">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-              />
-            </div>
-            <div className="border border-zinc-400 px-10 py-16 rounded-lg relative flex justify-between items-center">
-              <div className="flex-1">
-                <label htmlFor="subGroup">Sub-Group</label>
-                <InputSelect
-                  placeholder={""}
-                  setOption={setUsersOption}
-                  option={options}
-                  optionValue={usersOption}
-                  className={
-                    "lg:w-1/3 h-10 w-full placeholder:white cursor-pointer"
-                  }
-                />
-              </div>
-            </div>
-            <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-              <label htmlFor="phone">Phone Number</label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-              />
-            </div>
-            <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-              <label htmlFor="email">Email Address</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-              />
-            </div>
-          </div>
-          <div className="mt-5 flex justify-end gap-3 py-5">
-            <button
-              className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
-              disabled={isLoading}
+            <form
+              className="max-w-[1200px] mx-auto py-20"
+              onSubmit={handleSubmit}
             >
-              {isLoading && (
-                <CircularProgress
-                  color="inherit"
-                  className=" text-white"
-                  size={20}
-                />
-              )}
-              Submit Details
-              <span className="text-3xl">
-                <IoIosArrowRoundForward />
-              </span>
-            </button>
+              <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
+                  <label htmlFor="id">ID</label>
+                  <input
+                    type="text"
+                    name="id"
+                    value={formData.id}
+                    onChange={handleChange}
+                    className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
+                  <label htmlFor="name">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
+                  />
+                </div>
+                <div className="border border-zinc-400 px-10 py-16 rounded-lg relative flex justify-between items-center">
+                  <div className="flex-1">
+                    <label htmlFor="subGroup">Sub-Group</label>
+                    <InputSelect
+                      placeholder={""}
+                      setOption={setUsersOption}
+                      option={options}
+                      optionValue={usersOption}
+                      className={
+                        "lg:w-1/3 h-10 w-full placeholder:white cursor-pointer"
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
+                  <label htmlFor="phone">Phone Number</label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
+                  <label htmlFor="email">Email Address</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
+                  />
+                </div>
+              </div>
+              <div className="mt-5 flex justify-end gap-3 py-5">
+                <button
+                  className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
+                  disabled={isLoading}
+                >
+                  {isLoading && (
+                    <CircularProgress
+                      color="inherit"
+                      className=" text-white"
+                      size={20}
+                    />
+                  )}
+                  Submit Details
+                  <span className="text-3xl">
+                    <IoIosArrowRoundForward />
+                  </span>
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
+        </>
+      )}
     </div>
   );
 };

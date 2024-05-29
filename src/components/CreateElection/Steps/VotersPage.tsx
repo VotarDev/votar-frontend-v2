@@ -34,6 +34,7 @@ const VotersPage = () => {
     const inputValue = e.target.value;
     if (inputValue.length <= maxCharacterLength) setText(inputValue);
   };
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);

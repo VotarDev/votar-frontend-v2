@@ -52,6 +52,38 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     );
   };
 
+  const filterDuplicates = (array: any, keys: any) => {
+    const seen = new Set();
+    return array
+      .filter((item: any) => {
+        const compositeKey = keys.map((key: any) => item[key]).join("|");
+        const isDuplicate = seen.has(compositeKey);
+        seen.add(compositeKey);
+        return !isDuplicate;
+      })
+      .map(
+        ({
+          email,
+          name,
+          phoneNumber,
+          id,
+          subgroup,
+        }: {
+          email: string;
+          name: string;
+          phoneNumber: string;
+          id: string;
+          subgroup: string;
+        }) => ({
+          email,
+          name,
+          phoneNumber,
+          id,
+          subgroup,
+        })
+      );
+  };
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -91,7 +123,14 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
           });
           if (data) {
             console.log(data.data);
-            setResponses(data.data);
+            const uniqueItems = filterDuplicates(data.data, [
+              "id",
+              "name",
+              "subgroup",
+              "phone",
+              "email",
+            ]);
+            setResponses(uniqueItems);
           }
         }
       } catch (e) {
