@@ -78,14 +78,10 @@ const DetailsPage = ({
   ];
 
   const handleCandidateNo = () => {
-    setCandidateNo(candidateNo + 1);
     dispatch({ type: "INCREMENT_CANDIDATE_NO", value: 1 });
   };
   const decreaseCanditateNo = () => {
-    if (candidateNo > 0) {
-      setCandidateNo(candidateNo - 1);
-      dispatch({ type: "DECREMENT_CANDIDATE_NO", value: 1 });
-    }
+    dispatch({ type: "DECREMENT_CANDIDATE_NO", value: 1 });
   };
 
   const handleChange = (
@@ -405,10 +401,7 @@ const DetailsPage = ({
                   </div>
                   <input
                     type="text"
-                    value={
-                      state.max_number_candidate ||
-                      election?.max_number_candidate
-                    }
+                    value={state.max_number_candidate}
                     className="w-10 outline-none text-center"
                     onChange={handleChange}
                   />
