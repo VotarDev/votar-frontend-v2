@@ -60,6 +60,8 @@ const UsersForm = () => {
         }
       } catch (e: any) {
         console.log(e);
+        setIsFetchElection(false);
+        toast.error("An error occured");
       }
     };
     getElection();
