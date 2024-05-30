@@ -103,7 +103,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
         const formData = {
-          electionId: electionID,
+          election_id: electionID,
           subgroup: subGroup.map((item) => item.option),
         };
         const { data } = await createVotarForms(formData, USER_ID);
