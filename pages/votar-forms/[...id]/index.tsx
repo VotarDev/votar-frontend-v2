@@ -57,7 +57,7 @@ const CreateForm = () => {
         if (typeof window !== "undefined") {
           const electionId = localStorage.getItem("ElectionId");
           const electionData = { election_id: electionID };
-          const { data } = await getElectionById(electionData, USER_ID);
+          const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
             setIsFetchElection(false);

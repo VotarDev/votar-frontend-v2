@@ -13,6 +13,7 @@ const Ballot = ({ positions, setPositions }: any) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
 
+  console.log(positions);
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
@@ -34,7 +35,7 @@ const Ballot = ({ positions, setPositions }: any) => {
         if (typeof window !== "undefined") {
           const electionId = localStorage.getItem("ElectionId");
           const electionData = { election_id: electionId };
-          const { data } = await getElectionById(electionData, USER_ID);
+          const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
             setIsLoading(false);

@@ -50,7 +50,7 @@ const DetailsPage = ({
       try {
         if (electionId) {
           const electionData = { election_id: electionId };
-          const { data } = await getElectionById(electionData, userId);
+          const { data } = await getElectionById(electionData);
 
           if (data) {
             setElection(data.data);

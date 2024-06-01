@@ -51,7 +51,7 @@ const UsersForm = () => {
       try {
         const electionData = { election_id: electionID };
         if (electionID) {
-          const { data } = await getElectionById(electionData, USER_ID);
+          const { data } = await getElectionById(electionData);
 
           if (data) {
             setElection(data.data);

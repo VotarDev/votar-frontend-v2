@@ -23,6 +23,7 @@ const sendVoterCredUrl = "/user/send-votersCred";
 const setVotersUrl = "/user/set-voters";
 const exportVotersUrl = "/user/export-voters";
 const getVoterUrl = "/user/get-voters";
+const getCandidatesUrl = "/user/get-candidates";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -68,8 +69,8 @@ export const createCandidate = (data: any, id: string) => {
   });
 };
 
-export const getElectionById = (data: any, id: string) => {
-  return httpService.post(getElectionIdUrl + `/${id}`, data);
+export const getElectionById = (data: any) => {
+  return httpService.post(getElectionIdUrl, data);
 };
 
 export const updateProfile = (data: any, id: any) => {
@@ -126,4 +127,8 @@ export const exportVoters = (data: any, id: string) => {
 
 export const getVoters = (id: string, data: any) => {
   return httpService.post(getVoterUrl + `/${id}`, data);
+};
+
+export const getCandidates = (id: string, data: any) => {
+  return httpService.get(getCandidatesUrl + `/${id}`, data);
 };
