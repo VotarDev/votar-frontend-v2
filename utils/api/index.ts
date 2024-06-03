@@ -130,5 +130,5 @@ export const getVoters = (id: string, data: any) => {
 };
 
 export const getCandidates = (id: string, data: any) => {
-  return httpService.get(getCandidatesUrl + `/${id}`, data);
+  return httpService.post(getCandidatesUrl + `/${id}`, data);
 };
