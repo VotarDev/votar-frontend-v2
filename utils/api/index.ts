@@ -24,6 +24,8 @@ const setVotersUrl = "/user/set-voters";
 const exportVotersUrl = "/user/export-voters";
 const getVoterUrl = "/user/get-voters";
 const getCandidatesUrl = "/user/get-candidates";
+const importCsvUrl = "/user/import-csv";
+const updateCandidateUrl = "/user/update-candidate";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -131,4 +133,12 @@ export const getVoters = (id: string, data: any) => {
 
 export const getCandidates = (id: string, data: any) => {
   return httpService.post(getCandidatesUrl + `/${id}`, data);
+};
+
+export const importFromCsv = (id: string, data: any) => {
+  return httpService.post(importCsvUrl + `/${id}`, data);
+};
+
+export const updateCandidate = (id: string, data: any) => {
+  return httpService.put(updateCandidateUrl + `/${id}`, data);
 };

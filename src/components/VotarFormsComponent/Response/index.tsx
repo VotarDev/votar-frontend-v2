@@ -21,15 +21,7 @@ import { exportVoters } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
-
-interface UsersDets {
-  id: number;
-  name: string;
-  subGroup: string;
-  phone: string;
-  email: string;
-  isDuplicate?: boolean;
-}
+import { importFromCsv } from "@/utils/api";
 
 const ResponseTable = () => {
   const headers = [
@@ -50,6 +42,7 @@ const ResponseTable = () => {
   const [electionID, setElectionID] = useState("");
   const [votarResponses, setVotarResponses] = useState<VoterResponse[]>([]);
   const [isFetchResponse, setIsFetchResponse] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
@@ -176,62 +169,85 @@ const ResponseTable = () => {
     }
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (selectedFile) {
-      const reader = new FileReader();
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    try {
+      setIsImporting(true);
+      if (selectedFile) {
+        const reader = new FileReader();
 
-      reader.onload = (e) => {
-        if (e.target?.result) {
-          const binaryStr = e.target?.result;
-          const workBook = XSLX.read(binaryStr, { type: "binary" });
-          const workSheetName = workBook.SheetNames[0];
-          const workSheet = workBook.Sheets[workSheetName];
-          const csvData: any = XSLX.utils.sheet_to_json(workSheet, {
-            header: 1,
-          });
+        reader.onload = async (e) => {
+          if (e.target?.result) {
+            const binaryStr = e.target?.result;
+            const workBook = XSLX.read(binaryStr, { type: "binary" });
+            const workSheetName = workBook.SheetNames[0];
+            const workSheet = workBook.Sheets[workSheetName];
+            const csvData: any = XSLX.utils.sheet_to_json(workSheet, {
+              header: 1,
+            });
 
-          const newUserData = csvData
-            .map(
-              ([id, name, subgroup, phoneNumber, email]: [
-                number | string,
-                string,
-                string,
-                string,
-                string
-              ]) => ({
-                id,
-                name,
-                subgroup,
-                phoneNumber,
-                email,
-              })
-            )
-            .filter(
-              (newUser: any) =>
-                !votarResponses.some(
-                  (existingUser) => existingUser.id === newUser.id
-                )
-            );
-          const combinedData = [...votarResponses, ...newUserData];
-          setVotarResponses(combinedData);
-          const seen: Record<string, boolean> = {};
-          const updatedData = combinedData.map((item) => {
-            const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+            const newUserData = csvData
+              .map(
+                ([id, name, subgroup, phoneNumber, email]: [
+                  number | string,
+                  string,
+                  string,
+                  string,
+                  string
+                ]) => ({
+                  id,
+                  name,
+                  subgroup,
+                  phoneNumber,
+                  email,
+                })
+              )
+              .filter(
+                (newUser: any) =>
+                  !votarResponses.some(
+                    (existingUser) => existingUser.id === newUser.id
+                  )
+              );
+            const combinedData = [...votarResponses, ...newUserData];
+            setVotarResponses(combinedData);
+            const seen: Record<string, boolean> = {};
+            const updatedData = combinedData.map((item) => {
+              const key = `${item.name}_${item.phoneNumber}_${item.email}`;
 
-            if (seen[key]) {
-              // This is a duplicate
-              return { ...item, isDuplicate: true } as VoterResponse;
-            } else {
-              seen[key] = true;
-              return { ...item, isDuplicate: false } as VoterResponse;
-            }
-          });
-          setVotarResponses(updatedData);
-        }
-        handleCloseImportElection();
-      };
+              if (seen[key]) {
+                // This is a duplicate
+                return { ...item, isDuplicate: true } as VoterResponse;
+              } else {
+                seen[key] = true;
+                return { ...item, isDuplicate: false } as VoterResponse;
+              }
+            });
+            const bodyData = {
+              electionId: electionID,
+              voters: filterDuplicates(updatedData, [
+                "id",
+                "name",
+                "subgroup",
+                "phone",
+                "email",
+              ]),
+            };
+            console.log(bodyData);
+            const res = await importFromCsv(USER_ID, bodyData);
+            setIsImporting(false);
+            console.log(res);
+            toast.success("Imported File Successfully");
+            setVotarResponses(updatedData);
+          }
+          handleCloseImportElection();
+        };
 
-      reader.readAsBinaryString(selectedFile);
+        reader.readAsBinaryString(selectedFile);
+      }
+    } catch (e: any) {
+      setIsImporting(false);
+      console.log(e);
     }
   };
 
@@ -454,6 +470,7 @@ const ResponseTable = () => {
               handleFileUpload={handleFileUpload}
               handleFileChange={handleFileChange}
               selectedFile={selectedFile}
+              isImporting={isImporting}
             />
           </Modal>
         )}

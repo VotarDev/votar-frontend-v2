@@ -15,7 +15,7 @@ import { PiCaretRightBold } from "react-icons/pi";
 import { DetailFormAction, DetailFormState } from "@/utils/types";
 import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 import setAuthToken from "@/utils/setAuthToken";
-import { updateElection } from "@/utils/api";
+import { updateElection, updateCandidate } from "@/utils/api";
 import { BsArrowLeft } from "react-icons/bs";
 
 const steps = [
@@ -54,6 +54,7 @@ const ElectionDetail = () => {
     }
     return savedStep ? Number(savedStep) : 0;
   });
+  const [position, setPosition] = useState<any>([]);
 
   const [state, dispatch] = useReducer(reducer, initState);
 
@@ -163,6 +164,19 @@ const ElectionDetail = () => {
     if (state.image) {
       formData.append("election-image", state.image);
     }
+
+    const ballotFormData = new FormData();
+    ballotFormData.append("candidates", JSON.stringify(position));
+    for (const obj of position) {
+      for (const candidate of obj.candidates) {
+        if (candidate.candidate_picture) {
+          ballotFormData.append("profile", candidate.candidate_picture as Blob);
+        }
+        if (candidate.media.docs) {
+          ballotFormData.append("docs", candidate.media.docs as Blob);
+        }
+      }
+    }
     try {
       switch (step) {
         case 0:
@@ -175,6 +189,9 @@ const ElectionDetail = () => {
           }
           break;
         case 1:
+          const candidateRes = await updateCandidate(USER_ID, ballotFormData);
+          if (candidateRes) console.log(candidateRes);
+          setIsProcessing(false);
           break;
         case 2:
           break;
@@ -246,7 +263,9 @@ const ElectionDetail = () => {
               dispatch={dispatch}
             />
           )}
-          {currentStep === 1 && <BallotsPage />}
+          {currentStep === 1 && (
+            <BallotsPage position={position} setPosition={setPosition} />
+          )}
           {currentStep === 2 && <VoterPage />}
           {currentStep === 3 && <ReviewPage />}
           {currentStep === 4 && <PayPage />}

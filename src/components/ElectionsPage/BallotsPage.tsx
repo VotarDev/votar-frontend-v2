@@ -12,7 +12,7 @@ import leftline from "../../../public/assets/images/left-line.svg";
 import placeholder from "../../../public/assets/images/Placeholder.png";
 import rightline from "../../../public/assets/images/right-line.svg";
 
-const BallotsPage = () => {
+const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
   const router = useRouter();
   const user = useUser();
@@ -20,7 +20,6 @@ const BallotsPage = () => {
   const [electionID, setElectionID] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
-  const [position, setPosition] = useState<any>([]);
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -124,14 +123,18 @@ const BallotsPage = () => {
     positionIndex: any,
     candidateIndex: any
   ) => {
-    const file = e.target.files[0];
-    setPosition((prevPositions: any) => {
-      const updatedPositions = [...prevPositions];
-      updatedPositions[positionIndex].candidates[
-        candidateIndex
-      ].candidate_picture = file;
-      return updatedPositions;
-    });
+    const file = e.target.files?.[0];
+
+    if (file) {
+      const updatedPositions = [...position];
+      const candidate =
+        updatedPositions[positionIndex].candidates[candidateIndex];
+
+      candidate.candidate_picture = file;
+      candidate.filename = file.name;
+
+      setPosition(updatedPositions);
+    }
   };
 
   const handleAddCandidate = (positionIndex: any) => {
@@ -162,6 +165,26 @@ const BallotsPage = () => {
       },
     ]);
   };
+  const handleMediaUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    positionIndex: number,
+    candidateIndex: number
+  ) => {
+    const { files } = e.target;
+    if (files && files[0]) {
+      const updatedPositions = [...position];
+      const candidate =
+        updatedPositions[positionIndex].candidates[candidateIndex];
+      const mediaType = files[0].type.split("/")[0];
+
+      candidate.media = {
+        type: mediaType as "file" | "image" | "video",
+        docs: files[0],
+      };
+
+      setPosition(updatedPositions);
+    }
+  };
 
   const handleDeleteMedia = (
     e: any,
@@ -186,6 +209,7 @@ const BallotsPage = () => {
   if (error) {
     return <div className="my-10">{error}</div>;
   }
+  console.log(position);
 
   return (
     <div className="my-[60px]">
@@ -309,7 +333,14 @@ const BallotsPage = () => {
                                 />
                               ) : (
                                 <img
-                                  src={candidate.candidate_picture}
+                                  src={`${
+                                    typeof candidate.candidate_picture ===
+                                    "string"
+                                      ? candidate.candidate_picture
+                                      : URL.createObjectURL(
+                                          candidate.candidate_picture
+                                        )
+                                  }`}
                                   alt={`Image for ${candidate.candidate_name}`}
                                   className="max-w-[256px] w-full h-64 rounded-lg object-cover"
                                 />
@@ -387,7 +418,7 @@ const BallotsPage = () => {
                               id={`media-upload-${positionIndex}-${candidateIndex}`}
                               accept="image/*,video/*,.pdf,.doc,.docx"
                               onChange={(e) =>
-                                handleImageUpload(
+                                handleMediaUpload(
                                   e,
                                   positionIndex,
                                   candidateIndex
@@ -396,13 +427,29 @@ const BallotsPage = () => {
                               style={{ display: "none" }}
                               multiple
                             />
+                            <div>
+                              {candidate.media &&
+                                typeof candidate.media === "string" && (
+                                  <>
+                                    <img
+                                      src={candidate.media}
+                                      alt={candidate.candidate_name}
+                                      className="w-20 h-20 object-contain"
+                                    />
+                                  </>
+                                )}
+                            </div>
                             <div className="image-upload">
-                              {candidate.media.docs ? (
+                              {candidate.media ? (
                                 candidate.media.type === "image" ? (
                                   <img
-                                    src={`${URL.createObjectURL(
-                                      candidate.media.docs
-                                    )}`}
+                                    src={`${
+                                      typeof candidate.media === "string"
+                                        ? candidate.media
+                                        : URL.createObjectURL(
+                                            candidate.media.docs
+                                          )
+                                    }`}
                                     alt={`Image for ${candidate.candidate_name}`}
                                     className="w-20 h-20 object-contain"
                                   />
@@ -412,9 +459,13 @@ const BallotsPage = () => {
                                     className="w-20 h-20 object-contain"
                                   >
                                     <source
-                                      src={`${URL.createObjectURL(
-                                        candidate.media.docs
-                                      )}`}
+                                      src={`${
+                                        typeof candidate.media === "string"
+                                          ? candidate.media
+                                          : URL.createObjectURL(
+                                              candidate.media.docs
+                                            )
+                                      }`}
                                     />
                                     Your browser does not support the video tag.
                                   </video>
@@ -439,7 +490,7 @@ const BallotsPage = () => {
                                 id={`media-upload-${positionIndex}-${candidateIndex}`}
                                 accept="image/*,video/*,.pdf,.doc,.docx"
                                 onChange={(e) =>
-                                  handleImageUpload(
+                                  handleMediaUpload(
                                     e,
                                     positionIndex,
                                     candidateIndex
@@ -449,7 +500,7 @@ const BallotsPage = () => {
                                 multiple
                               />
                             </div>
-                            {candidate.media.docs && (
+                            {candidate.media && (
                               <div>
                                 <button
                                   className="text-xl border-none outline-none bg-transparent"

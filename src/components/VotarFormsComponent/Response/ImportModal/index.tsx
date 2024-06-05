@@ -1,10 +1,12 @@
 import React from "react";
+import { CircularProgress } from "@mui/material";
 
 const ImportModal = ({
   handleClose,
   handleFileUpload,
   handleFileChange,
   selectedFile,
+  isImporting,
 }: any) => {
   return (
     <div className="bg-white rounded-lg py-[24px] px-10 text-left">
@@ -30,9 +32,17 @@ const ImportModal = ({
           {selectedFile && (
             <button
               onClick={handleFileUpload}
+              disabled={isImporting}
               className="w-40 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded"
             >
               Upload
+              {isImporting && (
+                <CircularProgress
+                  size={20}
+                  style={{ color: "#fff" }}
+                  className="ml-2"
+                />
+              )}
             </button>
           )}
         </div>
