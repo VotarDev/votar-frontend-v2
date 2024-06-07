@@ -53,41 +53,6 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
             />
           </div>
         </div>
-        <div className="lg:mt-10 mt-5 flex lg:justify-end items-center lg:gap-10 gap-2 flex-wrap justify-center">
-          <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
-            <div>
-              Election ID:{" "}
-              <span ref={textRef}>{electionDetails?.election_id}</span>
-            </div>
-            <div onClick={handleCopyClick} className="cursor-pointer">
-              <IoCopy />
-            </div>
-          </div>
-          <div className="flex lg:gap-7 gap-2 flex-wrap justify-center">
-            <div>
-              <button className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0">
-                <span>
-                  <AiOutlineLink />
-                </span>
-                Copy Election Link
-              </button>
-            </div>
-            <div>
-              <Link
-                href="/cast-votes"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-xl text-xs p-4 font-semibold text-zinc-100 lg:p-0">
-                  <span>
-                    <AiOutlineEye />
-                  </span>
-                  Preview Ballot
-                </button>
-              </Link>
-            </div>
-          </div>
-        </div>
       </div>
     );
 

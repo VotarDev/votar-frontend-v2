@@ -70,17 +70,20 @@ const BallotsPage = ({ position, setPosition }: any) => {
   useEffect(() => {
     try {
       const fetchData = async () => {
-        const { data } = await getCandidates(USER_ID, electionID);
-        if (data) {
-          setPosition(data.data);
-          console.log(data);
+        if (electionID) {
+          const electionIdData = { election_id: electionID };
+          const { data } = await getCandidates(USER_ID, electionIdData);
+          if (data) {
+            setPosition(data.data);
+            console.log(data);
+          }
         }
       };
       fetchData();
     } catch (e) {
       console.log(e);
     }
-  }, []);
+  }, [electionID]);
 
   const handleInputChange = (
     e: any,
@@ -181,6 +184,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
         type: mediaType as "file" | "image" | "video",
         docs: files[0],
       };
+      candidate.docsname = files[0].name;
 
       setPosition(updatedPositions);
     }

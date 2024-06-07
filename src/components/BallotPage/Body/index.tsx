@@ -7,7 +7,7 @@ import { FaCloudUploadAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Position } from "@/utils/types";
 
-function Body({ positions, setPositions }: any) {
+function Body({ positions, setPositions, electionId }: any) {
   const handleAddPosition = () => {
     let election_id;
     if (typeof window !== "undefined") {
@@ -21,7 +21,7 @@ function Body({ positions, setPositions }: any) {
         show_pictures: true,
         allow_abstain: true,
         candidates: [],
-        election_id,
+        election_id: electionId,
       },
     ]);
   };
