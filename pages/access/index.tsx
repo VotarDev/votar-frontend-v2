@@ -8,7 +8,7 @@ const Access = () => {
   return (
     <>
       <Header />
-      <ElectionId />
+      {/* <ElectionId electionId=""/> */}
       <Chat />
     </>
   );

@@ -4,8 +4,15 @@ import illustration from "../public/assets/illustrations/illustration-5.svg";
 import voteicon from "../public/assets/icons/vote.svg";
 import illustrationBg from "../public/assets/images/vote-bg.png";
 import Chat from "@/src/components/Chat";
+import { useRouter } from "next/router";
 
 const Vote = () => {
+  const router = useRouter();
+  const [electionId, setElectionId] = React.useState("");
+  const onFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push(`/access/${electionId}`);
+  };
   return (
     <div>
       <Nav />
@@ -21,11 +28,16 @@ const Vote = () => {
             <br /> Voice is Heard!
           </div>
           <div>
-            <form className="w-full flex lg:items-center lg:mt-[60px] mt-5 gap-4 flex-col lg:flex-row">
+            <form
+              className="w-full flex lg:items-center lg:mt-[60px] mt-5 gap-4 flex-col lg:flex-row"
+              onSubmit={onFormSubmit}
+            >
               <div>
                 <input
                   type="text"
                   placeholder="Enter Your Election ID"
+                  value={electionId}
+                  onChange={(e) => setElectionId(e.target.value)}
                   className="border-[2px] border-[#B4B4B4] lg:w-[454px] h-[52px] outline-none p-4 rounded w-full"
                 />
               </div>

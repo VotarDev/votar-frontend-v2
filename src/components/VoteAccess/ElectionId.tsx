@@ -1,6 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
+import { voterLogin } from "@/utils/api";
+import { CircularProgress } from "@mui/material";
+import toast from "react-hot-toast";
 
-const ElectionId = () => {
+const ElectionId = ({ electionId }: { electionId: string }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const bodyData = { election_id: electionId, access_id: accessCode };
+      const { data } = await voterLogin(bodyData);
+      if (data) {
+        setIsLoading(false);
+        toast.success("Login Successful");
+        console.log(data);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occured");
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="lg:my-[100px] text-center my-[50px] px-4 lg:px-0 max-w-[30rem] mx-auto lg:max-w-full">
       <div className="lg:text-2xl font-bold text-xl">
@@ -8,17 +30,31 @@ const ElectionId = () => {
         <br /> ballot for the Association of Political Science Analyst Election
       </div>
       <div>
-        <form className="w-full flex lg:items-center lg:mt-[40px] mt-7 gap-4 flex-col lg:flex-row justify-center">
+        <form
+          onSubmit={onSubmit}
+          className="w-full flex lg:items-center lg:mt-[40px] mt-7 gap-4 flex-col lg:flex-row justify-center"
+        >
           <div>
             <input
               type="text"
               placeholder="Enter Your Access Code"
+              onChange={(e) => setAccessCode(e.target.value)}
               className="border-[2px] border-[#B4B4B4] lg:w-[585px] h-[52px] outline-none p-4 rounded w-full"
             />
           </div>
           <div>
-            <button className="h-[52px] bg-[#015CE9] text-white font-proximaNova rounded outline-none lg:w-[141px] w-full flex items-center justify-center">
+            <button
+              disabled={isLoading}
+              className="h-[52px] bg-[#015CE9] text-white font-proximaNova rounded outline-none lg:w-[141px] w-full flex items-center justify-center"
+            >
               Sign in
+              {isLoading && (
+                <CircularProgress
+                  size={20}
+                  style={{ color: "#fff" }}
+                  className="ml-2"
+                />
+              )}
             </button>
           </div>
         </form>

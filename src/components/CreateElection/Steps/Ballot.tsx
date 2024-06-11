@@ -49,8 +49,6 @@ const Ballot = ({ positions, setPositions }: any) => {
       } catch (e: any) {
         setError(e?.response?.data?.message);
         console.log(e?.response?.data?.message);
-      } finally {
-        setIsLoading(false);
       }
     };
     getElection();
