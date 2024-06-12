@@ -36,7 +36,7 @@ const AccessPage = () => {
             setIsFetchElection(false);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.log(error);
         setIsFetchElection(false);
       }

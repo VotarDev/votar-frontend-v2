@@ -35,7 +35,7 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
         router.push(`/ballot`);
         console.log(data.data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       toast.error("An error occured");
       setIsLoading(false);
