@@ -2,20 +2,38 @@ import React, { useState } from "react";
 import { voterLogin } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
+import Cookies from "universal-cookie";
+import { voterLoginCookieName } from "@/src/__env";
+import { useRouter } from "next/router";
+import { AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { login } from "@/redux/features/auth/voterLoginSlice";
 
 const ElectionId = ({ electionId }: { electionId: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [accessCode, setAccessCode] = useState("");
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     try {
       const bodyData = { election_id: electionId, access_id: accessCode };
       const { data } = await voterLogin(bodyData);
+      const cookie = new Cookies();
+      cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
       if (data) {
         setIsLoading(false);
+        const voterData = {
+          userData: data.data.user,
+          loading: false,
+          isVerified: true,
+        };
         toast.success("Login Successful");
-        console.log(data);
+        dispatch(login(voterData));
+        localStorage.setItem("voterProfile", JSON.stringify(voterData));
+        router.push(`/ballot`);
+        console.log(data.data);
       }
     } catch (error) {
       console.log(error);

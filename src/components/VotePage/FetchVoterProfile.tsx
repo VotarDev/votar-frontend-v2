@@ -1,0 +1,33 @@
+import { useEffect } from "react";
+import Cookies from "universal-cookie";
+
+import { login, logout } from "@/redux/features/auth/voterLoginSlice";
+
+import { useDispatch } from "react-redux";
+import { useRouter } from "next/navigation";
+
+import { voterLoginCookieName } from "@/src/__env";
+
+const FetchVoterProfile = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  useEffect(() => {
+    const runMe = async () => {
+      const cookie = new Cookies();
+      const token = cookie.get(voterLoginCookieName);
+
+      if (!token) {
+        dispatch(logout());
+        router.push("/vote");
+        return;
+      } else {
+        router.push("/ballot");
+      }
+    };
+    runMe();
+  }, [dispatch]);
+
+  return <></>;
+};
+export default FetchVoterProfile;

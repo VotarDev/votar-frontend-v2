@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import leftline from "../../public/assets/images/left-line.svg";
 import rightline from "../../public/assets/images/right-line.svg";
-
-import { Details } from "@/utils/types";
+import { Details, ElectionDetails } from "@/utils/types";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import avatar from "../../public/assets/images/avatar-placeholder.png";
 import checked from "../../public/assets/icons/checked.svg";
@@ -11,7 +10,20 @@ import Modal from "@/src/components/Modal";
 import { candidateVotes } from "@/utils/util";
 import CandidateDetails from "@/src/components/VotePage/CandidateDetails";
 import VoteHeader from "@/src/components/VotePage/Header";
-import { ca } from "date-fns/locale";
+import { RootState, AppDispatch } from "@/redux/store";
+import FetchVoterProfile from "@/src/components/VotePage/FetchVoterProfile";
+import Cookies from "universal-cookie";
+import {
+  logout,
+  initializeFromLocalStorage,
+} from "@/redux/features/auth/voterLoginSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/router";
+import { voterLoginCookieName } from "@/src/__env";
+import { getElectionById } from "@/utils/api";
+import Header from "@/src/components/BallotPage/Header";
+import { CircularProgress } from "@mui/material";
+import { set } from "lodash";
 
 type Candidate = {
   name: string;
@@ -28,8 +40,14 @@ type SelectedCandidates = {
   position: string;
   candidate: Candidate[];
 };
+
 const Ballot = () => {
   const [votingData, setVotingData] = useState<Position[]>(candidateVotes);
+  const dispatch = useDispatch<AppDispatch>();
+  const voterProfile = useSelector((state: RootState) => state.voterProfile);
+  const router = useRouter();
+  const [election, setElection] = useState<ElectionDetails | null>(null);
+  const [isFetchElection, setIsFetchElection] = useState(false);
   const [selectedCandidates, setSelectedCandidates] = useState<
     SelectedCandidates[]
   >([]);
@@ -73,6 +91,7 @@ const Ballot = () => {
       setVotingData(updatedData);
     }
   };
+
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
     const existingIndex = selectedCandidates.findIndex(
       (sc) => sc.position === position
@@ -109,7 +128,14 @@ const Ballot = () => {
     //   setSelectedCandidates((prevCandidate) => [...prevCandidate, candidate]);
     // }
   };
+
   const closeModal = () => setShowModal(false);
+  const handleLogout = () => {
+    dispatch(logout());
+    const cookie = new Cookies();
+    cookie.remove(voterLoginCookieName, { path: "/" });
+    router.push("/vote");
+  };
   //   const handleDetails = (candidate: Candidate) => {
   //     setSelectedCandidateDetails([
   //       //@ts-ignore
@@ -117,14 +143,64 @@ const Ballot = () => {
   //     ]);
   //     setShowModal(true);
   //   };
+  useEffect(() => {
+    const storedProfile = localStorage.getItem("voterProfile");
+    if (storedProfile) {
+      const parsedProfile = JSON.parse(storedProfile);
+      dispatch(initializeFromLocalStorage(parsedProfile));
+    }
+  }, [dispatch]);
 
-  console.log(selectedCandidates);
+  useEffect(() => {
+    const getElection = async () => {
+      setIsFetchElection(true);
+      try {
+        if (voterProfile.userData && voterProfile.userData.election_id) {
+          const electionData = {
+            election_id: voterProfile.userData.election_id,
+          };
+          const { data } = await getElectionById(electionData);
+          if (data) {
+            setElection(data.data);
+            console.log(data.data);
+            setIsFetchElection(false);
+          }
+        }
+      } catch (error: any) {
+        console.log(error);
+        setIsFetchElection(false);
+      }
+    };
+    if (voterProfile.userData) {
+      getElection();
+    }
+  }, [voterProfile.userData]);
+  // console.log(selectedCandidates);
+  console.log(voterProfile.userData?.election_id);
 
   return (
     <>
       {isClient && (
         <>
-          <VoteHeader />
+          <FetchVoterProfile />
+          {isFetchElection ? (
+            <div className="mt-10 text-center">
+              <CircularProgress size={30} style={{ color: "#015CE9" }} />
+            </div>
+          ) : (
+            <div>
+              <Header electionDetails={election} />
+            </div>
+          )}
+
+          <div className="mt-5 flex justify-end mr-10">
+            <button
+              onClick={handleLogout}
+              className="bg-blue-700 p-4 text-white rounded-md"
+            >
+              Logout
+            </button>
+          </div>
           <div className="mt-[56px] max-w-[1200px] mx-auto">
             {candidateVotes &&
               candidateVotes.map((preview, index) => {

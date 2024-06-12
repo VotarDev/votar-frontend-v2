@@ -57,7 +57,8 @@
     "sheetjs-style": "^0.15.8",
     "swiper": "^10.0.4",
     "tailwindcss": "3.3.3",
-    "typescript": "5.1.6"
+    "typescript": "5.1.6",
+    "universal-cookie": "^7.1.4"
   },
   "devDependencies": {
     "@types/aos": "^3.0.4",
