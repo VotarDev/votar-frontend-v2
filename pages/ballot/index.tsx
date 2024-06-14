@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, use } from "react";
 import leftline from "../../public/assets/images/left-line.svg";
 import rightline from "../../public/assets/images/right-line.svg";
 import { Details, ElectionDetails } from "@/utils/types";
@@ -23,7 +23,8 @@ import { voterLoginCookieName } from "@/src/__env";
 import { getElectionById } from "@/utils/api";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
-import { set } from "lodash";
+import { getCandidates } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 
 type Candidate = {
   name: string;
@@ -38,7 +39,7 @@ type Position = {
 
 type SelectedCandidates = {
   position: string;
-  candidate: Candidate[];
+  candidates: Candidate[];
 };
 
 const Ballot = () => {
@@ -46,6 +47,7 @@ const Ballot = () => {
   const dispatch = useDispatch<AppDispatch>();
   const voterProfile = useSelector((state: RootState) => state.voterProfile);
   const router = useRouter();
+  const [candidates, setCandidates] = useState([]);
   const [election, setElection] = useState<ElectionDetails | null>(null);
   const [isFetchElection, setIsFetchElection] = useState(false);
   const [selectedCandidates, setSelectedCandidates] = useState<
@@ -55,6 +57,8 @@ const Ballot = () => {
     []
   );
   const [isClient, setIsClient] = useState(false);
+  const users = useCurrentUser();
+  const user = useUser();
   const [showModal, setShowModal] = useState(false);
   //   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
   //     Details[]
@@ -68,6 +72,12 @@ const Ballot = () => {
     "#93241F",
     "#406b83",
   ];
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   useEffect(() => {
     setIsClient(true);
@@ -93,40 +103,45 @@ const Ballot = () => {
   };
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
-    const existingIndex = selectedCandidates.findIndex(
+    setSelectedCandidates((prevState) => {
+      const existingIndex = prevState.findIndex(
+        (sc) => sc.position === position
+      );
+
+      if (existingIndex !== -1) {
+        const updatedCandidates = [...prevState[existingIndex].candidates];
+        const candidateIndex = updatedCandidates.findIndex(
+          (c) => c.name === candidate.name
+        );
+
+        if (candidateIndex !== -1) {
+          updatedCandidates.splice(candidateIndex, 1); // Remove the candidate if already selected
+        } else {
+          updatedCandidates.push(candidate); // Add the candidate if not selected
+        }
+
+        const updatedSelectedCandidates = [...prevState];
+        updatedSelectedCandidates[existingIndex] = {
+          position,
+          candidates: updatedCandidates,
+        };
+
+        return updatedSelectedCandidates.filter(
+          (sc) => sc.candidates.length > 0
+        ); // Remove empty positions
+      } else {
+        return [...prevState, { position, candidates: [candidate] }];
+      }
+    });
+  };
+
+  const isCandidateActive = (position: string, candidate: Candidate) => {
+    const positionData = selectedCandidates.find(
       (sc) => sc.position === position
     );
-    if (existingIndex !== -1) {
-      setSelectedCandidates((prevState) => {
-        const updatedSelectedCandidates = [...prevState];
-        const candidateExists = updatedSelectedCandidates[
-          existingIndex
-        ].candidate.some((c) => c.name === candidate.name);
-        if (!candidateExists) {
-          updatedSelectedCandidates[existingIndex] = {
-            position,
-            candidate: [
-              ...updatedSelectedCandidates[existingIndex].candidate,
-              candidate,
-            ],
-          };
-        }
-        return updatedSelectedCandidates;
-      });
-    } else {
-      setSelectedCandidates((prevState) => [
-        ...prevState,
-        { position, candidate: [candidate] },
-      ]);
-    }
-
-    // if (selectedCandidates.includes(candidate) && candidate.vote <= 0) {
-    //   setSelectedCandidates((prevCandidates) =>
-    //     prevCandidates.filter((c) => c !== candidate)
-    //   );
-    // } else {
-    //   setSelectedCandidates((prevCandidate) => [...prevCandidate, candidate]);
-    // }
+    return (
+      positionData?.candidates.some((c) => c.name === candidate.name) ?? false
+    );
   };
 
   const closeModal = () => setShowModal(false);
@@ -175,8 +190,26 @@ const Ballot = () => {
       getElection();
     }
   }, [voterProfile.userData]);
-  // console.log(selectedCandidates);
-  console.log(voterProfile.userData?.election_id);
+
+  useEffect(() => {
+    const getCandidatesData = async () => {
+      try {
+        const { data } = await getCandidates(
+          USER_ID,
+          voterProfile.userData.election_id
+        );
+        console.log(data);
+        if (data) {
+          setCandidates(data.data);
+        }
+      } catch (error: any) {
+        console.log(error);
+      }
+    };
+    getCandidatesData();
+  }, []);
+  console.log(selectedCandidates);
+  console.log(voterProfile.userData);
 
   return (
     <>
@@ -200,6 +233,11 @@ const Ballot = () => {
             >
               Logout
             </button>
+          </div>
+          <div className="text-center mt-5">
+            <h1 className="text-xl font-bold lg:ml-20 capitalize">
+              Welcome, {voterProfile.userData?.name}
+            </h1>
           </div>
           <div className="mt-[56px] max-w-[1200px] mx-auto">
             {candidateVotes &&
@@ -238,13 +276,15 @@ const Ballot = () => {
                         <div
                           key={candidateIndex}
                           className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
-                            candidate.vote > 0 ? "active" : "duration-500"
+                            isCandidateActive(preview.position, candidate)
+                              ? "active"
+                              : "duration-500"
                           }`}
-                          onClick={(e) =>
+                          onClick={() =>
                             handleSelectCandidate(preview.position, candidate)
                           }
                         >
-                          {candidate.vote > 0 && (
+                          {isCandidateActive(preview.position, candidate) && (
                             <div className="absolute -right-2 -top-3 ">
                               <img src={checked.src} alt="" />
                             </div>
@@ -266,9 +306,9 @@ const Ballot = () => {
                               </div>
                             </div>
                             <div className="text-base text-blue-700 underline cursor-pointer font-normal">
-                              More Detials
+                              More Details
                             </div>
-                            <div className="flex justify-center pt-3 gap-4 items-center">
+                            {/* <div className="flex justify-center pt-3 gap-4 items-center">
                               <div>
                                 <button
                                   className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
@@ -299,7 +339,7 @@ const Ballot = () => {
                                   </span>
                                 </button>
                               </div>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       ))}
@@ -328,7 +368,11 @@ const Ballot = () => {
 
           <AnimatePresence mode="wait">
             {showModal && (
-              <Modal key="modal" handleClose={closeModal} classname="">
+              <Modal
+                key="modal"
+                handleClose={closeModal}
+                classname="overflow-y-scroll h-screen ballot-modal"
+              >
                 <div className="bg-white rounded ">
                   <div className="text-center pt-8 pb-5 max-w-[40rem] mx-auto">
                     Hello Mike!, the candidates you voted for in the different
@@ -361,7 +405,7 @@ const Ballot = () => {
                           </div>
                         </div>
                         <div className="flex justify-center gap-3">
-                          {selectedCandidate.candidate.map(
+                          {selectedCandidate.candidates.map(
                             (candidate, index) => (
                               <div key={index} className=" pb-3">
                                 <div className="flex justify-center py-2">
