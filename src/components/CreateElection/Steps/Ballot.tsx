@@ -43,6 +43,15 @@ const Ballot = ({ positions, setPositions }: any) => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+            setPositions([
+              {
+                name_of_position: "",
+                show_pictures: true,
+                allow_abstain: true,
+                candidates: [],
+                election_id: data.data.election_id,
+              },
+            ]);
             setIsLoading(false);
           }
         }
@@ -111,6 +120,7 @@ const Ballot = ({ positions, setPositions }: any) => {
           </div>
         </div>
       </div>
+
       <Body
         setPositions={setPositions}
         positions={positions}

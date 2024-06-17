@@ -27,10 +27,6 @@ const Create = () => {
   let election_id;
   if (typeof window !== "undefined") {
     const electionStep = localStorage.getItem("electionSteps");
-    const electionId = localStorage.getItem("ElectionId");
-    if (electionId !== null) {
-      election_id = electionId;
-    }
 
     if (electionStep !== null) {
       step = parseInt(electionStep, 10);
@@ -43,6 +39,7 @@ const Create = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<OptionTypes | null>(null);
+  const [electionID, setElectionID] = useState<string | null>("");
   const [secondaryColor, setSecondaryColor] = useState<OptionTypes | null>(
     null
   );
@@ -63,15 +60,7 @@ const Create = () => {
   const router = useRouter();
 
   //ballot
-  const [positions, setPositions] = useState<Position[]>([
-    {
-      name_of_position: "",
-      show_pictures: true,
-      allow_abstain: true,
-      candidates: [],
-      election_id,
-    },
-  ]);
+  const [positions, setPositions] = useState<Position[]>([]);
 
   if (typeof window !== "undefined") {
     localStorage.setItem("positions", JSON.stringify(positions));
@@ -92,6 +81,15 @@ const Create = () => {
     "Pay",
     "Monitor Election",
   ];
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const electionId = localStorage.getItem("ElectionId");
+      console.log(electionId);
+
+      setElectionID(electionId);
+    }
+  }, []);
 
   const displaySteps = (step: number) => {
     switch (step) {
