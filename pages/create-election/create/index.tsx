@@ -49,6 +49,7 @@ const Create = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [startTime, setStartTime] = useState("");
+
   const [endTIme, setEndTime] = useState("");
   const [logo, setLogo] = useState(null);
   const [numberofCandidate, setNumberofCandidate] = useState(0);
@@ -143,6 +144,12 @@ const Create = () => {
     const [endYear, endMonth, endDay] = endDateString.split("-");
     const formattedStartDate = formatDate(startYear, startMonth, startDay);
     const formattedEndDate = formatDate(endYear, endMonth, endDay);
+    const startDateData = formattedStartDate + "," + startTime;
+    const endDateData = formattedEndDate + "," + endTIme;
+
+    console.log(startDateData);
+    console.log(endDateData);
+    console.log(numberofCandidate);
 
     const detailsFormData = new FormData();
     detailsFormData.append("name_of_election", electionName);
@@ -151,11 +158,15 @@ const Create = () => {
       detailsFormData.append("primary_color", primaryColor?.value);
     if (secondaryColor)
       detailsFormData.append("secondary_color", secondaryColor?.value);
-    if (startTime && endTIme) {
-      detailsFormData.append("start_date", formattedStartDate);
-      detailsFormData.append("end_date", formattedEndDate);
-    }
+
+    detailsFormData.append("start_date", startDateData);
+    detailsFormData.append("end_date", endDateData);
+
     if (logo) detailsFormData.append("election-image", logo);
+    detailsFormData.append(
+      "max_number_candidate",
+      numberofCandidate.toString()
+    );
 
     const ballotFormData = new FormData();
     ballotFormData.append("candidates", JSON.stringify(positions));
@@ -253,7 +264,11 @@ const Create = () => {
       <ProtectedRoutes>
         <div className="w-full lg:px-3 px-0">
           <div>
-            <StepHeader steps={steps} currentStep={currentStep} />
+            <StepHeader
+              steps={steps}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+            />
           </div>
           <div>{displaySteps(currentStep)}</div>
           <div>

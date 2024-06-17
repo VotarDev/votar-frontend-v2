@@ -28,6 +28,7 @@ const importCsvUrl = "/user/import-csv";
 const updateCandidateUrl = "/user/update-candidate";
 const voterLoginUrl = "/voter/login";
 const ballotCandidateUrl = "/voter/get-candidates";
+const enterVotesUrl = "/voter/vote-candidates";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -151,4 +152,8 @@ export const voterLogin = (data: any) => {
 
 export const getBallotCandidate = (data: any) => {
   return httpService.post(ballotCandidateUrl, data);
+};
+
+export const enterVotes = (data: any) => {
+  return httpService.post(enterVotesUrl, data);
 };

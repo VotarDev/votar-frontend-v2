@@ -1115,8 +1115,11 @@ export const formatDateToISO = (dateString: string | undefined) => {
 export const formatTimeToHHMM = (timestamp: number | undefined) => {
   if (timestamp) {
     const date = new Date(timestamp);
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const wastDate = new Date(
+      date.getTime() + date.getTimezoneOffset() * 60 * 1000
+    );
+    const hours = String(wastDate.getHours()).padStart(2, "0");
+    const minutes = String(wastDate.getMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   }
 };
