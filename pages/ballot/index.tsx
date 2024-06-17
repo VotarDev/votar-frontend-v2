@@ -2,14 +2,12 @@ import React, { useEffect, useState, useContext, use } from "react";
 import leftline from "../../public/assets/images/left-line.svg";
 import rightline from "../../public/assets/images/right-line.svg";
 import { Details, ElectionDetails } from "@/utils/types";
-import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+
 import avatar from "../../public/assets/images/avatar-placeholder.png";
 import checked from "../../public/assets/icons/checked.svg";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
-import { candidateVotes } from "@/utils/util";
-import CandidateDetails from "@/src/components/VotePage/CandidateDetails";
-import VoteHeader from "@/src/components/VotePage/Header";
+
 import { PiWarningCircleFill } from "react-icons/pi";
 import { RootState, AppDispatch } from "@/redux/store";
 import FetchVoterProfile from "@/src/components/VotePage/FetchVoterProfile";
@@ -24,7 +22,7 @@ import { voterLoginCookieName } from "@/src/__env";
 import { getElectionById, getBallotCandidate } from "@/utils/api";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
-import { getCandidates } from "@/utils/api";
+
 import { useCurrentUser, useUser } from "@/utils/hooks";
 
 type BallotData = {
@@ -293,7 +291,7 @@ const Ballot = () => {
             ) : (
               <div>
                 <div className="text-center mt-5">
-                  <h1 className="text-xl font-bold  capitalize">
+                  <h1 className="text-4xl font-bold capitalize">
                     Welcome, {voterProfile.userData?.name}
                   </h1>
                 </div>
@@ -436,7 +434,7 @@ const Ballot = () => {
                         onClick={() => setShowModal(true)}
                         className="bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold"
                       >
-                        Enter Vote
+                        Enter Votes
                       </button>
                     </div>
                   </div>
@@ -452,9 +450,9 @@ const Ballot = () => {
                   classname="overflow-y-scroll h-[80vh] ballot-modal bg-white"
                 >
                   <div className="rounded h-full">
-                    <div className="text-center py-8 pb-5 max-w-[40rem] mx-auto">
+                    <div className="text-center py-8 pb-5 max-w-[40rem] mx-auto ">
                       Hello{" "}
-                      <span className="capitalize">
+                      <span className="capitalize font-semibold">
                         {voterProfile.userData.name}
                       </span>
                       , the candidates you voted for in the different positions
