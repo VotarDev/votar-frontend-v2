@@ -90,7 +90,7 @@ const Ballot = () => {
     ? users?.id
     : user?.user?.id;
 
-  const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 2;
+  const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 1;
 
   useEffect(() => {
     setIsClient(true);
@@ -114,6 +114,9 @@ const Ballot = () => {
   //     setVotingData(updatedData);
   //   }
   // };
+  const handleGoHome = () => {
+    router.push("/access");
+  };
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
     setSelectedCandidates((prevState: any) => {
@@ -347,8 +350,8 @@ const Ballot = () => {
                       Thank you for participating in the election.
                     </p>
                     <button
-                      // onClick={handleGoHome}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition duration-300"
+                      onClick={handleGoHome}
+                      className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-700 transition duration-300"
                     >
                       Go to Home
                     </button>

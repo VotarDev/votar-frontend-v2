@@ -13,6 +13,7 @@ import { TableRowTypes } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
 
 interface VotersPageTableProps {
   selectedRows: VoterResponse[];
@@ -35,6 +36,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
 
   const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
+  const [isFetchVoters, setIsFetchVoters] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
 
@@ -106,6 +108,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
       //     setResponses(JSON.parse(exportedResponses));
       //   }
       // }
+      setIsFetchVoters(true);
       if (users?.data) {
         setAuthToken(users.data.data.cookie);
       } else {
@@ -123,6 +126,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
           });
           if (data) {
             console.log(data.data);
+            setIsFetchVoters(false);
             const uniqueItems = filterDuplicates(data.data, [
               "id",
               "name",
@@ -135,6 +139,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
         }
       } catch (e) {
         console.log(e);
+        setIsFetchVoters(false);
       }
     };
 
@@ -142,6 +147,14 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
   }, []);
 
   console.log(trackChanges.length > 0);
+
+  if (isFetchVoters) {
+    return (
+      <div className="my-10 flex justify-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24">
