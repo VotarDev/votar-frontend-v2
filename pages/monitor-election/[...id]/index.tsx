@@ -48,7 +48,7 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitortotn`}</span> */}
             <span ref={totalNumberRef}>
-              http://localhost:3000/monitoring-elections
+              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections
             </span>
           </div>
           <div
@@ -74,7 +74,7 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitorindn`}</span> */}
             <span ref={individualNumberRef}>
-              http://localhost:3000/monitoring-elections
+              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections
             </span>
           </div>
           <div
