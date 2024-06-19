@@ -3,6 +3,7 @@ import DashboardLayout from "@/src/components/DashboardLayout";
 import { useRouter } from "next/router";
 import { handleCopyClick, shortenText } from "@/utils/util";
 import { IoCopy } from "react-icons/io5";
+import toast from "react-hot-toast";
 
 const MonitorAnElectionDetails = () => {
   const router = useRouter();
@@ -17,6 +18,20 @@ const MonitorAnElectionDetails = () => {
     }
   }, [id]);
 
+  // const handleCopyClick = async () => {
+  //   if (totalNumberRef.current) {
+  //     const selectedText = totalNumberRef.current.innerText;
+  //     try {
+  //       await navigator.clipboard.writeText(selectedText);
+
+  //       toast.success("Copied to clipboard!");
+  //     } catch (error) {
+  //       console.error("Failed to copy text:", error);
+  //       toast.error("Copy operation failed. Please try again.");
+  //     }
+  //   }
+  // };
+
   return (
     <DashboardLayout>
       <h1 className="text-4xl">Monitor an election</h1>
@@ -29,9 +44,12 @@ const MonitorAnElectionDetails = () => {
         </div>
         <div className=" flex items-center gap-5 pt-5">
           <div className="w-full max-w-[300px] lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
-            <span ref={totalNumberRef}>{`${shortenText(
+            {/* <span ref={totalNumberRef}>{`${shortenText(
               electionName
-            )}.votar.ng/monitortotn`}</span>
+            )}.votar.ng/monitortotn`}</span> */}
+            <span ref={totalNumberRef}>
+              http://localhost:3000/monitoring-elections
+            </span>
           </div>
           <div
             onClick={() => handleCopyClick(totalNumberRef)}
@@ -52,9 +70,12 @@ const MonitorAnElectionDetails = () => {
 
         <div className=" flex items-center gap-5 pt-5">
           <div className="w-full max-w-[300px] lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
-            <span ref={individualNumberRef}>{`${shortenText(
+            {/* <span ref={individualNumberRef}>{`${shortenText(
               electionName
-            )}.votar.ng/monitorindn`}</span>
+            )}.votar.ng/monitorindn`}</span> */}
+            <span ref={individualNumberRef}>
+              http://localhost:3000/monitoring-elections
+            </span>
           </div>
           <div
             onClick={() => handleCopyClick(individualNumberRef)}
