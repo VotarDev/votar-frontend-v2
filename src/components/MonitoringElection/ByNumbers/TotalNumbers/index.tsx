@@ -3,7 +3,7 @@ import { votingPositions } from "@/utils/util";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
 
-const TotalNumbers = () => {
+const TotalNumbers = ({ electionId }: { electionId: string }) => {
   const [colors, setColors] = useState<string[]>([]);
   const [isMounted, setIsMounted] = useState(false);
   const cols = [

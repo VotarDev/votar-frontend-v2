@@ -3,9 +3,17 @@ import { votingCandidatePositions } from "@/utils/util";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
 import checked from "@/public/assets/icons/checked.svg";
+import setAuthToken from "@/utils/setAuthToken";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import { monitorInidividualNumber } from "@/utils/api";
+import { CircularProgress } from "@mui/material";
 
-const IndividualNumbers = () => {
+const IndividualNumbers = ({ electionId }: { electionId: string }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [candidates, setCandidates] = useState<any>(null);
+  const [isFetchCandidate, setIsFetchCandidate] = useState(false);
+  const user = useUser();
+  const users = useCurrentUser();
   const cols = [
     "#b138b3",
     "#00ff00",
@@ -14,16 +22,75 @@ const IndividualNumbers = () => {
     "#93241F",
     "#406b83",
   ];
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
+
+  useEffect(() => {
+    const getCandiddatesByIndividualNumbers = async () => {
+      setIsFetchCandidate(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await monitorInidividualNumber(electionId);
+        if (data) {
+          const flattenedData = data.data.flat();
+          const groupedCandidates = flattenedData.reduce(
+            (acc: any, candidate: any) => {
+              const { position } = candidate;
+              if (!acc[position]) {
+                acc[position] = [];
+              }
+              acc[position].push(candidate);
+              return acc;
+            },
+            {}
+          );
+          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
+            ([position, candidates]) => ({
+              position,
+              candidates,
+            })
+          );
+          setCandidates(groupedCandidatesArray);
+          setIsFetchCandidate(false);
+          console.log(data.data);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchCandidate(false);
+      }
+    };
+    getCandiddatesByIndividualNumbers();
+  }, []);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  if (isFetchCandidate)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+
   return (
     <div>
       <div className="max-w-[1200px] mx-auto flex flex-col gap-20">
-        {votingCandidatePositions.map((position, index) => {
+        {candidates?.map((position: any, index: any) => {
           const randomColor = cols[Math.floor(Math.random() * cols.length)];
-          const totalVotes = position.candidate.reduce(
-            (accumulator, obj) => accumulator + obj.totalVote,
+          const totalVotes = position.candidates.reduce(
+            (accumulator: any, obj: any) => accumulator + obj.totalVote,
             0
           );
           console.log(totalVotes);
@@ -53,32 +120,37 @@ const IndividualNumbers = () => {
                 </div>
               </div>
               <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10 justify-center">
-                {position.candidate.map((candidates, index) => {
-                  const maxObject = position.candidate.reduce(
-                    (max, obj) => (obj.totalVote > max.totalVote ? obj : max),
-                    position.candidate[0]
+                {position.candidates.map((candidates: any, index: any) => {
+                  const maxObject = position.candidates.reduce(
+                    (max: any, obj: any) =>
+                      obj.totalVote > max.totalVote ? obj : max,
+                    position.candidates[0]
                   );
                   return (
                     <div
                       key={index}
                       className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded relative ${
-                        candidates.totalVote === maxObject.totalVote
+                        candidates.totalVote !== maxObject.totalVote
                           ? "active bg-white"
                           : "duration-500"
                       }`}
                     >
-                      {candidates.totalVote === maxObject.totalVote && (
+                      {candidates.totalVote !== maxObject.totalVote && (
                         <div className="absolute -right-2 -top-3 ">
                           <img src={checked.src} alt="" />
                         </div>
                       )}
                       <div>
-                        <img src={candidates.image} alt="" />
+                        <img
+                          src={candidates.image}
+                          alt=""
+                          className="w-40 h-40 object-cover"
+                        />
                       </div>
                       <div className="capitalize pt-4">
-                        <div>{candidates.name}</div>
+                        <div>{candidates.candidateName}</div>
                         <div className="text-base pt-2">
-                          ({candidates.nickname})
+                          ({candidates.nickName})
                         </div>
                       </div>
                       <div className="text-blue-700 text-2xl font-bold pt-2">

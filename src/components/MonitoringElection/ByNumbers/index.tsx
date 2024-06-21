@@ -42,7 +42,7 @@ const StyledTab = styled((props: StyledTabProps) => (
   },
 }));
 
-const ByNumbers = () => {
+const ByNumbers = ({ electionId }: { electionId: string }) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -62,8 +62,8 @@ const ByNumbers = () => {
       </div>
       <div className="pt-[52px] pb-20">
         <div className="w-full h-full flex flex-col items-center">
-          {value === 0 && <TotalNumbers />}
-          {value === 1 && <IndividualNumbers />}
+          {value === 0 && <TotalNumbers electionId={electionId} />}
+          {value === 1 && <IndividualNumbers electionId={electionId} />}
         </div>
       </div>
     </div>

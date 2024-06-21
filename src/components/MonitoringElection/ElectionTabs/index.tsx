@@ -1,14 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ByNumbers from "../ByNumbers";
 import ByLineChart from "../ByLineChart";
 import ByBarChart from "../ByBarChart";
 import BySubGroup from "../BySubGroup";
+import { monitorTotalVote } from "@/utils/api";
 
-const ElectionTabs = () => {
+const ElectionTabs = ({ electionId }: { electionId: string }) => {
   const [activeTab, setActiveTab] = useState(1);
+  console.log(electionId);
   const handleTabClick = (tabNumber: number) => {
     setActiveTab(tabNumber);
   };
+
+  useEffect(() => {
+    const getMonitoringElectionData = async () => {
+      try {
+        const { data } = await monitorTotalVote(electionId);
+        if (data) console.log(data);
+      } catch (e: any) {
+        console.log(e);
+      }
+    };
+    getMonitoringElectionData();
+  }, []);
   return (
     <div>
       <div className="text-center text-blue-700 text-4xl font-semibold pt-[62px]">
@@ -66,7 +80,7 @@ const ElectionTabs = () => {
       </div>
       <div className="pt-[78px]">
         <div className="w-full h-full flex flex-col items-center">
-          {activeTab === 1 && <ByNumbers />}
+          {activeTab === 1 && <ByNumbers electionId={electionId} />}
           {activeTab === 2 && <ByLineChart />}
           {activeTab === 3 && <ByBarChart />}
           {activeTab === 4 && <BySubGroup />}

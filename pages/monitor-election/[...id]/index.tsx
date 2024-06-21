@@ -7,16 +7,21 @@ import toast from "react-hot-toast";
 
 const MonitorAnElectionDetails = () => {
   const router = useRouter();
+  const [electionId, setElectionId] = useState("");
   const [electionName, setElectionName] = useState("");
   const totalNumberRef = useRef<HTMLElement | null>(null);
   const individualNumberRef = useRef<HTMLElement | null>(null);
 
   const { id } = router.query;
+  let idType: string | string[] | undefined = id;
   useEffect(() => {
-    if (id) {
-      setElectionName(id[0]);
+    if (idType) {
+      setElectionName(idType[0]);
+      setElectionId(idType[1]);
     }
   }, [id]);
+
+  console.log(electionId);
 
   // const handleCopyClick = async () => {
   //   if (totalNumberRef.current) {
@@ -48,7 +53,8 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitortotn`}</span> */}
             <span ref={totalNumberRef}>
-              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections
+              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+              {electionId}
             </span>
           </div>
           <div
@@ -74,7 +80,8 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitorindn`}</span> */}
             <span ref={individualNumberRef}>
-              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections
+              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+              {electionId}
             </span>
           </div>
           <div
