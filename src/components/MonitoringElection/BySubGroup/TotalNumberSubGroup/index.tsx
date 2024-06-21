@@ -4,8 +4,18 @@ import { Pie } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 Chart.register(CategoryScale);
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { monitorSubgroup } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
 
-const TotalNumberSubGroup = () => {
+const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
+  const users = useCurrentUser();
+  const user = useUser();
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
   const data = {
     labels: ["Group 1", "Group 2", "Group 3", "Group 4"],
     datasets: [
@@ -63,6 +73,28 @@ const TotalNumberSubGroup = () => {
         Chart.unregister(ChartDataLabels);
       };
     }
+  }, []);
+
+  useEffect(() => {
+    const monitorElectionBySubgroup = async () => {
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await monitorSubgroup(electionId);
+        if (data) {
+          console.log(data);
+        }
+      } catch (e: any) {
+        console.log(e);
+      }
+    };
+    monitorElectionBySubgroup();
   }, []);
 
   return (

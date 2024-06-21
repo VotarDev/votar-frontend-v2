@@ -8,7 +8,7 @@ import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 
-const IndividualNumberSubGroup = () => {
+const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const [isMounted, setIsMounted] = useState(false);
   const randomColors = [
     "#b138b3",

@@ -43,7 +43,7 @@ const StyledTab = styled((props: StyledTabProps) => (
   },
 }));
 
-const BySubGroup = () => {
+const BySubGroup = ({ electionId }: { electionId: string }) => {
   const [value, setValue] = useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -61,8 +61,8 @@ const BySubGroup = () => {
         </StyledTabs>
       </div>
       <div className="w-full h-full flex flex-col items-center">
-        {value === 0 && <TotalNumberSubGroup />}
-        {value === 1 && <IndividualNumberSubGroup />}
+        {value === 0 && <TotalNumberSubGroup electionId={electionId} />}
+        {value === 1 && <IndividualNumberSubGroup electionId={electionId} />}
       </div>
     </div>
   );

@@ -31,6 +31,7 @@ const ballotCandidateUrl = "/voter/get-candidates";
 const enterVotesUrl = "/voter/vote-candidates";
 const monitorVoteUrl = "/user/monitor-total";
 const monitorIndividualNumberUrl = "user/monitor-individual";
+const monitorSubGroupUrl = "user/monitor-subgroup";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -166,4 +167,8 @@ export const monitorTotalVote = (id: string) => {
 
 export const monitorInidividualNumber = (id: string) => {
   return httpService.get(monitorIndividualNumberUrl + `/${id}`);
+};
+
+export const monitorSubgroup = (id: string) => {
+  return httpService.get(monitorSubGroupUrl + `/${id}`);
 };

@@ -90,7 +90,7 @@ const IndividualNumbers = ({ electionId }: { electionId: string }) => {
         {candidates?.map((position: any, index: any) => {
           const randomColor = cols[Math.floor(Math.random() * cols.length)];
           const totalVotes = position.candidates.reduce(
-            (accumulator: any, obj: any) => accumulator + obj.totalVote,
+            (accumulator: any, obj: any) => accumulator + obj.numberOfVotes,
             0
           );
           console.log(totalVotes);
@@ -123,19 +123,19 @@ const IndividualNumbers = ({ electionId }: { electionId: string }) => {
                 {position.candidates.map((candidates: any, index: any) => {
                   const maxObject = position.candidates.reduce(
                     (max: any, obj: any) =>
-                      obj.totalVote > max.totalVote ? obj : max,
+                      obj.numberOfVotes > max.numberOfVotes ? obj : max,
                     position.candidates[0]
                   );
                   return (
                     <div
                       key={index}
                       className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded relative ${
-                        candidates.totalVote !== maxObject.totalVote
+                        candidates.numberOfVotes === maxObject.numberOfVotes
                           ? "active bg-white"
                           : "duration-500"
                       }`}
                     >
-                      {candidates.totalVote !== maxObject.totalVote && (
+                      {candidates.numberOfVotes === maxObject.numberOfVotes && (
                         <div className="absolute -right-2 -top-3 ">
                           <img src={checked.src} alt="" />
                         </div>
@@ -154,7 +154,7 @@ const IndividualNumbers = ({ electionId }: { electionId: string }) => {
                         </div>
                       </div>
                       <div className="text-blue-700 text-2xl font-bold pt-2">
-                        {candidates.totalVote} Votes
+                        {candidates.numberOfVotes} Votes
                       </div>
                     </div>
                   );

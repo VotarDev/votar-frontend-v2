@@ -83,7 +83,7 @@ const ElectionTabs = ({ electionId }: { electionId: string }) => {
           {activeTab === 1 && <ByNumbers electionId={electionId} />}
           {activeTab === 2 && <ByLineChart />}
           {activeTab === 3 && <ByBarChart />}
-          {activeTab === 4 && <BySubGroup />}
+          {activeTab === 4 && <BySubGroup electionId={electionId} />}
         </div>
       </div>
     </div>
