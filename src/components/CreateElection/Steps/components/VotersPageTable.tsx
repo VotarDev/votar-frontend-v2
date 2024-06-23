@@ -14,13 +14,16 @@ import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import { el } from "date-fns/locale";
 
 interface VotersPageTableProps {
+  electionId?: string;
   selectedRows: VoterResponse[];
   setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
 }
 
 const VotersPageTable: React.FC<VotersPageTableProps> = ({
+  electionId,
   selectedRows,
   setSelectedRows,
 }) => {
@@ -120,9 +123,9 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
 
       try {
         if (typeof window !== "undefined") {
-          const electionId = localStorage.getItem("ElectionId");
+          const electionID = localStorage.getItem("ElectionId");
           const { data } = await getVoters(USER_ID, {
-            election_id: electionId,
+            election_id: electionId || electionID,
           });
           if (data) {
             console.log(data.data);
@@ -144,9 +147,9 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     };
 
     handleResponseExported();
-  }, []);
+  }, [electionId]);
 
-  console.log(trackChanges.length > 0);
+  console.log(electionId);
 
   if (isFetchVoters) {
     return (

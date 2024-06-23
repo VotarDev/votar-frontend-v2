@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import {
   Checkbox,
   CircularProgress,
@@ -7,19 +7,25 @@ import {
 } from "@mui/material";
 import VotersPageTable from "../CreateElection/Steps/components/VotersPageTable";
 import { VoterResponse } from "@/utils/types";
-import { sendVoterCred } from "@/utils/api";
+import { getElectionById, sendVoterCred } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const VoterPage = () => {
   const [preference, setPreference] = useState("");
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const user = useUser();
+  const [election, setElection] = useState<any>([]);
+  const [electionID, setElectionID] = useState("");
+  const [error, setError] = useState("");
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -34,6 +40,46 @@ const VoterPage = () => {
     const inputValue = e.target.value;
     if (inputValue.length <= maxCharacterLength) setText(inputValue);
   };
+
+  const { id } = router.query;
+  let idType: string | string[] | undefined = id;
+
+  useEffect(() => {
+    if (Array.isArray(idType)) {
+      setElectionID(idType[1]);
+    }
+  }, [id, electionID]);
+  console.log(electionID);
+
+  useEffect(() => {
+    const getElection = async () => {
+      setIsLoading(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        if (electionID) {
+          const electionData = { election_id: electionID };
+          const { data } = await getElectionById(electionData);
+          if (data) {
+            setElection(data.data);
+            setIsLoading(false);
+          }
+        }
+      } catch (e: any) {
+        setError(e?.response?.data?.message);
+        console.log(e?.response?.data?.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    getElection();
+  }, [electionID]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -165,6 +211,7 @@ const VoterPage = () => {
         </form>
       </div>
       <VotersPageTable
+        electionId={electionID}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
       />
