@@ -32,7 +32,6 @@ function Body({ positions, setPositions, electionId }: any) {
       candidate_name: "",
       candidate_nickname: "",
       more_details: "",
-
       candidate_picture: null,
       filename: "",
       docsname: "",
