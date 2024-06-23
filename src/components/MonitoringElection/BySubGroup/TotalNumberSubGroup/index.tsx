@@ -7,8 +7,26 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 import { monitorSubgroup } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
+import { sub } from "date-fns";
+import { set } from "lodash";
+import { CircularProgress } from "@mui/material";
+import { tr } from "date-fns/locale";
 
 const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
+  const [subGroup, setSubGroup] = useState<any>(null);
+  const [isFetchSubGroup, setIsFetchSubGroup] = useState(false);
+  const medias = ["Media", "Engineering", "Logistics", "Engineering", "Media"];
+  const mediaCounts = subGroup?.reduce((acc: any, media: any) => {
+    acc[media] = (acc[media] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Step 2: Extract counts, maintaining duplicates
+
+  const countsArray = mediaCounts ? Object.values(mediaCounts) : [];
+  const uniqueLabels = Array.from(new Set(subGroup));
+
+  console.log(countsArray); // [2, 2, 1]
   const users = useCurrentUser();
   const user = useUser();
   let USER_ID = users?.data?.data
@@ -17,11 +35,11 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
     ? users?.id
     : user?.user?.id;
   const data = {
-    labels: ["Group 1", "Group 2", "Group 3", "Group 4"],
+    labels: uniqueLabels,
     datasets: [
       {
         label: "No of Votes",
-        data: [10, 15, 15, 25],
+        data: countsArray,
         backgroundColor: [
           "rgba(255, 186, 73, 1)",
           "rgba(204, 219, 220, 1)",
@@ -77,6 +95,7 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
 
   useEffect(() => {
     const monitorElectionBySubgroup = async () => {
+      setIsFetchSubGroup(true);
       if (users?.data) {
         setAuthToken(users.data.data.cookie);
       } else {
@@ -89,13 +108,23 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
         const { data } = await monitorSubgroup(electionId);
         if (data) {
           console.log(data);
+          setSubGroup(data.data.subgroups);
+          setIsFetchSubGroup(false);
         }
       } catch (e: any) {
         console.log(e);
+        setIsFetchSubGroup(false);
       }
     };
     monitorElectionBySubgroup();
   }, []);
+
+  if (isFetchSubGroup)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
 
   return (
     <div className="mb-20 lg:w-[1200px] mx-auto w-full flex flex-row bg-slate-50 px-10 p-[50px] border-l-4 border-l-[#015CE9] justify-center">
