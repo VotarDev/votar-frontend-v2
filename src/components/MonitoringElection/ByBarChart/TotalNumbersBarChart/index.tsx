@@ -1,11 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Chart } from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
+import setAuthToken from "@/utils/setAuthToken";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import { monitorBarChart } from "@/utils/api";
+import { CircularProgress } from "@mui/material";
 Chart.register(CategoryScale);
 
-const TotalNumbersBarChart = () => {
+const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
   const [voteData, setVoteData] = useState([{ x: "Candidates", y: 200 }]);
+  const [isFetchBarData, setIsFetchBarData] = useState(false);
+  const [barData, setBarData] = useState<any>(null);
+  const users = useCurrentUser();
+  const user = useUser();
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
   const data = {
     labels: voteData.map((x) => x.x),
     datasets: [
@@ -20,6 +33,46 @@ const TotalNumbersBarChart = () => {
       },
     ],
   };
+
+  useEffect(() => {
+    const monitorElectionBySubgroup = async () => {
+      setIsFetchBarData(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await monitorBarChart(electionId);
+        const bars = {
+          datasets: [
+            {
+              label: "No of Votes",
+              data: data.data[0],
+              backgroundColor: "#015CE9",
+              borderColor: "#015CE9",
+              tension: 0.1,
+            },
+          ],
+        };
+
+        if (data.data) {
+          console.log(data.data);
+          setBarData(bars);
+          setIsFetchBarData(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchBarData(false);
+      }
+    };
+    monitorElectionBySubgroup();
+  }, []);
+  // console.log(barData && barData[0].totalVoters);
+
   const options = {
     maxBarThickness: 100,
     scales: {
@@ -57,10 +110,16 @@ const TotalNumbersBarChart = () => {
       },
     },
   };
+  if (isFetchBarData)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
   return (
     <div className="mb-20 max-w-[1200px] mx-auto flex flex-row bg-slate-50 px-10 p-[90px] border-l-4 border-l-[#015CE9]">
       <div className="w-[812px] pb-20 pt-10">
-        <Bar data={data} options={options} />
+        {barData && <Bar data={barData} options={options} />}
       </div>
     </div>
   );

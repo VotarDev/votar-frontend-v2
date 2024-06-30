@@ -82,7 +82,7 @@ const ElectionTabs = ({ electionId }: { electionId: string }) => {
         <div className="w-full h-full flex flex-col items-center">
           {activeTab === 1 && <ByNumbers electionId={electionId} />}
           {activeTab === 2 && <ByLineChart />}
-          {activeTab === 3 && <ByBarChart />}
+          {activeTab === 3 && <ByBarChart electionId={electionId} />}
           {activeTab === 4 && <BySubGroup electionId={electionId} />}
         </div>
       </div>

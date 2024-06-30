@@ -122,7 +122,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
       }
 
       try {
-        if (typeof window !== "undefined" && electionId) {
+        if (typeof window !== "undefined" || electionId) {
           const electionID = localStorage.getItem("ElectionId");
           const { data } = await getVoters(USER_ID, {
             election_id: electionId || electionID,

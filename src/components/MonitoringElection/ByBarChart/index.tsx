@@ -43,7 +43,7 @@ const StyledTab = styled((props: StyledTabProps) => (
   },
 }));
 
-const ByBarChart = () => {
+const ByBarChart = ({ electionId }: { electionId: string }) => {
   const [value, setValue] = useState(0);
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -62,7 +62,7 @@ const ByBarChart = () => {
         </StyledTabs>
       </div>
       <div className="w-full h-full flex flex-col items-center">
-        {value === 0 && <TotalNumbersBarChart />}
+        {value === 0 && <TotalNumbersBarChart electionId={electionId} />}
         {value === 1 && <IndividualNumberBarChart />}
       </div>
     </div>
