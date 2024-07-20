@@ -30,6 +30,7 @@ export interface Candidate {
   candidate_nickname: string;
   more_details: string;
   candidate_picture: Blob | MediaSource;
+  candidate_picture_base64?: string | undefined;
   media: Media;
   votes: number;
   filename: string;

@@ -33,6 +33,7 @@ function Body({ positions, setPositions, electionId }: any) {
       candidate_nickname: "",
       more_details: "",
       candidate_picture: null,
+      candidate_picture_base64: null,
       filename: "",
       docsname: "",
       media: { type: "file", docs: null },
@@ -84,14 +85,19 @@ function Body({ positions, setPositions, electionId }: any) {
     const file = e.target.files?.[0];
 
     if (file) {
-      const updatedPositions = [...positions];
-      const candidate =
-        updatedPositions[positionIndex].candidates[candidateIndex];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedPositions = [...positions];
+        const candidate =
+          updatedPositions[positionIndex].candidates[candidateIndex];
 
-      candidate.candidate_picture = file;
-      candidate.filename = file.name;
+        candidate.candidate_picture = file;
+        candidate.candidate_picture_base64 = reader.result as string;
+        candidate.filename = file.name;
 
-      setPositions(updatedPositions);
+        setPositions(updatedPositions);
+      };
+      reader.readAsDataURL(file); // Convert the file to Base64 for localStorage
     }
   };
 

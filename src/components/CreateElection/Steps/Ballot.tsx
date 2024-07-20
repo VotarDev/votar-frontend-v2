@@ -109,7 +109,11 @@ const Ballot = ({ positions, setPositions }: any) => {
             </button>
           </div>
           <div>
-            <Link href="/cast-votes" rel="noopener noreferrer" target="_blank">
+            <Link
+              href={`/cast-votes/${election?.election_id}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
               <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-xl text-xs p-4 font-semibold text-zinc-100 lg:p-0">
                 <span>
                   <AiOutlineEye />

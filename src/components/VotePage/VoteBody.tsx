@@ -126,7 +126,7 @@ const VoteBody = () => {
                         )}
 
                         <div>
-                          {/* {preview.show_pictures && (
+                          {preview.show_pictures && (
                             <div className="mb-3">
                               <img
                                 src={`${URL.createObjectURL(
@@ -136,7 +136,7 @@ const VoteBody = () => {
                                 alt={`Image for ${candidate.candidate_name}`}
                               />
                             </div>
-                          )} */}
+                          )}
                           <div className="capitalize">
                             <div>{candidate.candidate_name}</div>
                             <div className="text-base">
