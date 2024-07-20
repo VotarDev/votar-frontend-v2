@@ -276,7 +276,7 @@ const Castvote = () => {
                             </div>
                             <div
                               className="text-base text-blue-700 underline cursor-pointer font-normal"
-                              onClick={() => handleDetails(candidate)}
+                              //   onClick={() => handleDetails(candidate)}
                             >
                               More Detials
                             </div>
