@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useRef } from "react";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { getElectionById } from "@/utils/api";
@@ -11,6 +11,10 @@ import { MdDelete } from "react-icons/md";
 import leftline from "../../../public/assets/images/left-line.svg";
 import placeholder from "../../../public/assets/images/Placeholder.png";
 import rightline from "../../../public/assets/images/right-line.svg";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import { IoCopy } from "react-icons/io5";
+import { AiOutlineEye, AiOutlineLink } from "react-icons/ai";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -20,6 +24,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const [electionID, setElectionID] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
+  const textRef = useRef<HTMLElement | null>(null);
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -203,6 +208,20 @@ const BallotsPage = ({ position, setPosition }: any) => {
     });
   };
 
+  const handleCopyClick = async () => {
+    if (textRef.current) {
+      const selectedText = textRef.current.innerText;
+      try {
+        await navigator.clipboard.writeText(selectedText);
+
+        toast.success("Copied to clipboard!");
+      } catch (error) {
+        console.error("Failed to copy text:", error);
+        toast.error("Copy operation failed. Please try again.");
+      }
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="my-10">
@@ -218,7 +237,41 @@ const BallotsPage = ({ position, setPosition }: any) => {
   return (
     <div className="my-[60px]">
       <Header electionDetails={election} />
-      <div>
+      <div className="lg:mt-10 mt-5 flex lg:justify-end items-center lg:gap-10 gap-2 flex-wrap justify-center">
+        <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
+          <div>
+            Election ID: <span ref={textRef}>{election?.election_id}</span>
+          </div>
+          <div onClick={handleCopyClick} className="cursor-pointer">
+            <IoCopy />
+          </div>
+        </div>
+        <div className="flex lg:gap-7 gap-2 flex-wrap justify-center">
+          <div>
+            <button className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0">
+              <span>
+                <AiOutlineLink />
+              </span>
+              Copy Election Link
+            </button>
+          </div>
+          <div>
+            <Link
+              href={`/cast-votes/${election?.election_id}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-xl text-xs p-4 font-semibold text-zinc-100 lg:p-0">
+                <span>
+                  <AiOutlineEye />
+                </span>
+                Preview Ballot
+              </button>
+            </Link>
+          </div>
+        </div>
+      </div>
+      <div className="mt-12">
         <form>
           {position.map((position: any, positionIndex: any) => (
             <div

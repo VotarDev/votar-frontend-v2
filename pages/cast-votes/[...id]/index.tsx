@@ -191,7 +191,7 @@ const Castvote = () => {
 
   if (isLoading) {
     return (
-      <div className="my-10">
+      <div className="my-10 text-center">
         <CircularProgress size={30} style={{ color: "#015CE9" }} />
       </div>
     );
