@@ -4,13 +4,19 @@ import { Chart, ChartConfiguration } from "chart.js/auto";
 import { Line, Bar } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 Chart.register(CategoryScale);
-import { de } from "date-fns/locale";
+import { de, el } from "date-fns/locale";
 import "chartjs-adapter-date-fns";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
+import { monitorInidividualNumber } from "@/utils/api";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
 
-const IndividualNumberBarChart = () => {
+const IndividualNumberBarChart = ({ electionId }: { electionId: string }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [canidates, setCanidates] = useState<any>(null);
+  const [isFetchBarData, setIsFetchBarData] = useState(false);
   const randomColors = [
     "#b138b3",
     "#00ff00",
@@ -19,9 +25,67 @@ const IndividualNumberBarChart = () => {
     "#93241F",
     "#406b83",
   ];
+  const users = useCurrentUser();
+  const user = useUser();
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    const monitorIndividualNumberBarChart = async () => {
+      setIsFetchBarData(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await monitorInidividualNumber(electionId);
+        if (data.data) {
+          const transformCanidates = data.data[0].map((candidate: any) => ({
+            ...candidate,
+            datasets: [
+              { x: candidate.candidateName, y: candidate.numberOfVotes },
+            ],
+          }));
+          const flattenedData = transformCanidates.flat();
+          const groupedCandidates = flattenedData.reduce(
+            (acc: any, candidate: any) => {
+              const { position } = candidate;
+              if (!acc[position]) {
+                acc[position] = [];
+              }
+              acc[position].push(candidate);
+              return acc;
+            },
+            {}
+          );
+          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
+            ([position, candidates]) => ({
+              position,
+              candidates,
+            })
+          );
+
+          console.log(data);
+          setIsFetchBarData(false);
+          setCanidates(groupedCandidatesArray);
+          console.log(transformCanidates);
+        }
+      } catch (error) {
+        setIsFetchBarData(false);
+        console.log(error);
+      }
+    };
+    monitorIndividualNumberBarChart();
+  }, [electionId]);
+
+  console.log(canidates);
+
   const option = {
     responsive: true,
     maintainAspectRatio: false,
@@ -63,10 +127,17 @@ const IndividualNumberBarChart = () => {
     },
   };
 
+  if (isFetchBarData)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+
   return (
     <>
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-20">
-        {votingCandidateBarGraph.map((position, index) => {
+      <div className="max-w-[1200px] mx-auto flex flex-col gap-20 mb-20">
+        {canidates?.map((position: any, index: number) => {
           const generateRandomColor =
             randomColors[Math.floor(Math.random() * randomColors.length)];
           const predefinedColors = [
@@ -78,20 +149,24 @@ const IndividualNumberBarChart = () => {
             "#406b83",
           ];
           const borderColors = generateUniqueColors(
-            position.candidates.length,
+            position.length,
             predefinedColors
           );
           const dat = () => {
             return {
-              labels: position.candidates.map((col) => col.name),
-              datasets: position.candidates.map((col, i) => {
+              labels: position.candidates.map((col: any) => col.candidateName),
+              datasets: position.candidates.map((col: any, i: number) => {
                 return {
-                  label: col.name,
+                  label: col.candidateName,
                   data: col.datasets,
                   borderColor:
-                    col.name === "Abstained" ? "#000000" : borderColors[i],
+                    col.candidateName === "Abstained"
+                      ? "#000000"
+                      : borderColors[i],
                   backgroundColor:
-                    col.name === "Abstained" ? "#000000" : borderColors[i],
+                    col.candidateName === "Abstained"
+                      ? "#000000"
+                      : borderColors[i],
                   borderWidth: 2,
                 };
               }),

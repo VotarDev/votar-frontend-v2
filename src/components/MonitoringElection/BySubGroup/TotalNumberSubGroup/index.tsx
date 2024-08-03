@@ -26,7 +26,51 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const countsArray = mediaCounts ? Object.values(mediaCounts) : [];
   const uniqueLabels = Array.from(new Set(subGroup));
 
-  console.log(countsArray); // [2, 2, 1]
+  const predefinedColors: string[] = [
+    "rgba(255, 186, 73, 1)",
+    "rgba(204, 219, 220, 1)",
+    "rgba(0, 18, 47, 1)",
+    "rgba(166, 61, 64, 1)",
+  ];
+
+  type RgbaArray = [number, number, number, number];
+
+  function rgbaToRgbArray(rgba: string): RgbaArray {
+    const rgbaArray = rgba.slice(5, -1).split(", ").map(Number);
+    return [
+      rgbaArray[0],
+      rgbaArray[1],
+      rgbaArray[2],
+      rgbaArray[3],
+    ] as RgbaArray;
+  }
+
+  function generateShade([r, g, b, a]: RgbaArray): string {
+    const variation = 30;
+    const randomInt = (base: number): number =>
+      Math.max(
+        0,
+        Math.min(
+          255,
+          base + Math.floor(Math.random() * (variation * 2 + 1)) - variation
+        )
+      );
+    return `rgba(${randomInt(r)}, ${randomInt(g)}, ${randomInt(b)}, ${a})`;
+  }
+
+  function generateShadesOfColors(colors: string[], length: number): string[] {
+    const shades = new Set<string>();
+    const rgbaColors = colors.map(rgbaToRgbArray);
+
+    while (shades.size < length) {
+      const baseColor = rgbaColors[shades.size % rgbaColors.length];
+      shades.add(generateShade(baseColor));
+    }
+
+    return Array.from(shades);
+  }
+
+  console.log(uniqueLabels); // [2, 2, 1]
   const users = useCurrentUser();
   const user = useUser();
   let USER_ID = users?.data?.data
@@ -40,18 +84,13 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
       {
         label: "No of Votes",
         data: countsArray,
-        backgroundColor: [
-          "rgba(255, 186, 73, 1)",
-          "rgba(204, 219, 220, 1)",
-          "rgba(0, 18, 47, 1)",
-          "rgba(166, 61, 64, 1)",
-        ],
-        borderColor: [
-          "rgba(255, 186, 73, 1)",
-          "rgba(204, 219, 220, 1)",
-          "rgba(0, 18, 47, 1)",
-          "rgba(166, 61, 64, 1)",
-        ],
+        // add colors to the chart according to the length of uniqueLabels
+
+        backgroundColor: generateShadesOfColors(
+          predefinedColors,
+          uniqueLabels.length
+        ),
+
         borderWidth: 1,
       },
     ],
@@ -106,9 +145,9 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
       }
       try {
         const { data } = await monitorSubgroup(electionId);
-        if (data) {
-          console.log(data);
-          setSubGroup(data.data.subgroups);
+        if (data.data) {
+          console.log(data.data);
+          setSubGroup(data.data[0].subGroups);
           setIsFetchSubGroup(false);
         }
       } catch (e: any) {

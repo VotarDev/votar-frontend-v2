@@ -29,10 +29,13 @@ const updateCandidateUrl = "/user/update-candidate";
 const voterLoginUrl = "/voter/login";
 const ballotCandidateUrl = "/voter/get-candidates";
 const enterVotesUrl = "/voter/vote-candidates";
-const monitorVoteUrl = "/user/monitor-total";
-const monitorIndividualNumberUrl = "user/monitor-individual";
-const monitorSubGroupUrl = "user/monitor-subgroup";
-const monitorBarChartUrl = "user/monitor-barchart";
+const monitorVoteUrl = "/user/monitor-totalNumber";
+const monitorIndividualNumberUrl = "user/monitor-individualNumber";
+const monitorSubGroupUrl = "user/monitor-subgroupTotal";
+const monitorIndividualSubGroupUrl = "user/monitor-subgroupIndividual";
+const monitorBarChartUrl = "user/monitor-barchartTotal";
+const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
+const monitorTotalLineChartUrl = "user/monitor-linechart";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -163,17 +166,29 @@ export const enterVotes = (data: any) => {
 };
 
 export const monitorTotalVote = (id: string) => {
-  return httpService.get(monitorVoteUrl + `/${id}`);
+  return httpService.get(monitorVoteUrl, { params: { id } });
 };
 
 export const monitorInidividualNumber = (id: string) => {
-  return httpService.get(monitorIndividualNumberUrl + `/${id}`);
+  return httpService.get(monitorIndividualNumberUrl, { params: { id } });
 };
 
 export const monitorSubgroup = (id: string) => {
-  return httpService.get(monitorSubGroupUrl + `/${id}`);
+  return httpService.get(monitorSubGroupUrl, { params: { id } });
+};
+
+export const monitorIndividualSubgroup = (id: string) => {
+  return httpService.get(monitorIndividualSubGroupUrl, { params: { id } });
 };
 
 export const monitorBarChart = (id: string) => {
-  return httpService.get(monitorBarChartUrl + `/${id}`);
+  return httpService.get(monitorBarChartUrl, { params: { id } });
+};
+
+export const monitorBarChartIndividual = (id: string) => {
+  return httpService.get(monitorBarChartIndividualUrl, { params: { id } });
+};
+
+export const monitorTotalLineChart = (id: string) => {
+  return httpService.get(monitorTotalLineChartUrl, { params: { id } });
 };

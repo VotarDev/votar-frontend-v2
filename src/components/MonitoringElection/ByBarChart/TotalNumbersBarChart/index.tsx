@@ -51,7 +51,7 @@ const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
           datasets: [
             {
               label: "No of Votes",
-              data: data.data[0],
+              data: { total_Number_Of_Votes: data.data[1]?.totalNumberOfVotes },
               backgroundColor: "#015CE9",
               borderColor: "#015CE9",
               tension: 0.1,

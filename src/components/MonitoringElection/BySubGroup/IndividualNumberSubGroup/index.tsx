@@ -7,9 +7,65 @@ import "chartjs-adapter-date-fns";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { useCurrentUser, useUser } from "@/utils/hooks";
+import { monitorIndividualSubgroup } from "@/utils/api";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
+
+const CustomLegend = ({ subgroups }: any) => {
+  return (
+    <div className="custom-legend">
+      {Object.keys(subgroups).map((key, index) => (
+        <div
+          key={index}
+          className="legend-item"
+          style={{ display: "flex", alignItems: "center" }}
+        >
+          <span
+            className="legend-color"
+            style={{
+              display: "inline-block",
+              width: "20px",
+              height: "20px",
+              backgroundColor: subgroups[key],
+              marginRight: "10px",
+            }}
+          ></span>
+          <span className="legend-label">{key}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const [isFetchSubGroup, setIsFetchSubGroup] = useState(false);
+  const [candidates, setCandidates] = useState<any>(null);
+  const [subGroup, setSubGroup] = useState<any>(null);
+
+  const mediaCounts = subGroup?.reduce((acc: any, media: any) => {
+    acc[media] = (acc[media] || 0) + 1;
+    return acc;
+  }, {});
+
+  const countsArray = mediaCounts ? Object.values(mediaCounts) : [];
+  const uniqueLabels = Array.from(new Set(subGroup));
+
+  console.log(uniqueLabels);
+  const users = useCurrentUser();
+  const user = useUser();
+
+  const subgroupColors: any = {
+    math: "rgba(255, 186, 73, 1)", // Example color
+    english: "rgba(204, 219, 220, 1)", // Example color
+    Media: "rgba(0, 18, 47, 1)", // Example color
+    Advertisement: "rgba(66, 135, 245, 1)", // Blue color
+    Action: "rgba(166, 61, 64, 1)", // Red color
+
+    // Add other subgroups and their colors here
+  };
+
   const randomColors = [
     "#b138b3",
     "#00ff00",
@@ -99,21 +155,98 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const monitorElectionBySubgroup = async () => {
+      setIsFetchSubGroup(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const { data } = await monitorIndividualSubgroup(electionId);
+        if (data.data) {
+          const flattenedData = data.data[0].flat();
+          const groupedCandidates = flattenedData.reduce(
+            (acc: any, candidate: any) => {
+              const { position } = candidate;
+              if (!acc[position]) {
+                acc[position] = [];
+              }
+              acc[position].push(candidate);
+              return acc;
+            },
+            {}
+          );
+          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
+            ([position, candidates]) => ({
+              position,
+              candidates,
+            })
+          );
+          console.log(groupedCandidatesArray);
+          setSubGroup(data.data[0].subgroups);
+          setCandidates(groupedCandidatesArray);
+          console.log(data.data[0]);
+
+          setIsFetchSubGroup(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchSubGroup(false);
+      }
+    };
+    monitorElectionBySubgroup();
+  }, [electionId]);
+
+  const chartData = candidates
+    ? candidates[0].candidates?.map((candidate: any) => {
+        const subgroupCounts = candidate.subgroups.reduce(
+          (acc: any, subgroup: any) => {
+            acc[subgroup] = (acc[subgroup] || 0) + 1;
+            return acc;
+          },
+          {}
+        );
+
+        const labels = Object.keys(subgroupCounts);
+        const data = labels.map((label) => subgroupCounts[label]);
+        const backgroundColor = labels.map((label) => subgroupColors[label]);
+        const borderColor = labels.map((label) => subgroupColors[label]);
+
+        return {
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: backgroundColor,
+              borderColor: borderColor,
+              borderWidth: 1,
+            },
+          ],
+        };
+      })
+    : null;
+
+  console.log(chartData);
+
+  if (isFetchSubGroup)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+
   return (
     <>
       <div className="max-w-[1200px] mx-auto flex flex-col gap-20 pb-20">
-        {subGroupContents.map((items, index) => {
+        {candidates?.map((items: any, index: any) => {
           const generateRandomColor =
             randomColors[Math.floor(Math.random() * randomColors.length)];
-          const backgroundColors = items.candidates[0].datasets.map(
-            (_, i) =>
-              [
-                "rgba(255, 186, 73, 1)",
-                "rgba(204, 219, 220, 1)",
-                "rgba(0, 18, 47, 1)",
-                "rgba(166, 61, 64, 1)",
-              ][i]
-          );
+
           return (
             <div
               key={index}
@@ -142,62 +275,65 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
                 </div>
               </div>
               <div className="mx-auto pt-10 relative flex justify-center  gap-10">
-                {items.candidates.map((candidate, candidateIndex) => (
+                <CustomLegend subgroups={subgroupColors} />
+                {items.candidates.map((candidate: any, candidateIndex: any) => (
                   <>
                     <div key={candidateIndex}>
                       <Pie
                         //@ts-ignore
                         options={option}
-                        data={{
-                          labels: Array.from(
-                            { length: items.candidates[0].datasets.length },
-                            (_, i) => `Group ${i + 1}`
-                          ),
-                          datasets: [
-                            {
-                              data: candidate.datasets,
-                              backgroundColor: [
-                                "rgba(255, 186, 73, 1)",
-                                "rgba(204, 219, 220, 1)",
-                                "rgba(0, 18, 47, 1)",
-                                "rgba(166, 61, 64, 1)",
-                              ],
-                              borderColor: [
-                                "rgba(255, 186, 73, 1)",
-                                "rgba(204, 219, 220, 1)",
-                                "rgba(0, 18, 47, 1)",
-                                "rgba(166, 61, 64, 1)",
-                              ],
-                              borderWidth: 1,
-                            },
-                          ],
-                        }}
+                        // data={{
+                        //   labels: Array.from(
+                        //     { length: items.candidates[0].datasets.length },
+                        //     (_, i) => `Group ${i + 1}`
+                        //   ),
+                        //   datasets: [
+                        //     {
+                        //       data: candidate.datasets,
+                        //       backgroundColor: [
+                        //         "rgba(255, 186, 73, 1)",
+                        //         "rgba(204, 219, 220, 1)",
+                        //         "rgba(0, 18, 47, 1)",
+                        //         "rgba(166, 61, 64, 1)",
+                        //       ],
+                        //       borderColor: [
+                        //         "rgba(255, 186, 73, 1)",
+                        //         "rgba(204, 219, 220, 1)",
+                        //         "rgba(0, 18, 47, 1)",
+                        //         "rgba(166, 61, 64, 1)",
+                        //       ],
+                        //       borderWidth: 1,
+                        //     },
+                        //   ],
+                        // }}
+
+                        data={chartData[candidateIndex]}
                         /** @ts-ignore */
                         plugins={[ChartDataLabels]}
                       />
                       <div className="flex justify-center py-10 text-xl font-semibold">
-                        {candidate.name}
+                        {candidate.candidateName}
                       </div>
                     </div>
                   </>
                 ))}
                 <div>
                   <div className="flex flex-col gap-3 mt-5">
-                    {Array.from(
+                    {/* {Array.from(
                       { length: items.candidates[0].datasets.length },
                       (_, i) => `Group ${i + 1}`
                     ).map((item, i) => (
                       <div key={i} className="flex items-center">
                         <div
                           className="w-4 h-4 mr-2"
-                          style={{
-                            backgroundColor: backgroundColors[i],
-                          }}
+                          // style={{
+                          //   backgroundColor: backgroundColors[i],
+                          // }}
                         ></div>
 
                         <div>{item}</div>
                       </div>
-                    ))}
+                    ))} */}
                   </div>
                 </div>
               </div>
