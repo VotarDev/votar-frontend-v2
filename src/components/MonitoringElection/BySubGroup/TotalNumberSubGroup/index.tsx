@@ -15,6 +15,7 @@ import { tr } from "date-fns/locale";
 const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const [subGroup, setSubGroup] = useState<any>(null);
   const [isFetchSubGroup, setIsFetchSubGroup] = useState(false);
+  const [candidates, setCandidates] = useState<any>(null);
   const medias = ["Media", "Engineering", "Logistics", "Engineering", "Media"];
   const mediaCounts = subGroup?.reduce((acc: any, media: any) => {
     acc[media] = (acc[media] || 0) + 1;
@@ -32,6 +33,19 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
     "rgba(0, 18, 47, 1)",
     "rgba(166, 61, 64, 1)",
   ];
+
+  const subgroupColors: any = {
+    math: "rgba(255, 186, 73, 1)", // Example color
+    english: "rgba(204, 219, 220, 1)", // Example color
+    media: "rgba(0, 18, 47, 1)", // Example color
+    advertisement: "rgba(66, 135, 245, 1)", // Blue color
+    action: "rgba(166, 61, 64, 1)", // Red color
+    logistics: "#00593d",
+    engineering: "#e37e1f",
+    bio: "#49b621",
+    chemistry: "#9e49ff",
+    // Add other subgroups and their colors here
+  };
 
   type RgbaArray = [number, number, number, number];
 
@@ -72,12 +86,42 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
 
   console.log(uniqueLabels); // [2, 2, 1]
   const users = useCurrentUser();
-  const user = useUser();
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+
+  const chartData = candidates
+    ? candidates?.map((candidate: any) => {
+        const subgroupCounts = candidate.subGroups.reduce(
+          (acc: any, subgroup: any) => {
+            acc[subgroup] = (acc[subgroup] || 0) + 1;
+            return acc;
+          },
+          {}
+        );
+
+        const labels = Object.keys(subgroupCounts);
+        const data = labels.map((label) => subgroupCounts[label]);
+        const backgroundColor = labels.map(
+          (label) => subgroupColors[label.toLowerCase()]
+        );
+        const borderColor = labels.map(
+          (label) => subgroupColors[label.toLowerCase()]
+        );
+
+        return {
+          labels: labels,
+          datasets: [
+            {
+              data: data,
+              backgroundColor: backgroundColor,
+              borderColor: borderColor,
+              borderWidth: 1,
+            },
+          ],
+        };
+      })
+    : null;
+
+  console.log(chartData);
+
   const data = {
     labels: uniqueLabels,
     datasets: [
@@ -147,6 +191,7 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
         const { data } = await monitorSubgroup(electionId);
         if (data.data) {
           console.log(data.data);
+          setCandidates(data.data);
           setSubGroup(data.data[0].subGroups);
           setIsFetchSubGroup(false);
         }
@@ -156,7 +201,7 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
       }
     };
     monitorElectionBySubgroup();
-  }, []);
+  }, [electionId]);
 
   if (isFetchSubGroup)
     return (
@@ -168,8 +213,13 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
   return (
     <div className="mb-20 lg:w-[1200px] mx-auto w-full flex flex-row bg-slate-50 px-10 p-[50px] border-l-4 border-l-[#015CE9] justify-center">
       <div className="w-[637px]">
-        {/* @ts-ignore */}
-        <Pie data={data} options={option} plugins={[ChartDataLabels]} />
+        {chartData && (
+          <Pie
+            data={chartData[0]} // @ts-ignore
+            options={option} // @ts-ignore
+            plugins={[ChartDataLabels]}
+          />
+        )}
       </div>
     </div>
   );

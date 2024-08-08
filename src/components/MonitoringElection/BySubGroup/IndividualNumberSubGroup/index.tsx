@@ -11,11 +11,24 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import { monitorIndividualSubgroup } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import { sub } from "date-fns";
 
-const CustomLegend = ({ subgroups }: any) => {
+const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
+  const subgroupCounts = candidateSubgroup.reduce(
+    (acc: any, candidate: any) => {
+      const subgroup = candidate.subgroups;
+      subgroup.forEach((sub: any) => {
+        acc[sub] = (acc[sub] || 0) + 1;
+      });
+      return acc;
+    },
+    {}
+  );
+  console.log(subgroupCounts);
+
   return (
-    <div className="custom-legend">
-      {Object.keys(subgroups).map((key, index) => (
+    <div className="flex flex-col gap-2">
+      {Object.keys(subgroupCounts).map((key, index) => (
         <div
           key={index}
           className="legend-item"
@@ -27,11 +40,11 @@ const CustomLegend = ({ subgroups }: any) => {
               display: "inline-block",
               width: "20px",
               height: "20px",
-              backgroundColor: subgroups[key],
+              backgroundColor: subgroups[key.toLowerCase()],
               marginRight: "10px",
             }}
           ></span>
-          <span className="legend-label">{key}</span>
+          <span className="legend-label text-slate-600">{key}</span>
         </div>
       ))}
     </div>
@@ -59,10 +72,13 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const subgroupColors: any = {
     math: "rgba(255, 186, 73, 1)", // Example color
     english: "rgba(204, 219, 220, 1)", // Example color
-    Media: "rgba(0, 18, 47, 1)", // Example color
-    Advertisement: "rgba(66, 135, 245, 1)", // Blue color
-    Action: "rgba(166, 61, 64, 1)", // Red color
-
+    media: "rgba(0, 18, 47, 1)", // Example color
+    advertisement: "rgba(66, 135, 245, 1)", // Blue color
+    action: "rgba(166, 61, 64, 1)", // Red color
+    logistics: "#00593d",
+    engineering: "#e37e1f",
+    bio: "#49b621",
+    chemistry: "#9e49ff",
     // Add other subgroups and their colors here
   };
 
@@ -77,48 +93,6 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const subGroupContents = [
-    {
-      position: "Chairman",
-      candidates: [
-        {
-          name: "Adeleke Olusegun",
-          datasets: [10, 15, 15, 25],
-        },
-        {
-          name: "Olusegun Mayowa",
-          datasets: [3, 15, 15, 25],
-        },
-        {
-          name: "Olabunmi Sukuanmi",
-          datasets: [15, 10, 10, 8],
-        },
-      ],
-    },
-    {
-      position: "Vice Chairman",
-      candidates: [
-        {
-          name: "Olusegun Mayowa",
-          datasets: [10, 15, 15, 25],
-        },
-      ],
-    },
-    {
-      position: "Secretary",
-      candidates: [
-        {
-          name: "Olusegun Mayowa",
-          datasets: [10, 15, 15, 25],
-        },
-        {
-          name: "Olusegun Mayowa",
-          datasets: [20, 15, 15, 25],
-        },
-      ],
-    },
-  ];
 
   const option = {
     plugins: {
@@ -214,8 +188,12 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
 
         const labels = Object.keys(subgroupCounts);
         const data = labels.map((label) => subgroupCounts[label]);
-        const backgroundColor = labels.map((label) => subgroupColors[label]);
-        const borderColor = labels.map((label) => subgroupColors[label]);
+        const backgroundColor = labels.map(
+          (label) => subgroupColors[label.toLowerCase()]
+        );
+        const borderColor = labels.map(
+          (label) => subgroupColors[label.toLowerCase()]
+        );
 
         return {
           labels: labels,
@@ -230,8 +208,6 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
         };
       })
     : null;
-
-  console.log(chartData);
 
   if (isFetchSubGroup)
     return (
@@ -275,7 +251,10 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
                 </div>
               </div>
               <div className="mx-auto pt-10 relative flex justify-center  gap-10">
-                <CustomLegend subgroups={subgroupColors} />
+                <CustomLegend
+                  subgroups={subgroupColors}
+                  candidateSubgroup={items.candidates}
+                />
                 {items.candidates.map((candidate: any, candidateIndex: any) => (
                   <>
                     <div key={candidateIndex}>
