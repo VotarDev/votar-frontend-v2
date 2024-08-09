@@ -29,7 +29,7 @@ const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
         }),
         backgroundColor: "#015CE9",
         borderColor: "#015CE9",
-        tension: 0.1,
+        tension: 1,
       },
     ],
   };
@@ -54,7 +54,11 @@ const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
               data: { total_Number_Of_Votes: data.data[1]?.totalNumberOfVotes },
               backgroundColor: "#015CE9",
               borderColor: "#015CE9",
-              tension: 0.1,
+              scaleOverride: true,
+              scaleSteps: 9,
+              scaleStartValue: 0,
+              scaleStepWidth: 1,
+              tension: 1.0,
             },
           ],
         };
@@ -89,7 +93,7 @@ const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
         ticks: {
           min: 0,
           max: 700,
-          stepSize: 0,
+          stepSize: 5,
           suggestedMin: 0,
           suggestedMax: 700,
         },
@@ -110,6 +114,7 @@ const TotalNumbersBarChart = ({ electionId }: { electionId: string }) => {
       },
     },
   };
+
   if (isFetchBarData)
     return (
       <div className="text-center">

@@ -119,6 +119,15 @@ const IndividualNumberBarChart = ({ electionId }: { electionId: string }) => {
         },
       },
       y: {
+        beginAtZero: true,
+
+        ticks: {
+          min: 0,
+          max: 700,
+          stepSize: 1,
+          suggestedMin: 0,
+          suggestedMax: 700,
+        },
         grid: {
           display: false,
           borderColor: "#000",
