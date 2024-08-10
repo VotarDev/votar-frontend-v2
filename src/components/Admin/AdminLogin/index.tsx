@@ -8,7 +8,14 @@ import {
   FormGroup,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import Cookies from "universal-cookie";
+import { adminLogin } from "@/utils/api";
+import { useDispatch } from "react-redux";
+import { setAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
 import useForm from "@/utils/formValidation/useForm";
+import toast from "react-hot-toast";
+import { useRouter } from "next/router";
+import { ro } from "date-fns/locale";
 
 const Login = () => {
   const useOutlinedInputStyles = makeStyles({
@@ -22,6 +29,30 @@ const Login = () => {
     },
   });
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const cookies = new Cookies();
+    setLoading(true);
+    try {
+      const { data } = await adminLogin({ username, password });
+      if (data) {
+        console.log(data.data.token);
+        cookies.set("admin-token", data.data.token, { path: "/" });
+        dispatch(setAdminData(data.data));
+        toast.success("Login successful");
+        router.push("/admin");
+        setLoading(false);
+      }
+    } catch (error) {
+      toast.error("Invalid email or password");
+      setLoading(false);
+    }
+  };
   return (
     <div className="h-screen w-full flex  justify-center px-4 bg-[#F6F6F7] overflow-auto">
       <div className="max-w-[28.15rem] mx-auto w-full">
@@ -30,13 +61,14 @@ const Login = () => {
         </div>
         <div className="bg-white shadow-lg rounded-lg p-8">
           <div className="text-xl leading-[1.4] pb-8">Login</div>
-          <form className=" text-[#060606]">
+          <form className=" text-[#060606]" onSubmit={handleLogin}>
             <div className="mb-10">
               <TextField
                 variant="standard"
-                label="Email"
-                name="email"
+                label="Username"
+                name="username"
                 className="w-full"
+                onChange={(e) => setUsername(e.target.value)}
                 InputLabelProps={{
                   style: {
                     color: "#bfbfbf",
@@ -50,7 +82,9 @@ const Login = () => {
                 variant="standard"
                 label="Password"
                 name="password"
+                type="password"
                 className="w-full"
+                onChange={(e) => setPassword(e.target.value)}
                 InputLabelProps={{
                   style: { color: "#bfbfbf" },
                 }}

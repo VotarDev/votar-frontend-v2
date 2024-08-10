@@ -526,8 +526,8 @@ export const adminCards = [
   {
     id: crypto.randomUUID(),
     plan: "free votar",
-    votarCredits: "967,000",
-    electionNumber: 700,
+    votarCredits: "#",
+    electionNumber: "#",
   },
   {
     id: crypto.randomUUID(),
@@ -538,8 +538,8 @@ export const adminCards = [
   {
     id: crypto.randomUUID(),
     plan: "votar meeting",
-    votarCredits: "967,000",
-    electionNumber: 270,
+    votarCredits: "#",
+    electionNumber: "#",
   },
 ];
 

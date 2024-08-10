@@ -37,6 +37,9 @@ const monitorBarChartUrl = "user/monitor-barchartTotal";
 const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
 const monitorTotalLineChartUrl = "user/monitor-linechart";
 
+/** ADMIN */
+const adminLoginUrl = "/admin/login";
+
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
     headers: {
@@ -48,6 +51,10 @@ export const signup = (data: any) => {
 
 export const singin = (data: { email: string; password: string }) => {
   return httpService.post(signinurl, data);
+};
+
+export const adminLogin = (data: { username: string; password: string }) => {
+  return httpService.post(adminLoginUrl, data);
 };
 
 export const googleAuth = () => {

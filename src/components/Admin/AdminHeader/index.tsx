@@ -15,14 +15,23 @@ import { RiUserVoiceLine } from "react-icons/ri";
 import logout from "../../../../public/assets/icons/logout-black.svg";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useDispatch } from "react-redux";
+import { removeAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
 
 const AdminHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
   const isLinkActive = (link: string) => {
     // Check if the current route contains the link
     return router.pathname.includes(link);
+  };
+
+  const logoutHandler = () => {
+    // Logout
+    dispatch(removeAdminData());
+    router.push("/admin/login");
   };
   return (
     <section className="relative overflow-auto lg:h-28 h-auto">
@@ -159,7 +168,10 @@ const AdminHeader = () => {
             </Link>
           </ul>
         </div>
-        <div className="flex flex-col items-center justify-center gap-1 font-semibold lg:text-base text-sm lg:mt-0 mt-5">
+        <div
+          onClick={logoutHandler}
+          className="cursor-pointer flex flex-col items-center justify-center gap-1 font-semibold lg:text-base text-sm lg:mt-0 mt-5"
+        >
           <span>
             <img src={logout.src} alt="logout" />
           </span>

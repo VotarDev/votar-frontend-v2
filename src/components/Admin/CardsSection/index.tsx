@@ -11,10 +11,10 @@ const CardsSection = () => {
             key={cards.id}
             className={`${
               cards.plan === "free votar"
-                ? "bg-[#015CE9]"
+                ? "bg-[#015CE9] opacity-25 pointer-events-none"
                 : cards.plan === "votar pro"
                 ? "bg-[#DC362E]"
-                : "bg-[#E46F24]"
+                : "bg-[#E46F24] opacity-25 pointer-events-none"
             } w-full rounded-lg text-white py-7 px-4 relative z-20`}
           >
             <div className="absolute top-0 left-0 bottom-0 right-0 opacity-30 -z-10">
