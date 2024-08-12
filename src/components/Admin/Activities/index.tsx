@@ -18,6 +18,7 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import { v4 as uuidv4 } from "uuid";
+import { formatTimeToHHMM } from "@/utils/util";
 
 interface TablePaginationActionsProps {
   count: number;
@@ -184,7 +185,8 @@ const Activities = ({ elections }: any) => {
                 <StyledTableCell>
                   {row.start_date} - {row.end_date}
                   <br />
-                  {row.time}
+                  {formatTimeToHHMM(row.start_time)} -{" "}
+                  {formatTimeToHHMM(row.end_time)}
                 </StyledTableCell>
                 <StyledTableCell>{row.quantity}</StyledTableCell>
                 <StyledTableCell>#</StyledTableCell>
