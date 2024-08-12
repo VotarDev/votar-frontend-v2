@@ -39,6 +39,9 @@ const monitorTotalLineChartUrl = "user/monitor-linechart";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
+const adminVotarPageUrl = "/admin/get-votarPage";
+const adminGetAllElectionsUrl = "/admin/getAllElection";
+const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -51,10 +54,6 @@ export const signup = (data: any) => {
 
 export const singin = (data: { email: string; password: string }) => {
   return httpService.post(signinurl, data);
-};
-
-export const adminLogin = (data: { username: string; password: string }) => {
-  return httpService.post(adminLoginUrl, data);
 };
 
 export const googleAuth = () => {
@@ -199,3 +198,22 @@ export const monitorBarChartIndividual = (id: string) => {
 export const monitorTotalLineChart = (id: string) => {
   return httpService.get(monitorTotalLineChartUrl, { params: { id } });
 };
+
+/** ADMIN */
+export const getAdminVotarPage = () => {
+  return httpService.get(adminVotarPageUrl);
+};
+
+export const adminLogin = (data: { username: string; password: string }) => {
+  return httpService.post(adminLoginUrl, data);
+};
+
+export const getAllElectionsAdmin = () => {
+  return httpService.get(adminGetAllElectionsUrl);
+};
+
+export const getVotarPageByElection = (email: string) => {
+  return httpService.get(adminVotarPageByElectionUrl + `/${email}`);
+};
+
+/** ADMIN */

@@ -7,10 +7,10 @@ const Navigations = () => {
   return (
     <div>
       <div className="flex items-center gap-8">
-        <div className="w-40 h-14 p-3 bg-zinc-100 rounded-lg shadow border border-neutral-400 flex items-center justify-center text-center text-sm">
+        <div className="w-40 h-14 p-3 bg-zinc-100 rounded-lg shadow border border-neutral-400 flex items-center justify-center text-center text-sm pointer-events-none">
           Proceed to Votar Meeting Page
         </div>
-        <Link href="/admin/free-pro-meeting">
+        <Link href="/admin/free-pro-meeting" className="pointer-events-none">
           <div
             className={`w-[167px] h-14 p-3 bg-zinc-100 rounded-lg shadow border border-neutral-400 flex items-center justify-center text-center text-sm ${
               pathname === "/admin/free-pro-meeting"

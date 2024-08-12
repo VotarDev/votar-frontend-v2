@@ -4,6 +4,7 @@ import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
 import Login from "../AdminLogin";
 import { useRouter } from "next/router";
+import Cookies from "universal-cookie";
 import { ro } from "date-fns/locale";
 
 const AdminLayout = ({ children }: any) => {
@@ -13,7 +14,11 @@ const AdminLayout = ({ children }: any) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!available && !tested) router.push("/admin/login");
+    const cookies = new Cookies();
+    const token = cookies.get("admin-token");
+    if (!token) {
+      router.push("/admin/login");
+    }
   }, [available, loading, tested]);
 
   return (

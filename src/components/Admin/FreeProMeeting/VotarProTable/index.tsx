@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -8,9 +8,16 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { votarProPower } from "@/utils/util";
 import { useRouter } from "next/router";
+import { getAdminVotarPage } from "@/utils/api";
+import Cookies from "universal-cookie";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
+import { set } from "lodash";
 
 const VotarProTable = () => {
   const headers = ["S/N", "Emails", "No. of Elections"];
+  const [users, setUsers] = useState<any>([]);
+  const [isFetchUsers, setIsFetchUsers] = useState(false);
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -25,9 +32,38 @@ const VotarProTable = () => {
     },
   }));
   const router = useRouter();
-  const handleEmailClick = (id: string | number, email: string) => {
-    router.push(`/admin/free-pro-meeting/pro/details/votar-pro/${id}/${email}`);
+  const handleEmailClick = (email: string) => {
+    router.push(`/admin/free-pro-meeting/pro/details/votar-pro/${email}`);
   };
+
+  useEffect(() => {
+    const getVotarProPower = async () => {
+      setIsFetchUsers(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+      try {
+        const { data } = await getAdminVotarPage();
+        if (data) {
+          setUsers(data.data);
+          console.log(data.data);
+          setIsFetchUsers(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchUsers(false);
+      }
+    };
+    getVotarProPower();
+  }, []);
+
+  if (isFetchUsers)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+
   return (
     <div>
       <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
@@ -56,23 +92,25 @@ const VotarProTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {votarProPower.map((row, index) => (
-              <TableRow key={row.id}>
-                <StyledTableCell align="center">
-                  {index <= 9 ? `0${index + 1}` : index + 1}
-                </StyledTableCell>
-                <StyledTableCell
-                  align="center"
-                  className="cursor-pointer hover:shadow-md duration-150"
-                  onClick={() => handleEmailClick(row.id, row.email)}
-                >
-                  {row.email}
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  {row.electionNo}
-                </StyledTableCell>
-              </TableRow>
-            ))}
+            {users &&
+              users.length > 0 &&
+              users.map((row: any, index: number) => (
+                <TableRow key={row.id}>
+                  <StyledTableCell align="center">
+                    {index <= 9 ? `0${index + 1}` : index + 1}
+                  </StyledTableCell>
+                  <StyledTableCell
+                    align="center"
+                    className="cursor-pointer hover:shadow-md duration-150"
+                    onClick={() => handleEmailClick(row.email)}
+                  >
+                    {row.email}
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    {row.numberOfElection}
+                  </StyledTableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

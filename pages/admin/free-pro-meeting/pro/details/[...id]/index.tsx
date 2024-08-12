@@ -9,11 +9,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { votarProAcessRequest } from "@/utils/util";
+import { getVotarPageByElection } from "@/utils/api";
+import Cookies from "universal-cookie";
 import SwitchButton from "@/src/components/Admin/AdminProfile/SwitchButton";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
 
 const UserElections = () => {
   const router = useRouter();
   const [userMail, setUserMail] = useState("");
+  const [electionDetails, setElectionDetails] = useState<any>([]);
+  const [isFetchElectionDetails, setIsFetchElectionDetails] = useState(false);
   const [plans, setPlans] = useState("");
   const { id } = router.query;
   const handleEmailClick = (id: string | number, name: string) => {
@@ -23,10 +29,33 @@ const UserElections = () => {
   };
   useEffect(() => {
     if (id) {
-      setUserMail(id[2]);
+      setUserMail(id[1]);
       setPlans(id[0]);
     }
   }, [id]);
+
+  useEffect(() => {
+    const getVotarProPower = async () => {
+      setIsFetchElectionDetails(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+      try {
+        if (id) {
+          const { data } = await getVotarPageByElection(userMail);
+          if (data) {
+            setElectionDetails(data.data);
+            console.log(data.data);
+            setIsFetchElectionDetails(false);
+          }
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchElectionDetails(false);
+      }
+    };
+    getVotarProPower();
+  }, [userMail]);
 
   const headers = [
     "S/N",
@@ -51,6 +80,12 @@ const UserElections = () => {
     },
   }));
   console.log(plans);
+  if (isFetchElectionDetails)
+    return (
+      <div className="text-center mt-10">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
   return (
     <div>
       <AdminLayout>
@@ -90,46 +125,49 @@ const UserElections = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {votarProAcessRequest.map((row, index) => (
-                      <TableRow key={row.id}>
-                        <StyledTableCell align="center">
-                          {index <= 9 ? `0${index + 1}` : index + 1}
-                        </StyledTableCell>
-                        <StyledTableCell
-                          align="center"
-                          className="cursor-pointer hover:shadow-md duration-150"
-                          onClick={() => handleEmailClick(row.id, row.name)}
-                        >
-                          {row.name}
-                        </StyledTableCell>
-
-                        <StyledTableCell align="center">
-                          {row.date}
-                          <br />
-                          {row.time}
-                        </StyledTableCell>
-                        <StyledTableCell align="center">
-                          {row.votarNumber.toLocaleString()}
-                        </StyledTableCell>
-                        <StyledTableCell align="center">
-                          <span
-                            className={`${
-                              row.status === "pending"
-                                ? "text-[#E88749]"
-                                : "text-green-400"
-                            } capitalize`}
+                    {electionDetails &&
+                      electionDetails.length > 0 &&
+                      electionDetails.map((row: any, index: number) => (
+                        <TableRow key={row.id}>
+                          <StyledTableCell align="center">
+                            {index < 9 ? `0${index + 1}` : index + 1}
+                          </StyledTableCell>
+                          <StyledTableCell
+                            align="center"
+                            className="cursor-pointer hover:shadow-md duration-150"
+                            onClick={() =>
+                              handleEmailClick(row.id, row.nameOfElection)
+                            }
                           >
-                            {row.status}
-                          </span>
-                        </StyledTableCell>
-                        <StyledTableCell align="center">
-                          NGN {row.amount.toLocaleString()}
-                        </StyledTableCell>
-                        <StyledTableCell align="center">
-                          <SwitchButton />
-                        </StyledTableCell>
-                      </TableRow>
-                    ))}
+                            {row.nameOfElection}
+                          </StyledTableCell>
+
+                          <StyledTableCell align="center">
+                            {row.date}
+                            <br />
+                            {row.start_time} - {row.close_time}
+                          </StyledTableCell>
+                          <StyledTableCell align="center">
+                            {row.numberOfVoters.toLocaleString()}
+                          </StyledTableCell>
+                          <StyledTableCell align="center">
+                            {/* <span
+                              className={`${
+                                row.status === "pending"
+                                  ? "text-[#E88749]"
+                                  : "text-green-400"
+                              } capitalize`}
+                            >
+                              {row.status}
+                            </span> */}
+                            #
+                          </StyledTableCell>
+                          <StyledTableCell align="center">#</StyledTableCell>
+                          <StyledTableCell align="center">
+                            <SwitchButton />
+                          </StyledTableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </TableContainer>

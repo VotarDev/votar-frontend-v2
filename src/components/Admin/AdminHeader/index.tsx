@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { removeAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
+import Cookies from "universal-cookie";
 
 const AdminHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -31,6 +32,8 @@ const AdminHeader = () => {
   const logoutHandler = () => {
     // Logout
     dispatch(removeAdminData());
+    const cookies = new Cookies();
+    cookies.remove("admin-token", { path: "/" });
     router.push("/admin/login");
   };
   return (
@@ -81,7 +84,7 @@ const AdminHeader = () => {
                 </span>
               </li>
             </Link>
-            <Link href="/admin/free-pro-meeting">
+            <Link href="/admin/free-pro-meeting/pro">
               <li
                 className={`flex flex-col items-center justify-center gap-1 ${
                   isLinkActive("/admin/free-pro-meeting")
