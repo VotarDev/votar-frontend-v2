@@ -41,7 +41,7 @@ const ElectionTabs = ({ electionId }: { electionId: string }) => {
             By Numbers
           </button>
         </div>
-        <div>
+        {/* <div>
           <button
             className={`${
               activeTab == 2
@@ -52,7 +52,7 @@ const ElectionTabs = ({ electionId }: { electionId: string }) => {
           >
             By Line Chart
           </button>
-        </div>
+        </div> */}
         <div>
           <button
             className={`${

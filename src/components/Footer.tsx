@@ -5,6 +5,13 @@ import linkedin from "../../public/assets/logos/linkedin.svg";
 import twitter from "../../public/assets/logos/twitter.svg";
 import instagram from "../../public/assets/logos/instagram.svg";
 import { CiLocationOn } from "react-icons/ci";
+import Link from "next/link";
+import {
+  FaFacebook,
+  FaLinkedin,
+  FaXTwitter,
+  FaInstagram,
+} from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -69,15 +76,34 @@ const Footer = () => {
           </div>
         </div>
         <div className="flex lg:flex-col flex-row gap-4 lg:gap-0">
-          <div className="mb-4">
-            <img src={linkedin.src} alt="twitter" />
-          </div>
-          <div className="mb-4">
-            <img src={twitter.src} alt="twitter" />
-          </div>
-          <div>
-            <img src={instagram.src} alt="twitter" />
-          </div>
+          <Link href="">
+            <div className="mb-4 text-4xl">
+              <FaLinkedin />
+            </div>
+          </Link>
+          <Link href="https://x.com/votarhq?s=21" target="_blank">
+            <div className="mb-4 text-4xl">
+              <FaXTwitter />
+            </div>
+          </Link>
+
+          <Link
+            href="https://www.instagram.com/votarhq?igsh=MWZydTF3MHJ1aDJiNg%3D%3D&utm_source=qr"
+            target="_blank"
+          >
+            <div className="mb-4 text-4xl">
+              <FaInstagram />
+            </div>
+          </Link>
+
+          <Link
+            href="https://www.facebook.com/profile.php?id=61553214208461&mibextid=LQQJ4d"
+            target="_blank"
+          >
+            <div className="text-4xl text-center">
+              <FaFacebook />
+            </div>
+          </Link>
         </div>
       </div>
       <div className="flex flex-wrap gap-3 justify-between items-center lg:text-xl text-sm max-w-[1340px] mx-auto pb-6">
