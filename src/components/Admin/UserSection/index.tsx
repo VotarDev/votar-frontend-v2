@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminLayout from "../AdminLayout";
 import { BsCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
 
@@ -13,10 +13,24 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { users } from "@/utils/util";
 import { drop } from "@/utils/util";
+import Cookies from "universal-cookie";
+import { adminGetAllUsers } from "@/utils/api";
+import setAuthToken from "@/utils/setAuthToken";
+import { v4 as uuidv4 } from "uuid";
+
+import { CircularProgress } from "@mui/material";
+
+interface MergedData {
+  name: string;
+  email: string;
+  category: string;
+}
 
 const UserSection = () => {
   const [isDropDown, setIsDropdown] = useState(false);
   const [filteredOption, setFilteredOption] = useState("All");
+  const [usersData, setUsersData] = useState<MergedData[]>([]);
+  const [isFetchUsers, setIsFetchUsers] = useState(false);
 
   const options = ["All", "Election Creator", "Voter"];
 
@@ -39,13 +53,75 @@ const UserSection = () => {
     setFilteredOption(opt);
     setIsDropdown(false);
   };
-  const sortUsers = users.filter((item) => {
-    if (filteredOption === "All") {
-      return item;
-    } else {
-      return item.category.toLowerCase().includes(filteredOption.toLowerCase());
-    }
-  });
+  const sortUsers =
+    usersData &&
+    usersData.filter((item) => {
+      if (filteredOption === "All") {
+        return item;
+      } else {
+        return item.category
+          .toLowerCase()
+          .includes(filteredOption.toLowerCase());
+      }
+    });
+
+  useEffect(() => {
+    const getAllAdminUsers = async () => {
+      setIsFetchUsers(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+      try {
+        const { data } = await adminGetAllUsers();
+        const mergedDataArray: MergedData[] = [];
+        if (data) {
+          data.data.electionCreators.forEach((creator: any) => {
+            mergedDataArray.push({
+              name: creator.userName,
+              email: creator.email,
+              category: "Election Creator",
+            });
+          });
+          data.data.voters.forEach((voter: any) => {
+            const existingCreatorIndex = mergedDataArray.findIndex(
+              (user) => user.email === voter.email
+            );
+            if (existingCreatorIndex > -1) {
+              if (
+                !mergedDataArray[existingCreatorIndex].category.includes(
+                  "Voter"
+                )
+              ) {
+                mergedDataArray[existingCreatorIndex].category += ", Voter";
+              }
+            } else {
+              mergedDataArray.push({
+                name: voter.name,
+                email: voter.email,
+                category: "Voter",
+              });
+            }
+          });
+          setUsersData(mergedDataArray);
+          setIsFetchUsers(false);
+        }
+      } catch (e: any) {
+        setIsFetchUsers(false);
+        console.log(e);
+      }
+    };
+    getAllAdminUsers();
+  }, []);
+
+  if (isFetchUsers)
+    return (
+      <AdminLayout>
+        <div className="text-center mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      </AdminLayout>
+    );
+
   return (
     <AdminLayout>
       <div className="p-10">
@@ -120,7 +196,7 @@ const UserSection = () => {
               </TableHead>
               <TableBody>
                 {sortUsers.map((row, index) => (
-                  <TableRow key={row.id}>
+                  <TableRow key={uuidv4()}>
                     <StyledTableCell align="center">
                       {index <= 9 ? `0${index + 1}` : index + 1}
                     </StyledTableCell>
