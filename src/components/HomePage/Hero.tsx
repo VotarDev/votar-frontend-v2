@@ -12,7 +12,7 @@ import Link from "next/link";
 const Hero = () => {
   return (
     <div className="lg:mt-[1rem] mt-[4rem] max-w-[1300px] mx-auto lg:px-[50px] px-4 overflow-x-hidden">
-      <div className="lg:flex-row flex-col-reverse flex justify-between items-center ">
+      <div className="lg:flex-row flex-col-reverse flex justify-between items-center w-full text-center lg:text-left">
         <ScrollAnimation
           animateIn="animate__fadeIn"
           animateOut="animate__fadeOut"
@@ -33,11 +33,13 @@ const Hero = () => {
               <br /> Enter the Votar experience for free
             </p>
           </div>
-          <Link href="/signin?create-account=signup">
-            <Button className="bg-[#015CE9] text-white rounded-lg lg:w-[221px] lg:h-[52px] w-[180px] h-[42px] p-[14px] whitespace-nowrap">
-              Start a Free Election
-            </Button>
-          </Link>
+          <div className="flex justify-center lg:block">
+            <Link href="/signin?create-account=signup">
+              <Button className="bg-[#015CE9] text-white rounded-lg lg:w-[221px] lg:h-[52px] w-[180px] h-[42px] p-[14px] whitespace-nowrap">
+                Start a Free Election
+              </Button>
+            </Link>
+          </div>
         </ScrollAnimation>
         <ScrollAnimation
           animateIn="animate__bounceInRight"
@@ -67,7 +69,7 @@ const Hero = () => {
           </div>
         </ScrollAnimation>
       </div>
-      <div className="flex items-center gap-3 max-w-[450px] lg:mt-[-3.5rem] mt-7">
+      <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
         <img
           src={testimony.src}
           alt="testimonies"

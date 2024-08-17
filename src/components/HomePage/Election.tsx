@@ -31,7 +31,7 @@ const Election = () => {
         Choose the Election that Suits you best
       </div>
       <div
-        className="flex flex-col lg:flex-row justify-center lg:justify-between flex-wrap lg:mt-[62px] mt-[30px] items-center"
+        className="grid sm:grid-cols-2 grid-cols-1 lg:grid-cols-3  lg:mt-[62px] mt-[30px] justify-items-center items-center lg:gap-10 gap-4"
         data-aos="fade-up"
         data-aos-easing="ease-in-out"
         data-aos-duration="1000"
@@ -41,13 +41,16 @@ const Election = () => {
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
               Free Votar
             </div>
-            <div className="lg:text-xl leading-[30px] h-[120px] text-base">
+            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
               Setup and participate in <br />
               an online election or poll <br />
               for free
             </div>
           </div>
-          <div className="cursor-pointer" onClick={openVideoHandler}>
+          <div
+            className="cursor-pointer lg:mt-5 mt-2"
+            onClick={openVideoHandler}
+          >
             <img src={freeVotar.src} alt="votar election" />
           </div>
           {isOpen && (
@@ -70,14 +73,14 @@ const Election = () => {
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
               Votar Pro
             </div>
-            <div className="lg:text-xl leading-[30px] h-[120px] text-base">
+            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
               Enjoy more privacy and security
               <br /> features with Votar Pro from the
               <br />
               comfort of your couch or on site
             </div>
           </div>
-          <div className="cursor-pointer">
+          <div className="cursor-pointer lg:mt-5 mt-2">
             <img src={votarPro.src} alt="votar election" />
           </div>
         </div>
@@ -87,14 +90,13 @@ const Election = () => {
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
               Votar Meetings
             </div>
-            <div className="lg:text-xl leading-[30px] h-auto text-base">
-              Participate in motion votes, annual meeting
-              <br /> confirmation, executive positions, Board of
-              <br /> directors vote, By-laws ammendment, budget
-              <br /> approval, contract reformation
+            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base max-w-[20rem] mx-auto">
+              Participate in motion votes, annual meeting confirmation,
+              executive positions, Board of directors vote, By-laws ammendment,
+              budget approval, contract reformation
             </div>
           </div>
-          <div className="cursor-pointer">
+          <div className="cursor-pointer lg:mt-5 mt-2">
             <img src={votarMeetings.src} alt="votar election" />
           </div>
         </div>

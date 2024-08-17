@@ -35,13 +35,17 @@ const Footer = () => {
             <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%] ">
               <BiRightArrowAlt />
             </span>
-            <div>About Us</div>
+            <Link href="/about">
+              <div>About Us</div>
+            </Link>
           </div>
           <div className="footer-link flex items-center lg:gap-[28.31px] gap-4 mb-6">
             <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%]">
               <BiRightArrowAlt />
             </span>
-            <div>Votar Plans</div>
+            <Link href="/product">
+              <div>Votar Plans</div>
+            </Link>
           </div>
           <div className="footer-link flex items-center lg:gap-[28.31px] gap-4">
             <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%]">
