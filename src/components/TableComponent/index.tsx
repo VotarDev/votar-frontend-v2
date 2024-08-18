@@ -36,7 +36,7 @@ const Tables = () => {
       <TableContainer>
         <Table
           sx={{
-            minWidth: 650,
+            minWidth: 900,
             borderCollapse: "separate",
             borderSpacing: "0 1em",
           }}

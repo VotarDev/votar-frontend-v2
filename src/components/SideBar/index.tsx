@@ -27,8 +27,6 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
   const user = useUser();
   const [isOpen, setIsOpen] = useState(false);
 
-  const imageLink: string | null | undefined = data ? data.user?.image : "";
-
   const handleLogout = async () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");

@@ -11,6 +11,7 @@ import setAuthToken from "@/utils/setAuthToken";
 
 import { CircularProgress } from "@mui/material";
 import ProtectedRoutes from "../ProtectedRoutes";
+import DashboardNavbar from "../DashboardNavbar";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -81,7 +82,7 @@ const DashboardLayout = ({ children }: any) => {
       {isClient && (
         <div className="overflow-auto">
           <div className="flex">
-            <div className="relative">
+            <div className="relative lg:block hidden">
               <SideBar opener={opener} />
               <div
                 className="absolute bg-blue-700  top-14 -right-5 w-10 h-10 lg:flex items-center justify-center text-zinc-100 shadow rounded-full hidden z-[999] cursor-pointer"
@@ -90,9 +91,15 @@ const DashboardLayout = ({ children }: any) => {
                 <span>{opener ? <BsArrowLeft /> : <BsArrowRight />}</span>
               </div>
             </div>
-            <div className="flex-1 md:flex h-screen relative max-w-full overflow-auto ml-20 lg:ml-0">
-              <Header />
-              <div className="mt-20 lg:p-6 w-full overflow-auto p-3">
+            <div className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0">
+              <div className="lg:block hidden">
+                <Header />
+              </div>
+              <div className="lg:hidden">
+                <DashboardNavbar />
+              </div>
+
+              <div className="lg:mt-20 m-0 lg:p-6 w-full overflow-auto p-4">
                 {children}
               </div>
             </div>
