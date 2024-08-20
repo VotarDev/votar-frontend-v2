@@ -231,7 +231,7 @@ const ElectionDetail = () => {
   return (
     <DashboardLayout>
       <ProtectedRoutes>
-        <div className="flex gap-2">
+        <div className="flex items-center lg:gap-5 gap-2 font-semibold lg:text-xl flex-wrap text-base">
           {steps.map((step, index) => (
             <div
               key={step}

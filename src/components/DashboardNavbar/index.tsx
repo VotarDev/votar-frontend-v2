@@ -99,7 +99,7 @@ const DashboardNavbar = () => {
             </div>
           </div>
 
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/dashboard"
               className={`flex items-center gap-2 ${
@@ -120,7 +120,7 @@ const DashboardNavbar = () => {
               </span>
             </Link>
           </div>
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base ">
             <Link
               href="/create-election"
               className={`flex items-center gap-2 ${
@@ -144,11 +144,13 @@ const DashboardNavbar = () => {
             </Link>
           </div>
 
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/elections"
               className={`flex items-center gap-2 ${
-                pathname === "/elections" ? "text-[#015CE9]" : "text-[#696969]"
+                pathname?.split("/").includes("elections")
+                  ? "text-[#015CE9]"
+                  : "text-[#696969]"
               }`}
             >
               <Tooltip title="Election">
@@ -166,7 +168,7 @@ const DashboardNavbar = () => {
             </Link>
           </div>
 
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/profile"
               className={`flex items-center gap-2 ${
@@ -187,7 +189,7 @@ const DashboardNavbar = () => {
               </span>
             </Link>
           </div>
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/participate"
               className={`flex items-center gap-2 ${
@@ -210,7 +212,7 @@ const DashboardNavbar = () => {
               </span>
             </Link>
           </div>
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/monitor-election"
               className={`flex items-center gap-2 ${
@@ -233,7 +235,7 @@ const DashboardNavbar = () => {
               </span>
             </Link>
           </div>
-          <div className="lg:text-[18px] text-base p-2">
+          <div className="lg:text-[18px] text-base">
             <Link
               href="/votar-forms"
               className={`flex items-center gap-2 ${
@@ -258,7 +260,7 @@ const DashboardNavbar = () => {
           </div>
           <div
             onClick={handleLogout}
-            className="flex items-center gap-2 p-2 text-[#DC362E] cursor-pointer"
+            className="flex items-center gap-2 text-[#DC362E] cursor-pointer"
           >
             <Tooltip title="Logout">
               <span>
