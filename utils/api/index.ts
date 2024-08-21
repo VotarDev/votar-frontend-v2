@@ -43,6 +43,7 @@ const adminVotarPageUrl = "/admin/get-votarPage";
 const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
+const adminPublishElectionUrl = "/admin/publish";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -219,6 +220,10 @@ export const getVotarPageByElection = (email: string) => {
 
 export const adminGetAllUsers = () => {
   return httpService.get(adminGetAllUsersUrl);
+};
+
+export const adminPublishElection = (data: any) => {
+  return httpService.post(adminPublishElectionUrl, data);
 };
 
 /** ADMIN */
