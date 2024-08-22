@@ -173,7 +173,7 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
               <Link
                 href="/elections"
                 className={`flex items-center gap-2 ${
-                  pathname === "/elections"
+                  pathname?.split("/").includes("elections")
                     ? "text-[#015CE9]"
                     : "text-[#696969]"
                 }`}

@@ -14,6 +14,7 @@ import Cookies from "universal-cookie";
 import SwitchButton from "@/src/components/Admin/AdminProfile/SwitchButton";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import { v4 } from "uuid";
 
 const UserElections = () => {
   const router = useRouter();
@@ -128,7 +129,7 @@ const UserElections = () => {
                     {electionDetails &&
                       electionDetails.length > 0 &&
                       electionDetails.map((row: any, index: number) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={v4()}>
                           <StyledTableCell align="center">
                             {index < 9 ? `0${index + 1}` : index + 1}
                           </StyledTableCell>
@@ -164,7 +165,7 @@ const UserElections = () => {
                           </StyledTableCell>
                           <StyledTableCell align="center">#</StyledTableCell>
                           <StyledTableCell align="center">
-                            <SwitchButton />
+                            <SwitchButton id={index} row={row} />
                           </StyledTableCell>
                         </TableRow>
                       ))}
