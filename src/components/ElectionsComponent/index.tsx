@@ -4,7 +4,6 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import { ElectionDetails } from "@/utils/types";
 import { useRouter } from "next/router";
 import { CircularProgress } from "@mui/material";
-import { ro } from "date-fns/locale";
 
 const ElectionsComponent = () => {
   const users = useCurrentUser();

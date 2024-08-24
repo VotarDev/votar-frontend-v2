@@ -1,10 +1,10 @@
 // import withAuth from "@/hoc/withAuth";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { logout } from "@/redux/features/auth/authSlice";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
 import { signOut, useSession } from "next-auth/react";
-import { useCurrentUser } from "@/utils/hooks";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 import DashboardLayout from "@/src/components/DashboardLayout";
 import { elections } from "@/utils/util";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -27,14 +27,24 @@ import url from "url";
 import setAuthToken from "@/utils/setAuthToken";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { googleAuth } from "@/redux/features/auth/authSlice";
+import { ElectionDetails } from "@/utils/types";
+import { getElections } from "@/utils/api";
+import { CircularProgress } from "@mui/material";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const users = useCurrentUser();
+  const user = useUser();
+  const [election, setElection] = useState<ElectionDetails[]>([]);
+  const [isFetchElections, setIsFetchElections] = useState(false);
   const { data } = useSession();
 
-  // console.log(JSON.parse(userInfo.user ? userInfo.user : null));
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -57,6 +67,23 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
       localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
     }
   }, [dispatch, userInfo]);
+
+  useEffect(() => {
+    setIsFetchElections(true);
+    const getElectionsData = async () => {
+      try {
+        const { data } = await getElections(USER_ID);
+        if (data) {
+          setElection(data.data);
+          setIsFetchElections(false);
+          console.log(data.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getElectionsData();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -112,24 +139,36 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
         </Swiper>
       </div>
 
-      <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
-        <span>
-          <img src={vote.src} alt="vote" className="w-4 h-4 object-contain" />
-        </span>
-        You have participated in 05 Votar Elections
-      </div>
+      {isFetchElections ? (
+        <div className="text-center mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      ) : (
+        <>
+          <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
+            <span>
+              <img
+                src={vote.src}
+                alt="vote"
+                className="w-4 h-4 object-contain"
+              />
+            </span>
+            You have participated in {election.length} Votar Elections
+          </div>
 
-      <div className="mt-9">
-        <div className="flex gap-2 text-xl font-semibold">
-          Past Elections
-          <span>
-            <img src={calendar.src} alt="calendar" />
-          </span>
-        </div>
-        <div className="mt-1">
-          <Tables />
-        </div>
-      </div>
+          <div className="mt-9">
+            <div className="flex gap-2 text-xl font-semibold">
+              Past Elections
+              <span>
+                <img src={calendar.src} alt="calendar" />
+              </span>
+            </div>
+            <div className="mt-1">
+              <Tables election={election} />
+            </div>
+          </div>
+        </>
+      )}
       <Chat />
     </DashboardLayout>
   );

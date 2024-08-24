@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -7,8 +7,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { tabelContents } from "@/utils/util";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 
-const Tables = () => {
+import { formatTimeToHHMM } from "@/utils/util";
+import { v4 } from "uuid";
+
+const Tables = ({ election }: any) => {
   const headers = [
     "S/N",
     "Election Name",
@@ -16,6 +20,8 @@ const Tables = () => {
     "Election Ends",
     "Created By",
   ];
+
+  const user = useUser();
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -30,17 +36,18 @@ const Tables = () => {
       border: "1px solid #B9B9B9",
     },
   }));
+  console.log(user);
 
   return (
     <div>
-      <TableContainer>
+      <TableContainer sx={{ maxHeight: 400 }} className="table-scroll">
         <Table
           sx={{
             minWidth: 900,
             borderCollapse: "separate",
             borderSpacing: "0 1em",
           }}
-          aria-label="simple table"
+          aria-label="sticky table"
         >
           <TableHead>
             <TableRow className="text-white font-bold">
@@ -58,18 +65,20 @@ const Tables = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tabelContents.map((row, index) => (
-              <TableRow key={row.id}>
+            {election.map((row: any, index: number) => (
+              <TableRow key={v4()}>
                 <StyledTableCell align="center">{index + 1}</StyledTableCell>
                 <StyledTableCell align="center">
-                  {row.electionName}
+                  {row.name_of_election}
                 </StyledTableCell>
                 <StyledTableCell align="center">
-                  {row.startDate}
+                  {row.start_date} {formatTimeToHHMM(row.start_time)}
                 </StyledTableCell>
-                <StyledTableCell align="center">{row.endDate}</StyledTableCell>
                 <StyledTableCell align="center">
-                  {row.createdBy}
+                  {row.end_date} {formatTimeToHHMM(row.end_time)}
+                </StyledTableCell>
+                <StyledTableCell align="center">
+                  {user?.user?.data?.userName}
                 </StyledTableCell>
               </TableRow>
             ))}
