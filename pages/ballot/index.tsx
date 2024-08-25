@@ -444,52 +444,11 @@ const Ballot = () => {
                                           <div className="text-base text-blue-700 underline cursor-pointer font-normal">
                                             More Details
                                           </div>
-                                          {/* <div className="flex justify-center pt-3 gap-4 items-center">
-                              <div>
-                                <button
-                                  className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                    candidate.vote <= 0
-                                      ? "cursor-not-allowed opacity-50"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    handleVote(index, candidateIndex, false)
-                                  }
-                                  disabled={candidate.vote <= 0}
-                                >
-                                  <span className="text-xl">
-                                    <AiOutlineMinus />
-                                  </span>
-                                </button>
-                              </div>
-                              <div>{candidate.vote}</div>
-                              <div>
-                                <button
-                                  className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100`}
-                                  onClick={() =>
-                                    handleVote(index, candidateIndex, true)
-                                  }
-                                >
-                                  <span className="text-xl">
-                                    <AiOutlinePlus />
-                                  </span>
-                                </button>
-                              </div>
-                            </div> */}
                                         </div>
                                       </div>
                                     )
                                   )}
                                 </div>
-                                {/* <div>
-                    {preview.allowAbstain && (
-                      <div className="flex justify-center items-center">
-                        <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl mb-10 uppercase">
-                          Abstain
-                        </button>
-                      </div>
-                    )}
-                  </div> */}
                               </div>
                             );
                           })}

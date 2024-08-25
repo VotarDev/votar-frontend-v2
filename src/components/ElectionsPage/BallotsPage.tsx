@@ -257,7 +257,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
           </div>
           <div>
             <Link
-              href={`/cast-votes/${election?.election_id}`}
+              href={`/preview-election/${election?.election_id}`}
               rel="noopener noreferrer"
               target="_blank"
             >
