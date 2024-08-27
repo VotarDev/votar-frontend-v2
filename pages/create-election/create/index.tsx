@@ -77,7 +77,7 @@ const Create = () => {
     "Details",
     "Ballot",
     "Voters Page",
-    "Review",
+    // "Review",
     "Pay",
     "Monitor Election",
   ];
