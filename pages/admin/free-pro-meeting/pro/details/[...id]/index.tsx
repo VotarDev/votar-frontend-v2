@@ -83,9 +83,11 @@ const UserElections = () => {
   console.log(plans);
   if (isFetchElectionDetails)
     return (
-      <div className="text-center mt-10">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
-      </div>
+      <AdminLayout>
+        <div className="text-center mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      </AdminLayout>
     );
   return (
     <div>
@@ -165,7 +167,11 @@ const UserElections = () => {
                           </StyledTableCell>
                           <StyledTableCell align="center">#</StyledTableCell>
                           <StyledTableCell align="center">
-                            <SwitchButton id={index} row={row} />
+                            <SwitchButton
+                              id={index}
+                              row={row}
+                              userMail={userMail}
+                            />
                           </StyledTableCell>
                         </TableRow>
                       ))}

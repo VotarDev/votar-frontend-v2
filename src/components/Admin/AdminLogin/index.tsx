@@ -41,7 +41,6 @@ const Login = () => {
     try {
       const { data } = await adminLogin({ username, password });
       if (data) {
-        console.log(data.data.token);
         cookies.set("admin-token", data.data.token, { path: "/" });
         dispatch(setAdminData(data.data));
         toast.success("Login successful");
