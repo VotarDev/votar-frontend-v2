@@ -55,7 +55,7 @@ const SwitchButton = ({ id, row, userMail }: any) => {
   return (
     <div>
       {isFetchElectionDetails ? (
-        <CircularProgress size={20} />
+        <CircularProgress size={20} style={{ color: "#015CE9" }} />
       ) : (
         <label className="toggle">
           <input

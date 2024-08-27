@@ -23,20 +23,6 @@ const MonitorAnElectionDetails = () => {
 
   console.log(electionId);
 
-  // const handleCopyClick = async () => {
-  //   if (totalNumberRef.current) {
-  //     const selectedText = totalNumberRef.current.innerText;
-  //     try {
-  //       await navigator.clipboard.writeText(selectedText);
-
-  //       toast.success("Copied to clipboard!");
-  //     } catch (error) {
-  //       console.error("Failed to copy text:", error);
-  //       toast.error("Copy operation failed. Please try again.");
-  //     }
-  //   }
-  // };
-
   return (
     <DashboardLayout>
       <h1 className="text-4xl">Monitor an election</h1>

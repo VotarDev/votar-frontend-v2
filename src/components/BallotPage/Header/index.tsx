@@ -89,11 +89,11 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
 
           <div className="flex justify-center items-center top-[100px] lg:absolute static left-[55%] lg:translate-x-[-55%] lg:max-w-[50%] mx-auto w-full">
             <div className="text-center">
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-10 lg:mt-0">
                 <img
                   src={electionDetails?.association_logo}
                   alt="logo"
-                  className="w-32 h-32 object-cover"
+                  className="lg:w-32 lg:h-32 object-cover w-[100px] h-[100px] rounded-full"
                 />
               </div>
               <div className="lg:text-[25px] font-semibold mt-3 text-2xl uppercase">
