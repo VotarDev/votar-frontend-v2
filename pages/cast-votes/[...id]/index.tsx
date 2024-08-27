@@ -206,10 +206,10 @@ const Castvote = () => {
       {isClient && (
         <div className="">
           <Header electionDetails={election} />
-          <div>
+          {/* <div>
             <MiniDashboard />
-          </div>
-          <div className="mt-[56px] max-w-[1200px] mx-auto">
+          </div> */}
+          <div className="mt-[206px] max-w-[1200px] mx-auto">
             {votingData &&
               votingData.map((preview, index) => {
                 const randomColor =

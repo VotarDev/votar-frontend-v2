@@ -123,11 +123,11 @@ const Create = () => {
         return <Ballot setPositions={setPositions} positions={positions} />;
       case 3:
         return <VotersPage />;
+      // case 4:
+      //   return <Review />;
       case 4:
-        return <Review />;
-      case 5:
         return <Pay />;
-      case 6:
+      case 5:
         return <MonitorElection />;
       default:
     }
