@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import {
   Checkbox,
   CircularProgress,
@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import VotersPageTable from "./components/VotersPageTable";
 import { VoterResponse } from "@/utils/types";
-import { sendVoterCred } from "@/utils/api";
+import { getElectionById, sendVoterCred } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
@@ -17,6 +17,8 @@ const VotersPage = () => {
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsloading] = useState(false);
+  const [election, setElection] = useState<any>([]);
   const maxCharacterLength = 100;
   const users = useCurrentUser();
   const user = useUser();
@@ -74,6 +76,38 @@ const VotersPage = () => {
       setIsSending(false);
     }
   };
+
+  useEffect(() => {
+    const getElection = async () => {
+      setIsloading(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const electionId = localStorage.getItem("ElectionId");
+        console.log(electionId);
+        if (electionId) {
+          const electionData = { election_id: electionId };
+          const { data } = await getElectionById(electionData);
+          if (data) {
+            setElection(data.data);
+            setIsloading(false);
+          }
+        }
+      } catch (e: any) {
+        console.log(e?.response?.data?.message);
+        setIsloading(false);
+      }
+    };
+    getElection();
+  }, []);
+
+  console.log(election?.published);
 
   console.log(selectedRows);
 
@@ -150,19 +184,23 @@ const VotersPage = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <button
-              disabled={isSending}
-              className="w-32 h-12 flex items-center justify-center bg-blue-700 rounded-lg outline-none text-zinc-100 text-lg font-semibold"
-            >
-              Send
-              {isSending && (
-                <CircularProgress
-                  size={20}
-                  style={{ color: "#fff" }}
-                  className="ml-2"
-                />
-              )}
-            </button>
+            {isLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <button
+                disabled={!election.published ? true : false}
+                className="w-32 h-12 flex items-center justify-center bg-blue-700 rounded-lg outline-none text-zinc-100 text-lg font-semibold"
+              >
+                Send
+                {isSending && (
+                  <CircularProgress
+                    size={20}
+                    style={{ color: "#fff" }}
+                    className="ml-2"
+                  />
+                )}
+              </button>
+            )}
           </div>
         </form>
       </div>

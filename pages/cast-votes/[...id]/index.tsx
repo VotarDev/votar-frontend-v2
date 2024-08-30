@@ -27,6 +27,11 @@ if (typeof window !== "undefined") {
   }
 }
 
+type SelectedCandidates = {
+  position: string;
+  candidates: Candidate[];
+};
+
 const Castvote = () => {
   const users = useCurrentUser();
   const router = useRouter();
@@ -39,7 +44,9 @@ const Castvote = () => {
   const [isClient, setIsClient] = useState(false);
   const [position, setPosition] = useState<any>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedCandidates, setSelectedCandidates] = useState<Candidate[]>([]);
+  const [selectedCandidates, setSelectedCandidates] = useState<
+    SelectedCandidates[]
+  >([]);
   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
     Details[]
   >([]);
@@ -69,6 +76,8 @@ const Castvote = () => {
     : users?.id
     ? users?.id
     : user?.user?.id;
+
+  const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 1;
 
   useEffect(() => {
     const getElection = async () => {
@@ -150,14 +159,48 @@ const Castvote = () => {
     getCandidatesData();
   }, [electionID]);
 
-  const handleSelectCandidate = (candidate: Candidate) => {
-    if (selectedCandidates.includes(candidate) && candidate.votes <= 0) {
-      setSelectedCandidates((prevCandidates) =>
-        prevCandidates.filter((c) => c !== candidate)
+  const handleSelectCandidate = (position: string, candidate: Candidate) => {
+    setSelectedCandidates((prevState: any) => {
+      const existingIndex = prevState.findIndex(
+        (sc: any) => sc.position === position
       );
-    } else {
-      setSelectedCandidates((prevCandidate) => [...prevCandidate, candidate]);
-    }
+
+      if (existingIndex !== -1) {
+        const updatedCandidates = [...prevState[existingIndex].candidates];
+        const candidateIndex = updatedCandidates.findIndex(
+          (c) => c.candidate_name === candidate.candidate_name
+        );
+
+        if (candidateIndex !== -1) {
+          // Remove the candidate if already selected and reset votes to 0
+          updatedCandidates[candidateIndex].votes = 0;
+          updatedCandidates.splice(candidateIndex, 1);
+        } else {
+          // Add the candidate if not selected
+          if (
+            updatedCandidates.length >= MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED
+          ) {
+            const removedCandidate = updatedCandidates.shift();
+            if (removedCandidate) removedCandidate.votes = 0; // Reset votes of the removed candidate
+          }
+          candidate.votes = 1; // Increment vote to 1 when selected
+          updatedCandidates.push(candidate);
+        }
+
+        const updatedSelectedCandidates = [...prevState];
+        updatedSelectedCandidates[existingIndex] = {
+          position,
+          candidates: updatedCandidates,
+        };
+
+        return updatedSelectedCandidates.filter(
+          (sc) => sc.candidates.length > 0
+        ); // Remove empty positions
+      } else {
+        candidate.votes = 1; // Increment vote to 1 when selected
+        return [...prevState, { position, candidates: [candidate] }];
+      }
+    });
   };
 
   const handleDetails = (candidate: Candidate) => {
@@ -172,20 +215,27 @@ const Castvote = () => {
     candidateIndex: number,
     increment: boolean
   ) => {
-    if (votingData && votingData[positionIndex]) {
-      const updatedData = [...votingData];
+    setVotingData((prevData: any) => {
+      const updatedData = [...prevData];
       const candidate = updatedData[positionIndex].candidates[candidateIndex];
       if (candidate) {
-        if (increment) {
-          candidate.votes++;
-        } else {
-          candidate.votes--;
-        }
+        candidate.votes = increment ? 1 : 0; // Increment or reset to 0
       }
-      setVotingData(updatedData);
-    }
+      return updatedData;
+    });
   };
   const closeModal = () => setShowModal(false);
+
+  const isCandidateActive = (position: string, candidate: Candidate) => {
+    const positionData = selectedCandidates.find(
+      (sc: any) => sc.position === position
+    );
+    return (
+      positionData?.candidates.some(
+        (c) => c.candidate_name === candidate.candidate_name && c.votes
+      ) ?? false
+    );
+  };
 
   console.log(candidates);
 
@@ -209,7 +259,7 @@ const Castvote = () => {
           {/* <div>
             <MiniDashboard />
           </div> */}
-          <div className="mt-[206px] max-w-[1200px] mx-auto">
+          <div className="mt-[126px] max-w-[1200px] mx-auto">
             {votingData &&
               votingData.map((preview, index) => {
                 const randomColor =
@@ -241,26 +291,47 @@ const Castvote = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16">
+                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16 justify-center">
                       {preview.candidates.map((candidate, candidateIndex) => (
                         <div
                           key={candidateIndex}
                           className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
-                            selectedCandidates.includes(candidate)
+                            isCandidateActive(
+                              preview.name_of_position,
+                              candidate
+                            )
                               ? "active"
                               : "duration-500"
                           }`}
-                          onClick={(e) => handleSelectCandidate(candidate)}
                         >
-                          {selectedCandidates.includes(candidate) && (
-                            <div className="absolute -right-2 -top-3 ">
+                          {isCandidateActive(
+                            preview.name_of_position,
+                            candidate
+                          ) && (
+                            <div
+                              className="absolute -right-2 -top-3 "
+                              onClick={(e) =>
+                                handleSelectCandidate(
+                                  preview.name_of_position,
+                                  candidate
+                                )
+                              }
+                            >
                               <img src={checked.src} alt="" />
                             </div>
                           )}
 
                           <div>
                             {preview.show_pictures && (
-                              <div className="mb-3">
+                              <div
+                                className="mb-3"
+                                onClick={(e) =>
+                                  handleSelectCandidate(
+                                    preview.name_of_position,
+                                    candidate
+                                  )
+                                }
+                              >
                                 <img
                                   src={candidate.candidate_picture_base64}
                                   className="w-[269px] h-[269px] object-cover rounded"

@@ -25,59 +25,63 @@ const MonitorAnElectionDetails = () => {
 
   return (
     <DashboardLayout>
-      <h1 className="text-4xl">Monitor an election</h1>
-      <div className="pt-10">
-        <h1 className="text-2xl">{electionName}</h1>
-      </div>
-      <div className="pt-10">
-        <div className="text-lg font-semibold">
-          To Monitor your Election By Total Numbers
-        </div>
-        <div className=" flex items-center gap-5 pt-5">
-          <div className="w-full max-w-[500px] lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
-            {/* <span ref={totalNumberRef}>{`${shortenText(
+      <div>
+        <div className="text-4xl">Monitor Election</div>
+        <div>
+          <div className="pt-10">
+            <h1 className="text-2xl">{electionName}</h1>
+          </div>
+          <div className="pt-10">
+            <div className="text-lg font-semibold">
+              To Monitor your Election By Total Numbers
+            </div>
+            <div className=" flex items-center gap-5 pt-5">
+              <div className="w-full max-w-[600px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
+                {/* <span ref={totalNumberRef}>{`${shortenText(
               electionName
             )}.votar.ng/monitortotn`}</span> */}
-            <span ref={totalNumberRef}>
-              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-              {electionId}
-            </span>
+                <span ref={totalNumberRef}>
+                  https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+                  {electionId}
+                </span>
+              </div>
+              <div
+                onClick={() => handleCopyClick(totalNumberRef)}
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <span className="text-2xl">
+                  <IoCopy />
+                </span>
+                <span>Copy Link</span>
+              </div>
+            </div>
           </div>
-          <div
-            onClick={() => handleCopyClick(totalNumberRef)}
-            className="cursor-pointer flex items-center gap-2"
-          >
-            <span className="text-2xl">
-              <IoCopy />
-            </span>
-            <span>Copy Link</span>
-          </div>
-        </div>
-      </div>
 
-      <div className="pt-10">
-        <div className="text-lg font-semibold">
-          To Monitor your Election By Individual Numbers
-        </div>
+          <div className="pt-10">
+            <div className="text-lg font-semibold">
+              To Monitor your Election By Individual Numbers
+            </div>
 
-        <div className=" flex items-center gap-5 pt-5">
-          <div className="w-full max-w-[500px] lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
-            {/* <span ref={individualNumberRef}>{`${shortenText(
+            <div className=" flex items-center gap-5 pt-5">
+              <div className="w-full max-w-[600px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
+                {/* <span ref={individualNumberRef}>{`${shortenText(
               electionName
             )}.votar.ng/monitorindn`}</span> */}
-            <span ref={individualNumberRef}>
-              https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-              {electionId}
-            </span>
-          </div>
-          <div
-            onClick={() => handleCopyClick(individualNumberRef)}
-            className="cursor-pointer flex items-center gap-2"
-          >
-            <span className="text-2xl">
-              <IoCopy />
-            </span>
-            <span>Copy Link</span>
+                <span ref={individualNumberRef}>
+                  https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+                  {electionId}
+                </span>
+              </div>
+              <div
+                onClick={() => handleCopyClick(individualNumberRef)}
+                className="cursor-pointer flex items-center gap-2"
+              >
+                <span className="text-2xl">
+                  <IoCopy />
+                </span>
+                <span>Copy Link</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
