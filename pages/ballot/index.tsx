@@ -301,9 +301,34 @@ const Ballot = () => {
 
     return acc;
   }, []);
-  console.log(selectedCandidates);
-  console.log(combinedData);
-  // console.log(voterProfile.userData);
+
+  console.log(election?.published);
+
+  if (election?.published === false) {
+    return (
+      <>
+        <div>
+          <Header electionDetails={election} />
+        </div>
+        <div className="mt-5 flex justify-end mr-10">
+          <button
+            onClick={handleLogout}
+            className="bg-blue-700 p-4 text-white rounded-md"
+          >
+            Logout
+          </button>
+        </div>
+        <div className="text-center mt-5">
+          <h1 className="text-4xl font-bold capitalize">
+            Welcome, {voterProfile.userData?.name}
+          </h1>
+        </div>
+        <div className="text-center pt-5">
+          You do not have Access to this election
+        </div>
+      </>
+    );
+  }
 
   return (
     <>

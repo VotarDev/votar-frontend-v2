@@ -142,6 +142,12 @@ function Body({ positions, setPositions, electionId }: any) {
 
     setPositions(updatedPositions);
   };
+  const deletePosition = (index: number) => {
+    if (positions.length > 1) {
+      const newPositions = positions.filter((_: any, i: any) => i !== index);
+      setPositions(newPositions);
+    }
+  };
 
   return (
     <section className="mt-12">
@@ -149,8 +155,18 @@ function Body({ positions, setPositions, electionId }: any) {
         {positions.map((position: Position, positionIndex: number) => (
           <div
             key={positionIndex}
-            className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4"
+            className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4 relative"
           >
+            {positionIndex > 0 && (
+              <div className="absolute -right-1 -top-4 text-3xl">
+                <button
+                  onClick={() => deletePosition(positionIndex)}
+                  className="text-red-500"
+                >
+                  <MdDelete />
+                </button>
+              </div>
+            )}
             <div className="text-center text-slate-900 lg:text-3xl text-base font-semibold flex items-center justify-center gap-2 uppercase">
               <div>
                 <img src={leftline.src} alt="line" className="w-14 lg:w-full" />

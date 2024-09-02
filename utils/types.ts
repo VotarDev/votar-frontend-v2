@@ -141,6 +141,7 @@ export type ElectionDetails = {
   start_time: number;
   status: string;
   updatedAt: string;
+  published: boolean;
   __v: number;
   _id: string;
 };

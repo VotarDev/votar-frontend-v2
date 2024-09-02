@@ -41,7 +41,10 @@ const Login = () => {
     try {
       const { data } = await adminLogin({ username, password });
       if (data) {
-        cookies.set("admin-token", data.data.token, { path: "/" });
+        cookies.set("admin-token", data.data.token, {
+          path: "/",
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
         dispatch(setAdminData(data.data));
         toast.success("Login successful");
         router.push("/admin");
