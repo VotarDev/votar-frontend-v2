@@ -256,10 +256,10 @@ const PreviewVote = () => {
       {isClient && (
         <div className="">
           <Header electionDetails={election} />
-          <div>
+          {/* <div>
             <MiniDashboard />
-          </div>
-          <div className="mt-[56px] max-w-[1200px] mx-auto">
+          </div> */}
+          <div className="mt-[126px] max-w-[1200px] mx-auto">
             {position &&
               position.map((preview: any, index: any) => {
                 const randomColor =
@@ -291,7 +291,7 @@ const PreviewVote = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16">
+                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16 justify-center">
                       {preview.candidates.map(
                         (candidate: any, candidateIndex: any) => {
                           const maxObject = preview.candidates.reduce(
