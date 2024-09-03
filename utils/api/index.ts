@@ -36,6 +36,7 @@ const monitorIndividualSubGroupUrl = "user/monitor-subgroupIndividual";
 const monitorBarChartUrl = "user/monitor-barchartTotal";
 const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
 const monitorTotalLineChartUrl = "user/monitor-linechart";
+const dashboardCardsUrl = "user/cards";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -199,6 +200,10 @@ export const monitorBarChartIndividual = (id: string) => {
 
 export const monitorTotalLineChart = (id: string) => {
   return httpService.get(monitorTotalLineChartUrl, { params: { id } });
+};
+
+export const dashboardCards = (authorId: any) => {
+  return httpService.post(dashboardCardsUrl, authorId);
 };
 
 /** ADMIN */

@@ -110,6 +110,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
               alt="logo"
               className="lg:w-14 lg:h-14 h-10 w-10 object-contain"
             />
+            <span className="text-xs">Encrypted</span>
           </div>
         </div>
       </div>

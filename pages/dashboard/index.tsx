@@ -30,6 +30,8 @@ import { googleAuth } from "@/redux/features/auth/authSlice";
 import { ElectionDetails } from "@/utils/types";
 import { getElections } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
+import { dashboardCards } from "@/utils/api";
+import { formatTimeToHHMM } from "@/utils/util";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
@@ -38,6 +40,8 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const user = useUser();
   const [election, setElection] = useState<ElectionDetails[]>([]);
   const [isFetchElections, setIsFetchElections] = useState(false);
+  const [cardDetails, setCardDetails] = useState<any>([]);
+  const [isFetchCards, setIsFetchCards] = useState(false);
   const { data } = useSession();
 
   let USER_ID = users?.data?.data
@@ -85,59 +89,96 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     getElectionsData();
   }, []);
 
+  useEffect(() => {
+    const getDashboardCards = async () => {
+      setIsFetchCards(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      try {
+        const authorId = { author_id: USER_ID };
+        const { data } = await dashboardCards(authorId);
+        if (data) {
+          setCardDetails(data.data);
+          console.log(data.data);
+          setIsFetchCards(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchCards(false);
+      }
+    };
+    getDashboardCards();
+  }, []);
+
   return (
     <DashboardLayout>
-      <div className="w-full flex">
-        <Swiper
-          modules={[A11y]}
-          spaceBetween={10}
-          breakpoints={{
-            240: { slidesPerView: 1, spaceBetween: 10 },
-            624: { slidesPerView: 1.5, spaceBetween: 10 },
-            1280: { slidesPerView: 1.8, spaceBetween: 10 },
-          }}
-          centeredSlides={true}
-          centeredSlidesBounds
-          className="w-full"
-        >
-          {elections.map((election) => (
-            <SwiperSlide
-              key={election.id}
-              className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
-              style={{
-                backgroundColor: `${election.style}`,
-                borderLeft: `3px solid ${election.border}`,
-              }}
-            >
-              <div>
-                <Link href="/access">
-                  <div className="lg:text-xl text-base text-white pt-6">
-                    {election.title}
-                  </div>
-                  <div className="flex pt-8 items-center text-white md:gap-6 justify-center text-xs lg:text-base gap-2">
-                    <div className="pb-4">{election.start}</div>
-                    <div>
+      {isFetchCards ? (
+        <div className="my-10 flex justify-center">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      ) : (
+        <div className="w-full flex">
+          <Swiper
+            modules={[A11y]}
+            spaceBetween={10}
+            breakpoints={{
+              240: { slidesPerView: 1, spaceBetween: 10 },
+              624: { slidesPerView: 1.5, spaceBetween: 10 },
+              1280: { slidesPerView: 1.8, spaceBetween: 10 },
+            }}
+            centeredSlides={true}
+            centeredSlidesBounds
+            className="w-full"
+          >
+            {cardDetails?.map((election: any, index: number) => (
+              <SwiperSlide
+                key={election._id}
+                className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
+                style={{
+                  backgroundColor: `${elections[index].style}`,
+                  borderLeft: `3px solid ${elections[index].border}`,
+                }}
+              >
+                <div>
+                  <Link href="/access">
+                    <div className="lg:text-xl text-base text-white pt-6">
+                      {election?.name_of_election}
+                    </div>
+                    <div className="flex pt-8 items-center text-white md:gap-6 justify-center text-xs lg:text-base gap-2">
+                      <div className="pb-4">
+                        Election Starts at {election?.start_date}
+                      </div>
+                      <div>
+                        <img
+                          src={line.src}
+                          alt="line"
+                          className="w-[20px] object-contain"
+                        />
+                      </div>
+                      <div className="pb-4">
+                        Election ends by {election.end_date}
+                      </div>
+                    </div>
+                    <div className="absolute top-0 left-0 bottom-0 right-0 -z-10 opacity-30">
                       <img
-                        src={line.src}
-                        alt="line"
-                        className="w-[20px] object-contain"
+                        src={cardBg.src}
+                        alt="card-bg"
+                        className="lg:min-w-[483px] w-full h-full"
                       />
                     </div>
-                    <div className="pb-4">{election.end}</div>
-                  </div>
-                  <div className="absolute top-0 left-0 bottom-0 right-0 -z-10 opacity-30">
-                    <img
-                      src={cardBg.src}
-                      alt="card-bg"
-                      className="lg:min-w-[483px] w-full h-full"
-                    />
-                  </div>
-                </Link>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+                  </Link>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+      )}
 
       {isFetchElections ? (
         <div className="text-center mt-10">

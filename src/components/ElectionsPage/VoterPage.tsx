@@ -194,19 +194,23 @@ const VoterPage = () => {
             </div>
           </div>
           <div className="flex justify-center">
-            <button
-              disabled={isSending}
-              className="w-32 h-12 flex items-center justify-center bg-blue-700 rounded-lg outline-none text-zinc-100 text-lg font-semibold"
-            >
-              Send
-              {isSending && (
-                <CircularProgress
-                  size={20}
-                  style={{ color: "#fff" }}
-                  className="ml-2"
-                />
-              )}
-            </button>
+            {isLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <button
+                disabled={!election.published ? true : false}
+                className="w-32 h-12 flex items-center justify-center bg-blue-700 rounded-lg outline-none text-zinc-100 text-lg font-semibold"
+              >
+                Send
+                {isSending && (
+                  <CircularProgress
+                    size={20}
+                    style={{ color: "#fff" }}
+                    className="ml-2"
+                  />
+                )}
+              </button>
+            )}
           </div>
         </form>
       </div>

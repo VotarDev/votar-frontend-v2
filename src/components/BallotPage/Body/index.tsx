@@ -148,6 +148,14 @@ function Body({ positions, setPositions, electionId }: any) {
       setPositions(newPositions);
     }
   };
+  const deleteCandidate = (positionIndex: number, candidateIndex: number) => {
+    const newPositions = [...positions];
+
+    newPositions[positionIndex].candidates = newPositions[
+      positionIndex
+    ].candidates.filter((_: any, i: any) => i !== candidateIndex);
+    setPositions(newPositions);
+  };
 
   return (
     <section className="mt-12">
@@ -247,7 +255,20 @@ function Body({ positions, setPositions, electionId }: any) {
             </div>
 
             {position.candidates.map((candidate, candidateIndex) => (
-              <div key={candidateIndex} className="w-full">
+              <div key={candidateIndex} className="w-full relative">
+                <div className="absolute right-0 top-5 text-red-500 text-3xl">
+                  <button
+                    onClick={() =>
+                      deleteCandidate(positionIndex, candidateIndex)
+                    }
+                    className="flex items-center"
+                  >
+                    <span>
+                      <MdDelete />
+                    </span>
+                    <span className="text-sm">Delete candidate</span>
+                  </button>
+                </div>
                 <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
                   {candidate.candidate_name
                     ? candidate.candidate_name
