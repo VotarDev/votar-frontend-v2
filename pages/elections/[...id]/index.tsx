@@ -22,7 +22,7 @@ const steps = [
   "Details",
   "Ballot",
   "Voters Page",
-  "Review",
+  // "Review",
   "Pay",
   "Monitor Election",
 ];
@@ -267,9 +267,9 @@ const ElectionDetail = () => {
             <BallotsPage position={position} setPosition={setPosition} />
           )}
           {currentStep === 2 && <VoterPage />}
-          {currentStep === 3 && <ReviewPage />}
-          {currentStep === 4 && <PayPage />}
-          {currentStep === 5 && <MonitorElectionPage />}
+          {/* {currentStep === 3 && <ReviewPage />} */}
+          {currentStep === 3 && <PayPage />}
+          {currentStep === 4 && <MonitorElectionPage electionId={electionID} />}
         </div>
 
         <div className="mt-5 flex gap-4 justify-end smm:flex-row flex-col">

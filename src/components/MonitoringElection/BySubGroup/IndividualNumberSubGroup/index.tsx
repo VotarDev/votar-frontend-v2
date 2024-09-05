@@ -140,10 +140,16 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
           setAuthToken(tokenLocal);
         }
       }
+
       try {
         const { data } = await monitorIndividualSubgroup(electionId);
         if (data.data) {
-          const flattenedData = data.data[0].flat();
+          console.log(data.data);
+
+          // Flatten the nested arrays into a single array of candidates
+          const flattenedData = data.data.flat();
+
+          // Group candidates by their position
           const groupedCandidates = flattenedData.reduce(
             (acc: any, candidate: any) => {
               const { position } = candidate;
@@ -155,24 +161,27 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
             },
             {}
           );
+
+          // Convert the grouped candidates object into an array
           const groupedCandidatesArray = Object.entries(groupedCandidates).map(
             ([position, candidates]) => ({
               position,
               candidates,
             })
           );
+
           console.log(groupedCandidatesArray);
-          setSubGroup(data.data[0].subgroups);
-          setCandidates(groupedCandidatesArray);
-          console.log(data.data[0]);
+          setSubGroup(data.data[0].subgroups); // Assuming subgroups are set correctly from the first data group
+          setCandidates(groupedCandidatesArray); // Setting grouped candidates by position
 
           setIsFetchSubGroup(false);
         }
-      } catch (e: any) {
+      } catch (e) {
         console.log(e);
         setIsFetchSubGroup(false);
       }
     };
+
     monitorElectionBySubgroup();
   }, [electionId]);
 

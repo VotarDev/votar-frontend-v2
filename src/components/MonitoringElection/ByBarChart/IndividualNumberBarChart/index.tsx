@@ -35,25 +35,30 @@ const IndividualNumberBarChart = ({ electionId }: { electionId: string }) => {
   useEffect(() => {
     const monitorIndividualNumberBarChart = async () => {
       setIsFetchBarData(true);
+
+      // Set auth token based on user data or local storage
       if (users?.data) {
         setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      } else if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
       }
+
       try {
         const { data } = await monitorInidividualNumber(electionId);
         if (data.data) {
-          const transformCanidates = data.data[0].map((candidate: any) => ({
-            ...candidate,
-            datasets: [
-              { x: candidate.candidateName, y: candidate.numberOfVotes },
-            ],
-          }));
-          const flattenedData = transformCanidates.flat();
-          const groupedCandidates = flattenedData.reduce(
+          // Transform the candidates for the bar chart dataset
+          const transformCandidates = data.data
+            .flat()
+            .map((candidate: any) => ({
+              ...candidate,
+              datasets: [
+                { x: candidate.candidateName, y: candidate.numberOfVotes },
+              ],
+            }));
+
+          // Group candidates by their position
+          const groupedCandidates = transformCandidates.reduce(
             (acc: any, candidate: any) => {
               const { position } = candidate;
               if (!acc[position]) {
@@ -64,6 +69,8 @@ const IndividualNumberBarChart = ({ electionId }: { electionId: string }) => {
             },
             {}
           );
+
+          // Convert the grouped candidates object into an array
           const groupedCandidatesArray = Object.entries(groupedCandidates).map(
             ([position, candidates]) => ({
               position,
@@ -71,19 +78,21 @@ const IndividualNumberBarChart = ({ electionId }: { electionId: string }) => {
             })
           );
 
-          console.log(data);
-          setIsFetchBarData(false);
+          console.log(data); // Log the raw data for debugging
+          console.log(transformCandidates); // Log transformed candidates for debugging
+
+          // Update state with grouped candidates
           setCanidates(groupedCandidatesArray);
-          console.log(transformCanidates);
+          setIsFetchBarData(false);
         }
       } catch (error) {
         setIsFetchBarData(false);
         console.log(error);
       }
     };
+
     monitorIndividualNumberBarChart();
   }, [electionId]);
-
   console.log(canidates);
 
   const option = {
