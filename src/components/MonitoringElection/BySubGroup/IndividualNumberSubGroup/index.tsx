@@ -17,9 +17,11 @@ const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
   const subgroupCounts = candidateSubgroup.reduce(
     (acc: any, candidate: any) => {
       const subgroup = candidate.subgroups;
-      subgroup.forEach((sub: any) => {
-        acc[sub] = (acc[sub] || 0) + 1;
-      });
+      if (subgroup && Array.isArray(subgroup)) {
+        subgroup.forEach((sub: any) => {
+          acc[sub] = (acc[sub] || 0) + 1;
+        });
+      }
       return acc;
     },
     {}
@@ -184,39 +186,49 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
 
     monitorElectionBySubgroup();
   }, [electionId]);
+  console.log(candidates && candidates);
 
-  const chartData = candidates
-    ? candidates[0].candidates?.map((candidate: any) => {
-        const subgroupCounts = candidate.subgroups.reduce(
-          (acc: any, subgroup: any) => {
-            acc[subgroup] = (acc[subgroup] || 0) + 1;
-            return acc;
-          },
-          {}
-        );
+  const chartData =
+    candidates?.length > 0
+      ? candidates.map(({ candidates: candidateList }: any) =>
+          candidateList && candidateList.length > 0
+            ? candidateList.map((candidate: any) => {
+                // Calculate the counts of each subgroup
+                const subgroupCounts = candidate.subgroups.reduce(
+                  (acc: Record<string, number>, subgroup: string) => {
+                    acc[subgroup] = (acc[subgroup] || 0) + 1;
+                    return acc;
+                  },
+                  {}
+                );
 
-        const labels = Object.keys(subgroupCounts);
-        const data = labels.map((label) => subgroupCounts[label]);
-        const backgroundColor = labels.map(
-          (label) => subgroupColors[label.toLowerCase()]
-        );
-        const borderColor = labels.map(
-          (label) => subgroupColors[label.toLowerCase()]
-        );
+                // Prepare the data for the chart
+                const labels = Object.keys(subgroupCounts);
+                const data = labels.map((label) => subgroupCounts[label]);
+                const backgroundColor = labels.map(
+                  (label) => subgroupColors[label.toLowerCase()] || "#000" // Ensure a default color if missing
+                );
+                const borderColor = labels.map(
+                  (label) => subgroupColors[label.toLowerCase()] || "#000"
+                );
 
-        return {
-          labels: labels,
-          datasets: [
-            {
-              data: data,
-              backgroundColor: backgroundColor,
-              borderColor: borderColor,
-              borderWidth: 1,
-            },
-          ],
-        };
-      })
-    : null;
+                return {
+                  labels: labels,
+                  datasets: [
+                    {
+                      data: data,
+                      backgroundColor: backgroundColor,
+                      borderColor: borderColor,
+                      borderWidth: 1,
+                    },
+                  ],
+                };
+              })
+            : []
+        )
+      : [];
+
+  console.log(chartData);
 
   if (isFetchSubGroup)
     return (
@@ -265,45 +277,24 @@ const IndividualNumberSubGroup = ({ electionId }: { electionId: string }) => {
                   candidateSubgroup={items.candidates}
                 />
                 {items.candidates.map((candidate: any, candidateIndex: any) => (
-                  <>
-                    <div key={candidateIndex}>
-                      <Pie
-                        //@ts-ignore
-                        options={option}
-                        // data={{
-                        //   labels: Array.from(
-                        //     { length: items.candidates[0].datasets.length },
-                        //     (_, i) => `Group ${i + 1}`
-                        //   ),
-                        //   datasets: [
-                        //     {
-                        //       data: candidate.datasets,
-                        //       backgroundColor: [
-                        //         "rgba(255, 186, 73, 1)",
-                        //         "rgba(204, 219, 220, 1)",
-                        //         "rgba(0, 18, 47, 1)",
-                        //         "rgba(166, 61, 64, 1)",
-                        //       ],
-                        //       borderColor: [
-                        //         "rgba(255, 186, 73, 1)",
-                        //         "rgba(204, 219, 220, 1)",
-                        //         "rgba(0, 18, 47, 1)",
-                        //         "rgba(166, 61, 64, 1)",
-                        //       ],
-                        //       borderWidth: 1,
-                        //     },
-                        //   ],
-                        // }}
-
-                        data={chartData[candidateIndex]}
-                        /** @ts-ignore */
-                        plugins={[ChartDataLabels]}
-                      />
+                  <div key={candidateIndex}>
+                    <div>
+                      {chartData &&
+                        chartData.length > index &&
+                        chartData[index][candidateIndex] && ( // Ensure indices align correctly
+                          <Pie
+                            //@ts-ignore
+                            options={option}
+                            data={chartData[index][candidateIndex]} // Correct index for candidate chart data
+                            /** @ts-ignore */
+                            plugins={[ChartDataLabels]}
+                          />
+                        )}
                       <div className="flex justify-center py-10 text-xl font-semibold">
                         {candidate.candidateName}
                       </div>
                     </div>
-                  </>
+                  </div>
                 ))}
                 <div>
                   <div className="flex flex-col gap-3 mt-5">
