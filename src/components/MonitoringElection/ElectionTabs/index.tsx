@@ -5,7 +5,15 @@ import ByBarChart from "../ByBarChart";
 import BySubGroup from "../BySubGroup";
 import { monitorTotalVote } from "@/utils/api";
 
-const ElectionTabs = ({ electionId }: { electionId: string }) => {
+const ElectionTabs = ({
+  electionId,
+  activeTabs,
+  setActiveTabs,
+}: {
+  electionId: string;
+  activeTabs: string;
+  setActiveTabs: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   const [activeTab, setActiveTab] = useState(1);
   console.log(electionId);
   const handleTabClick = (tabNumber: number) => {
@@ -80,10 +88,28 @@ const ElectionTabs = ({ electionId }: { electionId: string }) => {
       </div>
       <div className="pt-[78px]">
         <div className="w-full h-full flex flex-col items-center">
-          {activeTab === 1 && <ByNumbers electionId={electionId} />}
+          {activeTab === 1 && (
+            <ByNumbers
+              electionId={electionId}
+              activeTabs={activeTabs}
+              setActiveTabs={setActiveTabs}
+            />
+          )}
           {activeTab === 2 && <ByLineChart />}
-          {activeTab === 3 && <ByBarChart electionId={electionId} />}
-          {activeTab === 4 && <BySubGroup electionId={electionId} />}
+          {activeTab === 3 && (
+            <ByBarChart
+              electionId={electionId}
+              activeTabs={activeTabs}
+              setActiveTabs={setActiveTabs}
+            />
+          )}
+          {activeTab === 4 && (
+            <BySubGroup
+              electionId={electionId}
+              activeTabs={activeTabs}
+              setActiveTabs={setActiveTabs}
+            />
+          )}
         </div>
       </div>
     </div>

@@ -7,6 +7,9 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
+import Link from "next/link";
+import MonitorByTotalNumbers from "@/src/components/MonitoringElection/ByNumbers/MonitorByTotalNumbers";
+import MonitorByindividualNumbers from "@/src/components/MonitoringElection/ByNumbers/MonitorByIndividualNumbers";
 
 const MonitoringElections = () => {
   const users = useCurrentUser();
@@ -18,15 +21,35 @@ const MonitoringElections = () => {
   const [votingData, setVotingData] = useState<any>(null);
   const [error, setError] = useState("");
   const [isClient, setIsClient] = useState(false);
+  const [activeTabs, setActiveTabs] = useState<string>("");
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
+
+  const isTotalNumbersActive = router.pathname.includes("totalNumbers");
+  const isIndividualNumbersActive =
+    router.pathname.includes("individualNumbers");
 
   useEffect(() => {
     if (idType) {
       setElectionID(idType[0]);
     }
-  }, [id, electionID]);
+  }, [id]);
+
+  useEffect(() => {
+    // if (router.pathname.includes("individualNumbers")) {
+    //   setActiveTab("individualNumbers");
+    // } else {
+    //   setActiveTab("totalNumbers");
+    // }
+    if (idType?.includes("individualNumbers")) {
+      setActiveTabs("individualNumbers");
+    } else {
+      setActiveTabs("totalNumbers");
+    }
+  }, [idType]);
+
+  console.log(activeTabs, id);
 
   useEffect(() => {
     const getElection = async () => {
@@ -74,7 +97,37 @@ const MonitoringElections = () => {
       {isClient && (
         <div>
           <Header electionDetails={election} />
-          <ElectionTabs electionId={electionID} />
+          <ElectionTabs
+            electionId={electionID}
+            activeTabs={activeTabs}
+            setActiveTabs={setActiveTabs}
+          />
+          {/* <div>
+            <button
+              className={activeTab === "totalNumbers" ? "active" : ""}
+              onClick={() => handleTabChange("totalNumbers")}
+            >
+              Total Numbers
+            </button>
+            <button
+              className={activeTab === "individualNumbers" ? "active" : ""}
+              onClick={() => handleTabChange("individualNumbers")}
+            >
+              Individual Numbers
+            </button>
+          </div>
+          <div>
+            {activeTab === "totalNumbers" && (
+              <div>
+                <MonitorByTotalNumbers />
+              </div>
+            )}
+            {activeTab === "individualNumbers" && (
+              <div>
+                <MonitorByindividualNumbers />
+              </div>
+            )}
+          </div> */}
         </div>
       )}
     </div>

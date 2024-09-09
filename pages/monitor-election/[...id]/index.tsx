@@ -36,13 +36,13 @@ const MonitorAnElectionDetails = () => {
               To Monitor your Election By Total Numbers
             </div>
             <div className=" flex items-center gap-5 pt-5">
-              <div className="w-full max-w-[600px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
+              <div className="w-full max-w-[800px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
                 {/* <span ref={totalNumberRef}>{`${shortenText(
               electionName
             )}.votar.ng/monitortotn`}</span> */}
                 <span ref={totalNumberRef}>
                   https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-                  {electionId}
+                  {electionId}/totalNumbers
                 </span>
               </div>
               <div
@@ -63,13 +63,13 @@ const MonitorAnElectionDetails = () => {
             </div>
 
             <div className=" flex items-center gap-5 pt-5">
-              <div className="w-full max-w-[600px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
+              <div className="w-full max-w-[800px]  h-20 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-base text-xs text-blue-700 font-semibold p-4 lg:p-0">
                 {/* <span ref={individualNumberRef}>{`${shortenText(
               electionName
             )}.votar.ng/monitorindn`}</span> */}
                 <span ref={individualNumberRef}>
                   https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-                  {electionId}
+                  {electionId}/individualNumbers
                 </span>
               </div>
               <div

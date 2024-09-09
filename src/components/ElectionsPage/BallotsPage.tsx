@@ -276,8 +276,15 @@ const BallotsPage = ({ position, setPosition }: any) => {
           {position.map((position: any, positionIndex: any) => (
             <div
               key={positionIndex}
-              className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4"
+              className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4 relative"
             >
+              {positionIndex > 0 && (
+                <div className="absolute -right-1 -top-4 text-3xl">
+                  <button className="text-red-500">
+                    <MdDelete />
+                  </button>
+                </div>
+              )}
               <div className="text-center text-slate-900 lg:text-3xl text-base font-semibold flex items-center justify-center gap-2 uppercase">
                 <div>
                   <img
@@ -364,7 +371,15 @@ const BallotsPage = ({ position, setPosition }: any) => {
 
               {position.candidates.map(
                 (candidate: any, candidateIndex: any) => (
-                  <div key={candidateIndex} className="w-full">
+                  <div key={candidateIndex} className="w-full relative">
+                    <div className="absolute right-0 top-5 text-red-500 text-3xl">
+                      <button className="flex items-center">
+                        <span>
+                          <MdDelete />
+                        </span>
+                        <span className="text-sm">Delete candidate</span>
+                      </button>
+                    </div>
                     <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
                       {candidate.candidate_name
                         ? candidate.candidate_name

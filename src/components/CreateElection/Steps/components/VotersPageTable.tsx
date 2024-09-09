@@ -14,6 +14,7 @@ import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import DeleteDialog from "./DeleteDialog";
 import { el } from "date-fns/locale";
 
 interface VotersPageTableProps {
@@ -103,49 +104,49 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
+  const handleResponseExported = async () => {
+    // if (typeof window !== "undefined") {
+    //   const exportedResponses = localStorage.getItem("voter_response");
+    //   if (exportedResponses) {
+    //     setResponses(JSON.parse(exportedResponses));
+    //   }
+    // }
+    setIsFetchVoters(true);
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
+    }
+
+    try {
+      if (typeof window !== "undefined" || electionId) {
+        const electionID = localStorage.getItem("ElectionId");
+        const { data } = await getVoters(USER_ID, {
+          election_id: electionId || electionID,
+        });
+        if (data) {
+          console.log(data.data);
+          setIsFetchVoters(false);
+          const uniqueItems = filterDuplicates(data.data, [
+            "id",
+            "name",
+            "subgroup",
+            "phone",
+            "email",
+          ]);
+          setResponses(uniqueItems);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      setIsFetchVoters(false);
+    }
+  };
+
   useEffect(() => {
-    const handleResponseExported = async () => {
-      // if (typeof window !== "undefined") {
-      //   const exportedResponses = localStorage.getItem("voter_response");
-      //   if (exportedResponses) {
-      //     setResponses(JSON.parse(exportedResponses));
-      //   }
-      // }
-      setIsFetchVoters(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
-
-      try {
-        if (typeof window !== "undefined" || electionId) {
-          const electionID = localStorage.getItem("ElectionId");
-          const { data } = await getVoters(USER_ID, {
-            election_id: electionId || electionID,
-          });
-          if (data) {
-            console.log(data.data);
-            setIsFetchVoters(false);
-            const uniqueItems = filterDuplicates(data.data, [
-              "id",
-              "name",
-              "subgroup",
-              "phone",
-              "email",
-            ]);
-            setResponses(uniqueItems);
-          }
-        }
-      } catch (e) {
-        console.log(e);
-        setIsFetchVoters(false);
-      }
-    };
-
     handleResponseExported();
   }, [electionId]);
 
@@ -230,6 +231,16 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       setTrackChanges={setTrackChanges}
                       trackChanges={trackChanges}
                       setUsers={setResponses}
+                    />
+                  </StyledTableCell>
+                  <StyledTableCell align="center" className="cursor-pointer">
+                    <DeleteDialog
+                      selectedVoter={row.name}
+                      row={row}
+                      id={index}
+                      getUpdatedList={() => handleResponseExported()}
+                      voters={responses}
+                      setVoters={setResponses}
                     />
                   </StyledTableCell>
                 </TableRow>

@@ -5,6 +5,9 @@ import { styled } from "@mui/material/styles";
 import { StyledTabProps, StyledTabsProps } from "@/utils/types";
 import TotalNumbersBarChart from "./TotalNumbersBarChart";
 import IndividualNumberBarChart from "./IndividualNumberBarChart";
+import { useRouter } from "next/router";
+import MonitorTotalNumberBarChart from "./MonitorTotalNumberBarChart";
+import MonitorIndividualNumberChart from "./MonitorIndividualNumberChart";
 
 const StyledTabs = styled((props: StyledTabsProps) => (
   <Tabs
@@ -43,27 +46,72 @@ const StyledTab = styled((props: StyledTabProps) => (
   },
 }));
 
-const ByBarChart = ({ electionId }: { electionId: string }) => {
+const ByBarChart = ({
+  electionId,
+  activeTabs,
+  setActiveTabs,
+}: {
+  electionId: string;
+  activeTabs: string;
+  setActiveTabs: React.Dispatch<React.SetStateAction<string>>;
+}) => {
   const [value, setValue] = useState(0);
+  const router = useRouter();
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
+  };
+  const handleTabChange = (tab: string) => {
+    setActiveTabs(tab);
+    router.push(`/monitoring-elections/${electionId}/${tab}`);
   };
 
   return (
     <div>
-      <div className="flex justify-center items-center mb-[52px]">
-        <StyledTabs
+      <div>
+        {/* <StyledTabs
           value={value}
           onChange={handleChange}
           aria-label="styled tabs example"
         >
           <StyledTab label="Total Numbers" />
           <StyledTab label="Individual Numbers" />
-        </StyledTabs>
+        </StyledTabs> */}
+        <div className="flex justify-center items-center gap-10">
+          <button
+            className={`
+              ${activeTabs === "totalNumbers" ? "text-blue-700 " : ""}
+            text-xl`}
+            onClick={() => handleTabChange("totalNumbers")}
+          >
+            Total Numbers
+          </button>
+          <button
+            className={` ${
+              activeTabs === "individualNumbers" ? "text-blue-700" : ""
+            } text-xl`}
+            onClick={() => handleTabChange("individualNumbers")}
+          >
+            Individual Numbers
+          </button>
+        </div>
       </div>
-      <div className="w-full h-full flex flex-col items-center">
-        {value === 0 && <TotalNumbersBarChart electionId={electionId} />}
-        {value === 1 && <IndividualNumberBarChart electionId={electionId} />}
+      <div className="pt-[52px] pb-20">
+        <div className="w-full h-full flex flex-col items-center">
+          {/* {value === 0 && <TotalNumbers electionId={electionId} />}
+          {value === 1 && <IndividualNumbers electionId={electionId} />} */}
+          <div>
+            {activeTabs === "totalNumbers" && (
+              <div>
+                <MonitorTotalNumberBarChart electionId={electionId} />
+              </div>
+            )}
+            {activeTabs === "individualNumbers" && (
+              <div>
+                <MonitorIndividualNumberChart electionId={electionId} />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

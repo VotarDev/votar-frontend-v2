@@ -136,7 +136,18 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
         <span className="font-bold">INSTRUCTION:</span> Please Fill in your
         Details Correctly
       </div>
-      <form className="pt-20">
+      <div className="flex justify-end pt-10">
+        <button
+          className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
+          onClick={handleViewResponse}
+        >
+          View Response
+          <span className="text-3xl">
+            <IoIosArrowRoundForward />
+          </span>
+        </button>
+      </div>
+      <form className="pt-10">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
             <label htmlFor="id">ID</label>
@@ -286,15 +297,6 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
             <BsLink />
           </span>
           Copy Link
-        </button>
-        <button
-          className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
-          onClick={handleViewResponse}
-        >
-          View Response
-          <span className="text-3xl">
-            <IoIosArrowRoundForward />
-          </span>
         </button>
       </div>
     </div>

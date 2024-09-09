@@ -13,6 +13,7 @@ import Modal from "@/src/components/Modal";
 import ExportModal from "./ExportModal";
 import ImportModal from "./ImportModal";
 import XSLX from "sheetjs-style";
+import * as XLSX from "xlsx";
 import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { getVoterResponse } from "@/utils/api";
@@ -22,6 +23,11 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { importFromCsv } from "@/utils/api";
+
+type ResponseData = {
+  voters: VoterResponse[];
+  election_id: string | null;
+};
 
 const ResponseTable = () => {
   const headers = [
@@ -34,16 +40,17 @@ const ResponseTable = () => {
     "Email",
   ];
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
-  const [toggleExportToElection, setToggleExportToElection] = useState(false);
+  const [toggleExportToElection, setToggleExportToElection] =
+    useState<boolean>(false);
   const [toggleImportElection, setToggleImportElection] =
     useState<boolean>(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [elections, setElections] = useState<ElectionDetails[]>([]);
-  const [electionID, setElectionID] = useState("");
+  const [electionID, setElectionID] = useState<string | null>("");
   const [votarResponses, setVotarResponses] = useState<VoterResponse[]>([]);
-  const [isFetchResponse, setIsFetchResponse] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+  const [isFetchResponse, setIsFetchResponse] = useState<boolean>(false);
+  const [isImporting, setIsImporting] = useState<boolean>(false);
+  const [isExporting, setIsExporting] = useState<boolean>(false);
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -180,37 +187,53 @@ const ResponseTable = () => {
         reader.onload = async (e) => {
           if (e.target?.result) {
             const binaryStr = e.target?.result;
-            const workBook = XSLX.read(binaryStr, { type: "binary" });
+            const workBook = XLSX.read(binaryStr, { type: "binary" });
+
+            // Get the first sheet
             const workSheetName = workBook.SheetNames[0];
             const workSheet = workBook.Sheets[workSheetName];
-            const csvData: any = XSLX.utils.sheet_to_json(workSheet, {
-              header: 1,
+
+            // Convert to JSON
+            const csvData: any = XLSX.utils.sheet_to_json(workSheet, {
+              header: 1, // Read the first row as headers
+              raw: true, // Keep raw values without type conversion
+              defval: "", // Default value for empty cells
             });
 
+            // Process CSV data and ensure all fields are read as strings
             const newUserData = csvData
               .map(
                 ([id, name, subgroup, phoneNumber, email]: [
-                  number | string,
+                  string | number,
                   string,
                   string,
-                  string,
+                  string | number,
                   string
-                ]) => ({
-                  id,
-                  name,
-                  subgroup,
-                  phoneNumber,
-                  email,
-                })
+                ]) => {
+                  return {
+                    id: typeof id === "string" ? id : String(id), // Force id to be string
+                    name,
+                    subgroup,
+                    phoneNumber:
+                      typeof phoneNumber === "number"
+                        ? phoneNumber.toString()
+                        : phoneNumber, // Ensure phone is string
+                    email,
+                  };
+                }
               )
               .filter(
                 (newUser: any) =>
+                  newUser.id &&
+                  newUser.name && // Ensure valid users only
                   !votarResponses.some(
                     (existingUser) => existingUser.id === newUser.id
                   )
               );
+
             const combinedData = [...votarResponses, ...newUserData];
             setVotarResponses(combinedData);
+
             const seen: Record<string, boolean> = {};
             const updatedData = combinedData.map((item) => {
               const key = `${item.name}_${item.phoneNumber}_${item.email}`;
@@ -223,16 +246,18 @@ const ResponseTable = () => {
                 return { ...item, isDuplicate: false } as VoterResponse;
               }
             });
+
             const bodyData = {
               electionId: electionID,
               voters: filterDuplicates(updatedData, [
                 "id",
                 "name",
                 "subgroup",
-                "phone",
+                "phoneNumber",
                 "email",
               ]),
             };
+
             console.log(bodyData);
             const res = await importFromCsv(USER_ID, bodyData);
             setIsImporting(false);
@@ -258,79 +283,70 @@ const ResponseTable = () => {
     XSLX.writeFile(newWorkbook, "users.xlsx");
   };
 
-  const filterDuplicates = (array: any, keys: any) => {
-    const seen = new Set();
-    return array
-      .filter((item: any) => {
-        const compositeKey = keys.map((key: any) => item[key]).join("|");
-        const isDuplicate = seen.has(compositeKey);
-        seen.add(compositeKey);
-        return !isDuplicate;
-      })
-      .map(
-        ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        }: {
-          email: string;
-          name: string;
-          phoneNumber: string;
-          id: string;
-          subgroup: string;
-        }) => ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        })
-      );
+  const filterDuplicates = (
+    array: VoterResponse[],
+    keys: (keyof VoterResponse)[]
+  ): VoterResponse[] => {
+    const seen = new Set<string>();
+    return array.filter((item) => {
+      const key = keys.map((k) => item[k]).join("_"); // Create a unique key by combining specified fields
+      if (seen.has(key)) {
+        return false; // This item is a duplicate
+      } else {
+        seen.add(key);
+        return true; // This item is unique
+      }
+    });
   };
 
-  const exportResponseToElection = async () => {
-    const uniqueItems = filterDuplicates(votarResponses, [
+  const exportResponseToElection = async (): Promise<void> => {
+    // Filter out duplicate voters based on specified fields
+    const uniqueItems: VoterResponse[] = filterDuplicates(votarResponses, [
       "id",
       "name",
       "subgroup",
-      "phone",
+      "phoneNumber",
       "email",
     ]);
+
     setIsExporting(true);
+
+    // Set the authentication token
     if (users?.data) {
       setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
+    } else if (typeof window !== "undefined") {
+      const tokenLocal = localStorage.getItem("token");
+      if (tokenLocal) {
         setAuthToken(tokenLocal);
       }
     }
+
+    // Store the election ID in localStorage if it exists
     if (electionID) localStorage.setItem("ElectionId", electionID);
-    const responseData = {
-      voters: uniqueItems,
+
+    // Prepare the data to be exported
+    const responseData: ResponseData = {
+      voters: uniqueItems, // Only unique voters
       election_id: electionID,
     };
-    console.log(responseData);
+
+    console.log("Exporting Response Data:", responseData);
+
     try {
+      // Make the API call to export voters
       const { data } = await exportVoters(responseData, USER_ID);
       if (data) {
         setIsExporting(false);
         toast.success("Responses exported successfully");
-        setVotarResponses([]);
-        console.log(data);
+        setVotarResponses([]); // Clear the responses after successful export
+        console.log("Exported Data:", data);
       }
     } catch (e: any) {
-      console.log(e);
+      console.error("Error exporting responses:", e);
       setIsExporting(false);
     }
 
-    console.log(uniqueItems);
-
-    // localStorage.setItem("voter_response", JSON.stringify(uniqueItems));
-    // toast.success("Responses exported successfully");
-    // window.dispatchEvent(new Event("responsesExported"));
+    console.log("Unique Items after Filtering:", uniqueItems);
   };
 
   const handleOpen = () => setToggleExportToElection(true);

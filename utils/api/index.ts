@@ -37,6 +37,7 @@ const monitorBarChartUrl = "user/monitor-barchartTotal";
 const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
 const monitorTotalLineChartUrl = "user/monitor-linechart";
 const dashboardCardsUrl = "user/cards";
+const deleteVoterUrl = "user/delete-voter";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -204,6 +205,12 @@ export const monitorTotalLineChart = (id: string) => {
 
 export const dashboardCards = (authorId: any) => {
   return httpService.post(dashboardCardsUrl, authorId);
+};
+
+export const deleteVoter = (data: { voter_id: string; email: string }) => {
+  return httpService.delete(deleteVoterUrl, {
+    data: data, // Include the data in the request body
+  });
 };
 
 /** ADMIN */
