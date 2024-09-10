@@ -31,7 +31,7 @@ import { ElectionDetails } from "@/utils/types";
 import { getElections } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
 import { dashboardCards } from "@/utils/api";
-import { formatTimeToHHMM } from "@/utils/util";
+import Cookies from "universal-cookie";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
@@ -42,6 +42,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const [isFetchElections, setIsFetchElections] = useState(false);
   const [cardDetails, setCardDetails] = useState<any>([]);
   const [isFetchCards, setIsFetchCards] = useState(false);
+  const cookies = new Cookies();
   const { data } = useSession();
 
   let USER_ID = users?.data?.data
@@ -50,18 +51,23 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     ? users?.id
     : user?.user?.id;
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const tokenLocal = localStorage.getItem("token");
-      if (!token && !tokenLocal) {
-        // If token does not exist, redirect to signin page
-        router.push("/signin");
-      }
-    }
-    if (typeof token === "string") {
-      localStorage.setItem("token", token);
-    }
-  }, [router]);
+  console.log(token);
+
+  // useEffect(() => {
+  //   const userToken = cookies.get("user-token");
+  //   console.log(userToken);
+
+  //   // If the userToken or the token from props does not exist, redirect to signin
+  //   if (userToken) {
+  //     return; // Do nothing, user is authenticated
+  //   }
+  //   if (token) {
+  //     return;
+  //   } else {
+  //     // If neither token exists, redirect to signin
+  //     router.push("/signin");
+  //   }
+  // }, [router, token]);
 
   useEffect(() => {
     if (userInfo.token) setAuthToken(userInfo.token);
@@ -117,124 +123,132 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   }, []);
 
   return (
-    <DashboardLayout>
-      {isFetchCards ? (
-        <div className="my-10 flex justify-center">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      ) : (
-        <div className="w-full flex">
-          <Swiper
-            modules={[A11y]}
-            spaceBetween={10}
-            breakpoints={{
-              240: { slidesPerView: 1, spaceBetween: 10 },
-              624: { slidesPerView: 1.5, spaceBetween: 10 },
-              1280: { slidesPerView: 1.8, spaceBetween: 10 },
-            }}
-            centeredSlides={true}
-            centeredSlidesBounds
-            className="w-full"
-          >
-            {cardDetails?.map((election: any, index: number) => (
-              <SwiperSlide
-                key={election._id}
-                className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
-                style={{
-                  backgroundColor: `${elections[index].style}`,
-                  borderLeft: `3px solid ${elections[index].border}`,
-                }}
-              >
-                <div>
-                  <Link href="/access">
-                    <div className="lg:text-xl text-base text-white pt-6">
-                      {election?.name_of_election}
-                    </div>
-                    <div className="flex pt-8 items-center text-white md:gap-6 justify-center text-xs lg:text-base gap-2">
-                      <div className="pb-4">
-                        Election Starts at {election?.start_date}
+    <ProtectedRoutes googletoken={token}>
+      <DashboardLayout>
+        {isFetchCards ? (
+          <div className="my-10 flex justify-center">
+            <CircularProgress size={30} style={{ color: "#015CE9" }} />
+          </div>
+        ) : (
+          <div className="w-full flex">
+            <Swiper
+              modules={[A11y]}
+              spaceBetween={10}
+              breakpoints={{
+                240: { slidesPerView: 1, spaceBetween: 10 },
+                624: { slidesPerView: 1.5, spaceBetween: 10 },
+                1280: { slidesPerView: 1.8, spaceBetween: 10 },
+              }}
+              centeredSlides={true}
+              centeredSlidesBounds
+              className="w-full"
+            >
+              {cardDetails?.map((election: any, index: number) => (
+                <SwiperSlide
+                  key={election._id}
+                  className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
+                  style={{
+                    backgroundColor: `${elections[index].style}`,
+                    borderLeft: `3px solid ${elections[index].border}`,
+                  }}
+                >
+                  <div>
+                    <Link href="/access">
+                      <div className="lg:text-xl text-base text-white pt-6">
+                        {election?.name_of_election}
                       </div>
-                      <div>
+                      <div className="flex pt-8 items-center text-white md:gap-6 justify-center text-xs lg:text-base gap-2">
+                        <div className="pb-4">
+                          Election Starts at {election?.start_date}
+                        </div>
+                        <div>
+                          <img
+                            src={line.src}
+                            alt="line"
+                            className="w-[20px] object-contain"
+                          />
+                        </div>
+                        <div className="pb-4">
+                          Election ends by {election.end_date}
+                        </div>
+                      </div>
+                      <div className="absolute top-0 left-0 bottom-0 right-0 -z-10 opacity-30">
                         <img
-                          src={line.src}
-                          alt="line"
-                          className="w-[20px] object-contain"
+                          src={cardBg.src}
+                          alt="card-bg"
+                          className="lg:min-w-[483px] w-full h-full"
                         />
                       </div>
-                      <div className="pb-4">
-                        Election ends by {election.end_date}
-                      </div>
-                    </div>
-                    <div className="absolute top-0 left-0 bottom-0 right-0 -z-10 opacity-30">
-                      <img
-                        src={cardBg.src}
-                        alt="card-bg"
-                        className="lg:min-w-[483px] w-full h-full"
-                      />
-                    </div>
-                  </Link>
-                </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </div>
-      )}
-
-      {isFetchElections ? (
-        <div className="text-center mt-10">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      ) : (
-        <>
-          <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
-            <span>
-              <img
-                src={vote.src}
-                alt="vote"
-                className="w-4 h-4 object-contain"
-              />
-            </span>
-            You have participated in {election.length} Votar Elections
+                    </Link>
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
+        )}
 
-          <div className="mt-9">
-            <div className="flex gap-2 text-xl font-semibold">
-              Past Elections
+        {isFetchElections ? (
+          <div className="text-center mt-10">
+            <CircularProgress size={30} style={{ color: "#015CE9" }} />
+          </div>
+        ) : (
+          <>
+            <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
               <span>
-                <img src={calendar.src} alt="calendar" />
+                <img
+                  src={vote.src}
+                  alt="vote"
+                  className="w-4 h-4 object-contain"
+                />
               </span>
+              You have participated in {election.length} Votar Elections
             </div>
-            <div className="mt-1">
-              <Tables election={election} />
+
+            <div className="mt-9">
+              <div className="flex gap-2 text-xl font-semibold">
+                Past Elections
+                <span>
+                  <img src={calendar.src} alt="calendar" />
+                </span>
+              </div>
+              <div className="mt-1">
+                <Tables election={election} />
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      <Chat />
-    </DashboardLayout>
+          </>
+        )}
+        <Chat />
+      </DashboardLayout>
+    </ProtectedRoutes>
   );
 };
 
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const parsedUrl = url.parse(context.req.url || "", true);
-  console.log(parsedUrl.query);
+  const { query } = context; // Use context.query to get query parameters
 
   let token: string | null = null;
 
-  if (typeof parsedUrl.query.token === "string") {
-    token = parsedUrl.query.token;
-  } else if (Array.isArray(parsedUrl.query.token)) {
-    token = parsedUrl.query.token[0];
+  if (typeof query.token === "string") {
+    token = query.token;
+  } else if (Array.isArray(query.token)) {
+    token = query.token[0];
   }
 
-  if (token === undefined) {
-    // Set a default value or handle the case as needed
-    token = null;
-  }
+  // Check if token is undefined or null and handle accordingly
+  // if (!token) {
+  //   // If the token is not found, handle the redirect or set a default value as needed
+  //   return {
+  //     redirect: {
+  //       destination: "/signin", // Redirect to signin if token is not available
+  //       permanent: false,
+  //     },
+  //   };
+  // }
+
   return {
-    props: { token, userInfo: parsedUrl.query },
+    props: { token, userInfo: query }, // Pass token and other user info as props
   };
 };
 

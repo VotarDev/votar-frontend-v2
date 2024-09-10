@@ -18,6 +18,7 @@ import logoutIcon from "../../../public/assets/icons/log out.svg";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { Tooltip } from "@mui/material";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
+import Cookies from "universal-cookie";
 
 const SideBar = ({ opener }: { opener?: boolean }) => {
   const { data, status } = useSession();
@@ -29,7 +30,9 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
 
   const handleLogout = async () => {
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    // localStorage.removeItem("token");
+    const cookies = new Cookies();
+    cookies.remove("user-token", { path: "/" });
     dispatch(logout());
     dispatch(userData({}));
 

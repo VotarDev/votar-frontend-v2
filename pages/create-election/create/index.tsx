@@ -258,8 +258,8 @@ const Create = () => {
   }, [currentStep]);
 
   return (
-    <DashboardLayout>
-      <ProtectedRoutes>
+    <ProtectedRoutes>
+      <DashboardLayout>
         <div className="w-full lg:px-3 px-0">
           <div>
             <StepHeader
@@ -299,8 +299,8 @@ const Create = () => {
             </div>
           </div>
         </div>
-      </ProtectedRoutes>
-    </DashboardLayout>
+      </DashboardLayout>
+    </ProtectedRoutes>
   );
 };
 

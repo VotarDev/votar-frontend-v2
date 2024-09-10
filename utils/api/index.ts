@@ -38,6 +38,7 @@ const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
 const monitorTotalLineChartUrl = "user/monitor-linechart";
 const dashboardCardsUrl = "user/cards";
 const deleteVoterUrl = "user/delete-voter";
+const deleteElectionUrl = "user/delete-election";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -210,6 +211,15 @@ export const dashboardCards = (authorId: any) => {
 export const deleteVoter = (data: { voter_id: string; email: string }) => {
   return httpService.delete(deleteVoterUrl, {
     data: data, // Include the data in the request body
+  });
+};
+
+export const deleteElection = (
+  electionId: string,
+  data: { election_id: string }
+) => {
+  return httpService.delete(deleteElectionUrl + `/${electionId}`, {
+    data: data,
   });
 };
 

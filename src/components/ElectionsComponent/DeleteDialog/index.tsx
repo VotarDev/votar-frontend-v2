@@ -2,50 +2,56 @@ import React, { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
-import { deleteVoter } from "@/utils/api";
+import { deleteElection } from "@/utils/api";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
 
 const DeleteDialog = ({
-  selectedVoter,
+  selectedAdmin,
   id,
-  voters,
-  setVoters,
-  row,
+  admins,
+  setAdmins,
   getUpdatedList,
+  userId,
 }: any) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const handleClickOpen = () => setOpen(true);
+
   const handleClickClose = () => setOpen(false);
-
-  const handleDelete = async () => {
-    setIsLoading(true);
-    try {
-      const bodyData = {
-        voter_id: row.id,
-        email: row.email,
-      };
-
-      const { data } = await deleteVoter(bodyData);
-      if (data) {
-        setIsLoading(false);
-        getUpdatedList();
-        toast.success("Deleted");
-      }
-    } catch (e: any) {
-      setIsLoading(false);
-      console.log(e);
-    }
-  };
   const handleDeleteAdmin = () => {
-    const filteredEmptyAdmin = voters.filter(
+    const filteredEmptyAdmin = admins.filter(
       (item: any) => item.name || item.username || item.password
     );
     const updatedUser = filteredEmptyAdmin.filter(
       (item: any, index: number) => index !== id
     );
-    setVoters(updatedUser);
+    setAdmins(updatedUser);
+  };
+
+  const handleDeleteElection = async () => {
+    setIsLoading(true);
+    try {
+      const dataBody = { election_id: id };
+      const { data } = await deleteElection(userId, dataBody);
+      if (data) {
+        toast.success("Deleted Succesfully");
+        getUpdatedList();
+        setIsLoading(false);
+        setOpen(false);
+      }
+    } catch (error: any) {
+      console.log(error);
+      setIsLoading(false);
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      toast.error(error.response.data.message || error.message);
+      setOpen(false);
+    }
   };
 
   return (
@@ -57,7 +63,7 @@ const DeleteDialog = ({
         {open && (
           <Modal key="modal" handleClose={handleClickClose}>
             <div className="bg-white rounded-lg py-[24px] px-10 text-left text-xl text-slate-600">
-              <div className="pb-10">{`Are you sure you want to delete "${selectedVoter}"?`}</div>
+              <div className="pb-10">{`Are you sure you want to delete "${selectedAdmin}"?`}</div>
               <div className="pb-8 text-base">
                 This will permanently remove the details from the system and
                 cannot be reversed.
@@ -71,12 +77,15 @@ const DeleteDialog = ({
                     Cancel
                   </button>
                 </div>
-                <div className="w-full" onClick={handleDelete}>
-                  <button className="bg-red-500 w-full flex-1 h-12 outline-none rounded">
+                <div className="w-full" onClick={handleDeleteElection}>
+                  <button
+                    className="bg-red-500 w-full flex-1 h-12 outline-none rounded flex items-center justify-center"
+                    disabled={isLoading}
+                  >
                     {isLoading && (
                       <CircularProgress
                         color="inherit"
-                        className=" text-white"
+                        className=" text-white mr-2"
                         size={20}
                       />
                     )}

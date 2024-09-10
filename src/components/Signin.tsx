@@ -42,7 +42,7 @@ const SigninComponent = () => {
 
     const userdata = { email, password };
     //@ts-ignore
-    dispatch(login(userdata));
+    await dispatch(login(userdata));
     console.log(message);
   };
 

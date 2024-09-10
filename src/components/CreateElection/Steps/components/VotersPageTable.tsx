@@ -150,7 +150,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     handleResponseExported();
   }, [electionId]);
 
-  console.log(electionId);
+  console.log(responses);
 
   if (isFetchVoters) {
     return (

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "./authService";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
+import Cookies from "universal-cookie";
 
 let users = null;
 
@@ -30,11 +31,16 @@ export const login = createAsyncThunk(
   `${process.env.NEXT_PUBLIC_BASE_URL}/user/login`,
   async (userdata, thunkAPI) => {
     try {
+      const cookies = new Cookies();
       const { data } = await authService.login(userdata);
       if (data) {
         setAuthToken(data.data.data.cookie);
         localStorage.setItem("user", JSON.stringify(data));
-        localStorage.setItem("token", data.data.data.cookie);
+        cookies.set("user-token", data.data.data.cookie, {
+          path: "/",
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        });
+        // localStorage.setItem("token", data.data.data.cookie);
         toast.success(data.data?.message);
       }
       return data;
