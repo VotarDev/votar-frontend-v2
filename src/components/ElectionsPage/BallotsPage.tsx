@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { getElectionById } from "@/utils/api";
+import { deleteCandidate, deletePosition, getElectionById } from "@/utils/api";
 import { Checkbox, CircularProgress, FormControlLabel } from "@mui/material";
 import Header from "../BallotPage/Header";
 import { useRouter } from "next/router";
@@ -72,22 +72,23 @@ const BallotsPage = ({ position, setPosition }: any) => {
     getElection();
   }, [electionID]);
 
-  useEffect(() => {
+  const fetchData = async () => {
     try {
-      const fetchData = async () => {
-        if (electionID) {
-          const electionIdData = { election_id: electionID };
-          const { data } = await getCandidates(USER_ID, electionIdData);
-          if (data) {
-            setPosition(data.data);
-            console.log(data);
-          }
+      if (electionID) {
+        const electionIdData = { election_id: electionID };
+        const { data } = await getCandidates(USER_ID, electionIdData);
+        if (data) {
+          setPosition(data.data);
+          console.log(data);
         }
-      };
-      fetchData();
+      }
     } catch (e) {
       console.log(e);
     }
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [electionID]);
 
   const handleInputChange = (
@@ -222,6 +223,60 @@ const BallotsPage = ({ position, setPosition }: any) => {
     }
   };
 
+  const handleDeleteCandidate = async (
+    e: any,
+    positionName: string,
+    candidateName: string
+  ) => {
+    e.preventDefault();
+    try {
+      const dataBody = {
+        election_id: electionID,
+        name_of_position: positionName,
+        candidate_name: candidateName,
+      };
+      const { data } = await deleteCandidate(dataBody);
+      if (data) {
+        toast.success("Deleted Successfully");
+        fetchData();
+      }
+      console.log(dataBody);
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(error);
+      toast.error(error.response.data.message || error.message);
+    }
+  };
+
+  const handleDeletePosition = async (e: any, positionName: string) => {
+    e.preventDefault();
+    try {
+      const dataBody = {
+        election_id: electionID,
+        name_of_position: positionName,
+      };
+      const { data } = await deletePosition(dataBody, USER_ID);
+      if (data) {
+        toast.success("Deleted Sucessfully");
+        fetchData();
+      }
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(error);
+      toast.error(error.response.data.message || error.message);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="my-10">
@@ -280,7 +335,12 @@ const BallotsPage = ({ position, setPosition }: any) => {
             >
               {positionIndex > 0 && (
                 <div className="absolute -right-1 -top-4 text-3xl">
-                  <button className="text-red-500">
+                  <button
+                    className="text-red-500"
+                    onClick={(e) =>
+                      handleDeletePosition(e, position.name_of_position)
+                    }
+                  >
                     <MdDelete />
                   </button>
                 </div>
@@ -373,7 +433,16 @@ const BallotsPage = ({ position, setPosition }: any) => {
                 (candidate: any, candidateIndex: any) => (
                   <div key={candidateIndex} className="w-full relative">
                     <div className="absolute right-0 top-5 text-red-500 text-3xl">
-                      <button className="flex items-center">
+                      <button
+                        className="flex items-center"
+                        onClick={(e) =>
+                          handleDeleteCandidate(
+                            e,
+                            position.name_of_position,
+                            candidate.candidate_name
+                          )
+                        }
+                      >
                         <span>
                           <MdDelete />
                         </span>

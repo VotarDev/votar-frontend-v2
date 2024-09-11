@@ -76,22 +76,33 @@ const ByNumbers = ({
           <StyledTab label="Individual Numbers" />
         </StyledTabs> */}
         <div className="flex justify-center items-center gap-10">
-          <button
-            className={`
-              ${activeTabs === "totalNumbers" ? "text-blue-700 " : ""}
-            text-xl`}
-            onClick={() => handleTabChange("totalNumbers")}
-          >
-            Total Numbers
-          </button>
-          <button
-            className={` ${
-              activeTabs === "individualNumbers" ? "text-blue-700" : ""
-            } text-xl`}
-            onClick={() => handleTabChange("individualNumbers")}
-          >
-            Individual Numbers
-          </button>
+          {activeTabs === "totalNumbers" && (
+            <button
+              className={`text-xl ${
+                activeTabs === "totalNumbers" ? "text-blue-700" : ""
+              }`}
+              onClick={() => handleTabChange("totalNumbers")}
+            >
+              Total Numbers
+            </button>
+          )}
+
+          {activeTabs === "individualNumbers" && (
+            <>
+              <button
+                className="text-xl"
+                onClick={() => handleTabChange("totalNumbers")}
+              >
+                Total Numbers
+              </button>
+              <button
+                className="text-xl text-blue-700"
+                onClick={() => handleTabChange("individualNumbers")}
+              >
+                Individual Numbers
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className="pt-[52px] pb-20">

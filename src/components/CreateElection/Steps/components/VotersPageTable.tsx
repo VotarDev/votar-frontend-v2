@@ -233,7 +233,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       setUsers={setResponses}
                     />
                   </StyledTableCell>
-                  <StyledTableCell align="center" className="cursor-pointer">
+                  {/* <StyledTableCell align="center" className="cursor-pointer">
                     <DeleteDialog
                       selectedVoter={row.name}
                       row={row}
@@ -242,7 +242,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       voters={responses}
                       setVoters={setResponses}
                     />
-                  </StyledTableCell>
+                  </StyledTableCell> */}
                 </TableRow>
               ))}
             </TableBody>

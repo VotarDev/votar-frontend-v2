@@ -23,6 +23,7 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { importFromCsv } from "@/utils/api";
+import DeleteDialog from "./DeleteDialog";
 
 type ResponseData = {
   voters: VoterResponse[];
@@ -125,40 +126,40 @@ const ResponseTable = () => {
     getElectionsData();
   }, []);
 
-  useEffect(() => {
-    const getVoterResponses = async () => {
-      setIsFetchResponse(true);
-      try {
-        if (electionID) {
-          const bodyData = { election_id: electionID };
-          const { data } = await getVoterResponse(USER_ID, bodyData);
-          if (data.data) {
-            console.log(data.data.voter_response);
-            setVotarResponses(data.data.voter_response);
-            setIsFetchResponse(false);
-            const seen: Record<string, boolean> = {};
-            const updatedData = data.data.voter_response.map(
-              (item: VoterResponse) => {
-                const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+  const getVoterResponses = async () => {
+    setIsFetchResponse(true);
+    try {
+      if (electionID) {
+        const bodyData = { election_id: electionID };
+        const { data } = await getVoterResponse(USER_ID, bodyData);
+        if (data.data) {
+          console.log(data.data.voter_response);
+          setVotarResponses(data.data.voter_response);
+          setIsFetchResponse(false);
+          const seen: Record<string, boolean> = {};
+          const updatedData = data.data.voter_response.map(
+            (item: VoterResponse) => {
+              const key = `${item.name}_${item.phoneNumber}_${item.email}`;
 
-                if (seen[key]) {
-                  // This is a duplicate
-                  return { ...item, isDuplicate: true } as VoterResponse;
-                } else {
-                  seen[key] = true;
-                  return { ...item, isDuplicate: false } as VoterResponse;
-                }
+              if (seen[key]) {
+                // This is a duplicate
+                return { ...item, isDuplicate: true } as VoterResponse;
+              } else {
+                seen[key] = true;
+                return { ...item, isDuplicate: false } as VoterResponse;
               }
-            );
-            setVotarResponses(updatedData);
-          }
+            }
+          );
+          setVotarResponses(updatedData);
         }
-      } catch (error) {
-        console.log(error);
-        setIsFetchResponse(false);
       }
-    };
+    } catch (error) {
+      console.log(error);
+      setIsFetchResponse(false);
+    }
+  };
 
+  useEffect(() => {
     getVoterResponses();
   }, [electionID]);
 
@@ -462,6 +463,16 @@ const ResponseTable = () => {
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       {row.email}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <DeleteDialog
+                        selectedVoter={row.name}
+                        row={row}
+                        id={index}
+                        getUpdatedList={() => getVoterResponses()}
+                        voters={votarResponses}
+                        setVoters={setVotarResponses}
+                      />
                     </StyledTableCell>
                   </TableRow>
                 ))}

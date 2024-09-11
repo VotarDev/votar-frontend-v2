@@ -39,6 +39,8 @@ const monitorTotalLineChartUrl = "user/monitor-linechart";
 const dashboardCardsUrl = "user/cards";
 const deleteVoterUrl = "user/delete-voter";
 const deleteElectionUrl = "user/delete-election";
+const deletePositionUrl = "user/delete-position";
+const deleteCandidateUrl = "user/delete-candidate";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -212,6 +214,23 @@ export const deleteVoter = (data: { voter_id: string; email: string }) => {
   return httpService.delete(deleteVoterUrl, {
     data: data, // Include the data in the request body
   });
+};
+
+export const deleteCandidate = (data: {
+  election_id: string;
+  name_of_position: string;
+  candidate_name: string;
+}) => {
+  return httpService.delete(deleteCandidateUrl, {
+    data: data,
+  });
+};
+
+export const deletePosition = (
+  data: { election_id: string; name_of_position: string },
+  id: string
+) => {
+  return httpService.delete(deletePositionUrl + `/${id}`, { data: data });
 };
 
 export const deleteElection = (
