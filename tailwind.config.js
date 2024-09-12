@@ -32,6 +32,7 @@ module.exports = {
     },
     fontFamily: {
       proximaNova: ["var(--font-proxima)", "sans-serif"],
+      sourceCodePro: ["var(--font-source-code-pro)", "monospace"],
     },
     extend: {
       backgroundImage: {

@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import store from "@/redux/store";
 import { Provider } from "react-redux";
 import { Toaster } from "react-hot-toast";
+import { Source_Code_Pro } from "next/font/google";
 
 import { SessionProvider } from "next-auth/react";
 import AppContext from "@/src/context/AppContext";
@@ -42,6 +43,12 @@ const proxima = localFont({
   variable: "--font-proxima",
 });
 
+const sourceCodePro = Source_Code_Pro({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-source-code-pro",
+});
+
 const THEME = createTheme({
   typography: {
     fontFamily: `var(--font-proxima), sans-serif`,
@@ -70,7 +77,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <AppContext.Provider value={value}>
       <Provider store={store}>
         <SessionProvider session={pageProps.session}>
-          <div className={`${proxima.variable} font-proximaNova `}>
+          <div
+            className={`${proxima.variable} font-proximaNova ${sourceCodePro.variable}`}
+          >
             <ThemeProvider theme={THEME}>
               <Toaster />
               <Component {...pageProps} />

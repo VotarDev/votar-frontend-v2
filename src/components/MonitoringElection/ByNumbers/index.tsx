@@ -54,7 +54,7 @@ const ByNumbers = ({
   activeTabs: string;
   setActiveTabs: React.Dispatch<React.SetStateAction<string>>;
 }) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(1);
   const router = useRouter();
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -89,18 +89,14 @@ const ByNumbers = ({
 
           {activeTabs === "individualNumbers" && (
             <>
-              <button
-                className="text-xl"
-                onClick={() => handleTabChange("totalNumbers")}
+              <StyledTabs
+                value={value}
+                onChange={handleChange}
+                aria-label="styled tabs example"
               >
-                Total Numbers
-              </button>
-              <button
-                className="text-xl text-blue-700"
-                onClick={() => handleTabChange("individualNumbers")}
-              >
-                Individual Numbers
-              </button>
+                <StyledTab label="Total Numbers" />
+                <StyledTab label="Individual Numbers" />
+              </StyledTabs>
             </>
           )}
         </div>
@@ -110,12 +106,13 @@ const ByNumbers = ({
           {/* {value === 0 && <TotalNumbers electionId={electionId} />}
           {value === 1 && <IndividualNumbers electionId={electionId} />} */}
           <div>
-            {activeTabs === "totalNumbers" && (
+            {(activeTabs === "totalNumbers" || value === 0) && (
               <div>
                 <MonitorByTotalNumbers electionId={electionId} />
               </div>
             )}
-            {activeTabs === "individualNumbers" && (
+
+            {activeTabs === "individualNumbers" && value === 1 && (
               <div>
                 <MonitorByindividualNumbers electionId={electionId} />
               </div>

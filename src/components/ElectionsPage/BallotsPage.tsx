@@ -15,6 +15,10 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { IoCopy } from "react-icons/io5";
 import { AiOutlineEye, AiOutlineLink } from "react-icons/ai";
+import Modal from "@/src/components/Modal";
+import { AnimatePresence } from "framer-motion";
+import { set } from "lodash";
+import DeletePositionDialog from "./DeletePositionModal";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -25,6 +29,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState("");
   const textRef = useRef<HTMLElement | null>(null);
+  const [deleteCandidateModal, setDeleteCandidateModal] = useState(false);
+  const [deletePositionModal, setDeletePositionModal] = useState(false);
+  const [isDeletePositionLoading, setIsDeletePositionLoading] = useState(false);
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -253,28 +260,20 @@ const BallotsPage = ({ position, setPosition }: any) => {
     }
   };
 
-  const handleDeletePosition = async (e: any, positionName: string) => {
+  const handleOpenCandidateModal = () => {
+    setDeleteCandidateModal(true);
+  };
+  const handleCloseCandidateModal = () => {
+    setDeleteCandidateModal(false);
+  };
+
+  const handleOpenPositionModal = (e: any) => {
     e.preventDefault();
-    try {
-      const dataBody = {
-        election_id: electionID,
-        name_of_position: positionName,
-      };
-      const { data } = await deletePosition(dataBody, USER_ID);
-      if (data) {
-        toast.success("Deleted Sucessfully");
-        fetchData();
-      }
-    } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      console.log(error);
-      toast.error(error.response.data.message || error.message);
-    }
+    setDeletePositionModal(true);
+  };
+
+  const handleClosePositionModal = () => {
+    setDeletePositionModal(false);
   };
 
   if (isLoading) {
@@ -335,14 +334,21 @@ const BallotsPage = ({ position, setPosition }: any) => {
             >
               {positionIndex > 0 && (
                 <div className="absolute -right-1 -top-4 text-3xl">
-                  <button
+                  {/* <button
                     className="text-red-500"
-                    onClick={(e) =>
-                      handleDeletePosition(e, position.name_of_position)
-                    }
+                    // onClick={(e) =>
+                    //   handleDeletePosition(e, position.name_of_position)
+                    // }
+                    onClick={(e) => handleOpenPositionModal(e)}
                   >
                     <MdDelete />
-                  </button>
+                  </button> */}
+                  <DeletePositionDialog
+                    selectedPosition={position.name_of_position}
+                    id={electionID}
+                    userId={USER_ID}
+                    getUpdatedList={() => fetchData()}
+                  />
                 </div>
               )}
               <div className="text-center text-slate-900 lg:text-3xl text-base font-semibold flex items-center justify-center gap-2 uppercase">

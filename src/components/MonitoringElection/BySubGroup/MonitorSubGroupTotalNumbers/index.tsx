@@ -102,7 +102,12 @@ const MonitorSubGroupTotalNumbers = ({
         );
 
         const labels = Object.keys(subgroupCounts);
-        const data = labels.map((label) => subgroupCounts[label]);
+        console.log(labels.length);
+        const data =
+          labels.length > 0 && labels[0] !== ""
+            ? labels.map((label) => subgroupCounts[label])
+            : [];
+        console.log(data);
         const backgroundColor = labels.map(
           (label) => subgroupColors[label.toLowerCase()]
         );
@@ -124,7 +129,8 @@ const MonitorSubGroupTotalNumbers = ({
       })
     : null;
 
-  console.log(chartData);
+  console.log(subGroup);
+  console.log(mediaCounts);
 
   const data = {
     labels: uniqueLabels,
