@@ -19,6 +19,7 @@ import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
 import { set } from "lodash";
 import DeletePositionDialog from "./DeletePositionModal";
+import DeleteCandidateDialog from "./DeleteCandidateModal";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -439,7 +440,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                 (candidate: any, candidateIndex: any) => (
                   <div key={candidateIndex} className="w-full relative">
                     <div className="absolute right-0 top-5 text-red-500 text-3xl">
-                      <button
+                      {/* <button
                         className="flex items-center"
                         onClick={(e) =>
                           handleDeleteCandidate(
@@ -453,7 +454,14 @@ const BallotsPage = ({ position, setPosition }: any) => {
                           <MdDelete />
                         </span>
                         <span className="text-sm">Delete candidate</span>
-                      </button>
+                      </button> */}
+                      <DeleteCandidateDialog
+                        selectedPosition={position.name_of_position}
+                        selectedCandidate={candidate.candidate_name}
+                        id={electionID}
+                        userId={USER_ID}
+                        getUpdatedList={() => fetchData()}
+                      />
                     </div>
                     <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
                       {candidate.candidate_name

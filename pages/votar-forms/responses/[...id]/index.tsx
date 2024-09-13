@@ -45,7 +45,7 @@ const Responses = () => {
       }
       setIsFetchElection(true);
       try {
-        if (typeof window !== "undefined") {
+        if (electionID) {
           const electionId = localStorage.getItem("ElectionId");
           const electionData = { election_id: electionID };
           const { data } = await getElectionById(electionData);

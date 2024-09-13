@@ -18,6 +18,7 @@ const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/voter-response";
 const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
+
 const updateElectionUrl = "/user/update-election";
 const sendVoterCredUrl = "/user/send-votersCred";
 const setVotersUrl = "/user/set-voters";
