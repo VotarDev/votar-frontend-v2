@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import { deleteElection, deleteCandidate } from "@/utils/api";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
-import { get } from "lodash";
+import { get, set } from "lodash";
 
 const DeleteCandidateDialog = ({
   selectedPosition,
@@ -41,6 +41,7 @@ const DeleteCandidateDialog = ({
 
   const handleDeleteCandidate = async (e: any) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       const dataBody = {
         election_id: id,
@@ -51,6 +52,8 @@ const DeleteCandidateDialog = ({
       if (data) {
         toast.success("Deleted Successfully");
         getUpdatedList();
+        setIsLoading(false);
+        setOpen(false);
       }
       console.log(dataBody);
     } catch (error: any) {
@@ -62,6 +65,8 @@ const DeleteCandidateDialog = ({
         error.toString();
       console.log(error);
       toast.error(error.response.data.message || error.message);
+      setIsLoading(false);
+      setOpen(false);
     }
   };
 
@@ -74,7 +79,7 @@ const DeleteCandidateDialog = ({
         {open && (
           <Modal key="modal" handleClose={handleClickClose}>
             <div className="bg-white rounded-lg py-[24px] px-10 text-left text-xl text-slate-600">
-              <div className="pb-10">{`Are you sure you want to delete "${selectedPosition}"?`}</div>
+              <div className="pb-10">{`Are you sure you want to delete "${selectedCandidate}"?`}</div>
               <div className="pb-8 text-base">
                 This will permanently remove the details from the system and
                 cannot be reversed.
