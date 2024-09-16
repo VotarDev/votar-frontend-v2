@@ -45,34 +45,46 @@ const Hero = () => {
           animateIn="animate__bounceInRight"
           animateOut="animate__bounceOutRight"
         >
-          <div className="flex lg:gap-[38px] gap-0 p-10">
+          <div className="flex lg:gap-[38px] gap-0 lg:p-10 p-6">
             <Image
               src={illustrationOne}
-              width={0}
-              height={0}
+              width={300}
+              height={300}
               alt="illustration"
               className="w-[300px] h-[300px] object-contain lg:w-full lg:h-auto"
             />
-            <div className="relative tilt-inward-left  ">
-              <img
-                src={illustrationTwo.src}
-                alt="illustration"
-                className="absolute top-[-4rem] left-[-3rem]"
-              />
-              <img
-                src={illustrationThree.src}
-                alt="illustration"
-                className="absolute bottom-[-3rem] right-0"
-              />
+            <div className="relative tilt-inward-left hidden lg:block">
+              <div className="absolute top-[-4rem] left-[-3rem]">
+                <Image
+                  src={illustrationTwo.src}
+                  alt="illustration"
+                  width={200}
+                  height={200}
+                  className="object-contain"
+                />
+              </div>
+
+              <div className="absolute bottom-[-3rem] right-0">
+                <Image
+                  src={illustrationThree.src}
+                  alt="illustration"
+                  width={200}
+                  height={200}
+                  className="object-contain"
+                />
+              </div>
+
               <div className="lg:w-[395px] lg:h-[395px] hidden lg:block rounded-[150px] bg-[#ccc]"></div>
             </div>
           </div>
         </ScrollAnimation>
       </div>
       <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
-        <img
+        <Image
           src={testimony.src}
           alt="testimonies"
+          width={60}
+          height={60}
           className="w-[60px] h-[60px] lg:w-[100px] lg:h-[100px]"
         />
         <div>

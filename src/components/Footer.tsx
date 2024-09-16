@@ -1,9 +1,6 @@
 import React from "react";
 import logo from "../../public/assets/logos/logo_white.png";
 import { BiRightArrowAlt } from "react-icons/bi";
-import linkedin from "../../public/assets/logos/linkedin.svg";
-import twitter from "../../public/assets/logos/twitter.svg";
-import instagram from "../../public/assets/logos/instagram.svg";
 import { CiLocationOn } from "react-icons/ci";
 import Link from "next/link";
 import {
@@ -12,16 +9,19 @@ import {
   FaXTwitter,
   FaInstagram,
 } from "react-icons/fa6";
+import Image from "next/image";
 
 const Footer = () => {
   return (
     <div className="bg-footer-bg bg-cover w-full bg-no-repeat bg-[#00122F] text-white lg:px-[50px] px-4">
       <div className="flex flex-col lg:flex-row justify-between max-w-[1340px] mx-auto pt-[45px] lg:pb-[100px] pb-[60px]">
         <div className=" ">
-          <img
-            src={logo.src}
+          <Image
+            src={logo}
             alt="logo"
-            className="w-[351px] h-[351px] object-contain mt-[-8.7rem] ml-[-7rem]"
+            width={351}
+            height={351}
+            className="bject-contain mt-[-8.7rem] ml-[-7rem]"
           />
           <div className="mt-[-9rem] leading-[30px] mb-[9rem] lg:mb-0">
             We provide you with the best options for your election,

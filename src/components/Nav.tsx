@@ -13,7 +13,6 @@ const Nav = () => {
   const [signinDropDown, setSigninDropdown] = useState(false);
 
   const pathname = usePathname();
-  console.log(pathname);
 
   const hamburgerHandler = () => {
     setToggle(!toggle);
@@ -25,10 +24,10 @@ const Nav = () => {
   return (
     <>
       <div className="lg:h-[116px] h-0">
-        <div className="navbar fixed top-0 left-0 right-0 max-w-[1300px] mx-auto z-[999] lg:flex justify-between items-center  mt-[21px] hidden">
+        <nav className="navbar fixed top-0 left-0 right-0 max-w-[1300px] mx-auto z-[999] lg:flex justify-between items-center  mt-[21px] hidden">
           <div>
             <Link href="/">
-              <Image src={logo} width={144} height={106} alt="votar logo" />
+              <Image src={logo} width={144} alt="votar logo" />
             </Link>
           </div>
           <div>
@@ -72,7 +71,7 @@ const Nav = () => {
             </ul>
           </div>
           <div className="flex gap-5">
-            <div className="">
+            <div>
               <button className="border border-[#015CE9] w-[154px] h-[52px] rounded text-[#015CE9] sign-hover relative">
                 Sign In
                 <div
@@ -95,7 +94,7 @@ const Nav = () => {
               </Link>
             </div>
           </div>
-        </div>
+        </nav>
       </div>
       <div className="lg:hidden fixed top-0 right-0 w-full z-[999]">
         <div className="mobile-nav flex items-center justify-between px-5">
@@ -104,7 +103,7 @@ const Nav = () => {
               <Hamburger size={20} />
             </div>
             <Link href="/">
-              <img src={logo.src} alt="logo" className="w-[80px] h-[80px]" />
+              <Image src={logo} alt="logo" width={80} />
             </Link>
           </div>
 

@@ -26,7 +26,7 @@ const Card = () => {
       console.log(e);
     }
   };
-  console.log(mediumPosts);
+
   return (
     <div className="lg:mb-20 mb-10">
       <div className="flex lg:gap-10 gap-5 lg:mt-[-6rem] text-[#f8f8f8] justify-center mt-5 lg:flex-row flex-col">
@@ -38,7 +38,7 @@ const Card = () => {
           var srcEnd =
             images.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
           var src = images.description.substring(srcStart, srcEnd);
-          console.log(src);
+
           return (
             <div key={images.title} className="relative">
               <div className="relative overflow-hidden">

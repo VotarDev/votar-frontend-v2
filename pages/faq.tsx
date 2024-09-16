@@ -5,6 +5,7 @@ import { faqs } from "@/utils/util";
 import { useState } from "react";
 import AccordionItem from "@/src/components/faqPage/AccordionItem";
 import Header from "@/src/components/faqPage/Header";
+import Head from "next/head";
 
 const Faq = () => {
   const faq1 = faqs.slice(0, 5);
@@ -15,6 +16,22 @@ const Faq = () => {
   console.log(faq2);
   return (
     <div>
+      <Head>
+        <title>FAQ - Votar</title>
+        <meta
+          name="description"
+          content="Find answers to common questions about Votar. Get all the information you need about voting and using the platform."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="FAQ - Votar" />
+        <meta
+          property="og:description"
+          content="Common questions and answers about voting with Votar."
+        />
+        <meta property="og:url" content="https://www.votar.ng/faq" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://www.votar.ng/faq" />
+      </Head>
       <Nav />
       <div className="max-w-[1300px] mx-auto px-4 lg:px-0 xl:px-10">
         <Header />

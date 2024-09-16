@@ -5,6 +5,7 @@ import voteicon from "../public/assets/icons/vote.svg";
 import illustrationBg from "../public/assets/images/vote-bg.png";
 import Chat from "@/src/components/Chat";
 import { useRouter } from "next/router";
+import Head from "next/head";
 
 const Vote = () => {
   const router = useRouter();
@@ -15,6 +16,22 @@ const Vote = () => {
   };
   return (
     <div>
+      <Head>
+        <title>Vote - Votar</title>
+        <meta
+          name="description"
+          content="Cast your vote on Votar and make your voice heard. Participate in democratic elections today!"
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="Vote - Votar" />
+        <meta
+          property="og:description"
+          content="Join Votar to vote and take part in elections that shape the future."
+        />
+        <meta property="og:url" content="https://www.votar.ng/vote" />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href="https://www.votar.ng/vote" />
+      </Head>
       <Nav />
       <div className="flex justify-center lg:items-center w-full lg:h-[80vh] lg:gap-20 gap-10 flex-col-reverse lg:flex-row h-auto my-[7rem] lg:my-0 px-4 lg:px-0">
         <div>

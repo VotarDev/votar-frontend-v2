@@ -6,6 +6,7 @@ import ModalVideo from "react-modal-video";
 import "react-modal-video/scss/modal-video.scss";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import Image from "next/image";
 
 const Election = () => {
   useEffect(() => {
@@ -19,7 +20,6 @@ const Election = () => {
   const closeVideoHandler = () => {
     setIsOpen(!isOpen);
   };
-  console.log(isOpen);
 
   return (
     <div className="lg:mt-[172px] mt-[60px] max-w-[1340px] mx-auto px-4">
@@ -51,7 +51,7 @@ const Election = () => {
             className="cursor-pointer lg:mt-5 mt-2"
             onClick={openVideoHandler}
           >
-            <img src={freeVotar.src} alt="votar election" />
+            <Image src={freeVotar} alt="votar election" />
           </div>
           {isOpen && (
             <div>
@@ -81,7 +81,7 @@ const Election = () => {
             </div>
           </div>
           <div className="cursor-pointer lg:mt-5 mt-2">
-            <img src={votarPro.src} alt="votar election" />
+            <Image src={votarPro} alt="votar election" />
           </div>
         </div>
 
@@ -97,7 +97,7 @@ const Election = () => {
             </div>
           </div>
           <div className="cursor-pointer lg:mt-5 mt-2">
-            <img src={votarMeetings.src} alt="votar election" />
+            <Image src={votarMeetings} alt="votar election" />
           </div>
         </div>
       </div>

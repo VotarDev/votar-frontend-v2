@@ -1,9 +1,8 @@
 import React from "react";
-import world from "../../../public/assets/icons/world.svg";
 import people from "../../../public/assets/icons/people.svg";
-import monitor from "../../../public/assets/icons/monitor.svg";
 import { LiaSmsSolid } from "react-icons/lia";
 import { TfiEmail } from "react-icons/tfi";
+import Image from "next/image";
 
 const Partcipate = () => {
   return (
@@ -16,7 +15,7 @@ const Partcipate = () => {
       <div className="flex justify-center items-stretch flex-wrap text-[#F5F5F5] lg:gap-[85px] gap-10 lg:mt-[117px] mt-[40px]">
         <div className="bg-[#015CE9] rounded-lg p-6 w-[293px] ">
           <div>
-            <img src={people.src} alt="icons" />
+            <Image src={people} alt="icons" />
           </div>
           <div className="lg:text-[32px] text-2xl mt-[15px]">
             On-Site Voting

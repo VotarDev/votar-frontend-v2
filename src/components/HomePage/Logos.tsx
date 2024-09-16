@@ -7,9 +7,9 @@ import { Autoplay, A11y, FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
+import Image from "next/image";
 
 const Logos = () => {
-  console.log(logos);
   return (
     <div className="mt-[65px] max-w-[1300px] mx-auto px-4 ">
       <ScrollAnimation
@@ -22,11 +22,15 @@ const Logos = () => {
         <div className="lg:flex justify-between items-center flex-wrap hidden">
           {logos.map((logo) => (
             <div key={logo.id}>
-              <img
-                src={logo.image}
-                alt="logo"
-                className="w-[120px] h-[85px] object-contain"
-              />
+              <div key={logo.id} className="relative w-[120px] h-[85px]">
+                <Image
+                  src={logo.image}
+                  alt="logo"
+                  fill
+                  sizes="100%"
+                  className="object-contain"
+                />
+              </div>
             </div>
           ))}
         </div>
@@ -52,18 +56,22 @@ const Logos = () => {
           >
             {logos.map((logo) => (
               <SwiperSlide key={logo.id}>
-                <img
-                  src={logo.image}
-                  alt="logo"
-                  className="w-[120px] h-[85px] object-contain"
-                />
+                <div key={logo.id} className="relative w-[120px] h-[85px]">
+                  <Image
+                    src={logo.image}
+                    alt="logo"
+                    fill
+                    sizes="100%"
+                    className="object-contain"
+                  />
+                </div>
               </SwiperSlide>
             ))}
           </Swiper>
         </div>
 
         <div>
-          <p className="lg:text-2xl text-center max-w-[759px] mx-auto mt-[52px] font-semibold text-[18px] ">
+          <p className="lg:text-2xl text-center max-w-[759px] mx-auto mt-14 font-semibold text-[18px] ">
             Votar is used by all Industries and professional association that
             are in need of a credible and reliable voting process
           </p>
