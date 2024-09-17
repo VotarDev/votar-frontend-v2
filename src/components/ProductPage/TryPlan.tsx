@@ -1,6 +1,7 @@
 import React from "react";
 import payment1 from "../../../public/assets/logos/payments.svg";
 import payment2 from "../../../public/assets/logos/payments-2.svg";
+import Image from "next/image";
 
 const TryPlan = () => {
   return (
@@ -23,8 +24,20 @@ const TryPlan = () => {
         <div className="text-center mt-[30px] ">
           <div className="text-[28px] mb-3 lg-mb-0">Payment Methods</div>
           <div className="flex justify-center gap-1 flex-wrap">
-            <img src={payment1.src} alt="cards" />
-            <img src={payment2.src} alt="cards" />
+            <Image
+              src={payment1.src}
+              alt="cards"
+              width={0}
+              height={0}
+              style={{ width: "auto", height: "auto" }}
+            />
+            <Image
+              src={payment2.src}
+              alt="cards"
+              width={0}
+              height={0}
+              style={{ width: "auto", height: "auto" }}
+            />
           </div>
           <div className="mt-2">
             We accept Visa, American Express, Mastercard, Paypal and Crypto

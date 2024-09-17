@@ -2,6 +2,7 @@ import React from "react";
 import record from "../../../public/assets/icons/record.svg";
 import graph from "../../../public/assets/icons/graph.svg";
 import note from "../../../public/assets/icons/note.svg";
+import Image from "next/image";
 
 const Plan = () => {
   return (
@@ -13,7 +14,13 @@ const Plan = () => {
         <div>
           <div className="h-10 flex items-center text-[30px] font-semibold gap-2 justify-center">
             <span>
-              <img src={record.src} alt="record icon" />
+              <Image
+                src={record.src}
+                alt="record icon"
+                height={0}
+                width={0}
+                style={{ width: "40px", height: "auto" }}
+              />
             </span>{" "}
             Live
           </div>
@@ -26,7 +33,13 @@ const Plan = () => {
         </div>
         <div>
           <div className="h-10 flex justify-center">
-            <img src={graph.src} alt="graph icon" />
+            <Image
+              src={graph}
+              alt="graph icon"
+              height={0}
+              width={0}
+              style={{ width: "40px", height: "auto" }}
+            />
           </div>
           <div className="lg:text-xl text-[18px] font-semibold text-[#060606] p-4">
             Analytics Tool for
@@ -35,7 +48,13 @@ const Plan = () => {
         </div>
         <div>
           <div className="h-10 flex justify-center">
-            <img src={note.src} alt="note icon" />
+            <Image
+              src={note}
+              alt="note icon"
+              height={0}
+              width={0}
+              style={{ width: "40px", height: "auto" }}
+            />
           </div>
           <div className="lg:text-xl text-[18px] font-semibold text-[#060606] p-4">
             Branded Ballots with

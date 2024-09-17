@@ -12,8 +12,7 @@ const Faq = () => {
   const faq2 = faqs.slice(5);
   const [currentOpen, setCurrentOpen] = useState(false);
   const [currentOpenTwo, setCurrentOpenTwo] = useState(false);
-  console.log(faq1);
-  console.log(faq2);
+
   return (
     <div>
       <Head>

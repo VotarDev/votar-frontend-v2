@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import check from "../../../public/assets/icons/Check_fill.svg";
 import check2 from "../../../public/assets/icons/Check_fill-2.svg";
+import Image from "next/image";
 
 const PaymentPlan = () => {
   return (
@@ -26,67 +27,133 @@ const PaymentPlan = () => {
           <div className="mt-6 text-sm lg:text-base">
             <div className="flex items-center gap-1">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Participate in Elections with Email
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Voting Encryption
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Election Link
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Single Votes per Position
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Mutiple Votes per Position
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Raise Funds for your events via Polls
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Live Updates/Transmission of Results
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Analytic Tools for Election
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Branded Ballots and Election Page
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Candidates Bio/Details on Ballot
             </div>
             <div className="flex items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Full Customer Support
             </div>
@@ -214,13 +281,25 @@ const PaymentPlan = () => {
           <div className="mt-6 text-sm lg:text-base">
             <div className="flex flex-wrap items-center gap-1">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               All Votar Features
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Board Member Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -229,7 +308,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3 whitespace-nowrap">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Members Experience Survey
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -238,7 +323,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Yes or No Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -247,7 +338,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Plurality Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -256,7 +353,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Cummulative Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -265,7 +368,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Prefencial Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -274,7 +383,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Scored Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -283,7 +398,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Approval Voting
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
@@ -292,7 +413,13 @@ const PaymentPlan = () => {
             </div>
             <div className="flex flex-wrap items-center gap-1 mt-3">
               <span>
-                <img src={check.src} alt="check icon" />
+                <Image
+                  src={check.src}
+                  alt="check icon"
+                  height={0}
+                  width={0}
+                  style={{ width: "24px", height: "auto" }}
+                />
               </span>
               Nomminations
               <span className="bg-[#37B34A] text-[#F3F3F3] px-1 rounded text-xs">
