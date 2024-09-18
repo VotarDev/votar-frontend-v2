@@ -16,7 +16,7 @@ import XSLX from "sheetjs-style";
 import * as XLSX from "xlsx";
 import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
-import { getVoterResponse, getForms } from "@/utils/api";
+import { getVoterResponse, getForms, getUserResponse } from "@/utils/api";
 import { useRouter } from "next/router";
 import { exportVoters } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
@@ -131,7 +131,7 @@ const ResponseTable = () => {
     try {
       if (electionID) {
         const bodyData = { election_id: electionID };
-        const { data } = await getForms(USER_ID);
+        const { data } = await getUserResponse(bodyData, USER_ID);
         console.log(data);
         if (data.data) {
           console.log(data.data[0].voter_response);

@@ -5,7 +5,7 @@ import withAuth from "@/hoc/withAuth";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import ResponseTable from "@/src/components/VotarFormsComponent/Response";
 import { ElectionDetails } from "@/utils/types";
-import { getElectionById } from "@/utils/api";
+import { getElectionById, votarResponse } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
