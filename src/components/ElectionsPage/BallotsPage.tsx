@@ -177,6 +177,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
         show_pictures: false,
         allow_abstain: false,
         candidates: [],
+        election_id: electionID,
         __v: 0,
         author_id: "",
       },

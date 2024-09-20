@@ -40,6 +40,7 @@ const monitorBarChartIndividualUrl = "user/monitor-barchartIndividual";
 const monitorTotalLineChartUrl = "user/monitor-linechart";
 const dashboardCardsUrl = "user/cards";
 const deleteVoterUrl = "user/delete-voter";
+const deleteVoterResponseUrl = "user/delete-voterResponse";
 const deleteElectionUrl = "user/delete-election";
 const deletePositionUrl = "user/delete-position";
 const deleteCandidateUrl = "user/delete-candidate";
@@ -218,6 +219,16 @@ export const dashboardCards = (authorId: any) => {
 export const deleteVoter = (data: { voter_id: string; email: string }) => {
   return httpService.delete(deleteVoterUrl, {
     data: data, // Include the data in the request body
+  });
+};
+
+export const deleteVoterResponse = (data: {
+  voter_id: string;
+  email: string;
+  election_id: string;
+}) => {
+  return httpService.delete(deleteVoterResponseUrl, {
+    data: data,
   });
 };
 

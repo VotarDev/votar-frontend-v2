@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
-import { deleteVoter } from "@/utils/api";
+import { deleteVoter, deleteVoterResponse } from "@/utils/api";
 import toast from "react-hot-toast";
 import { CircularProgress } from "@mui/material";
 
@@ -13,6 +13,7 @@ const DeleteDialog = ({
   setVoters,
   row,
   getUpdatedList,
+  electionId,
 }: any) => {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,9 +26,10 @@ const DeleteDialog = ({
       const bodyData = {
         voter_id: row.id,
         email: row.email,
+        election_id: electionId,
       };
 
-      const { data } = await deleteVoter(bodyData);
+      const { data } = await deleteVoterResponse(bodyData);
       if (data) {
         setIsLoading(false);
         getUpdatedList();
@@ -72,7 +74,10 @@ const DeleteDialog = ({
                   </button>
                 </div>
                 <div className="w-full" onClick={handleDelete}>
-                  <button className="bg-red-500 w-full flex-1 h-12 outline-none rounded">
+                  <button
+                    className="bg-red-500 w-full flex h-12 outline-none rounded items-center justify-center gap-2"
+                    disabled={isLoading}
+                  >
                     {isLoading && (
                       <CircularProgress
                         color="inherit"

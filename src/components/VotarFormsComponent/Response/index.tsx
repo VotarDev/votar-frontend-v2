@@ -468,6 +468,7 @@ const ResponseTable = () => {
                     <StyledTableCell align="center">
                       <DeleteDialog
                         selectedVoter={row.name}
+                        electionId={electionID}
                         row={row}
                         id={index}
                         getUpdatedList={() => getVoterResponses()}
