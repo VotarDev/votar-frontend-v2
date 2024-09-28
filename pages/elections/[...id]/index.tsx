@@ -166,7 +166,9 @@ const ElectionDetail = () => {
     }
 
     const ballotFormData = new FormData();
-    ballotFormData.append("candidates", JSON.stringify(position));
+    const filterPosition = position.filter((pos: any) => !pos._id);
+    console.log(filterPosition);
+    ballotFormData.append("candidates", JSON.stringify(filterPosition));
     for (const obj of position) {
       for (const candidate of obj.candidates) {
         if (candidate.candidate_picture) {

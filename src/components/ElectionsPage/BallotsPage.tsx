@@ -155,18 +155,16 @@ const BallotsPage = ({ position, setPosition }: any) => {
   };
 
   const handleAddCandidate = (positionIndex: any) => {
-    setPosition((prevPositions: any) => {
-      const updatedPositions = [...prevPositions];
-      updatedPositions[positionIndex].candidates.push({
-        candidate_name: "",
-        candidate_nickname: "",
-        candidate_picture: null,
-        media: "",
-        votes: 0,
-        _id: Date.now().toString(),
-      });
-      return updatedPositions;
+    const updatedPositions = [...position];
+    updatedPositions[positionIndex].candidates.push({
+      candidate_name: "",
+      candidate_nickname: "",
+      candidate_picture: null,
+      media: "",
+      votes: 0,
+      _id: Date.now().toString(),
     });
+    setPosition(updatedPositions);
   };
 
   const handleAddPosition = () => {
@@ -179,7 +177,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
         candidates: [],
         election_id: electionID,
         __v: 0,
-        author_id: "",
+        author_id: USER_ID,
       },
     ]);
   };
@@ -260,22 +258,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
       console.log(error);
       toast.error(error.response.data.message || error.message);
     }
-  };
-
-  const handleOpenCandidateModal = () => {
-    setDeleteCandidateModal(true);
-  };
-  const handleCloseCandidateModal = () => {
-    setDeleteCandidateModal(false);
-  };
-
-  const handleOpenPositionModal = (e: any) => {
-    e.preventDefault();
-    setDeletePositionModal(true);
-  };
-
-  const handleClosePositionModal = () => {
-    setDeletePositionModal(false);
   };
 
   if (isLoading) {
