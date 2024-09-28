@@ -166,9 +166,9 @@ const ElectionDetail = () => {
     }
 
     const ballotFormData = new FormData();
-    const filterPosition = position.filter((pos: any) => !pos._id);
-    console.log(filterPosition);
-    ballotFormData.append("candidates", JSON.stringify(filterPosition));
+    // const filterPosition = position.filter((pos: any) => !pos._id);
+    // console.log(filterPosition);
+    ballotFormData.append("candidates", JSON.stringify(position));
     for (const obj of position) {
       for (const candidate of obj.candidates) {
         if (candidate.candidate_picture) {
@@ -192,7 +192,8 @@ const ElectionDetail = () => {
           break;
         case 1:
           const candidateRes = await updateCandidate(USER_ID, ballotFormData);
-          if (candidateRes) console.log(candidateRes);
+
+          if (candidateRes) toast.success("Successfully Updated");
           setIsProcessing(false);
           break;
         case 2:
