@@ -42,7 +42,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
       setElectionID(idType[1]);
     }
   }, [id, electionID]);
-  console.log(electionID);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -87,7 +86,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
         const { data } = await getCandidates(USER_ID, electionIdData);
         if (data) {
           setPosition(data.data);
-          console.log(data);
         }
       }
     } catch (e) {
@@ -270,7 +268,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
   if (error) {
     return <div className="my-10">{error}</div>;
   }
-  console.log(position);
 
   return (
     <div className="my-[60px]">

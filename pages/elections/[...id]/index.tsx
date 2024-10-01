@@ -229,7 +229,6 @@ const ElectionDetail = () => {
       setCurrentStep(currentStep - 1);
     }
   };
-  console.log(currentStep);
 
   return (
     <DashboardLayout>

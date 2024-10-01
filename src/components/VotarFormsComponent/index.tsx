@@ -13,18 +13,7 @@ const VotarFormsComponent = ({
 }) => {
   const user = useUser();
   const router = useRouter();
-  console.log(elections);
-  const availableElections = [
-    {
-      election: "National Association of Political Science Students",
-    },
-    {
-      election: "Most Beautiful Girl in Abuja",
-    },
-    {
-      election: "NNPC Board Election",
-    },
-  ];
+
   const handleElectionDetails = (election: string, id: string) => {
     router.push(`/votar-forms/${election}/${id}`);
   };

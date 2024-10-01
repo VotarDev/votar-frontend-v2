@@ -110,8 +110,6 @@ const ResponseTable = () => {
     }
   }, []);
 
-  console.log(electionID);
-
   useEffect(() => {
     const getElectionsData = async () => {
       try {
@@ -345,6 +343,7 @@ const ResponseTable = () => {
       }
     } catch (e: any) {
       console.error("Error exporting responses:", e);
+      toast.error("An error occurred while exporting responses");
       setIsExporting(false);
     }
 
