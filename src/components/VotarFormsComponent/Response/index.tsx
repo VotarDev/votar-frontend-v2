@@ -200,7 +200,6 @@ const ResponseTable = () => {
               defval: "", // Default value for empty cells
             });
 
-            // Process CSV data and ensure all fields are read as strings
             const newUserData = csvData
               .map(
                 ([id, name, subgroup, phoneNumber, email]: [
@@ -211,13 +210,13 @@ const ResponseTable = () => {
                   string
                 ]) => {
                   return {
-                    id: typeof id === "string" ? id : String(id), // Force id to be string
+                    id: typeof id === "string" ? id : String(id),
                     name,
                     subgroup,
                     phoneNumber:
                       typeof phoneNumber === "number"
                         ? phoneNumber.toString()
-                        : phoneNumber, // Ensure phone is string
+                        : phoneNumber,
                     email,
                   };
                 }
@@ -289,7 +288,7 @@ const ResponseTable = () => {
   ): VoterResponse[] => {
     const seen = new Set<string>();
     return array.filter((item) => {
-      const key = keys.map((k) => item[k]).join("_"); // Create a unique key by combining specified fields
+      const key = keys.map((k) => item[k]).join("_");
       if (seen.has(key)) {
         return false; // This item is a duplicate
       } else {
@@ -300,7 +299,6 @@ const ResponseTable = () => {
   };
 
   const exportResponseToElection = async (): Promise<void> => {
-    // Filter out duplicate voters based on specified fields
     const uniqueItems: VoterResponse[] = filterDuplicates(votarResponses, [
       "id",
       "name",
@@ -311,7 +309,6 @@ const ResponseTable = () => {
 
     setIsExporting(true);
 
-    // Set the authentication token
     if (users?.data) {
       setAuthToken(users.data.data.cookie);
     } else if (typeof window !== "undefined") {
@@ -321,24 +318,21 @@ const ResponseTable = () => {
       }
     }
 
-    // Store the election ID in localStorage if it exists
     if (electionID) localStorage.setItem("ElectionId", electionID);
 
-    // Prepare the data to be exported
     const responseData: ResponseData = {
-      voters: uniqueItems, // Only unique voters
+      voters: uniqueItems,
       election_id: electionID,
     };
 
     console.log("Exporting Response Data:", responseData);
 
     try {
-      // Make the API call to export voters
       const { data } = await exportVoters(responseData, USER_ID);
       if (data) {
         setIsExporting(false);
         toast.success("Responses exported successfully");
-        setVotarResponses([]); // Clear the responses after successful export
+        setVotarResponses([]);
         console.log("Exported Data:", data);
       }
     } catch (e: any) {
