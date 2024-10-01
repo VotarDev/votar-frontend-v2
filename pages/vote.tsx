@@ -1,19 +1,82 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Nav from "@/src/components/Nav";
 import illustration from "../public/assets/illustrations/illustration-5.svg";
 import voteicon from "../public/assets/icons/vote.svg";
 import illustrationBg from "../public/assets/images/vote-bg.png";
 import Chat from "@/src/components/Chat";
 import { useRouter } from "next/router";
+import { voterVerificationLink } from "@/utils/api";
+import Cookies from "universal-cookie";
 import Head from "next/head";
+import { voterLoginCookieName } from "@/src/__env";
+import { CircularProgress } from "@mui/material";
+import toast from "react-hot-toast";
+import { AppDispatch } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { login } from "@/redux/features/auth/voterLoginSlice";
 
 const Vote = () => {
   const router = useRouter();
-  const [electionId, setElectionId] = React.useState("");
+  const { t } = router.query;
+  const [isLoading, setisLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [electionId, setElectionId] = useState("");
   const onFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(`/access/${electionId}`);
   };
+
+  useEffect(() => {
+    if (t) {
+      console.log(t);
+      setisLoading(true);
+      const verifyVoter = async () => {
+        try {
+          const { data } = await voterVerificationLink(t as string);
+          const cookie = new Cookies();
+          if (data) {
+            cookie.set(voterLoginCookieName, data.data.data.token, {
+              path: "/",
+            });
+            console.log(data.data.data);
+            router.push(`/ballot`);
+            setisLoading(false);
+
+            const voterData = {
+              userData: {
+                election_id: data.data.data.election_id,
+                id: data.data.data.id,
+                subgroup: data.data.data.subgroup,
+                hasVoted: data.data.data.hasVoted,
+                name: data.data.data.name,
+              },
+
+              loading: false,
+              isVerified: true,
+            };
+            console.log(voterData);
+            toast.success("Login Successful");
+            dispatch(login(voterData));
+            localStorage.setItem("voterProfile", JSON.stringify(voterData));
+          }
+        } catch (e: any) {
+          console.log(e);
+          setisLoading(false);
+          toast.error("An error occured");
+        }
+      };
+      verifyVoter();
+    }
+  }, [t]);
+
+  if (isLoading) {
+    return (
+      <div className="mt-10 text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+  }
   return (
     <div>
       <Head>

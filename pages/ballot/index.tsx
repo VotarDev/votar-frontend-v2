@@ -175,6 +175,7 @@ const Ballot = () => {
     dispatch(logout());
     const cookie = new Cookies();
     cookie.remove(voterLoginCookieName, { path: "/" });
+    localStorage.removeItem("voterProfile");
     setAuthToken(null);
     router.push("/vote");
   };

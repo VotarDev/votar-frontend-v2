@@ -30,9 +30,10 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
           isVerified: true,
         };
         toast.success("Login Successful");
+        router.push(`/ballot`);
         dispatch(login(voterData));
         localStorage.setItem("voterProfile", JSON.stringify(voterData));
-        router.push(`/ballot`);
+
         console.log(data.data);
       }
     } catch (error: any) {

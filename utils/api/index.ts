@@ -44,6 +44,8 @@ const deleteVoterResponseUrl = "user/delete-voterResponse";
 const deleteElectionUrl = "user/delete-election";
 const deletePositionUrl = "user/delete-position";
 const deleteCandidateUrl = "user/delete-candidate";
+const voterVerificationLinkUrl =
+  "https://votar-api.onrender.com/app:v1/voter/verifyLink";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -198,6 +200,10 @@ export const monitorSubgroup = (id: string) => {
 
 export const monitorIndividualSubgroup = (id: string) => {
   return httpService.get(monitorIndividualSubGroupUrl, { params: { id } });
+};
+
+export const voterVerificationLink = (t: string) => {
+  return httpService.get(voterVerificationLinkUrl, { params: { t } });
 };
 
 export const monitorBarChart = (id: string) => {
