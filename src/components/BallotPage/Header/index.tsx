@@ -56,7 +56,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
       </div>
     );
 
-  if (votarPlan === "Votar Pro")
+  if (votarPlan === "Votar Pro" || !votarPlan)
     return (
       <div className="mb-10">
         <div className=" relative lg:mt-0 max-w-[1600px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">
