@@ -179,13 +179,7 @@ const Ballot = () => {
     setAuthToken(null);
     router.push("/vote");
   };
-  //   const handleDetails = (candidate: Candidate) => {
-  //     setSelectedCandidateDetails([
-  //       //@ts-ignore
-  //       { dets: candidate.details, media: candidate.media },
-  //     ]);
-  //     setShowModal(true);
-  //   };
+
   useEffect(() => {
     const storedProfile = localStorage.getItem("voterProfile");
     if (storedProfile) {
