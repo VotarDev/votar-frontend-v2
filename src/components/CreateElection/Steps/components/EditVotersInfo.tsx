@@ -62,8 +62,6 @@ const EditVotersInfo = ({
     handleClickClose();
   };
 
-  console.log(trackChanges);
-
   const formDetails = [
     {
       name: "name",

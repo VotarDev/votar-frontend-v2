@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -104,49 +104,46 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
-  const handleResponseExported = async () => {
-    // if (typeof window !== "undefined") {
-    //   const exportedResponses = localStorage.getItem("voter_response");
-    //   if (exportedResponses) {
-    //     setResponses(JSON.parse(exportedResponses));
-    //   }
-    // }
-    setIsFetchVoters(true);
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
-    }
-
-    try {
-      if (typeof window !== "undefined" || electionId) {
-        const electionID = localStorage.getItem("ElectionId");
-        const { data } = await getVoters(USER_ID, {
-          election_id: electionId || electionID,
-        });
-        if (data) {
-          console.log(data.data);
-          setIsFetchVoters(false);
-          const uniqueItems = filterDuplicates(data.data, [
-            "id",
-            "name",
-            "subgroup",
-            "phone",
-            "email",
-          ]);
-          setResponses(uniqueItems);
+  useEffect(() => {
+    setResponses([]);
+    const handleResponseExported = async () => {
+      setResponses([]);
+      setIsFetchVoters(true);
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
         }
       }
-    } catch (e) {
-      console.log(e);
-      setIsFetchVoters(false);
-    }
-  };
 
-  useEffect(() => {
+      try {
+        if (typeof window !== "undefined") {
+          const electionID = electionId || localStorage.getItem("ElectionId");
+          console.log("Election ID being used:", electionID);
+          const { data } = await getVoters(USER_ID, {
+            election_id: electionID,
+          });
+          if (data) {
+            console.log(data);
+            console.log(data.data);
+            setIsFetchVoters(false);
+            // const uniqueItems = filterDuplicates(data.data, [
+            //   "id",
+            //   "name",
+            //   "subgroup",
+            //   "phone",
+            //   "email",
+            // ]);
+            setResponses(data.data);
+          }
+        }
+      } catch (e) {
+        console.log(e);
+        setIsFetchVoters(false);
+      }
+    };
     handleResponseExported();
   }, [electionId]);
 
