@@ -12,6 +12,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import VoterTable from "./VoterTable";
 
 const VoterPage = () => {
   const [preference, setPreference] = useState("");
@@ -214,7 +215,7 @@ const VoterPage = () => {
           </div>
         </form>
       </div>
-      <VotersPageTable
+      <VoterTable
         electionId={electionID}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}

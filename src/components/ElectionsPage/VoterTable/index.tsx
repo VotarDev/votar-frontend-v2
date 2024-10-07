@@ -6,16 +6,16 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import EditVotersInfo from "./EditVotersInfo";
-import DropdownComponent from "./DropdownComponent";
+
 import { TrackeChanges, VoterResponse } from "@/utils/types";
 import { TableRowTypes } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
-import DeleteDialog from "./DeleteDialog";
-import { el } from "date-fns/locale";
+
+import DropdownComponent from "../../CreateElection/Steps/components/DropdownComponent";
+import EditVotersInfo from "../../CreateElection/Steps/components/EditVotersInfo";
 
 interface VotersPageTableProps {
   electionId?: string;
@@ -23,7 +23,7 @@ interface VotersPageTableProps {
   setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
 }
 
-const VotersPageTable: React.FC<VotersPageTableProps> = ({
+const VoterTable: React.FC<VotersPageTableProps> = ({
   electionId,
   selectedRows,
   setSelectedRows,
@@ -119,15 +119,15 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
       }
 
       try {
-        if (typeof window !== "undefined") {
-          const electionID = localStorage.getItem("ElectionId");
+        if (electionId) {
           const { data } = await getVoters(USER_ID, {
-            election_id: electionID,
+            election_id: electionId,
           });
           if (data) {
             setIsFetchVoters(false);
             setResponses(data.data);
           }
+          return;
         }
       } catch (e) {
         console.log(e);
@@ -240,4 +240,4 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
   );
 };
 
-export default VotersPageTable;
+export default VoterTable;
