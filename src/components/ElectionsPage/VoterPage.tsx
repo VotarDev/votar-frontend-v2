@@ -105,7 +105,7 @@ const VoterPage = () => {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
         const credentialsData = {
-          election_id: electionId,
+          election_id: electionID,
           preferences: preference,
           message: text,
           voters: credentials,
