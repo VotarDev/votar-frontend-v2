@@ -25,16 +25,15 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
       if (data) {
         setIsLoading(false);
         const voterData = {
-          userData: data.data.user,
+          userData: data.data.data.user,
           loading: false,
           isVerified: true,
         };
         toast.success("Login Successful");
+
         router.push(`/ballot`);
         dispatch(login(voterData));
         localStorage.setItem("voterProfile", JSON.stringify(voterData));
-
-        console.log(data.data);
       }
     } catch (error: any) {
       console.log(error);

@@ -197,6 +197,7 @@ const Ballot = () => {
             election_id: voterProfile.userData.election_id,
           };
           const { data } = await getElectionById(electionData);
+          console.log(data);
           if (data) {
             setElection(data.data);
             console.log(data.data);
@@ -297,7 +298,7 @@ const Ballot = () => {
     return acc;
   }, []);
 
-  console.log(election?.published);
+  console.log(election);
 
   if (election?.published === false) {
     return (
@@ -415,7 +416,7 @@ const Ballot = () => {
                                     />
                                   </div>
                                 </div>
-                                <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16">
+                                <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16">
                                   {preview.candidates.map(
                                     (candidate: any, candidateIndex: any) => (
                                       <div
