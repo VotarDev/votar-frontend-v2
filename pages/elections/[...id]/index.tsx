@@ -147,12 +147,15 @@ const ElectionDetail = () => {
       }
     }
     const formData = new FormData();
+    const startDateData = formattedStartDate + " " + state.start_time;
+    const endDateData = formattedEndDate + " " + state.end_time;
     formData.append("name_of_election", state.electionName);
     formData.append("description", state.description);
     formData.append("primary_color", state.primary_color);
     formData.append("secondary_color", state.secondary_color);
-    formData.append("start_date", formattedStartDate);
-    formData.append("end_date", formattedEndDate);
+    formData.append("start_date", startDateData);
+    formData.append("end_date", endDateData);
+
     if (state.start_time)
       formData.append("start_time", String(state.start_time));
     if (state.end_time) formData.append("end_time", String(state.end_time));
@@ -164,6 +167,8 @@ const ElectionDetail = () => {
     if (state.image) {
       formData.append("election-image", state.image);
     }
+
+    console.log(startDateData, endDateData);
 
     const ballotFormData = new FormData();
     // const filterPosition = position.filter((pos: any) => !pos._id);
