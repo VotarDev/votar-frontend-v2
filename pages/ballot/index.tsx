@@ -248,6 +248,11 @@ const Ballot = () => {
 
   const enterVotesHandler = async () => {
     setIsCastVote(true);
+    const cookie = new Cookies();
+    const token = cookie.get(voterLoginCookieName);
+    if (token) {
+      setAuthToken(token);
+    }
     try {
       if (voterProfile.userData && voterProfile.userData.election_id) {
         const electionData = {
