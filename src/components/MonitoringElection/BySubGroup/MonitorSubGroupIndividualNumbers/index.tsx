@@ -11,7 +11,6 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import { monitorIndividualSubgroup } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
-import { sub } from "date-fns";
 
 const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
   const subgroupCounts = candidateSubgroup.reduce(
@@ -75,17 +74,26 @@ const MonitorSubGroupIndividualNumbers = ({
   const users = useCurrentUser();
   const user = useUser();
 
-  const subgroupColors: any = {
-    math: "rgba(255, 186, 73, 1)", // Example color
-    english: "rgba(204, 219, 220, 1)", // Example color
-    media: "rgba(0, 18, 47, 1)", // Example color
-    advertisement: "rgba(66, 135, 245, 1)", // Blue color
-    action: "rgba(166, 61, 64, 1)", // Red color
-    logistics: "#00593d",
-    engineering: "#e37e1f",
-    bio: "#49b621",
-    chemistry: "#9e49ff",
-    // Add other subgroups and their colors here
+  const getRandomColor = (): string => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
+  // Object to hold the consistent colors for each subgroup
+  const subgroupColors: Record<string, string> = {};
+
+  // Function to get or assign a color for a subgroup
+  const getSubgroupColor = (subgroup: string): string => {
+    const lowerCaseSubgroup = subgroup.toLowerCase();
+    if (!subgroupColors[lowerCaseSubgroup]) {
+      // Assign a random color if the subgroup doesn't have one yet
+      subgroupColors[lowerCaseSubgroup] = getRandomColor();
+    }
+    return subgroupColors[lowerCaseSubgroup];
   };
 
   const randomColors = [
@@ -190,7 +198,6 @@ const MonitorSubGroupIndividualNumbers = ({
 
     monitorElectionBySubgroup();
   }, [electionId]);
-  console.log(candidates && candidates);
 
   const chartData =
     candidates?.length > 0
@@ -209,11 +216,11 @@ const MonitorSubGroupIndividualNumbers = ({
                 // Prepare the data for the chart
                 const labels = Object.keys(subgroupCounts);
                 const data = labels.map((label) => subgroupCounts[label]);
-                const backgroundColor = labels.map(
-                  (label) => subgroupColors[label.toLowerCase()] || "#000" // Ensure a default color if missing
+                const backgroundColor = labels.map((label) =>
+                  getSubgroupColor(label)
                 );
-                const borderColor = labels.map(
-                  (label) => subgroupColors[label.toLowerCase()] || "#000"
+                const borderColor = labels.map((label) =>
+                  getSubgroupColor(label)
                 );
 
                 return {

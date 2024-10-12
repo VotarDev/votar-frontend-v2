@@ -351,7 +351,7 @@ const Castvote = () => {
                             >
                               More Detials
                             </div>
-                            <div className="flex justify-center pt-3 gap-4 items-center">
+                            {/* <div className="flex justify-center pt-3 gap-4 items-center">
                               <div>
                                 <button
                                   className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
@@ -382,7 +382,7 @@ const Castvote = () => {
                                   </span>
                                 </button>
                               </div>
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       ))}

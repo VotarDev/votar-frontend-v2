@@ -51,8 +51,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     ? users?.id
     : user?.user?.id;
 
-  console.log(token);
-
   // useEffect(() => {
   //   const userToken = cookies.get("user-token");
   //   console.log(userToken);
@@ -86,7 +84,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
         if (data) {
           setElection(data.data);
           setIsFetchElections(false);
-          console.log(data.data);
         }
       } catch (error) {
         console.log(error);
@@ -111,7 +108,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
         const { data } = await dashboardCards(authorId);
         if (data) {
           setCardDetails(data.data);
-          console.log(data.data);
+
           setIsFetchCards(false);
         }
       } catch (e: any) {

@@ -306,7 +306,7 @@ const PreviewVote = () => {
                               key={candidateIndex}
                               className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
                                 candidate.votes === maxObject.votes
-                                  ? "active"
+                                  ? ""
                                   : "duration-500"
                               }`}
                               onClick={() =>
@@ -316,11 +316,11 @@ const PreviewVote = () => {
                                 )
                               }
                             >
-                              {candidate.votes === maxObject.votes && (
+                              {/* {candidate.votes === maxObject.votes && (
                                 <div className="absolute -right-2 -top-3 ">
                                   <img src={checked.src} alt="" />
                                 </div>
-                              )}
+                              )} */}
 
                               <div>
                                 <div className="mb-3">
@@ -340,7 +340,7 @@ const PreviewVote = () => {
                                 <div className="text-base text-blue-700 underline cursor-pointer font-normal">
                                   More Details
                                 </div>
-                                <div className="flex justify-center pt-3 gap-4 items-center">
+                                {/* <div className="flex justify-center pt-3 gap-4 items-center">
                                   <div>
                                     <button
                                       className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
@@ -371,7 +371,7 @@ const PreviewVote = () => {
                                       </span>
                                     </button>
                                   </div>
-                                </div>
+                                </div> */}
                               </div>
                             </div>
                           );

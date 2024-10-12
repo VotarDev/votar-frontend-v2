@@ -64,9 +64,9 @@ const Ballot = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<
     SelectedCandidates[]
   >([]);
-  const [selecredCandidateName, setSelectedCandidateName] = useState<string[]>(
-    []
-  );
+  const [pickedCandidates, setPickedCandidates] = useState({} as any);
+  const [abstentions, setAbstentions] = useState({} as any);
+  const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
@@ -84,36 +84,12 @@ const Ballot = () => {
     "#406b83",
   ];
 
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
-
   const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 1;
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  // const handleVote = (
-  //   positionIndex: number,
-  //   candidateIndex: number,
-  //   increment: boolean
-  // ) => {
-  //   if (candidateVotes && candidateVotes[positionIndex]) {
-  //     const updatedData = [...candidateVotes];
-  //     const candidate = updatedData[positionIndex].candidate[candidateIndex];
-  //     if (candidate) {
-  //       if (increment) {
-  //         candidate.vote++;
-  //       } else {
-  //         candidate.vote--;
-  //       }
-  //     }
-  //     setVotingData(updatedData);
-  //   }
-  // };
   const handleGoHome = () => {
     router.push("/access");
   };
@@ -303,7 +279,22 @@ const Ballot = () => {
     return acc;
   }, []);
 
+  useEffect(() => {
+    const allPositions = combinedData.map((item: any) => item.name_of_position);
+    const selectedPositions = selectedCandidates.map(
+      (item: any) => item.position
+    );
+
+    const isAllPositionsSelected = allPositions.every((position: any) =>
+      selectedPositions.includes(position)
+    );
+
+    setAllPositionsSelected(isAllPositionsSelected);
+  }, [selectedCandidates, combinedData]);
+
   console.log(election);
+
+  console.log(allPositionsSelected);
 
   if (election?.published === false) {
     return (
@@ -421,7 +412,7 @@ const Ballot = () => {
                                     />
                                   </div>
                                 </div>
-                                <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16">
+                                <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
                                   {preview.candidates.map(
                                     (candidate: any, candidateIndex: any) => (
                                       <div
@@ -475,12 +466,28 @@ const Ballot = () => {
                                     )
                                   )}
                                 </div>
+                                <div className="flex justify-center items-center">
+                                  <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl  uppercase">
+                                    Abstain
+                                  </button>
+                                </div>
                               </div>
                             );
                           })}
+
+                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-center p-4 items-center justify-center my-10 w-[700px] mx-auto gap-2">
+                          <div className="text-[#ECAE0D] text-xl">
+                            <PiWarningCircleFill />
+                          </div>
+                          <div className="text-[#826008]">
+                            Please ensure that you have selected your preffered
+                            candidate in each position.
+                          </div>
+                        </div>
                         <div className="flex justify-center mb-10">
                           <button
                             onClick={() => setShowModal(true)}
+                            disabled={!allPositionsSelected}
                             className="bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold"
                           >
                             Enter Votes
