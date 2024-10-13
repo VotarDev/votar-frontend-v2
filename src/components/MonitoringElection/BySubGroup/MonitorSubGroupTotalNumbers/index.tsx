@@ -5,12 +5,9 @@ import { CategoryScale } from "chart.js";
 Chart.register(CategoryScale);
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import { monitorSubgroup } from "@/utils/api";
-import { useCurrentUser, useUser } from "@/utils/hooks";
+import { useCurrentUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { sub } from "date-fns";
-import { set } from "lodash";
 import { CircularProgress } from "@mui/material";
-import { tr } from "date-fns/locale";
 
 const MonitorSubGroupTotalNumbers = ({
   electionId,
@@ -20,16 +17,22 @@ const MonitorSubGroupTotalNumbers = ({
   const [subGroup, setSubGroup] = useState<any>(null);
   const [isFetchSubGroup, setIsFetchSubGroup] = useState(false);
   const [candidates, setCandidates] = useState<any>(null);
-  const medias = ["Media", "Engineering", "Logistics", "Engineering", "Media"];
-  const mediaCounts = subGroup?.reduce((acc: any, media: any) => {
-    acc[media] = (acc[media] || 0) + 1;
-    return acc;
-  }, {});
 
-  // Step 2: Extract counts, maintaining duplicates
+  const getStoredSubgroupColors = () => {
+    const storedColors = localStorage.getItem("subgroupColors");
+    return storedColors ? JSON.parse(storedColors) : {};
+  };
 
-  const countsArray = mediaCounts ? Object.values(mediaCounts) : [];
-  const uniqueLabels = Array.from(new Set(subGroup));
+  const storeSubgroupColors = (subgroupColors: any) => {
+    localStorage.setItem("subgroupColors", JSON.stringify(subgroupColors));
+  };
+
+  const generateRandomColor = () => {
+    const randomColor = `rgba(${Math.floor(Math.random() * 256)}, ${Math.floor(
+      Math.random() * 256
+    )}, ${Math.floor(Math.random() * 256)}, 1)`;
+    return randomColor;
+  };
 
   const predefinedColors: string[] = [
     "rgba(255, 186, 73, 1)",
@@ -38,61 +41,21 @@ const MonitorSubGroupTotalNumbers = ({
     "rgba(166, 61, 64, 1)",
   ];
 
-  const subgroupColors: any = {
-    math: "rgba(255, 186, 73, 1)", // Example color
-    english: "rgba(204, 219, 220, 1)", // Example color
-    media: "rgba(0, 18, 47, 1)", // Example color
-    advertisement: "rgba(66, 135, 245, 1)", // Blue color
-    action: "rgba(166, 61, 64, 1)", // Red color
-    logistics: "#00593d",
-    engineering: "#e37e1f",
-    bio: "#49b621",
-    chemistry: "#9e49ff",
-    // Add other subgroups and their colors here
+  const assignColorsToSubgroups = (subgroups: string[]) => {
+    let subgroupColors = getStoredSubgroupColors();
+
+    subgroups.forEach((subgroup) => {
+      if (!subgroupColors[subgroup]) {
+        subgroupColors[subgroup] = generateRandomColor();
+      }
+    });
+
+    storeSubgroupColors(subgroupColors);
+    return subgroupColors;
   };
 
-  type RgbaArray = [number, number, number, number];
-
-  function rgbaToRgbArray(rgba: string): RgbaArray {
-    const rgbaArray = rgba.slice(5, -1).split(", ").map(Number);
-    return [
-      rgbaArray[0],
-      rgbaArray[1],
-      rgbaArray[2],
-      rgbaArray[3],
-    ] as RgbaArray;
-  }
-
-  function generateShade([r, g, b, a]: RgbaArray): string {
-    const variation = 30;
-    const randomInt = (base: number): number =>
-      Math.max(
-        0,
-        Math.min(
-          255,
-          base + Math.floor(Math.random() * (variation * 2 + 1)) - variation
-        )
-      );
-    return `rgba(${randomInt(r)}, ${randomInt(g)}, ${randomInt(b)}, ${a})`;
-  }
-
-  function generateShadesOfColors(colors: string[], length: number): string[] {
-    const shades = new Set<string>();
-    const rgbaColors = colors.map(rgbaToRgbArray);
-
-    while (shades.size < length) {
-      const baseColor = rgbaColors[shades.size % rgbaColors.length];
-      shades.add(generateShade(baseColor));
-    }
-
-    return Array.from(shades);
-  }
-
-  console.log(uniqueLabels); // [2, 2, 1]
-  const users = useCurrentUser();
-
   const chartData = candidates
-    ? candidates?.map((candidate: any) => {
+    ? candidates.map((candidate: any) => {
         const subgroupCounts = candidate.subGroups.reduce(
           (acc: any, subgroup: any) => {
             acc[subgroup] = (acc[subgroup] || 0) + 1;
@@ -102,26 +65,16 @@ const MonitorSubGroupTotalNumbers = ({
         );
 
         const labels = Object.keys(subgroupCounts);
-        console.log(labels.length);
-        const data =
-          labels.length > 0 && labels[0] !== ""
-            ? labels.map((label) => subgroupCounts[label])
-            : [];
-        console.log(data);
-        const backgroundColor = labels.map(
-          (label) => subgroupColors[label.toLowerCase()]
-        );
-        const borderColor = labels.map(
-          (label) => subgroupColors[label.toLowerCase()]
-        );
+        const data = labels.map((label) => subgroupCounts[label]);
+        const backgroundColor = assignColorsToSubgroups(labels);
 
         return {
           labels: labels,
           datasets: [
             {
               data: data,
-              backgroundColor: backgroundColor,
-              borderColor: borderColor,
+              backgroundColor: labels.map((label) => backgroundColor[label]),
+              borderColor: labels.map((label) => backgroundColor[label]),
               borderWidth: 1,
             },
           ],
@@ -129,52 +82,7 @@ const MonitorSubGroupTotalNumbers = ({
       })
     : null;
 
-  console.log(subGroup);
-  console.log(mediaCounts);
-
-  const data = {
-    labels: uniqueLabels,
-    datasets: [
-      {
-        label: "No of Votes",
-        data: countsArray,
-        // add colors to the chart according to the length of uniqueLabels
-
-        backgroundColor: generateShadesOfColors(
-          predefinedColors,
-          uniqueLabels.length
-        ),
-
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const option = {
-    plugins: {
-      datalabels: {
-        color: "#ffffff",
-      },
-      legend: {
-        display: true,
-        position: "right",
-        align: "start",
-        maxWidth: 200,
-        labels: {
-          boxWidth: 20,
-          padding: 16,
-          font: {
-            size: 16,
-            color: "#151B27",
-          },
-        },
-        font: {
-          size: 30,
-          color: "#151B27",
-        },
-      },
-    },
-  };
+  const users = useCurrentUser();
 
   useEffect(() => {
     if (typeof Chart !== "undefined") {
@@ -200,7 +108,6 @@ const MonitorSubGroupTotalNumbers = ({
       try {
         const { data } = await monitorSubgroup(electionId);
         if (data.data) {
-          console.log(data.data);
           setCandidates(data.data);
           setSubGroup(data.data[0].subGroups);
           setIsFetchSubGroup(false);
@@ -226,7 +133,27 @@ const MonitorSubGroupTotalNumbers = ({
         {chartData && (
           <Pie
             data={chartData[0]} // @ts-ignore
-            options={option} // @ts-ignore
+            options={{
+              plugins: {
+                datalabels: {
+                  color: "#ffffff",
+                },
+                legend: {
+                  display: true,
+                  position: "right",
+                  align: "start",
+                  maxWidth: 200,
+                  labels: {
+                    boxWidth: 20,
+                    padding: 16,
+                    font: {
+                      size: 16,
+                    },
+                  },
+                },
+              },
+            }}
+            // @ts-ignore
             plugins={[ChartDataLabels]}
           />
         )}

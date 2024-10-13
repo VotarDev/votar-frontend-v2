@@ -475,13 +475,17 @@ const Ballot = () => {
                             );
                           })}
 
-                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-center p-4 items-center justify-center my-10 w-[700px] mx-auto gap-2">
+                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 w-[700px] mx-auto gap-2">
                           <div className="text-[#ECAE0D] text-xl">
                             <PiWarningCircleFill />
                           </div>
                           <div className="text-[#826008]">
-                            Please ensure that you have selected your preffered
-                            candidate in each position.
+                            To cast your vote using the “Enter Votes” button
+                            below, please make sure to select your preferred
+                            candidate for each position in the election. If you
+                            choose not to vote for a particular position, you
+                            may select “Abstain” (if this option is available in
+                            your election).
                           </div>
                         </div>
                         <div className="flex justify-center mb-10">

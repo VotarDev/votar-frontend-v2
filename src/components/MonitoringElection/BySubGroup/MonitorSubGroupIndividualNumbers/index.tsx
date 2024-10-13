@@ -74,6 +74,14 @@ const MonitorSubGroupIndividualNumbers = ({
   const users = useCurrentUser();
   const user = useUser();
 
+  const getStoredColors = () => {
+    const storedColors = localStorage.getItem("subgroupColors");
+    return storedColors ? JSON.parse(storedColors) : {};
+  };
+
+  const [subgroupColors, setSubgroupColors] =
+    useState<Record<string, string>>(getStoredColors);
+
   const getRandomColor = (): string => {
     const letters = "0123456789ABCDEF";
     let color = "#";
@@ -84,14 +92,21 @@ const MonitorSubGroupIndividualNumbers = ({
   };
 
   // Object to hold the consistent colors for each subgroup
-  const subgroupColors: Record<string, string> = {};
+  // const subgroupColors: Record<string, string> = {};
 
   // Function to get or assign a color for a subgroup
   const getSubgroupColor = (subgroup: string): string => {
     const lowerCaseSubgroup = subgroup.toLowerCase();
     if (!subgroupColors[lowerCaseSubgroup]) {
       // Assign a random color if the subgroup doesn't have one yet
-      subgroupColors[lowerCaseSubgroup] = getRandomColor();
+      const newColor = getRandomColor();
+      const updatedColors = {
+        ...subgroupColors,
+        [lowerCaseSubgroup]: newColor,
+      };
+      setSubgroupColors(updatedColors);
+      localStorage.setItem("subgroupColors", JSON.stringify(updatedColors)); // Save to localStorage
+      return newColor;
     }
     return subgroupColors[lowerCaseSubgroup];
   };
