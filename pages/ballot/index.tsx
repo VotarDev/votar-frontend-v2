@@ -95,6 +95,13 @@ const Ballot = () => {
   };
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
+    if (abstentions[position]?.abstained) {
+      // If abstained, don't allow selecting a candidate
+      toast.error(
+        `You have already abstained from selecting a candidate for ${position}.`
+      );
+      return;
+    }
     setSelectedCandidates((prevState: any) => {
       const existingIndex = prevState.findIndex(
         (sc: any) => sc.position === position
@@ -136,6 +143,10 @@ const Ballot = () => {
   };
 
   const isCandidateActive = (position: string, candidate: Candidate) => {
+    if (abstentions[position]?.abstained) {
+      return false;
+    }
+
     const positionData = selectedCandidates.find(
       (sc: any) => sc.position === position
     );
@@ -192,7 +203,7 @@ const Ballot = () => {
 
   useEffect(() => {
     const getCandidatesData = async () => {
-      setIsFetchCandidate(true);
+      setIsFetchCandidate(false);
       const cookie = new Cookies();
       const token = cookie.get(voterLoginCookieName);
       if (token) {
@@ -231,15 +242,26 @@ const Ballot = () => {
     }
     try {
       if (voterProfile.userData && voterProfile.userData.election_id) {
+        const selectedVotes = selectedCandidates.flatMap((item) =>
+          item.candidates.map((can) => ({
+            candidate_name: can.candidate_name,
+            position: item.position,
+            abstain: false, // Mark as not abstained
+          }))
+        );
+
+        const abstainVotes = Object.keys(abstentions).flatMap((position) =>
+          abstentions[position]?.abstained ? [{ position, abstain: true }] : []
+        );
+
+        const votes = [...selectedVotes, ...abstainVotes];
+
         const electionData = {
           voter_id: voterProfile.userData.id,
           election_id: voterProfile.userData.election_id,
-          votes: selectedCandidates.flatMap((item) =>
-            item.candidates.map((can) => ({
-              candidate_name: can.candidate_name,
-            }))
-          ),
+          votes, // Add the combined votes array here
         };
+
         console.log(electionData);
         const { data } = await enterVotes(electionData);
         if (data) {
@@ -256,6 +278,23 @@ const Ballot = () => {
       console.log(e);
     }
   };
+
+  const handleAbstain = (position: string) => {
+    toast.success(
+      `You have successfully abstained from voting for the ${position} position`
+    );
+    setSelectedCandidates((prevState: any) =>
+      prevState.filter((sc: any) => sc.name_of_position !== position)
+    );
+    setAbstentions((prevState: any) => ({
+      ...prevState,
+      [position]: {
+        abstained: true,
+      },
+    }));
+  };
+
+  console.log(abstentions);
 
   const combinedData = candidates.reduce((acc: any, curr: any) => {
     const existingPosition = acc.find(
@@ -281,20 +320,28 @@ const Ballot = () => {
 
   useEffect(() => {
     const allPositions = combinedData.map((item: any) => item.name_of_position);
+
     const selectedPositions = selectedCandidates.map(
       (item: any) => item.position
     );
 
+    const abstainedPositions = Object.keys(abstentions).filter(
+      (position) => abstentions[position]?.abstained === true
+    );
+
+    const selectedAndAbstainedPositions = [
+      ...selectedPositions,
+      ...abstainedPositions,
+    ];
+
     const isAllPositionsSelected = allPositions.every((position: any) =>
-      selectedPositions.includes(position)
+      selectedAndAbstainedPositions.includes(position)
     );
 
     setAllPositionsSelected(isAllPositionsSelected);
-  }, [selectedCandidates, combinedData]);
+  }, [selectedCandidates, abstentions, combinedData]);
 
-  console.log(election);
-
-  console.log(allPositionsSelected);
+  console.log(combinedData);
 
   if (election?.published === false) {
     return (
@@ -467,7 +514,16 @@ const Ballot = () => {
                                   )}
                                 </div>
                                 <div className="flex justify-center items-center">
-                                  <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl  uppercase">
+                                  <button
+                                    onClick={() =>
+                                      handleAbstain(preview.name_of_position)
+                                    }
+                                    disabled={
+                                      abstentions[preview.name_of_position]
+                                        ?.abstained
+                                    }
+                                    className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl  uppercase"
+                                  >
                                     Abstain
                                   </button>
                                 </div>

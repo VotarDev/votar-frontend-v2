@@ -146,7 +146,9 @@ const SigninComponent = () => {
               label="Remember me"
             />
           </FormGroup>
-          <div>Forgot Password</div>
+          <Link href={"/forgot-password"}>
+            <div>Forgot Password</div>
+          </Link>
         </div>
       </form>
 
