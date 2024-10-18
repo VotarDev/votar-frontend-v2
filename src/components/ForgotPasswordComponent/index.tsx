@@ -10,7 +10,7 @@ const ForgotPasswordComponent = () => {
         <h1 className="text-[24px]">Forgot your password?</h1>
         <p className="pt-3">
           Enter the email address associated with your account, then click
-          "Continue".
+          &quot;Continue&quot;.
         </p>
         <p className="pt-3">We will email you a link to reset your password.</p>
         <div className="pt-8 ">
