@@ -42,28 +42,21 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
       }
       try {
         const { data } = await monitorInidividualNumber(electionId);
+        console.log(data.data);
         if (data) {
-          const flattenedData = data.data.flat();
-          const groupedCandidates = flattenedData.reduce(
-            (acc: any, candidate: any) => {
-              const { position } = candidate;
-              if (!acc[position]) {
-                acc[position] = [];
-              }
-              acc[position].push(candidate);
-              return acc;
-            },
-            {}
+          const formattedData = data.data.map(
+            ([abstainedData, candidatesData]: any) => {
+              const position = candidatesData[0].position; // Assuming all candidates have the same position
+              return {
+                position,
+                candidates: candidatesData,
+                abstained: abstainedData.abstain,
+              };
+            }
           );
-          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
-            ([position, candidates]) => ({
-              position,
-              candidates,
-            })
-          );
-          setCandidates(groupedCandidatesArray);
+          console.log(formattedData);
+          setCandidates(formattedData);
           setIsFetchCandidate(false);
-          console.log(data.data);
         }
       } catch (e: any) {
         console.log(e);
@@ -83,6 +76,8 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
         <CircularProgress size={30} style={{ color: "#015CE9" }} />
       </div>
     );
+
+  console.log(candidates);
 
   return (
     <div>
@@ -144,7 +139,7 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
                         <img
                           src={candidates.image}
                           alt=""
-                          className="w-40 h-40 object-cover"
+                          className="w-full h-auto object-contain"
                         />
                       </div>
                       <div className="capitalize pt-4">

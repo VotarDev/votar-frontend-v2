@@ -4,7 +4,7 @@ import { Chart, ChartConfiguration } from "chart.js/auto";
 import { Line, Bar } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 Chart.register(CategoryScale);
-import { de, el } from "date-fns/locale";
+import { de, el, tr } from "date-fns/locale";
 import "chartjs-adapter-date-fns";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
@@ -50,43 +50,33 @@ const MonitorIndividualNumberChart = ({
 
       try {
         const { data } = await monitorInidividualNumber(electionId);
+        console.log(data.data);
         if (data.data) {
-          // Transform the candidates for the bar chart dataset
-          const transformCandidates = data.data
-            .flat()
-            .map((candidate: any) => ({
-              ...candidate,
-              datasets: [
-                { x: candidate.candidateName, y: candidate.numberOfVotes },
-              ],
-            }));
+          const transformedData = data.data.map(
+            ([abstainedData, candidatesData]: any) => {
+              const position = candidatesData[0].position;
 
-          // Group candidates by their position
-          const groupedCandidates = transformCandidates.reduce(
-            (acc: any, candidate: any) => {
-              const { position } = candidate;
-              if (!acc[position]) {
-                acc[position] = [];
-              }
-              acc[position].push(candidate);
-              return acc;
-            },
-            {}
+              const datasets = candidatesData.map((candidate: any) => ({
+                x: candidate.candidateName,
+                y: candidate.numberOfVotes,
+              }));
+
+              datasets.push({
+                x: "Abstained",
+                y: abstainedData.abstain,
+              });
+
+              return {
+                position,
+                abstained: abstainedData.abstain,
+                datasets,
+                candidates: candidatesData,
+              };
+            }
           );
 
-          // Convert the grouped candidates object into an array
-          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
-            ([position, candidates]) => ({
-              position,
-              candidates,
-            })
-          );
-
-          console.log(data); // Log the raw data for debugging
-          console.log(transformCandidates); // Log transformed candidates for debugging
-
-          // Update state with grouped candidates
-          setCanidates(groupedCandidatesArray);
+          console.log(transformedData);
+          setCanidates(transformedData);
           setIsFetchBarData(false);
         }
       } catch (error) {
@@ -171,27 +161,42 @@ const MonitorIndividualNumberChart = ({
             "#406b83",
           ];
           const borderColors = generateUniqueColors(
-            position.length,
+            position.datasets.length,
             predefinedColors
           );
           const dat = () => {
-            return {
-              labels: position.candidates.map((col: any) => col.candidateName),
-              datasets: position.candidates.map((col: any, i: number) => {
+            const datasets = position.datasets.map(
+              (dataset: any, i: number) => {
+                const isAbstained = dataset.x === "Abstained";
+
                 return {
-                  label: col.candidateName,
-                  data: col.datasets,
-                  borderColor:
-                    col.candidateName === "Abstained"
-                      ? "#000000"
-                      : borderColors[i],
-                  backgroundColor:
-                    col.candidateName === "Abstained"
-                      ? "#000000"
-                      : borderColors[i],
+                  label: dataset.x,
+                  data: [{ x: dataset.x, y: dataset.y }],
+                  borderColor: isAbstained ? "#000000" : borderColors[i],
+                  backgroundColor: isAbstained ? "#000000" : borderColors[i],
                   borderWidth: 2,
                 };
-              }),
+              }
+            );
+
+            const labels = position.datasets.map((dataset: any) => dataset.x);
+            // return {
+            //   labels: position.candidates.map((col: any) => col.candidateName),
+            //   datasets: position.candidates.map((col: any, i: number) => {
+            //     return {
+            //       label: col.candidateName,
+            //       data: position.datasets,
+            //       borderColor:
+            //         position.abstained > 0 ? "#000000" : borderColors[i],
+            //       backgroundColor:
+            //         position.abstained > 0 ? "#000000" : borderColors[i],
+            //       borderWidth: 2,
+            //     };
+            //   }),
+            // };
+            return {
+              labels,
+              datasets,
             };
           };
           return (
