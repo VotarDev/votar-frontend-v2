@@ -44,8 +44,9 @@ const deleteVoterResponseUrl = "user/delete-voterResponse";
 const deleteElectionUrl = "user/delete-election";
 const deletePositionUrl = "user/delete-position";
 const deleteCandidateUrl = "user/delete-candidate";
-const voterVerificationLinkUrl =
-  "https://votar-api.onrender.com/app:v1/voter/verifyLink";
+const voterVerificationLinkUrl = "/voter/verifyLink";
+const forgotPassword = "/user/forget-password";
+const verifyForgotPassword = "/user/verify-forgetPassword";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -262,6 +263,17 @@ export const deleteElection = (
   return httpService.delete(deleteElectionUrl + `/${electionId}`, {
     data: data,
   });
+};
+
+export const forgotPasswordRequest = (data: { email: string }) => {
+  return httpService.post(forgotPassword, data);
+};
+
+export const verifyForgotPasswordRequest = (data: {
+  token: string;
+  password: string;
+}) => {
+  return httpService.put(verifyForgotPassword, data);
 };
 
 /** ADMIN */

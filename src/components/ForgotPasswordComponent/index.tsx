@@ -2,8 +2,14 @@ import React from "react";
 
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { forgotPasswordRequest } from "@/utils/api";
+import { set } from "lodash";
+import { CircularProgress } from "@mui/material";
+import toast from "react-hot-toast";
 
 const ForgotPasswordComponent = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
   const router = useRouter();
   const handleCancelHandler = () => {
     router.push("/signin");
@@ -11,8 +17,30 @@ const ForgotPasswordComponent = () => {
 
   const [steps, setSteps] = useState(1);
 
-  const handleContinueHandler = () => {
-    setSteps(2);
+  const handleContinueHandler = async (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    try {
+      setIsLoading(true);
+      const { data } = await forgotPasswordRequest({ email });
+      if (data) {
+        console.log(data);
+        setIsLoading(false);
+        setSteps(2);
+      }
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(error);
+      toast.error(error.response.data.message || error.message);
+
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -46,6 +74,8 @@ const ForgotPasswordComponent = () => {
                   type="email"
                   name="email"
                   id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-[300px] border border-gray-300 outline-none h-12 p-4 rounded-md"
                 />
               </div>
@@ -53,14 +83,18 @@ const ForgotPasswordComponent = () => {
               <div className="flex gap-2">
                 <button
                   onClick={handleContinueHandler}
-                  className="w-24 h-12 bg-blue-700 text-white flex items-center justify-center rounded-md outline-none"
+                  disabled={isLoading}
+                  className="w-[150px] h-12 gap-2 bg-blue-700 text-white flex items-center justify-center rounded-md outline-none"
                 >
+                  {isLoading && (
+                    <CircularProgress size={20} style={{ color: "#ffffff" }} />
+                  )}
                   Continue
                 </button>
 
                 <button
                   onClick={handleCancelHandler}
-                  className="w-24 h-12 border border-red-500 text-red-500 flex items-center justify-center rounded-md outline-none"
+                  className="w-[150px] h-12 border border-red-500 text-red-500 flex items-center justify-center rounded-md outline-none"
                 >
                   Cancel
                 </button>

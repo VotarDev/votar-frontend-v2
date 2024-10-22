@@ -1,13 +1,19 @@
-import { TextField } from "@mui/material";
+import { CircularProgress, TextField } from "@mui/material";
 import Link from "next/link";
 import React, { useState } from "react";
 import logo from "../../public/assets/logos/logo_white-1.png";
 import illustration from "../../public/assets/illustrations/illustration-4.svg";
+import { useRouter } from "next/router";
+import { verifyForgotPasswordRequest } from "@/utils/api";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const { t } = router.query;
 
   const validatePassword = (password: string) => {
     const personalInfo = ["username", "email"];
@@ -26,7 +32,7 @@ const ResetPassword = () => {
     return null;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
 
@@ -39,6 +45,33 @@ const ResetPassword = () => {
     if (newPassword !== confirmPassword) {
       setErrorMessage("Passwords do not match.");
       return;
+    }
+
+    try {
+      setIsLoading(true);
+      if (t) {
+        const { data } = await verifyForgotPasswordRequest({
+          token: t as string,
+          password: newPassword,
+        });
+        if (data) {
+          router.push("/signin");
+          toast.success("Password reset successful");
+          console.log(data.data);
+          setIsLoading(false);
+        }
+      }
+    } catch (error: any) {
+      console.log(error);
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(error);
+      toast.error(error.response.data.message || error.message);
+      setIsLoading(false);
     }
 
     console.log("Password is valid, submit form.");
@@ -107,8 +140,12 @@ const ResetPassword = () => {
           )}
           <button
             type="submit"
+            disabled={isLoading}
             className=" bg-[#015CE9] text-white h-[52px] rounded mt-7 w-full font-proximaNova flex justify-center items-center gap-3"
           >
+            {isLoading && (
+              <CircularProgress size={20} style={{ color: "#ffffff" }} />
+            )}
             Submit
           </button>
         </form>
