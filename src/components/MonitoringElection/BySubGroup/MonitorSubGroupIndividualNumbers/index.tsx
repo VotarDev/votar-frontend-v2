@@ -12,7 +12,7 @@ import { monitorIndividualSubgroup } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 
-const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
+const CustomLegend = ({ subgroups, candidateSubgroup, abstained }: any) => {
   const subgroupCounts = candidateSubgroup.reduce(
     (acc: any, candidate: any) => {
       const subgroup = candidate.subgroups;
@@ -25,6 +25,11 @@ const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
     },
     {}
   );
+
+  console.log(abstained);
+  if (abstained > 0) {
+    subgroupCounts["Abstained"] = abstained;
+  }
   console.log(subgroupCounts);
 
   return (
@@ -41,7 +46,10 @@ const CustomLegend = ({ subgroups, candidateSubgroup }: any) => {
               display: "inline-block",
               width: "20px",
               height: "20px",
-              backgroundColor: subgroups[key.toLowerCase()],
+              backgroundColor:
+                key.toLowerCase() === "abstained"
+                  ? "#000000"
+                  : subgroups[key.toLowerCase()],
               marginRight: "10px",
             }}
           ></span>
@@ -91,21 +99,16 @@ const MonitorSubGroupIndividualNumbers = ({
     return color;
   };
 
-  // Object to hold the consistent colors for each subgroup
-  // const subgroupColors: Record<string, string> = {};
-
-  // Function to get or assign a color for a subgroup
   const getSubgroupColor = (subgroup: string): string => {
     const lowerCaseSubgroup = subgroup.toLowerCase();
     if (!subgroupColors[lowerCaseSubgroup]) {
-      // Assign a random color if the subgroup doesn't have one yet
       const newColor = getRandomColor();
       const updatedColors = {
         ...subgroupColors,
         [lowerCaseSubgroup]: newColor,
       };
       setSubgroupColors(updatedColors);
-      localStorage.setItem("subgroupColors", JSON.stringify(updatedColors)); // Save to localStorage
+      localStorage.setItem("subgroupColors", JSON.stringify(updatedColors));
       return newColor;
     }
     return subgroupColors[lowerCaseSubgroup];
@@ -175,33 +178,21 @@ const MonitorSubGroupIndividualNumbers = ({
         if (data.data) {
           console.log(data.data);
 
-          // Flatten the nested arrays into a single array of candidates
-          const flattenedData = data.data.flat();
+          const transformedData = data.data.map(
+            ([candidatesData, abstainedData]: any) => {
+              const position = candidatesData.position;
 
-          // Group candidates by their position
-          const groupedCandidates = flattenedData.reduce(
-            (acc: any, candidate: any) => {
-              const { position } = candidate;
-              if (!acc[position]) {
-                acc[position] = [];
-              }
-              acc[position].push(candidate);
-              return acc;
-            },
-            {}
+              return {
+                position,
+                abstained: abstainedData.abstain,
+                candidates: [candidatesData],
+              };
+            }
           );
 
-          // Convert the grouped candidates object into an array
-          const groupedCandidatesArray = Object.entries(groupedCandidates).map(
-            ([position, candidates]) => ({
-              position,
-              candidates,
-            })
-          );
-
-          console.log(groupedCandidatesArray);
-          setSubGroup(data.data[0].subgroups); // Assuming subgroups are set correctly from the first data group
-          setCandidates(groupedCandidatesArray); // Setting grouped candidates by position
+          console.log(transformedData);
+          setSubGroup(data.data[0].subgroups);
+          setCandidates(transformedData);
 
           setIsFetchSubGroup(false);
         }
@@ -219,8 +210,7 @@ const MonitorSubGroupIndividualNumbers = ({
       ? candidates.map(({ candidates: candidateList }: any) =>
           candidateList && candidateList.length > 0
             ? candidateList.map((candidate: any) => {
-                // Calculate the counts of each subgroup
-                const subgroupCounts = candidate.subgroups.reduce(
+                const subgroupCounts = (candidate.subgroups || []).reduce(
                   (acc: Record<string, number>, subgroup: string) => {
                     acc[subgroup] = (acc[subgroup] || 0) + 1;
                     return acc;
@@ -228,7 +218,6 @@ const MonitorSubGroupIndividualNumbers = ({
                   {}
                 );
 
-                // Prepare the data for the chart
                 const labels = Object.keys(subgroupCounts);
                 const data = labels.map((label) => subgroupCounts[label]);
                 const backgroundColor = labels.map((label) =>
@@ -253,6 +242,21 @@ const MonitorSubGroupIndividualNumbers = ({
             : []
         )
       : [];
+
+  if (chartData.length > 0) {
+    // Add the abstained value at the chart level
+    chartData.flat().forEach((chart: any, index: number) => {
+      const abstainedValue = candidates[index]?.abstained || 0;
+
+      if (abstainedValue > 0) {
+        // Add 'Abstained' label and data with a black color
+        chart.labels.push("Abstained");
+        chart.datasets[0].data.push(abstainedValue);
+        chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
+        chart.datasets[0].borderColor.push("#000000");
+      }
+    });
+  }
 
   console.log(chartData);
 
@@ -301,6 +305,7 @@ const MonitorSubGroupIndividualNumbers = ({
                 <CustomLegend
                   subgroups={subgroupColors}
                   candidateSubgroup={items.candidates}
+                  abstained={items.abstained}
                 />
                 {items.candidates.map((candidate: any, candidateIndex: any) => (
                   <div key={candidateIndex}>
@@ -322,25 +327,6 @@ const MonitorSubGroupIndividualNumbers = ({
                     </div>
                   </div>
                 ))}
-                <div>
-                  <div className="flex flex-col gap-3 mt-5">
-                    {/* {Array.from(
-                        { length: items.candidates[0].datasets.length },
-                        (_, i) => `Group ${i + 1}`
-                      ).map((item, i) => (
-                        <div key={i} className="flex items-center">
-                          <div
-                            className="w-4 h-4 mr-2"
-                            // style={{
-                            //   backgroundColor: backgroundColors[i],
-                            // }}
-                          ></div>
-  
-                          <div>{item}</div>
-                        </div>
-                      ))} */}
-                  </div>
-                </div>
               </div>
             </div>
           );

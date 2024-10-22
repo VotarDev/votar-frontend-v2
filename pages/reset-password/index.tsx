@@ -56,8 +56,8 @@ const ResetPassword = () => {
           </div>
         </div>
       </div>
-      <div className="flex justify-center flex-col lg:my-0 my-8 lg:py-0 w-full mx-auto max-w-[500px]">
-        <div className="">
+      <div className="flex justify-center flex-col lg:my-0 my-8 lg:py-0 w-full mx-auto lg:max-w-[500px] px-4">
+        <div>
           <h1 className="text-2xl">Hello, Anthony!</h1>
           <p className="pt-3">
             Please set up your new credentials in order to log in.
@@ -72,7 +72,7 @@ const ResetPassword = () => {
           <li>Not contain any of your personal information</li>
         </ul>
         <form className="w-full text-[#060606] mt-10" onSubmit={handleSubmit}>
-          <div className="flex justify-center w-full gap-5">
+          <div className="flex justify-center w-full gap-5 sm:flex-row flex-col">
             <div className="flex-1">
               <TextField
                 variant="standard"

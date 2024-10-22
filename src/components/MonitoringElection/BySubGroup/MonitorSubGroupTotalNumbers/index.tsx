@@ -8,6 +8,9 @@ import { monitorSubgroup } from "@/utils/api";
 import { useCurrentUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import { ca, tr } from "date-fns/locale";
+import leftline from "@/public/assets/images/left-line.svg";
+import rightline from "@/public/assets/images/right-line.svg";
 
 const MonitorSubGroupTotalNumbers = ({
   electionId,
@@ -17,6 +20,8 @@ const MonitorSubGroupTotalNumbers = ({
   const [subGroup, setSubGroup] = useState<any>(null);
   const [isFetchSubGroup, setIsFetchSubGroup] = useState(false);
   const [candidates, setCandidates] = useState<any>(null);
+  const [totalAbstain, setTotalAbstain] = useState<any>(null);
+  const [candidateData, setCandidateData] = useState<any>(null);
 
   const getStoredSubgroupColors = () => {
     const storedColors = localStorage.getItem("subgroupColors");
@@ -56,7 +61,7 @@ const MonitorSubGroupTotalNumbers = ({
 
   const chartData = candidates
     ? candidates.map((candidate: any) => {
-        const subgroupCounts = candidate.subGroups.reduce(
+        const subgroupCounts = (candidate.subGroups || []).reduce(
           (acc: any, subgroup: any) => {
             acc[subgroup] = (acc[subgroup] || 0) + 1;
             return acc;
@@ -81,6 +86,19 @@ const MonitorSubGroupTotalNumbers = ({
         };
       })
     : null;
+
+  if (chartData?.length > 0) {
+    // Add the abstained value at the chart level
+    chartData.forEach((chart: any, index: number) => {
+      if (totalAbstain > 0) {
+        // Add 'Abstained' label and data with a black color
+        chart.labels.push("Abstained");
+        chart.datasets[0].data.push(totalAbstain);
+        chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
+        chart.datasets[0].borderColor.push("#000000");
+      }
+    });
+  }
 
   const users = useCurrentUser();
 
@@ -108,7 +126,23 @@ const MonitorSubGroupTotalNumbers = ({
       try {
         const { data } = await monitorSubgroup(electionId);
         if (data.data) {
-          setCandidates(data.data);
+          console.log(data.data);
+          const [{ totalAbstain }, ...filteredData] = data.data;
+
+          const transformedData = filteredData.map((candidate: any) => {
+            const position = candidate.position;
+            return {
+              position,
+              subGroups: [candidate.subGroups],
+            };
+          });
+
+          setCandidateData(transformedData);
+          console.log(totalAbstain);
+          console.log(filteredData);
+          console.log(transformedData);
+          setCandidates(filteredData);
+          setTotalAbstain(totalAbstain);
           setSubGroup(data.data[0].subGroups);
           setIsFetchSubGroup(false);
         }
@@ -120,6 +154,8 @@ const MonitorSubGroupTotalNumbers = ({
     monitorElectionBySubgroup();
   }, [electionId]);
 
+  console.log(chartData);
+
   if (isFetchSubGroup)
     return (
       <div className="text-center">
@@ -128,11 +164,58 @@ const MonitorSubGroupTotalNumbers = ({
     );
 
   return (
-    <div className="mb-20 lg:w-[1200px] mx-auto w-full flex flex-row bg-slate-50 px-10 p-[50px] border-l-4 border-l-[#015CE9] justify-center">
-      <div className="w-[637px]">
+    <div className="mb-20 lg:w-[1200px] mx-auto w-full bg-slate-50 flex flex-col gap-20 pb-20 justify-center">
+      {candidateData?.map((candidate: any, index: number) => {
+        return (
+          <div key={index} className=" px-10 ">
+            <div className="text-center pt-20 text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
+              <div>
+                <img src={leftline.src} alt="line" className="w-14 lg:w-full" />
+              </div>
+              <div>{candidate.position}</div>
+              <div>
+                <img
+                  src={rightline.src}
+                  alt="line"
+                  className="w-14 lg:w-full"
+                />
+              </div>
+            </div>
+            <div className="w-[600px] mx-auto">
+              <Pie
+                data={chartData[index]} // @ts-ignore
+                options={{
+                  plugins: {
+                    datalabels: {
+                      color: "#ffffff",
+                    },
+                    legend: {
+                      display: true,
+                      position: "right",
+                      align: "start",
+                      maxWidth: 200,
+                      labels: {
+                        boxWidth: 20,
+                        padding: 16,
+                        font: {
+                          size: 16,
+                        },
+                      },
+                    },
+                  },
+                }}
+                // @ts-ignore
+                plugins={[ChartDataLabels]}
+              />
+            </div>
+          </div>
+        );
+      })}
+
+      {/* <div className="w-[637px]">
         {chartData && (
           <Pie
-            data={chartData[0]} // @ts-ignore
+            data={chartData[1]} // @ts-ignore
             options={{
               plugins: {
                 datalabels: {
@@ -157,7 +240,7 @@ const MonitorSubGroupTotalNumbers = ({
             plugins={[ChartDataLabels]}
           />
         )}
-      </div>
+      </div> */}
     </div>
   );
 };
