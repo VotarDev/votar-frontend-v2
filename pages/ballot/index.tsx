@@ -48,6 +48,7 @@ type Candidate = {
 type SelectedCandidates = {
   position: string;
   candidates: Candidate[];
+  abstain?: boolean;
 };
 
 const Ballot = () => {
@@ -95,33 +96,32 @@ const Ballot = () => {
   };
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
-    if (abstentions[position]?.abstained) {
-      // If abstained, don't allow selecting a candidate
-      toast.error(
-        `You have already abstained from selecting a candidate for ${position}.`
-      );
-      return;
-    }
     setSelectedCandidates((prevState: any) => {
       const existingIndex = prevState.findIndex(
         (sc: any) => sc.position === position
       );
 
+      setAbstentions((prevAbstentions: any) => ({
+        ...prevAbstentions,
+        [position]: {
+          abstained: false,
+        },
+      }));
+
       if (existingIndex !== -1) {
-        const updatedCandidates = [...prevState[existingIndex].candidates];
+        const updatedCandidates = [
+          ...(prevState[existingIndex].candidates || []),
+        ];
         const candidateIndex = updatedCandidates.findIndex(
           (c) => c.candidate_name === candidate.candidate_name
         );
 
         if (candidateIndex !== -1) {
-          // Remove the candidate if already selected
           updatedCandidates.splice(candidateIndex, 1);
         } else {
-          // Add the candidate if not selected
           if (
             updatedCandidates.length >= MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED
           ) {
-            // Remove the first candidate to maintain the limit
             updatedCandidates.shift();
           }
           updatedCandidates.push(candidate);
@@ -134,13 +134,18 @@ const Ballot = () => {
         };
 
         return updatedSelectedCandidates.filter(
-          (sc) => sc.candidates.length > 0
-        ); // Remove empty positions
+          (sc) => sc.candidates?.length > 0 || sc.abstain
+        );
       } else {
-        return [...prevState, { position, candidates: [candidate] }];
+        return [
+          ...prevState,
+          { position, candidates: [candidate], abstain: false },
+        ];
       }
     });
   };
+
+  console.log(selectedCandidates);
 
   const isCandidateActive = (position: string, candidate: Candidate) => {
     if (abstentions[position]?.abstained) {
@@ -246,7 +251,7 @@ const Ballot = () => {
           item.candidates.map((can) => ({
             candidate_name: can.candidate_name,
             position: item.position,
-            abstain: false, // Mark as not abstained
+            abstain: false,
           }))
         );
 
@@ -259,7 +264,7 @@ const Ballot = () => {
         const electionData = {
           voter_id: voterProfile.userData.id,
           election_id: voterProfile.userData.election_id,
-          votes, // Add the combined votes array here
+          votes,
         };
 
         console.log(electionData);
@@ -280,18 +285,24 @@ const Ballot = () => {
   };
 
   const handleAbstain = (position: string) => {
-    toast.success(
-      `You have successfully abstained from voting for the ${position} position`
-    );
-    setSelectedCandidates((prevState: any) =>
-      prevState.filter((sc: any) => sc.name_of_position !== position)
-    );
+    setSelectedCandidates((prevState: any) => {
+      const updatedCandidates = prevState.filter(
+        (sc: any) => sc.position !== position
+      );
+
+      return [...updatedCandidates, { position, abstain: true }];
+    });
+
     setAbstentions((prevState: any) => ({
       ...prevState,
       [position]: {
         abstained: true,
       },
     }));
+
+    toast.success(
+      `You have abstained from voting for the position: ${position}`
+    );
   };
 
   console.log(abstentions);
@@ -602,27 +613,35 @@ const Ballot = () => {
                               />
                             </div>
                           </div>
-                          <div className="flex justify-center gap-3">
-                            {selectedCandidate.candidates.map(
-                              (candidate: any, index: any) => (
-                                <div key={index} className=" pb-3">
-                                  <div className="flex justify-center py-2">
-                                    <img
-                                      src={candidate.candidate_picture}
-                                      alt="candidate"
-                                      className="w-20 h-20 object-cover rounded-full"
-                                    />
+
+                          {selectedCandidate.abstain ? (
+                            <div className="text-center text-red-500 font-semibold py-2">
+                              You have abstained from voting for this position.
+                            </div>
+                          ) : (
+                            <div className="flex justify-center gap-3">
+                              {selectedCandidate.candidates?.map(
+                                (candidate: any, candidateIndex: any) => (
+                                  <div key={candidateIndex} className="pb-3">
+                                    <div className="flex justify-center py-2">
+                                      <img
+                                        src={candidate.candidate_picture}
+                                        alt="candidate"
+                                        className="w-20 h-20 object-cover rounded-full"
+                                      />
+                                    </div>
+                                    <div className="font-semibold">
+                                      {candidate.candidate_name}
+                                    </div>
+                                    <div>({candidate.candidate_nickname})</div>
                                   </div>
-                                  <div className="font-semibold">
-                                    {candidate.candidate_name}
-                                  </div>
-                                  <div>({candidate.candidate_nickname})</div>
-                                </div>
-                              )
-                            )}
-                          </div>
+                                )
+                              )}
+                            </div>
+                          )}
                         </div>
                       ))}
+
                       <div className="flex bg-[#FFBC11] bg-opacity-20 text-center p-4 items-center justify-center my-5">
                         <div className="text-[#ECAE0D] text-xl">
                           <PiWarningCircleFill />

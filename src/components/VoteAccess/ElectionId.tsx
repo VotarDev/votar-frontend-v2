@@ -12,6 +12,7 @@ import { login } from "@/redux/features/auth/voterLoginSlice";
 const ElectionId = ({ electionId }: { electionId: string }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [accessCode, setAccessCode] = useState("");
+  const [errorMesssage, setErrorMessage] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,46 +38,65 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
       }
     } catch (error: any) {
       console.log(error);
-      toast.error("An error occured");
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      console.log(error);
+      // toast.error(error.response.data.message || error.message);
+      setErrorMessage(message);
+
+      // console.log(
+      //   message.includes("Please, you can only vote once. Thank you")
+      // );
       setIsLoading(false);
     }
   };
   return (
     <div className="lg:my-[100px] text-center my-[50px] px-4 lg:px-0 max-w-[30rem] mx-auto lg:max-w-full">
-      <div className="lg:text-2xl font-bold text-xl">
-        Please enter your Access code to gain Authorization To your secret
-        <br /> ballot for the Association of Political Science Analyst Election
-      </div>
-      <div>
-        <form
-          onSubmit={onSubmit}
-          className="w-full flex lg:items-center lg:mt-[40px] mt-7 gap-4 flex-col lg:flex-row justify-center"
-        >
-          <div>
-            <input
-              type="text"
-              placeholder="Enter Your Access Code"
-              onChange={(e) => setAccessCode(e.target.value)}
-              className="border-[2px] border-[#B4B4B4] lg:w-[585px] h-[52px] outline-none p-4 rounded w-full"
-            />
+      {errorMesssage.includes("Please, you can only vote once. Thank you") ? (
+        <div className="text-[24px] font-semibold">Already Voted</div>
+      ) : (
+        <div>
+          <div className="lg:text-2xl font-bold text-xl">
+            Please enter your Access code to gain Authorization To your secret
+            <br /> ballot for the Association of Political Science Analyst
+            Election
           </div>
           <div>
-            <button
-              disabled={isLoading}
-              className="h-[52px] bg-[#015CE9] text-white font-proximaNova rounded outline-none lg:w-[141px] w-full flex items-center justify-center"
+            <form
+              onSubmit={onSubmit}
+              className="w-full flex lg:items-center lg:mt-[40px] mt-7 gap-4 flex-col lg:flex-row justify-center"
             >
-              Sign in
-              {isLoading && (
-                <CircularProgress
-                  size={20}
-                  style={{ color: "#fff" }}
-                  className="ml-2"
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter Your Access Code"
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  className="border-[2px] border-[#B4B4B4] lg:w-[585px] h-[52px] outline-none p-4 rounded w-full"
                 />
-              )}
-            </button>
+              </div>
+              <div>
+                <button
+                  disabled={isLoading}
+                  className="h-[52px] bg-[#015CE9] text-white font-proximaNova rounded outline-none lg:w-[141px] w-full flex items-center justify-center"
+                >
+                  Sign in
+                  {isLoading && (
+                    <CircularProgress
+                      size={20}
+                      style={{ color: "#fff" }}
+                      className="ml-2"
+                    />
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
