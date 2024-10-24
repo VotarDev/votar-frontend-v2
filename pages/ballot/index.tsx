@@ -92,7 +92,7 @@ const Ballot = () => {
   }, []);
 
   const handleGoHome = () => {
-    router.push("/access");
+    router.push("/vote");
   };
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
@@ -245,14 +245,17 @@ const Ballot = () => {
     if (token) {
       setAuthToken(token);
     }
+    console.log(token);
     try {
       if (voterProfile.userData && voterProfile.userData.election_id) {
         const selectedVotes = selectedCandidates.flatMap((item) =>
-          item.candidates.map((can) => ({
-            candidate_name: can.candidate_name,
-            position: item.position,
-            abstain: false,
-          }))
+          item.candidates
+            ? item.candidates.map((can) => ({
+                candidate_name: can.candidate_name,
+                position: item.position,
+                abstain: false,
+              }))
+            : []
         );
 
         const abstainVotes = Object.keys(abstentions).flatMap((position) =>
@@ -268,6 +271,7 @@ const Ballot = () => {
         };
 
         console.log(electionData);
+
         const { data } = await enterVotes(electionData);
         if (data) {
           setIsCastVote(false);

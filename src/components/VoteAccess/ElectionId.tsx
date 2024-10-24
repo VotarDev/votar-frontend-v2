@@ -22,7 +22,8 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
       const bodyData = { election_id: electionId, access_id: accessCode };
       const { data } = await voterLogin(bodyData);
       const cookie = new Cookies();
-      cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
+      cookie.set(voterLoginCookieName, data.data.data.token, { path: "/" });
+
       if (data) {
         setIsLoading(false);
         const voterData = {
@@ -48,9 +49,9 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
       // toast.error(error.response.data.message || error.message);
       setErrorMessage(message);
 
-      // console.log(
-      //   message.includes("Please, you can only vote once. Thank you")
-      // );
+      console.log(
+        message.includes("Please, you can only vote once. Thank you")
+      );
       setIsLoading(false);
     }
   };
