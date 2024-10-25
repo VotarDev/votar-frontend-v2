@@ -65,8 +65,7 @@ const MonitorTotalNumberBarChart = ({ electionId }: { electionId: string }) => {
             {
               label: "No of Votes",
               data: {
-                "Total Votes": totalVotes,
-                Abstained: totalAbstain,
+                "Total Votes": totalVotes + totalAbstain,
               },
               backgroundColor:
                 totalAbstain > 0 ? ["#015CE9", "black"] : "#015CE9", // Set to black if abstained > 0
