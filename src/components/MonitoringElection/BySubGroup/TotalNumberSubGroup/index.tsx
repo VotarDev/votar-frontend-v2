@@ -22,8 +22,6 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
     return acc;
   }, {});
 
-  // Step 2: Extract counts, maintaining duplicates
-
   const countsArray = mediaCounts ? Object.values(mediaCounts) : [];
   const uniqueLabels = Array.from(new Set(subGroup));
 
@@ -35,16 +33,15 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
   ];
 
   const subgroupColors: any = {
-    math: "rgba(255, 186, 73, 1)", // Example color
-    english: "rgba(204, 219, 220, 1)", // Example color
-    media: "rgba(0, 18, 47, 1)", // Example color
-    advertisement: "rgba(66, 135, 245, 1)", // Blue color
-    action: "rgba(166, 61, 64, 1)", // Red color
+    math: "rgba(255, 186, 73, 1)",
+    english: "rgba(204, 219, 220, 1)",
+    media: "rgba(0, 18, 47, 1)",
+    advertisement: "rgba(66, 135, 245, 1)",
+    action: "rgba(166, 61, 64, 1)",
     logistics: "#00593d",
     engineering: "#e37e1f",
     bio: "#49b621",
     chemistry: "#9e49ff",
-    // Add other subgroups and their colors here
   };
 
   type RgbaArray = [number, number, number, number];
@@ -84,7 +81,7 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
     return Array.from(shades);
   }
 
-  console.log(uniqueLabels); // [2, 2, 1]
+  console.log(uniqueLabels);
   const users = useCurrentUser();
 
   const chartData = candidates
@@ -128,7 +125,6 @@ const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
       {
         label: "No of Votes",
         data: countsArray,
-        // add colors to the chart according to the length of uniqueLabels
 
         backgroundColor: generateShadesOfColors(
           predefinedColors,

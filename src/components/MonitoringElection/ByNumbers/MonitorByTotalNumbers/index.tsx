@@ -79,7 +79,9 @@ const MonitorByTotalNumbers = ({ electionId }: { electionId: string }) => {
     <div>
       <div className="max-w-[1200px] mx-auto flex flex-col gap-20">
         {candidates?.map((positions: any, index: any) => {
-          const voteNumber = positions.totalVotes.toString().split("");
+          const totalVotes = positions.totalVotes + positions.abstain;
+          const voteNumber = totalVotes.toString().split("");
+
           const randomColor = cols[Math.floor(Math.random() * cols.length)];
 
           return (

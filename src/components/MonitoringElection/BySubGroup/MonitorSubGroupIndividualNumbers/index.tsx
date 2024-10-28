@@ -27,9 +27,9 @@ const CustomLegend = ({ subgroups, candidateSubgroup, abstained }: any) => {
   );
 
   console.log(abstained);
-  if (abstained > 0) {
-    subgroupCounts["Abstained"] = abstained;
-  }
+  // if (abstained > 0) {
+  //   subgroupCounts["Abstained"] = abstained;
+  // }
   console.log(subgroupCounts);
 
   return (
@@ -190,9 +190,29 @@ const MonitorSubGroupIndividualNumbers = ({
             }
           );
 
-          console.log(transformedData);
+          const transformedDatas = data.data.map((positionGroup: any) => {
+            const candidates = positionGroup
+              .filter((entry: any) => entry.candidateName && entry.subgroups)
+              .map((candidate: any) => ({
+                candidateName: candidate.candidateName,
+                subgroups: candidate.subgroups,
+              }));
+
+            const abstain =
+              positionGroup.find((entry: any) => entry.abstain)?.abstain || 0;
+
+            return {
+              position: positionGroup[0].position || "Unknown Position",
+              abstain,
+              candidates,
+            };
+          });
+
+          console.log(transformedDatas);
+
+          console.log(transformedDatas);
           setSubGroup(data.data[0].subgroups);
-          setCandidates(transformedData);
+          setCandidates(transformedDatas);
 
           setIsFetchSubGroup(false);
         }
@@ -243,22 +263,24 @@ const MonitorSubGroupIndividualNumbers = ({
         )
       : [];
 
-  if (chartData.length > 0) {
-    // Add the abstained value at the chart level
-    chartData.flat().forEach((chart: any, index: number) => {
-      const abstainedValue = candidates[index]?.abstained || 0;
+  // if (chartData.length > 0) {
+  //   // Add the abstained value at the chart level
+  //   chartData.flat().forEach((chart: any, index: number) => {
+  //     const abstainedValue = candidates[index]?.abstain || 0;
 
-      if (abstainedValue > 0) {
-        // Add 'Abstained' label and data with a black color
-        chart.labels.push("Abstained");
-        chart.datasets[0].data.push(abstainedValue);
-        chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
-        chart.datasets[0].borderColor.push("#000000");
-      }
-    });
-  }
+  //     if (abstainedValue > 0) {
+  //       // Add 'Abstained' label and data with a black color
+  //       chart.labels.push("Abstained");
+  //       chart.datasets[0].data.push(abstainedValue);
+  //       chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
+  //       chart.datasets[0].borderColor.push("#000000");
+  //     }
+  //   });
+  // }
 
   console.log(chartData);
+
+  console.log(candidates);
 
   if (isFetchSubGroup)
     return (
@@ -301,11 +323,11 @@ const MonitorSubGroupIndividualNumbers = ({
                   />
                 </div>
               </div>
-              <div className="mx-auto pt-10 relative flex justify-center  gap-10">
+              <div className="pt-10 relative flex justify-center  gap-10">
                 <CustomLegend
                   subgroups={subgroupColors}
                   candidateSubgroup={items.candidates}
-                  abstained={items.abstained}
+                  abstained={items.abstain}
                 />
                 {items.candidates.map((candidate: any, candidateIndex: any) => (
                   <div key={candidateIndex}>

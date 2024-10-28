@@ -46,6 +46,23 @@ const MonitorSubGroupTotalNumbers = ({
     "rgba(166, 61, 64, 1)",
   ];
 
+  const getStoredColors = () => {
+    const storedColors = localStorage.getItem("subgroupColors");
+    return storedColors ? JSON.parse(storedColors) : {};
+  };
+
+  const [subgroupColors, setSubgroupColors] =
+    useState<Record<string, string>>(getStoredColors);
+
+  const getRandomColor = (): string => {
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   const assignColorsToSubgroups = (subgroups: string[]) => {
     let subgroupColors = getStoredSubgroupColors();
 
@@ -59,46 +76,94 @@ const MonitorSubGroupTotalNumbers = ({
     return subgroupColors;
   };
 
-  const chartData = candidates
-    ? candidates.map((candidate: any) => {
-        const subgroupCounts = (candidate.subGroups || []).reduce(
-          (acc: any, subgroup: any) => {
-            acc[subgroup] = (acc[subgroup] || 0) + 1;
-            return acc;
-          },
-          {}
-        );
+  // const chartData = candidates
+  //   ? candidates.map((candidate: any) => {
+  //       const subgroupCounts = (candidate.subGroups || []).reduce(
+  //         (acc: any, subgroup: any) => {
+  //           acc[subgroup] = (acc[subgroup] || 0) + 1;
+  //           return acc;
+  //         },
+  //         {}
+  //       );
 
-        const labels = Object.keys(subgroupCounts);
-        const data = labels.map((label) => subgroupCounts[label]);
-        const backgroundColor = assignColorsToSubgroups(labels);
+  //       const labels = Object.keys(subgroupCounts);
+  //       const data = labels.map((label) => subgroupCounts[label]);
+  //       const backgroundColor = assignColorsToSubgroups(labels);
 
-        return {
-          labels: labels,
-          datasets: [
-            {
-              data: data,
-              backgroundColor: labels.map((label) => backgroundColor[label]),
-              borderColor: labels.map((label) => backgroundColor[label]),
-              borderWidth: 1,
-            },
-          ],
-        };
-      })
-    : null;
+  //       return {
+  //         labels: labels,
+  //         datasets: [
+  //           {
+  //             data: data,
+  //             backgroundColor: labels.map((label) => backgroundColor[label]),
+  //             borderColor: labels.map((label) => backgroundColor[label]),
+  //             borderWidth: 1,
+  //           },
+  //         ],
+  //       };
+  //     })
+  //   : null;
+  const getSubgroupColor = (subgroup: string): string => {
+    const lowerCaseSubgroup = subgroup.toLowerCase();
+    if (!subgroupColors[lowerCaseSubgroup]) {
+      const newColor = getRandomColor();
+      const updatedColors = {
+        ...subgroupColors,
+        [lowerCaseSubgroup]: newColor,
+      };
+      setSubgroupColors(updatedColors);
+      localStorage.setItem("subgroupColors", JSON.stringify(updatedColors));
+      return newColor;
+    }
+    return subgroupColors[lowerCaseSubgroup];
+  };
 
-  if (chartData?.length > 0) {
-    // Add the abstained value at the chart level
-    chartData.forEach((chart: any, index: number) => {
-      if (totalAbstain > 0) {
-        // Add 'Abstained' label and data with a black color
-        chart.labels.push("Abstained");
-        chart.datasets[0].data.push(totalAbstain);
-        chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
-        chart.datasets[0].borderColor.push("#000000");
-      }
-    });
-  }
+  const calculateChartData = (candidates: any) => {
+    // Accumulate subgroup counts across all candidates
+    const totalSubgroupCounts = candidates.reduce(
+      (acc: any, candidate: any) => {
+        candidate.subGroups.forEach((subgroup: any) => {
+          acc[subgroup] = (acc[subgroup] || 0) + 1;
+        });
+        return acc;
+      },
+      {}
+    );
+
+    // Prepare chart data
+    const labels = Object.keys(totalSubgroupCounts);
+    const data = labels.map((label) => totalSubgroupCounts[label]);
+    const backgroundColor = labels.map((label) => getSubgroupColor(label));
+    const borderColor = labels.map((label) => getSubgroupColor(label));
+
+    return {
+      labels: labels,
+      datasets: [
+        {
+          data: data,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  // Usage
+  const chartData = candidates ? calculateChartData(candidates) : null;
+
+  // if (chartData?.length > 0) {
+  //   // Add the abstained value at the chart level
+  //   chartData.forEach((chart: any, index: number) => {
+  //     if (totalAbstain > 0) {
+  //       // Add 'Abstained' label and data with a black color
+  //       chart.labels.push("Abstained");
+  //       chart.datasets[0].data.push(totalAbstain);
+  //       chart.datasets[0].backgroundColor.push("#000000"); // Black color for abstained
+  //       chart.datasets[0].borderColor.push("#000000");
+  //     }
+  //   });
+  // }
 
   const users = useCurrentUser();
 
@@ -129,18 +194,20 @@ const MonitorSubGroupTotalNumbers = ({
           console.log(data.data);
           const [{ totalAbstain }, ...filteredData] = data.data;
 
-          const transformedData = filteredData.map((candidate: any) => {
-            const position = candidate.position;
-            return {
-              position,
-              subGroups: [candidate.subGroups],
-            };
-          });
+          // const transformedData = filteredData.map((candidate: any) => {
+          //   const position = candidate.position;
+          //   return {
+          //     position,
+          //     subGroups: [candidate.subGroups],
+          //   };
+          // });
 
-          setCandidateData(transformedData);
+          console.log(filteredData);
+
+          setCandidateData(filteredData);
           console.log(totalAbstain);
           console.log(filteredData);
-          console.log(transformedData);
+          console.log(filteredData);
           setCandidates(filteredData);
           setTotalAbstain(totalAbstain);
           setSubGroup(data.data[0].subGroups);
@@ -165,7 +232,35 @@ const MonitorSubGroupTotalNumbers = ({
 
   return (
     <div className="mb-20 lg:w-[1200px] mx-auto w-full bg-slate-50 flex flex-col gap-20 pb-20 justify-center">
-      {candidateData?.map((candidate: any, index: number) => {
+      <div className="w-[637px] mx-auto">
+        {chartData && (
+          <Pie
+            data={chartData} // @ts-ignore
+            options={{
+              plugins: {
+                datalabels: {
+                  color: "#ffffff",
+                },
+                legend: {
+                  display: true,
+                  position: "right",
+                  align: "start",
+                  maxWidth: 200,
+                  labels: {
+                    boxWidth: 20,
+                    padding: 16,
+                    font: {
+                      size: 16,
+                    },
+                  },
+                },
+              },
+            }} // @ts-ignore
+            plugins={[ChartDataLabels]}
+          />
+        )}
+      </div>
+      {/* {candidateData?.map((candidate: any, index: number) => {
         return (
           <div key={index} className=" px-10 ">
             <div className="text-center pt-20 text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
@@ -210,7 +305,7 @@ const MonitorSubGroupTotalNumbers = ({
             </div>
           </div>
         );
-      })}
+      })} */}
 
       {/* <div className="w-[637px]">
         {chartData && (
