@@ -149,7 +149,7 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
                         </div>
                       </div>
                       <div className="text-blue-700 text-2xl font-bold pt-2">
-                        {candidates.numberOfVotes + position.abstained} Votes
+                        {candidates.numberOfVotes} Votes
                       </div>
                     </div>
                   );
@@ -159,7 +159,7 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
                 {position.abstained} Voters <br /> Abstained from Voting
               </div>
               <div className="text-center text-blue-700 text-3xl font-bold">
-                Total Votes: {totalVotes}
+                Total Votes: {totalVotes + position.abstained}
               </div>
             </div>
           );
