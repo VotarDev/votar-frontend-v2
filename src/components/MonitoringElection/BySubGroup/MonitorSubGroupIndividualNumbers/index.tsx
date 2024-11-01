@@ -191,6 +191,7 @@ const MonitorSubGroupIndividualNumbers = ({
           );
 
           const transformedDatas = data.data.map((positionGroup: any) => {
+            // Transform the candidates with subgroups
             const candidates = positionGroup
               .filter((entry: any) => entry.candidateName && entry.subgroups)
               .map((candidate: any) => ({
@@ -198,17 +199,22 @@ const MonitorSubGroupIndividualNumbers = ({
                 subgroups: candidate.subgroups,
               }));
 
-            const abstain =
-              positionGroup.find((entry: any) => entry.abstain)?.abstain || 0;
+            // Add the abstain data as another "candidate" entry if it exists
+            const abstainEntry = positionGroup.find(
+              (entry: any) => entry.abstain
+            );
+            if (abstainEntry) {
+              candidates.push({
+                candidateName: "Abstain",
+                subgroups: abstainEntry.abstain_subgroups || [],
+              });
+            }
 
             return {
-              position: positionGroup[0].position || "Unknown Position",
-              abstain,
+              position: positionGroup[0]?.position || "Unknown Position",
               candidates,
             };
           });
-
-          console.log(transformedDatas);
 
           console.log(transformedDatas);
           setSubGroup(data.data[0].subgroups);
