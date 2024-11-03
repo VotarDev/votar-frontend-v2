@@ -329,32 +329,39 @@ const MonitorSubGroupIndividualNumbers = ({
                   />
                 </div>
               </div>
-              <div className="pt-10 relative flex justify-center  gap-10">
-                <CustomLegend
-                  subgroups={subgroupColors}
-                  candidateSubgroup={items.candidates}
-                  abstained={items.abstain}
-                />
-                {items.candidates.map((candidate: any, candidateIndex: any) => (
-                  <div key={candidateIndex}>
-                    <div>
-                      {chartData &&
-                        chartData.length > index &&
-                        chartData[index][candidateIndex] && ( // Ensure indices align correctly
-                          <Pie
-                            //@ts-ignore
-                            options={option}
-                            data={chartData[index][candidateIndex]} // Correct index for candidate chart data
-                            /** @ts-ignore */
-                            plugins={[ChartDataLabels]}
-                          />
-                        )}
-                      <div className="flex justify-center py-10 text-xl font-semibold">
-                        {candidate.candidateName}
+              <div className="pt-10 relative">
+                <div className="absolute left-0 top-6">
+                  <CustomLegend
+                    subgroups={subgroupColors}
+                    candidateSubgroup={items.candidates}
+                    abstained={items.abstain}
+                  />
+                </div>
+
+                <div className="max-w-[700px] w-full mx-auto grid lg:grid-cols-3 grid-cols-1 p-6 gap-10">
+                  {items.candidates.map(
+                    (candidate: any, candidateIndex: any) => (
+                      <div key={candidateIndex}>
+                        <div>
+                          {chartData &&
+                            chartData.length > index &&
+                            chartData[index][candidateIndex] && ( // Ensure indices align correctly
+                              <Pie
+                                //@ts-ignore
+                                options={option}
+                                data={chartData[index][candidateIndex]} // Correct index for candidate chart data
+                                /** @ts-ignore */
+                                plugins={[ChartDataLabels]}
+                              />
+                            )}
+                          <div className="flex justify-center py-10 text-xl font-semibold">
+                            {candidate.candidateName}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    )
+                  )}
+                </div>
               </div>
             </div>
           );
