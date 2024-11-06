@@ -45,11 +45,11 @@ const Vote = () => {
 
             const voterData = {
               userData: {
-                election_id: data.data.data.election_id,
-                id: data.data.data.id,
-                subgroup: data.data.data.subgroup,
-                hasVoted: data.data.data.hasVoted,
-                name: data.data.data.name,
+                election_id: data.data.data.user.election_id,
+                id: data.data.data.user.id,
+                subgroup: data.data.data.user.subgroup,
+                hasVoted: data.data.data.user.hasVoted,
+                name: data.data.data.user.name,
               },
 
               loading: false,
