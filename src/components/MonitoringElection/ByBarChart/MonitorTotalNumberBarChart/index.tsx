@@ -47,10 +47,11 @@ const MonitorTotalNumberBarChart = ({ electionId }: { electionId: string }) => {
       }
       try {
         const { data } = await monitorBarChart(electionId);
-        const [{ totalVoters }, { totalAbstain }, ...filteredData] = data.data;
+        const [{ totalVoters }, { totalParticipant }, ...filteredData] =
+          data.data;
 
         console.log(totalVoters);
-        console.log(totalAbstain);
+        console.log(totalParticipant);
         console.log(filteredData);
 
         const totalVotes = filteredData.reduce(
@@ -65,11 +66,10 @@ const MonitorTotalNumberBarChart = ({ electionId }: { electionId: string }) => {
             {
               label: "No of Votes",
               data: {
-                "Total Votes": totalVotes + totalAbstain,
+                "Total Votes": totalParticipant,
               },
-              backgroundColor:
-                totalAbstain > 0 ? ["#015CE9", "black"] : "#015CE9", // Set to black if abstained > 0
-              borderColor: totalAbstain > 0 ? ["#015CE9", "black"] : "#015CE9",
+              backgroundColor: "#015CE9", // Set to black if abstained > 0
+              borderColor: "#015CE9",
               scaleOverride: true,
               scaleSteps: 9,
               scaleStartValue: 0,
