@@ -8,7 +8,6 @@ import { monitorSubgroup } from "@/utils/api";
 import { useCurrentUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
-import { ca, tr } from "date-fns/locale";
 import leftline from "@/public/assets/images/left-line.svg";
 import rightline from "@/public/assets/images/right-line.svg";
 
@@ -122,7 +121,7 @@ const MonitorSubGroupTotalNumbers = ({
     // Accumulate subgroup counts across all candidates
     const totalSubgroupCounts = candidates.reduce(
       (acc: any, candidate: any) => {
-        candidate.subGroups.forEach((subgroup: any) => {
+        candidate.subgroups.forEach((subgroup: any) => {
           acc[subgroup] = (acc[subgroup] || 0) + 1;
         });
         return acc;
