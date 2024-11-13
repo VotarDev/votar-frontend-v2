@@ -24,6 +24,7 @@ import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { importFromCsv } from "@/utils/api";
 import DeleteDialog from "./DeleteDialog";
+import { set } from "lodash";
 
 type ResponseData = {
   voters: VoterResponse[];
@@ -132,24 +133,29 @@ const ResponseTable = () => {
         const { data } = await getVoterResponse(USER_ID, bodyData);
         console.log(data);
         if (data.data) {
-          console.log(data.data.voter_response);
-          setVotarResponses(data.data.voter_response);
-          setIsFetchResponse(false);
-          const seen: Record<string, boolean> = {};
-          const updatedData = data.data.voter_response.map(
-            (item: VoterResponse) => {
-              const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+          const fetchedResponses = data.data.voter_response;
 
-              if (seen[key]) {
-                // This is a duplicate
-                return { ...item, isDuplicate: true } as VoterResponse;
-              } else {
-                seen[key] = true;
-                return { ...item, isDuplicate: false } as VoterResponse;
-              }
-            }
-          );
+          let exportedIds: string[] = [];
+
+          if (typeof window !== "undefined") {
+            exportedIds = JSON.parse(
+              localStorage.getItem("exportedIds") || "[]"
+            );
+          }
+
+          const updatedData = fetchedResponses.map((item: VoterResponse) => {
+            const existingItem = votarResponses.find(
+              (response) => response.id === item.id
+            );
+            return {
+              ...item,
+              isDuplicate: false,
+              isExported: exportedIds.includes(String(item.id)),
+            };
+          });
+          console.log(updatedData);
           setVotarResponses(updatedData);
+          setIsFetchResponse(false);
         }
       }
     } catch (error) {
@@ -332,12 +338,41 @@ const ResponseTable = () => {
       if (data) {
         setIsExporting(false);
         toast.success("Responses exported successfully");
-        setVotarResponses([]);
+
+        let exportedIds: string[] = [];
+
+        if (typeof window !== "undefined") {
+          exportedIds = JSON.parse(localStorage.getItem("exportedIds") || "[]");
+        }
+
+        const newExportedIds = [
+          ...exportedIds,
+          ...uniqueItems.map((item) => item.id),
+        ];
+
+        localStorage.setItem(
+          "exportedIds",
+          JSON.stringify(Array.from(new Set(newExportedIds)))
+        );
+
+        const updatedResponses = votarResponses.map((item) =>
+          uniqueItems.some((exported) => exported.id === item.id)
+            ? { ...item, isExported: true }
+            : item
+        );
+
+        setVotarResponses(updatedResponses);
         console.log("Exported Data:", data);
       }
-    } catch (e: any) {
-      console.error("Error exporting responses:", e);
-      toast.error("An error occurred while exporting responses");
+    } catch (error: any) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      toast.error(error.response.data.message || error.message);
+      console.log(error);
       setIsExporting(false);
     }
 
@@ -429,7 +464,7 @@ const ResponseTable = () => {
                       row.isDuplicate
                         ? "opacity-30 bg-red-600 pointer-events-none"
                         : ""
-                    }`}
+                    } ${row.isExported ? "opacity-40" : ""}`}
                   >
                     <StyledTableCell align="center">
                       <div className="flex items-center justify-center">

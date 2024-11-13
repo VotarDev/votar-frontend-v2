@@ -154,6 +154,7 @@ export type VoterResponse = {
   _id: string;
   isDuplicate?: boolean;
   subgroup?: string;
+  isExported?: boolean;
 };
 
 export type OptionTypes = {
