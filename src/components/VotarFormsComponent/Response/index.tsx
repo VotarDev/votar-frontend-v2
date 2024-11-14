@@ -139,14 +139,11 @@ const ResponseTable = () => {
 
           if (typeof window !== "undefined") {
             exportedIds = JSON.parse(
-              localStorage.getItem("exportedIds") || "[]"
+              localStorage.getItem(`exportedIds_${electionID}`) || "[]"
             );
           }
 
           const updatedData = fetchedResponses.map((item: VoterResponse) => {
-            const existingItem = votarResponses.find(
-              (response) => response.id === item.id
-            );
             return {
               ...item,
               isDuplicate: false,
@@ -311,7 +308,7 @@ const ResponseTable = () => {
       "subgroup",
       "phoneNumber",
       "email",
-    ]);
+    ]).filter((item) => !item.isExported);
 
     setIsExporting(true);
 
@@ -342,7 +339,9 @@ const ResponseTable = () => {
         let exportedIds: string[] = [];
 
         if (typeof window !== "undefined") {
-          exportedIds = JSON.parse(localStorage.getItem("exportedIds") || "[]");
+          exportedIds = JSON.parse(
+            localStorage.getItem(`exportedIds_${electionID}`) || "[]"
+          );
         }
 
         const newExportedIds = [
@@ -351,7 +350,7 @@ const ResponseTable = () => {
         ];
 
         localStorage.setItem(
-          "exportedIds",
+          `exportedIds_${electionID}`,
           JSON.stringify(Array.from(new Set(newExportedIds)))
         );
 
@@ -464,7 +463,9 @@ const ResponseTable = () => {
                       row.isDuplicate
                         ? "opacity-30 bg-red-600 pointer-events-none"
                         : ""
-                    } ${row.isExported ? "opacity-40" : ""}`}
+                    } ${
+                      row.isExported ? "opacity-40 pointer-events-none" : ""
+                    }`}
                   >
                     <StyledTableCell align="center">
                       <div className="flex items-center justify-center">
