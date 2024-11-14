@@ -190,7 +190,7 @@ const ProfileBody = () => {
               <div className="">
                 Unredeemed <br /> Referral
               </div>
-              <div className="text-[40px]">02</div>
+              <div className="text-[40px]">##</div>
             </div>
 
             <div className="z-20">
@@ -198,7 +198,7 @@ const ProfileBody = () => {
                 Redeemed
                 <br /> Referral
               </div>
-              <div className="text-[40px]">15</div>
+              <div className="text-[40px]">##</div>
             </div>
           </div>
         </div>

@@ -41,7 +41,7 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitortotn`}</span> */}
                 <span ref={totalNumberRef}>
-                  https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+                  https://www.votar.ng/monitoring-elections/
                   {electionId}/totalNumbers
                 </span>
               </div>
@@ -68,7 +68,7 @@ const MonitorAnElectionDetails = () => {
               electionName
             )}.votar.ng/monitorindn`}</span> */}
                 <span ref={individualNumberRef}>
-                  https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
+                  https://www.votar.ng/monitoring-elections/
                   {electionId}/individualNumbers
                 </span>
               </div>
