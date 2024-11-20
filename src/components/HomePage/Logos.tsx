@@ -17,7 +17,7 @@ const Logos = () => {
         animateOut="animate__fadeOut"
       >
         <div className="lg:px-[25px] lg:text-[24px] mb-4 text-[18px] px-4">
-          Join our list of trusted clients
+          <p>Join our list of trusted clients</p>
         </div>
         <div className="lg:flex justify-between items-center flex-wrap hidden">
           {logos.map((logo) => (
@@ -71,30 +71,56 @@ const Logos = () => {
         </div>
 
         <div>
-          <p className="lg:text-2xl text-center max-w-[759px] mx-auto mt-14 font-semibold text-[18px] ">
+          <h2 className="lg:text-2xl text-center max-w-[759px] mx-auto mt-14 font-semibold text-[18px] ">
             Votar is used by all Industries and professional association that
             are in need of a credible and reliable voting process
-          </p>
+          </h2>
         </div>
         <div className="flex flex-wrap md:flex-row flex-col text-center md:text-left justify-center gap-[62px] mt-[52px] lg:text-xl text-[#013D9B] text-base">
           <div>
-            <div className="pb-4">Professional Association</div>
-            <div className="pb-4">Industry Association</div>
-            <div className="pb-4">NGO’s, Society and Clubs</div>
-            <div>Fashion Shows and Events</div>
+            <div className="pb-4">
+              <p>Professional Association</p>
+            </div>
+            <div className="pb-4">
+              <p>Industry Association</p>
+            </div>
+            <div className="pb-4">
+              <p>NGO’s, Society and Clubs</p>
+            </div>
+            <div>
+              <p>Fashion Shows and Events</p>
+            </div>
           </div>
           <div>
-            <div className="pb-4">University Unions</div>
-            <div className="pb-4">University Association</div>
-            <div className="pb-4">Churches and religious groups</div>
-            <div>Award Shows</div>
+            <div className="pb-4">
+              <p>University Unions</p>
+            </div>
+            <div className="pb-4">
+              <p>University Association</p>
+            </div>
+            <div className="pb-4">
+              <p>Churches and religious groups</p>
+            </div>
+            <div>
+              <p>Award Shows</p>
+            </div>
           </div>
           <div>
-            <div className="pb-4">Political Parties</div>
-            <div className="pb-4">Government Election</div>
-            <div className="pb-4">Cooperatives and credit unions</div>
-            <div className="pb-4">Other companies and organization</div>
-            <div>Pageantry Events</div>
+            <div className="pb-4">
+              <p>Political Parties</p>
+            </div>
+            <div className="pb-4">
+              <p>Government Election</p>
+            </div>
+            <div className="pb-4">
+              <p>Cooperatives and credit unions</p>
+            </div>
+            <div className="pb-4">
+              <p>Other companies and organization</p>
+            </div>
+            <div>
+              <p>Pageantry Events</p>
+            </div>
           </div>
         </div>
       </ScrollAnimation>

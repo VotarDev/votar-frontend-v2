@@ -14,8 +14,10 @@ const Organizations = () => {
     <div className="mt-[5rem] organization lg:py-[5rem] py-[2rem] xl:px-10">
       <div className="max-w-[1300px] mx-auto px-4 lg:px-0">
         <div className="lg:text-[40px] text-[1.5rem] max-w-[40rem] relative font-semibold">
-          A few <span className="text-[#015CE9]">Global Organizations </span>
-          that trust Votar
+          <h1>
+            A few <span className="text-[#015CE9]">Global Organizations </span>
+            that trust Votar
+          </h1>
           <span className="absolute bottom-[1rem] right-[22rem] hidden lg:block">
             <img src={arrow.src} alt="arrow icon" />
           </span>

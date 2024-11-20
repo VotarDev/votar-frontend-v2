@@ -8,7 +8,7 @@ const Plan = () => {
   return (
     <div>
       <div className="lg:text-4xl text-2xl text-center font-bold mt-10 text-[#015CE9] px-4 lg:px-0 lg:pt-20">
-        Every Plan Includes
+        <h1>Every Plan Includes</h1>
       </div>
       <div className="flex flex-wrap justify-center text-center lg:gap-[172px] gap-10 mt-[52px]">
         <div>
@@ -22,13 +22,15 @@ const Plan = () => {
                 style={{ width: "40px", height: "auto" }}
               />
             </span>{" "}
-            Live
+            <p>Live</p>
           </div>
           <div className="lg:text-xl text-[18px] font-semibold text-[#060606] p-4">
-            Live Updates/
-            <br />
-            Transimission of
-            <br /> election results
+            <p>
+              Live Updates/
+              <br />
+              Transimission of
+              <br /> election results
+            </p>
           </div>
         </div>
         <div>
@@ -42,8 +44,10 @@ const Plan = () => {
             />
           </div>
           <div className="lg:text-xl text-[18px] font-semibold text-[#060606] p-4">
-            Analytics Tool for
-            <br /> Election Result
+            <p>
+              Analytics Tool for
+              <br /> Election Result
+            </p>
           </div>
         </div>
         <div>
@@ -57,10 +61,12 @@ const Plan = () => {
             />
           </div>
           <div className="lg:text-xl text-[18px] font-semibold text-[#060606] p-4">
-            Branded Ballots with
-            <br /> colors, Logs of
-            <br /> Information set by the
-            <br /> Organizers
+            <p>
+              Branded Ballots with
+              <br /> colors, Logs of
+              <br /> Information set by the
+              <br /> Organizers
+            </p>
           </div>
         </div>
       </div>

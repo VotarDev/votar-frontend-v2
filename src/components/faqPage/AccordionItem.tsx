@@ -15,14 +15,16 @@ const AccordionItem = ({ children, curOpen, onOpen, num, title }: any) => {
           !isOpen ? "accordion-item" : ""
         } `}
       >
-        <div className="lg:text-xl font-semibold ssm:text-[18px]">{title}</div>
+        <div className="lg:text-xl font-semibold ssm:text-[18px]">
+          <h2>{title}</h2>
+        </div>
         <div className="toggle-sign">
           <div className={`plus ${isOpen ? "checked" : ""}`}></div>
         </div>
       </div>
       <Collapse isOpened={isOpen}>
         <div className="leading-[1.6] ssm:py-[25px] py-[20px] px-[20px] ssm:px-[38px]">
-          {children}
+          <p>{children}</p>
         </div>
       </Collapse>
     </div>

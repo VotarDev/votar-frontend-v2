@@ -70,8 +70,10 @@ const Posts = () => {
     <div className="bg-[#f7fafd] pb-20">
       <div className="max-w-[1300px] mx-auto px-4 lg:px-0 xl:px-10">
         <div className="max-w-[40rem] mx-auto text-center lg:text-2xl text-xl lg:pt-20 pt-10 text-[#7c8e9b]">
-          Let&apos;s share contemporary information with you about Votar,
-          e-voting, and the Global Progressive Society
+          <h2>
+            Let&apos;s share contemporary information with you about Votar,
+            e-voting, and the Global Progressive Society
+          </h2>
         </div>
         <div className="max-w-[40rem] mx-auto pt-5 pb-10">
           <form onSubmit={handleSearchHandler}>
@@ -96,15 +98,15 @@ const Posts = () => {
             <h1 className="my-3 text-[38px]">Searched Posts</h1>
             <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-col-1 justify-center gap-10 items-stretch my-10">
               {searchedPosts.map((post, index) => {
-                var tagIndex = post.description.indexOf("<img"); // Find where the img tag starts
+                var tagIndex = post.description.indexOf("<img");
                 var srcIndex =
                   post.description.substring(tagIndex).indexOf("src=") +
-                  tagIndex; // Find where the src attribute starts
-                var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
+                  tagIndex;
+                var srcStart = srcIndex + 5;
                 var srcEnd =
-                  post.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
+                  post.description.substring(srcStart).indexOf('"') + srcStart;
                 var src = post.description.substring(srcStart, srcEnd);
-                console.log(src);
+
                 return (
                   <motion.div
                     key={post.title}
@@ -122,12 +124,13 @@ const Posts = () => {
                       />
                       <div className="absolute bg-[rgba(0,0,0,0.4)] w-full h-full top-0 bottom-0"></div>
                       <div className="absolute top-8 left-0 text-[#f6fafd] text-[18px] font-bold px-4">
-                        {post.title}
+                        <h3>{post.title}</h3>
                       </div>
                     </div>
                     <div className="text-[#7c8e9b] text-justify p-4">
-                      {`${ToText(post.description.substring(0, 360))}...`}
-                      {/* {post.description} */}
+                      <p>{`${ToText(
+                        post.description.substring(0, 360)
+                      )}...`}</p>
                     </div>
 
                     <div className="absolute bottom-0 px-4 py-4 text-sm transition duration-150 ease-in hover:text-[#015ce9] cursor-pointer ">
@@ -136,7 +139,7 @@ const Posts = () => {
                         target="_blank"
                         className="flex items-center gap-1"
                       >
-                        Read more
+                        <p>Read more</p>
                         <span>
                           <PiCaretRightBold className="text-[#015ce9]" />
                         </span>
@@ -151,12 +154,12 @@ const Posts = () => {
 
         <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-col-1 justify-center gap-10 items-stretch">
           {visiblePostData.map((post, index) => {
-            var tagIndex = post.description.indexOf("<img"); // Find where the img tag starts
+            var tagIndex = post.description.indexOf("<img");
             var srcIndex =
-              post.description.substring(tagIndex).indexOf("src=") + tagIndex; // Find where the src attribute starts
-            var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
+              post.description.substring(tagIndex).indexOf("src=") + tagIndex;
+            var srcStart = srcIndex + 5;
             var srcEnd =
-              post.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
+              post.description.substring(srcStart).indexOf('"') + srcStart;
             var src = post.description.substring(srcStart, srcEnd);
 
             return (
@@ -176,12 +179,11 @@ const Posts = () => {
                   />
                   <div className="absolute bg-[rgba(0,0,0,0.4)] w-full h-full top-0 bottom-0"></div>
                   <div className="absolute top-8 left-0 text-[#f6fafd] text-[18px] font-bold px-4">
-                    {post.title}
+                    <h3>{post.title}</h3>
                   </div>
                 </div>
                 <div className="text-[#7c8e9b] text-justify p-4">
-                  {`${ToText(post.description.substring(0, 360))}...`}
-                  {/* {post.description} */}
+                  <p>{`${ToText(post.description.substring(0, 360))}...`}</p>
                 </div>
 
                 <div className="absolute bottom-0 px-4 py-4 text-sm transition duration-150 ease-in hover:text-[#015ce9] cursor-pointer ">

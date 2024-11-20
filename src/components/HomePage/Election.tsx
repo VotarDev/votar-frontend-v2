@@ -28,7 +28,7 @@ const Election = () => {
         data-aos="fade-up"
         data-aos-easing="ease-in-out"
       >
-        Choose the Election that Suits you best
+        <h1>Choose the Election that Suits you best</h1>
       </div>
       <div
         className="grid sm:grid-cols-2 grid-cols-1 lg:grid-cols-3  lg:mt-[62px] mt-[30px] justify-items-center items-center lg:gap-10 gap-4"
@@ -39,12 +39,14 @@ const Election = () => {
         <div className="text-center">
           <div>
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              Free Votar
+              <h1>Free Votar</h1>
             </div>
             <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
-              Setup and participate in <br />
-              an online election or poll <br />
-              for free
+              <p>
+                Setup and participate in <br />
+                an online election or poll <br />
+                for free
+              </p>
             </div>
           </div>
           <div
@@ -71,13 +73,15 @@ const Election = () => {
         <div className="text-center">
           <div>
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              Votar Pro
+              <h1>Votar Pro</h1>
             </div>
             <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
-              Enjoy more privacy and security
-              <br /> features with Votar Pro from the
-              <br />
-              comfort of your couch or on site
+              <p>
+                Enjoy more privacy and security
+                <br /> features with Votar Pro from the
+                <br />
+                comfort of your couch or on site
+              </p>
             </div>
           </div>
           <div className="cursor-pointer lg:mt-5 mt-2">
@@ -88,12 +92,14 @@ const Election = () => {
         <div className="text-center">
           <div>
             <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              Votar Meetings
+              <h1>Votar Meetings</h1>
             </div>
             <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base max-w-[20rem] mx-auto">
-              Participate in motion votes, annual meeting confirmation,
-              executive positions, Board of directors vote, By-laws ammendment,
-              budget approval, contract reformation
+              <p>
+                Participate in motion votes, annual meeting confirmation,
+                executive positions, Board of directors vote, By-laws
+                ammendment, budget approval, contract reformation
+              </p>
             </div>
           </div>
           <div className="cursor-pointer lg:mt-5 mt-2">

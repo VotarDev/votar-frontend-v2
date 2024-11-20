@@ -225,7 +225,7 @@ export const dashboardCards = (authorId: any) => {
 
 export const deleteVoter = (data: { voter_id: string; email: string }) => {
   return httpService.delete(deleteVoterUrl, {
-    data: data, // Include the data in the request body
+    data: data,
   });
 };
 

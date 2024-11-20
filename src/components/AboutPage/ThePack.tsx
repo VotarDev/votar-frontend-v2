@@ -10,7 +10,10 @@ const ThePack = () => {
       <div className="lg:w-[500px] mx-auto text-center w-full">
         <div className="lg:text-[40px] font-bold text-[1.5rem]">
           <div className="relative max-w-[20rem] mx-auto lg:max-w-[40rem]">
-            <span className="text-[#015CE9]">What keeps</span> us going...
+            <p>
+              <span className="text-[#015CE9]">What keeps</span> us going...
+            </p>
+
             <span className="absolute lg:top-[-2rem] lg:left-[-4rem] top-[-2rem] left-[-1.5rem] hidden lg:block">
               <img src={line.src} alt="line" />
             </span>
@@ -24,9 +27,11 @@ const ThePack = () => {
           </div>
         </div>
         <div className="lg:text-[18px] mt-5 text-[0.875rem]">
-          Over time. we have created an air-tight system that assures
-          reliability and transparency, building a community of very satisfied
-          clients and helping us accomplish our objectives.
+          <p>
+            Over time. we have created an air-tight system that assures
+            reliability and transparency, building a community of very satisfied
+            clients and helping us accomplish our objectives.
+          </p>
         </div>
       </div>
       <div className="lg:mt-[5rem] mt-[2rem] flex justify-center gap-10 flex-wrap ">
@@ -38,16 +43,20 @@ const ThePack = () => {
           </div>
           <div className="  max-w-[30rem]">
             <div className="lg:text-[18px] text-base text-[#015CE9] mb-3 font-semibold">
-              Our Mission
+              <h3>Our Mission</h3>
             </div>
             <div className="lg:text-base text-[0.875rem]">
-              To build an e-Voting and choice visualization infrastructure that
-              <br />
-              will revolutionize society and foster unity through transparency,
-              <br />
-              trust, and accountability across all sectors from Africa to the
-              <br />
-              Global landscape.
+              <p>
+                To build an e-Voting and choice visualization infrastructure
+                that
+                <br />
+                will revolutionize society and foster unity through
+                transparency,
+                <br />
+                trust, and accountability across all sectors from Africa to the
+                <br />
+                Global landscape.
+              </p>
             </div>
           </div>
         </div>
@@ -60,11 +69,13 @@ const ThePack = () => {
           </div>
           <div className=" max-w-[30rem]">
             <div className="lg:text-[18px] text-base text-[#015CE9] mb-3 font-semibold">
-              Our Vision
+              <h3>Our Vision</h3>
             </div>
             <div className="lg:text-base text-[0.875rem]">
-              To help promote trust and confidence in society, <br />
-              reshaping the choice-making process one sector at a time.
+              <p>
+                To help promote trust and confidence in society, <br />
+                reshaping the choice-making process one sector at a time.
+              </p>
             </div>
           </div>
         </div>
@@ -77,12 +88,14 @@ const ThePack = () => {
           </div>
           <div className=" max-w-[30rem]">
             <div className="lg:text-[18px] text-base text-[#015CE9] mb-3 font-semibold">
-              Our Culture
+              <h3>Our Culture</h3>
             </div>
             <div className="lg:text-base text-[0.875rem]">
-              We believe in serving customers&apos; needs via our
-              <br /> intuitive platform, thus, creating an unparalleled
-              experience.
+              <p>
+                We believe in serving customers&apos; needs via our
+                <br /> intuitive platform, thus, creating an unparalleled
+                experience.
+              </p>
             </div>
           </div>
         </div>

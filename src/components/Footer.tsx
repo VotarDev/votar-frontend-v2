@@ -15,19 +15,21 @@ const Footer = () => {
   return (
     <div className="bg-footer-bg bg-cover w-full bg-no-repeat bg-[#00122F] text-white lg:px-[50px] px-4">
       <div className="flex flex-col lg:flex-row justify-between max-w-[1340px] mx-auto pt-[45px] lg:pb-[100px] pb-[60px]">
-        <div className=" ">
+        <div>
           <Image
             src={logo}
             alt="logo"
             width={351}
             height={351}
-            className="bject-contain mt-[-8.7rem] ml-[-7rem]"
+            className="object-contain mt-[-8.7rem] ml-[-7rem]"
           />
           <div className="mt-[-9rem] leading-[30px] mb-[9rem] lg:mb-0">
-            We provide you with the best options for your election,
-            <br />
-            all our features are carefully crafted
-            <br /> to give our users a seamless election journey.
+            <p>
+              We provide you with the best options for your election,
+              <br />
+              all our features are carefully crafted
+              <br /> to give our users a seamless election journey.
+            </p>
           </div>
         </div>
         <div className="lg:text-xl tex-base mt-[-7rem] lg:mt-0">
@@ -36,7 +38,7 @@ const Footer = () => {
               <BiRightArrowAlt />
             </span>
             <Link href="/about">
-              <div>About Us</div>
+              <p>About Us</p>
             </Link>
           </div>
           <div className="footer-link flex items-center lg:gap-[28.31px] gap-4 mb-6">
@@ -44,28 +46,30 @@ const Footer = () => {
               <BiRightArrowAlt />
             </span>
             <Link href="/product">
-              <div>Votar Plans</div>
+              <p>Votar Plans</p>
             </Link>
           </div>
           <div className="footer-link flex items-center lg:gap-[28.31px] gap-4">
             <span className="w-[38px] h-[38px] bg-white flex items-center justify-center text-black text-2xl rounded-[50%]">
               <BiRightArrowAlt />
             </span>
-            <div> Contact Us</div>
+            <p> Contact Us</p>
           </div>
         </div>
         <div className="lg:text-xl text-base my-7 lg:my-0">
           <div className="lg:mb-6 mb-4 font-bold lg:text-2xl text-xl">
-            Locations
+            <h2>Locations</h2>
           </div>
           <div className="mb-3 flex gap-3">
             <span className="text-3xl">
               <CiLocationOn />
             </span>
             <div>
-              No 20 Fair-view estate
-              <br />
-              Lagos Island, Lagos state.
+              <p>
+                No 20 Fair-view estate
+                <br />
+                Lagos Island, Lagos state.
+              </p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -73,14 +77,16 @@ const Footer = () => {
               <CiLocationOn />
             </span>
             <div>
-              No 1, Ooni crownland estate
-              <br />
-              Damico, Ile-Ife, Osun state.
+              <p>
+                No 1, Ooni crownland estate
+                <br />
+                Damico, Ile-Ife, Osun state.
+              </p>
             </div>
           </div>
         </div>
         <div className="flex lg:flex-col flex-row gap-4 lg:gap-0">
-          <Link href="">
+          <Link href="#">
             <div className="mb-4 text-4xl">
               <FaLinkedin />
             </div>
@@ -115,8 +121,12 @@ const Footer = () => {
           <span className="lg:pr-3 pr-1">&copy;</span>Konzi tech
         </div>
         <div className="flex items-center lg:gap-[67px] gap-8">
-          <div>Privacy Policy</div>
-          <div>Terms and Conditions</div>
+          <div>
+            <p>Privacy Policy</p>
+          </div>
+          <div>
+            <p>Terms and Conditions</p>
+          </div>
         </div>
       </div>
     </div>

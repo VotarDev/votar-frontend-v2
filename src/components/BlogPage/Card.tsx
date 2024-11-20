@@ -24,6 +24,7 @@ const Card = () => {
       }
     } catch (e: any) {
       console.log(e);
+      setIsLoading(false);
     }
   };
 
@@ -31,12 +32,12 @@ const Card = () => {
     <div className="lg:mb-20 mb-10">
       <div className="flex lg:gap-10 gap-5 lg:mt-[-6rem] text-[#f8f8f8] justify-center mt-5 lg:flex-row flex-col">
         {mediumPosts.slice(0, 3).map((images) => {
-          var tagIndex = images.description.indexOf("<img"); // Find where the img tag starts
+          var tagIndex = images.description.indexOf("<img");
           var srcIndex =
-            images.description.substring(tagIndex).indexOf("src=") + tagIndex; // Find where the src attribute starts
-          var srcStart = srcIndex + 5; // Find where the actual image URL starts; 5 for the length of 'src="'
+            images.description.substring(tagIndex).indexOf("src=") + tagIndex;
+          var srcStart = srcIndex + 5;
           var srcEnd =
-            images.description.substring(srcStart).indexOf('"') + srcStart; // Find where the URL ends
+            images.description.substring(srcStart).indexOf('"') + srcStart;
           var src = images.description.substring(srcStart, srcEnd);
 
           return (
@@ -51,14 +52,14 @@ const Card = () => {
               </div>
 
               <div className="absolute top-7 left-4 bg-[#015ce9] rounded-2xl py-2 px-4 text-xs">
-                NEW
+                <p>NEW</p>
               </div>
               <div className="absolute top-20 px-4 text-xl font-semibold">
-                {images.title}
+                <h3>{images.title}</h3>
               </div>
               <Link href={images.link}>
                 <div className="absolute bottom-5 px-4 text-xl transition duration-150 ease-in hover:text-[#015ce9] cursor-pointer flex items-center gap-1">
-                  Read more
+                  <p>Read more</p>
                   <span>
                     <PiCaretRightBold className="text-[#015ce9]" />
                   </span>

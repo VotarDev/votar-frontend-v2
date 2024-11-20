@@ -6,7 +6,9 @@ const OurTeam = () => {
     <div>
       <div className="lg:w-[500px] mx-auto text-center w-full mt-[3rem] lg:mt-0">
         <div className="lg:text-[40px] text-[1.5rem] text-center font-bold relative max-w-[20rem] mx-auto lg:max-w-[40rem]">
-          Our <span className="text-[#015CE9]">Team</span>
+          <h1>
+            Our <span className="text-[#015CE9]">Team</span>
+          </h1>
           <span className="absolute lg:top-[-2rem] lg:right-[5rem] top-[-1.5rem] right-[3.5rem]">
             <img
               src={line.src}
@@ -16,8 +18,10 @@ const OurTeam = () => {
           </span>
         </div>
         <div className="lg:text-[18px] mt-5 text-[0.875rem]">
-          Specially Skilled and committed individuals keen about ensuring a
-          sustainable future for Africa make up our Team.
+          <p>
+            Specially Skilled and committed individuals keen about ensuring a
+            sustainable future for Africa make up our Team.
+          </p>
         </div>
       </div>
       <div className="flex justify-center gap-10 mt-[4rem] text-center flex-wrap">
@@ -25,36 +29,44 @@ const OurTeam = () => {
           <img src="http://fpoimg.com/200x200" alt="" />
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
-              Anthony Okon
+              <h3>Anthony Okon</h3>
             </div>
-            <div className="text-sm">Co-founder & CEO</div>
+            <div className="text-sm">
+              <p>Co-founder & CEO</p>
+            </div>
           </div>
         </div>
         <div>
           <img src="http://fpoimg.com/200x200" alt="" />
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
-              Aso Orji
+              <h3>Aso Orji</h3>
             </div>
-            <div className="text-sm">Co-founder & CTO</div>
+            <div className="text-sm">
+              <p>Co-founder & CTO</p>
+            </div>
           </div>
         </div>
         <div>
           <img src="http://fpoimg.com/200x200" alt="" />
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
-              Tobi Faniran
+              <h3>Tobi Faniran</h3>
             </div>
-            <div className="text-sm">Engineering</div>
+            <div className="text-sm">
+              <p>Engineering</p>
+            </div>
           </div>
         </div>
         <div>
           <img src="http://fpoimg.com/200x200" alt="" />
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
-              Irene Okon
+              <h3>Irene Okon</h3>
             </div>
-            <div className="text-sm">Legal</div>
+            <div className="text-sm">
+              <p>Legal</p>
+            </div>
           </div>
         </div>
       </div>

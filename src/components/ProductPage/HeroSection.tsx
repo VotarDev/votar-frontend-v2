@@ -22,8 +22,10 @@ const HeroSection = () => {
         >
           <div className="flex justify-center lg:mt-12 mt-[7rem] gap-[22px]">
             <div className="lg:text-[40px] font-bold text-2xl leading-[1.4]">
-              Take Advantage of Our Services for Free or Pay for only What you
-              use if you want more
+              <h1>
+                Take Advantage of Our Services for Free or Pay for only What you
+                use if you want more
+              </h1>
             </div>
             <span className="self-end py-4 hidden lg:block">
               <Image
@@ -36,19 +38,26 @@ const HeroSection = () => {
             </span>
           </div>
           <div className="mt-[35px] text-[#015CE9] lg:text-xl text-base">
-            Conduct you election for free with free votar, enjoy wider scope of
-            opinions in the polls as all voter restrictions is removed, anyone
-            anywhere can participate.
+            <p>
+              Conduct you election for free with free votar, enjoy wider scope
+              of opinions in the polls as all voter restrictions is removed,
+              anyone anywhere can participate.
+            </p>
           </div>
           <div className="lg:text-xl text-base text-[#A2A2A2] mt-4">
-            We care about the younger ones, take advantage of the huge discount
-            for Student&apos;s with Campus Votar, enjoy all the security
-            features we offer for just NGN 30 per voter. Conducting an election
-            to take your organization/firm to the next level is no easy task,
+            <p>
+              We care about the younger ones, take advantage of the huge
+              discount for Student&apos;s with Campus Votar, enjoy all the
+              security features we offer for just NGN 30 per voter. Conducting
+              an election to take your organization/firm to the next level is no
+              easy task,
+            </p>
           </div>
           <div className="lg:text-xl text-base text-[#A2A2A2] mt-4">
-            Let&apos;s help you simplify this task with our technology for as
-            low as NGN 150 with ORG & Meeting Votar.
+            <p>
+              Let&apos;s help you simplify this task with our technology for as
+              low as NGN 150 with ORG & Meeting Votar.
+            </p>
           </div>
         </motion.div>
         <motion.div custom={1}>

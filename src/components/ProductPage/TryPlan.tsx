@@ -8,12 +8,14 @@ const TryPlan = () => {
     <div>
       <div className="lg:my-[160px] my-[100px] px-4 lg:px-0">
         <div className="text-center lg:text-[40px] text-2xl font-semibold">
-          Try our 100% free Plan
+          <h1>Try our 100% free Plan</h1>
         </div>
         <div className="flex flex-wrap justify-center text-center border-[3px] rounded-lg border-[#00122F] max-w-[800px] mx-auto items-center lg:gap-6 gap-1 mt-[36px]">
           <div className="my-6 text-[#060606]">
-            Get started with our free plan and make 10 lookups per month
-            absolutely free!
+            <p>
+              Get started with our free plan and make 10 lookups per month
+              absolutely free!
+            </p>
           </div>
           <div>
             <button className="outline-none p-2 bg-[#015CE9] text-[#F3F3F3] text-xl rounded mb-6 sm:mb-0">
@@ -22,7 +24,9 @@ const TryPlan = () => {
           </div>
         </div>
         <div className="text-center mt-[30px] ">
-          <div className="text-[28px] mb-3 lg-mb-0">Payment Methods</div>
+          <div className="text-[28px] mb-3 lg-mb-0">
+            <h1>Payment Methods</h1>
+          </div>
           <div className="flex justify-center gap-1 flex-wrap">
             <Image
               src={payment1.src}
@@ -40,7 +44,9 @@ const TryPlan = () => {
             />
           </div>
           <div className="mt-2">
-            We accept Visa, American Express, Mastercard, Paypal and Crypto
+            <p>
+              We accept Visa, American Express, Mastercard, Paypal and Crypto
+            </p>
           </div>
         </div>
       </div>

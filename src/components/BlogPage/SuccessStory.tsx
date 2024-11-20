@@ -5,7 +5,7 @@ const SuccessStory = () => {
   return (
     <div>
       <div className="max-w-[40rem] mx-auto text-center lg:text-3xl text-2xl lg:pt-20 pt-12 text-[#7c8e9b]">
-        Want to become the next success story?
+        <h2>Want to become the next success story?</h2>
       </div>
       <div className="flex justify-center items-center my-10 gap-10 flex-wrap">
         <div>
