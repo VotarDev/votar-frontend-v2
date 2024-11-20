@@ -1,12 +1,11 @@
 import { CircularProgress, TextField } from "@mui/material";
-import Link from "next/link";
-import React, { useState, useEffect, use } from "react";
+
+import React, { useState, useEffect } from "react";
 import logo from "../../public/assets/logos/logo_white-1.png";
 import illustration from "../../public/assets/illustrations/illustration-4.svg";
 import { useRouter } from "next/router";
 import { verifyForgotPasswordRequest } from "@/utils/api";
 import toast from "react-hot-toast";
-import { set } from "lodash";
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
@@ -55,24 +54,19 @@ const ResetPassword = () => {
         if (data) {
           router.push("/signin");
           toast.success("Password reset successful");
-          console.log(data.data);
           setIsLoading(false);
         }
       }
     } catch (error: any) {
-      console.log(error);
       const message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      console.log(error);
       toast.error(error.response.data.message || error.message);
       setIsLoading(false);
     }
-
-    console.log("Password is valid, submit form.");
   };
 
   useEffect(() => {
@@ -86,7 +80,6 @@ const ResetPassword = () => {
           if (data) {
             setUser(data.data);
             setIsFetchUser(false);
-            console.log(data.data);
           }
         }
       } catch (error: any) {
@@ -96,7 +89,6 @@ const ResetPassword = () => {
             error.response.data.message) ||
           error.message ||
           error.toString();
-        console.log(error);
         toast.error(error.response.data.message || error.message);
         setIsFetchUser(false);
       }
