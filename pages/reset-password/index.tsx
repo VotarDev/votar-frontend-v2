@@ -1,17 +1,20 @@
 import { CircularProgress, TextField } from "@mui/material";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect, use } from "react";
 import logo from "../../public/assets/logos/logo_white-1.png";
 import illustration from "../../public/assets/illustrations/illustration-4.svg";
 import { useRouter } from "next/router";
 import { verifyForgotPasswordRequest } from "@/utils/api";
 import toast from "react-hot-toast";
+import { set } from "lodash";
 
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetchUser, setIsFetchUser] = useState(false);
+  const [user, setUser] = useState("");
   const router = useRouter();
   const { t } = router.query;
 
@@ -72,6 +75,43 @@ const ResetPassword = () => {
     console.log("Password is valid, submit form.");
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      setIsFetchUser(true);
+      try {
+        if (t) {
+          const { data } = await verifyForgotPasswordRequest({
+            token: t as string,
+          });
+          if (data) {
+            setUser(data.data);
+            setIsFetchUser(false);
+            console.log(data.data);
+          }
+        }
+      } catch (error: any) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        console.log(error);
+        toast.error(error.response.data.message || error.message);
+        setIsFetchUser(false);
+      }
+    };
+    fetchUser();
+  }, [t]);
+
+  if (isFetchUser) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress size={20} style={{ color: "#2B77ED" }} />
+      </div>
+    );
+  }
+
   return (
     <div className="flex">
       <div className="hidden bg-auth-bg w-[40%] min-h-[100vh] bg-cover bg-left-bottom bg-no-repeat bg-[#2B77ED] lg:flex  flex-col justify-center py-10">
@@ -86,7 +126,7 @@ const ResetPassword = () => {
       </div>
       <div className="flex justify-center flex-col lg:my-0 my-8 lg:py-0 w-full mx-auto lg:max-w-[500px] px-4">
         <div>
-          <h1 className="text-2xl">Hello, Anthony!</h1>
+          <h1 className="text-2xl capitalize">Hello, {user || "*"}!</h1>
           <p className="pt-3">
             Please set up your new credentials in order to log in.
             <br />

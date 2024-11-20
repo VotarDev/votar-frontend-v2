@@ -93,7 +93,6 @@ const ResponseTable = () => {
       const key = `${item.name}_${item.phoneNumber}_${item.email}`;
 
       if (seen[key]) {
-        // This is a duplicate
         return { ...item, isDuplicate: true } as VoterResponse;
       } else {
         seen[key] = true;
@@ -192,15 +191,13 @@ const ResponseTable = () => {
             const binaryStr = e.target?.result;
             const workBook = XLSX.read(binaryStr, { type: "binary" });
 
-            // Get the first sheet
             const workSheetName = workBook.SheetNames[0];
             const workSheet = workBook.Sheets[workSheetName];
 
-            // Convert to JSON
             const csvData: any = XLSX.utils.sheet_to_json(workSheet, {
-              header: 1, // Read the first row as headers
-              raw: true, // Keep raw values without type conversion
-              defval: "", // Default value for empty cells
+              header: 1,
+              raw: true,
+              defval: "",
             });
 
             const newUserData = csvData
@@ -227,7 +224,7 @@ const ResponseTable = () => {
               .filter(
                 (newUser: any) =>
                   newUser.id &&
-                  newUser.name && // Ensure valid users only
+                  newUser.name &&
                   !votarResponses.some(
                     (existingUser) => existingUser.id === newUser.id
                   )
@@ -241,7 +238,6 @@ const ResponseTable = () => {
               const key = `${item.name}_${item.phoneNumber}_${item.email}`;
 
               if (seen[key]) {
-                // This is a duplicate
                 return { ...item, isDuplicate: true } as VoterResponse;
               } else {
                 seen[key] = true;
@@ -293,10 +289,10 @@ const ResponseTable = () => {
     return array.filter((item) => {
       const key = keys.map((k) => item[k]).join("_");
       if (seen.has(key)) {
-        return false; // This item is a duplicate
+        return false;
       } else {
         seen.add(key);
-        return true; // This item is unique
+        return true;
       }
     });
   };

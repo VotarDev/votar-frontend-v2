@@ -8,14 +8,14 @@ const Button = ({
   onMouseLeave,
 }: any) => {
   return (
-    <div
+    <button
       className={`${className} cursor-pointer text-center flex justify-center items-center lg:text-[17px] text-base `}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       {children}
-    </div>
+    </button>
   );
 };
 

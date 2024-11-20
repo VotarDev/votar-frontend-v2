@@ -78,10 +78,10 @@ const Nav = () => {
                   className={`opacity-0 invisible absolute transition ease-in-out delay-200 top-[43px]  px-4 py-5 rounded-lg bg-white text-[#015CE9] whitespace-nowrap mt-2 shadow-lg text-left`}
                 >
                   <Link href="/signin">
-                    <div className="mb-3">Sign In to Dashboard</div>
+                    <p className="mb-3">Sign In to Dashboard</p>
                   </Link>
                   <Link href="/vote">
-                    <div>Sign In to Vote</div>
+                    <p>Sign In to Vote</p>
                   </Link>
                 </div>
               </button>
@@ -112,7 +112,7 @@ const Nav = () => {
               className="bg-[#015CE9] text-white rounded-lg p-[10px] flex items-center gap-1"
               onClick={signinHandler}
             >
-              Sign In
+              <p>Sign In</p>
               <span>
                 <BsArrowDown className="font-bold" />
               </span>
@@ -177,7 +177,7 @@ const Nav = () => {
             <div>
               <Link href="/signin?create-account=signup">
                 <Button className="bg-[#015CE9] text-white rounded-lg p-[10px]">
-                  Create a Free account
+                  <p>Create a Free account</p>
                 </Button>
               </Link>
             </div>

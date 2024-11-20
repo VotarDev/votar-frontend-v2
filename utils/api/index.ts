@@ -271,7 +271,7 @@ export const forgotPasswordRequest = (data: { email: string }) => {
 
 export const verifyForgotPasswordRequest = (data: {
   token: string;
-  password: string;
+  password?: string;
 }) => {
   return httpService.put(verifyForgotPassword, data);
 };
