@@ -46,34 +46,40 @@ const MonitorAnElection = ({
           </div>
         ) : (
           <div className=" pt-5">
-            <div className="flex flex-col gap-5">
-              {elections.map((election, index) => (
-                <div key={index}>
-                  <div
-                    className="flex items-center gap-2"
-                    onClick={() =>
-                      handleElectionDetails(
-                        election.name_of_election,
-                        election.election_id
-                      )
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      name="checkbox"
-                      id={`checkbox${index}`}
-                      className="w-5 h-5 bg-white rounded-full align-middle border border-gray-600 appearance-none outline-none cursor-pointer checked:bg-blue-600 checked:border-white"
-                    />
-                    <label
-                      htmlFor={`checkbox${index}`}
-                      className="text-lg cursor-pointer"
+            {elections.length === 0 ? (
+              <div className=" text-lg font-medium text-gray-500">
+                No elections found
+              </div>
+            ) : (
+              <div className="flex flex-col gap-5">
+                {elections.map((election, index) => (
+                  <div key={index}>
+                    <div
+                      className="flex items-center gap-2"
+                      onClick={() =>
+                        handleElectionDetails(
+                          election.name_of_election,
+                          election.election_id
+                        )
+                      }
                     >
-                      {election.name_of_election}
-                    </label>
+                      <input
+                        type="checkbox"
+                        name="checkbox"
+                        id={`checkbox${index}`}
+                        className="w-5 h-5 bg-white rounded-full align-middle border border-gray-600 appearance-none outline-none cursor-pointer checked:bg-blue-600 checked:border-white"
+                      />
+                      <label
+                        htmlFor={`checkbox${index}`}
+                        className="text-lg cursor-pointer"
+                      >
+                        {election.name_of_election}
+                      </label>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

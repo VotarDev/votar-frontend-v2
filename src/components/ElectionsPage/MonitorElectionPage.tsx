@@ -68,8 +68,8 @@ const MonitorElectionPage = ({
               electionName
             )}.votar.ng/monitortotn`}</span> */}
               <span ref={totalNumberRef}>
-                https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-                {election?.election_id}
+                https://www.votar.ng/monitoring-elections/
+                {election?.election_id}/totalNumbers
               </span>
             </div>
             <div
@@ -95,8 +95,8 @@ const MonitorElectionPage = ({
               electionName
             )}.votar.ng/monitorindn`}</span> */}
               <span ref={individualNumberRef}>
-                https://votar-frontend-v2-6o9y.vercel.app/monitoring-elections/
-                {election?.election_id}
+                https://www.votar.ng/monitoring-elections/
+                {election?.election_id}/individualNumbers
               </span>
             </div>
             <div

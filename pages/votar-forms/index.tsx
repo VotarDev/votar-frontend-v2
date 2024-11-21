@@ -29,6 +29,7 @@ const VotarForms = () => {
         }
       } catch (error) {
         console.log(error);
+        setIsFetchElections(false);
       }
     };
     getElectionsData();

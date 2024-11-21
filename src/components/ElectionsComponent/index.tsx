@@ -9,6 +9,7 @@ import { MdDelete } from "react-icons/md";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
 import DeleteDialog from "./DeleteDialog";
+import { set } from "lodash";
 
 const ElectionsComponent = () => {
   const users = useCurrentUser();
@@ -32,10 +33,12 @@ const ElectionsComponent = () => {
       const { data } = await getElections(USER_ID);
       if (data) {
         setElections(data.data);
+
         setIsFetchElections(false);
       }
     } catch (error) {
       console.log(error);
+      setIsFetchElections(false);
     }
   };
   useEffect(() => {
@@ -55,36 +58,42 @@ const ElectionsComponent = () => {
             <CircularProgress size={30} style={{ color: "#015CE9" }} />
           </div>
         ) : (
-          <div className=" pt-5">
-            <div className="flex flex-col gap-5">
-              {elections.map((election, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div
-                    className="flex items-center gap-2 cursor-pointer hover:underline"
-                    onClick={() =>
-                      handleElectionDetails(
-                        election.name_of_election,
-                        election.election_id
-                      )
-                    }
-                  >
-                    <div className="text-lg font-semibold">
-                      {index + 1}. {election.name_of_election}
+          <div className="pt-5">
+            {elections.length === 0 ? (
+              <div className=" text-lg font-medium text-gray-500">
+                No elections found
+              </div>
+            ) : (
+              <div className="flex flex-col gap-5">
+                {elections.map((election, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div
+                      className="flex items-center gap-2 cursor-pointer hover:underline"
+                      onClick={() =>
+                        handleElectionDetails(
+                          election.name_of_election,
+                          election.election_id
+                        )
+                      }
+                    >
+                      <div className="text-lg font-semibold">
+                        {index + 1}. {election.name_of_election}
+                      </div>
+                    </div>
+                    <div>
+                      <DeleteDialog
+                        selectedAdmin={election.name_of_election}
+                        id={election.election_id}
+                        admins={elections}
+                        setAdmins={setElections}
+                        getUpdatedList={() => getElectionsData()}
+                        userId={USER_ID}
+                      />
                     </div>
                   </div>
-                  <div>
-                    <DeleteDialog
-                      selectedAdmin={election.name_of_election}
-                      id={election.election_id}
-                      admins={elections}
-                      setAdmins={setElections}
-                      getUpdatedList={() => getElectionsData()}
-                      userId={USER_ID}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

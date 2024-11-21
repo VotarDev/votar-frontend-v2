@@ -194,7 +194,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                     </div>
                   </StyledTableCell>
                   <StyledTableCell align="center">
-                    {index < 10 ? `0${index + 1}` : index + 1}
+                    {index < 9 ? `0${index + 1}` : index + 1}
                   </StyledTableCell>
                   <StyledTableCell align="center">{row.id}</StyledTableCell>
                   <StyledTableCell align="center">{row.name}</StyledTableCell>
