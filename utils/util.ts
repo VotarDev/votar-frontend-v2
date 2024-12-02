@@ -1,125 +1,126 @@
 import toast from "react-hot-toast";
 import { RefObject } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export const logos = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/man.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/oi.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/oau.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/afigist.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/nuasa.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/nice.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/nacss.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/napss.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/nesa.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/irsa.png",
   },
 ];
 
 export const logos2 = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Accounting.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/AFRIGIST.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/BCH.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Civil.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Computer.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Dentistry.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Economics.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/InterRel.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/MCB.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Medical.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/NLC.png",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/NMA.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/OONI.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/Political science.jpg",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/logos/Logo/URP.jpg",
   },
 ];
 
 export const blogImages = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/blog-1.jpeg",
     title: "AT WIT July Hackathon — Data Protection and Privacy",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/blog-2.png",
     title: "How To: Send Data and Receive Reports using Africa’s Talking APIs",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/blog-3.jpeg",
     title: "A Recap of Our Developers’ Mid-Year Networking Party",
   },
@@ -127,7 +128,7 @@ export const blogImages = [
 
 export const posts = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-1.jpeg",
     title: "Africa’s Talking WIT Hackathon — Empowering Women to Use APIs",
     description:
@@ -135,7 +136,7 @@ export const posts = [
   },
 
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-2.jpeg",
     title: "Africa’s Talking -Airtime API: Basic Usage Guide",
     description:
@@ -143,7 +144,7 @@ export const posts = [
   },
 
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-3.jpeg",
     title: "Africa’s Talking Women in Tech Anti-FGM Hackathon",
     description:
@@ -151,7 +152,7 @@ export const posts = [
   },
 
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-4.jpeg",
     title: "Ensibuuko: Banking The Last Mile With Mobile Technology",
     description:
@@ -159,7 +160,7 @@ export const posts = [
   },
 
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-5.jpeg",
     title:
       "AT Women in Tech | Building Tech Solutions for the African Girl Child.",
@@ -168,7 +169,7 @@ export const posts = [
   },
 
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     image: "/assets/images/post-6.jpeg",
     title: "AT Women in Tech | Anti-FGM Solutions Hackathon-turned-Discussion",
     description:
@@ -178,52 +179,52 @@ export const posts = [
 
 export const faqs = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "How do I upgrade/downgrade my worksplace plan?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Can i add other information be added to an invoice?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "When should I use a new table vs. a view?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "How can I transfer data from one base to another?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "How do I change my account email address?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "How does billing work?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Can I share an individual app?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Can I epxort a list of all collaborators?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Can invoices be sent to other collaborators?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "How do i contact support?",
     desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
   },
@@ -231,7 +232,7 @@ export const faqs = [
 
 export const elections = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "NATIONALL ASSOCIATION OF POLITICAL SCIENCE ANALYST",
     start: "Election Starts at Monday, 4th July, 2022 8:00 AM",
     end: "Election End by Monday, 4th July, 2022 5:00 PM",
@@ -239,7 +240,7 @@ export const elections = [
     border: "#001F4E",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "NATIONALL ASSOCIATION OF POLITICAL SCIENCE ANALYST",
     start: "Election Starts at Monday, 4th July, 2022 8:00 AM",
     end: "Election End by Monday, 4th July, 2022 5:00 PM",
@@ -247,7 +248,7 @@ export const elections = [
     border: "#49120F",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "NATIONALL ASSOCIATION OF POLITICAL SCIENCE ANALYST",
     start: "Election Starts at Monday, 4th July, 2022 8:00 AM",
     end: "Election End by Monday, 4th July, 2022 5:00 PM",
@@ -258,19 +259,19 @@ export const elections = [
 
 export const electionPlans = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "Free Votar",
     desc: "Create an Election for free Raise funds for your event, make her Election participants pay to get more voting power to vote their preffered Candidates and increase their chances of emerging as the winner OR Let your voters cast their votes for free without having to pay",
     btnText: "Lets go vote",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "Votar Pro",
     desc: "Create an Election that has all the Privacy and security features you would need to make your election free, fair and credible Here, a Voter can vote for the preffered candidate Once and once only.",
     btnText: "Lets go vote",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "Votar Meeting",
     desc: "Create an Election for free Raise funds for your event, make her Election participants pay to get more voting power to vote their preffered Candidates and increase their chances of emerging as the winner OR Let your voters cast their votes for free without having to pay",
     btnText: "Lets go vote",
@@ -279,14 +280,14 @@ export const electionPlans = [
 
 export const tabelContents = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     electionName: "National Association of Political science analyst",
     startDate: "4th July, 2022 8:00 AM",
     endDate: "4th July, 2022 5:00 PM",
     createdBy: "Damola Alausa",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     electionName: "National Association of Political science analyst",
     startDate: "4th July, 2022 8:00 AM",
     endDate: "4th July, 2022 5:00 PM",
@@ -296,7 +297,7 @@ export const tabelContents = [
 
 export const activitiesContent = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "National Association of Political Analysts",
     type: "Votar Pro",
     date: "21st October, 2023",
@@ -306,7 +307,7 @@ export const activitiesContent = [
     status: "pending",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "National Institution of Mechanical Engineers",
     type: "Votar Pro",
     date: "7th August, 2023",
@@ -316,7 +317,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Most Beautiful Girl in Nigeria",
     type: "Free Votar",
     date: "11th August, 2023",
@@ -326,7 +327,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Accounting Dinner Awards",
     type: "Free Votar",
     date: "3rd August, 2023",
@@ -336,7 +337,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Tomiade@gmail.com",
     type: "Votar Credit",
     date: "15th September, 2023",
@@ -346,7 +347,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Samueloj34@gmail.com",
     type: "Votar Credit",
     date: "18th July, 2023",
@@ -356,7 +357,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Solomon2@gmail.com",
     type: "Votar Credit",
     date: "28th June, 2023",
@@ -366,7 +367,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Nigerian Bar Association",
     type: "Votar Pro",
     date: "13th May, 2023",
@@ -376,7 +377,7 @@ export const activitiesContent = [
     status: "paid",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Nigerian Society of Engineers",
     type: "Votar Pro",
     date: "15th April, 2023",
@@ -389,7 +390,7 @@ export const activitiesContent = [
 
 export const electionsAdmin = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     election: "NIPS Election",
     time: "07:00 HRS - 17:30 HRS",
     date: "11th January 2023",
@@ -400,7 +401,7 @@ export const electionsAdmin = [
     publish: false,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     election: "NIMECHE Election",
     time: "14:00 HRS - 16:00 HRS",
     date: "2nd June 2023",
@@ -413,7 +414,7 @@ export const electionsAdmin = [
 ];
 export const freeVotarAccessRequest = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Most Beautiful Girl in Nigeria",
 
     date: "11th August, 2023",
@@ -423,7 +424,7 @@ export const freeVotarAccessRequest = [
     amount: 150000,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Fanlink Artistry",
 
     date: "21st October, 2023",
@@ -436,7 +437,7 @@ export const freeVotarAccessRequest = [
 
 export const votarProAcessRequest = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "National Association of Political Analysts Association",
     date: "11th August, 2023",
     time: "08:00 HRS -  18:20 HRS",
@@ -445,7 +446,7 @@ export const votarProAcessRequest = [
     amount: 150000,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "NNPC Board Election",
     date: "21st October, 2023",
     time: "06:00 HRS -  19:20 HRS",
@@ -457,13 +458,13 @@ export const votarProAcessRequest = [
 
 export const freeVotarPower = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Kamara24@gmail.com",
     user: "S. Ade",
     electionNo: 3,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Amanam35@gmail.com",
     user: "KLU",
     electionNo: 5,
@@ -472,13 +473,13 @@ export const freeVotarPower = [
 
 export const votarProPower = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Ayoade@gmail.com",
     user: "S. Ade",
     electionNo: 3,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Amanam35@gmail.com",
     user: "KLU",
     electionNo: 5,
@@ -486,13 +487,13 @@ export const votarProPower = [
 ];
 export const adminVotarCreditTable = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Kamara24@gmail.com",
     totalCredits: 10,
     defaultCredit: 20,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     email: "Amanam35@gmail.com",
     totalCredits: 100,
     defaultCredit: 50,
@@ -524,19 +525,19 @@ export const voteCandidate = [
 
 export const adminCards = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "free votar",
     votarCredits: "#",
     electionNumber: "#",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "votar pro",
     votarCredits: "967,000",
     electionNumber: 500,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     plan: "votar meeting",
     votarCredits: "#",
     electionNumber: "#",
@@ -545,17 +546,17 @@ export const adminCards = [
 
 export const votingPositions = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Chairman",
     numberOfVotes: 600,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Vice Chairman",
     numberOfVotes: 600,
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     title: "Secretary",
     numberOfVotes: 600,
   },
@@ -838,31 +839,31 @@ export const candidateVotes = [
 
 export const users = [
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Sam Johnson",
     email: "johnson@gmail.com",
     category: "election creator",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Esther Akindele",
     email: "esther20@gmail.com",
     category: "voter",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Silvia Bekky",
     email: "bekky@gmail.com",
     category: "voter",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "James Okon",
     email: "james100@gmail.com",
     category: "election creator, voter",
   },
   {
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "Edidiong Sunday",
     email: "eddy@gmail.com",
     category: "election creator",
