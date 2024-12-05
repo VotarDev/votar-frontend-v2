@@ -180,53 +180,65 @@ export const posts = [
 export const faqs = [
   {
     id: uuidv4(),
-    title: "How do I upgrade/downgrade my worksplace plan?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "What types of elections can Votar support?",
+    desc: "Votar can be used for various types of elections, including school faculty and departmental elections, staff elections, professional association elections, pageantry voting, TV show voting, and opinion polls, among others.",
   },
   {
     id: uuidv4(),
-    title: "Can i add other information be added to an invoice?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "Do I need a paid account to set up an election on Votar?",
+    desc: "No, creating an account on Votar is free. However, the cost of conducting an election depends on the type of election being set up. Some elections may be free, while others may incur charges.",
   },
   {
     id: uuidv4(),
-    title: "When should I use a new table vs. a view?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "What is the cost of setting up an election on Votar?",
+    desc: "The cost varies. For student and campus elections, pricing starts at a discounted rate of ₦40 per registered voter. For staff and professional elections using Votar Pro, costs begin at ₦1,000 or more, with discounts available based on terms and conditions.",
   },
   {
     id: uuidv4(),
-    title: "How can I transfer data from one base to another?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "How can I set up an election on Votar?",
+    desc: "To set up an election, the organizer must gather details such as: -Candidate information: Names, nicknames (if applicable), and positions. -Voter information: A .CSV file with unique IDs (assigned by the organizer), full names, subgroups (e.g., department, level, or category), phone numbers, and email addresses. Once these details are collated, the organizer can upload them to the platform to begin setting up the election.",
   },
   {
     id: uuidv4(),
-    title: "How do I change my account email address?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "How do I add voters to an election on the Votar Platform?",
+    desc: "To add voters to your election, ensure you have the .CSV Excel sheet containing the voters' information according to the format stated here: xxx. On the Voters page, click on the 'Add Voters to election' button or on the user dashboard, click on Votar forms among the icons in the left side of the page, scroll to the desired election, and click on the election you want to add voters to; on the next page displayed, click on the 'view responses' button at the top right, then click on the 'import voters' button at the top left to import the voters to the responses page. After the voters list has been checked and all errors have been cleaned from the table, click on the 'export to election' button to add the voters to the election.",
   },
   {
     id: uuidv4(),
-    title: "How does billing work?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title:
+      "How do I send the login credentials to the voters that were added to an election, so they can participate in an election on the Votar platform?",
+    desc: "On Votar Pro, after payment has been made for an election, the 'send' button will be active; check the checkbox for the voters you want to send their login credentials to and click the send button at the top of the page to send the login credentials to the selected voters.",
   },
   {
     id: uuidv4(),
-    title: "Can I share an individual app?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title:
+      "How do I add details of the candidates in an election on the Votar platform?",
+    desc: "If you are creating the election for the first time, on your dashboard, click the 'create an election' icon among the icons on the left side of the page, select the type of election you'd like to create; on the next page displayed, enter the details of the election, save this information with the 'save to proceed' button at the lower right of the page and you will be redirected to the ballot page where you can input all the details of the candidates for the election, click on the 'Save to proceed' button again to save what you've added.",
   },
   {
     id: uuidv4(),
-    title: "Can I epxort a list of all collaborators?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "How do I vote in an election on the Votar platform?",
+    desc: "When the election organizer have set up an election, they send out the login credentials to voters via email, text message or WhatsApp message. Among the links contained in the credentials sent, the voter can choose to go to their secret ballot page by clicking the link in the email according to the first login method stated, or they can choose to login with their election ID and Access code via the voters page according to the second method stated.",
   },
   {
     id: uuidv4(),
-    title: "Can invoices be sent to other collaborators?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "How do I monitor an election on the Votar platform?",
+    desc: "An election organizer can monitor an election by clicking on the 'monitor an election' icon among the icons at the left side on their dashboard, scroll and click on the election you want to monitor, on the next page to be displayed, links to monitor the election by total numbers only or by individual numbers will be displayed, copy the preferred link and paste it on a new tab to monitor the election.",
   },
   {
     id: uuidv4(),
-    title: "How do i contact support?",
-    desc: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae, sequi quam modi quae necessitatibus iusto at hic similique enim earum sit. Quo ea adipisci corporis totam provident et dolor cumque laborum beatae sint quasi culpa itaque illum, fugiat animi quod harum amet est, accusantium ut doloremque! Quis ullam omnis, praesentium natus doloremque ex asperiores id consequuntur magni est unde iure saepe, placeat ",
+    title: "How do I make payments for an election?",
+    desc: "After inputting all election and voter details, navigate to the 'Pay' page. Use the provided link to contact the Votar support team and complete the payment process.",
+  },
+  {
+    id: uuidv4(),
+    title: "Can Votar handle a large number of users voting simultaneously?",
+    desc: "Yes. Votar automatically scales its capacity to accommodate a large volume of voters accessing the platform simultaneously, ensuring a smooth experience.",
+  },
+  {
+    id: uuidv4(),
+    title: "Can other stakeholders audit an election set up on Votar?",
+    desc: "Yes. The platform ensures transparency, and all actions taken by the organizer, including voter and candidate information, are securely stored and available for review by stakeholders.",
   },
 ];
 

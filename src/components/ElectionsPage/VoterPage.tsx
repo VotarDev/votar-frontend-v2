@@ -27,6 +27,9 @@ const VoterPage = () => {
   const [election, setElection] = useState<any>([]);
   const [electionID, setElectionID] = useState("");
   const [error, setError] = useState("");
+  const url = "/elections/Best%20in%20Fooling/ELE5157D6EC";
+  const extractedText = url.split("/").slice(-2).join("/");
+  console.log(extractedText);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -122,6 +125,10 @@ const VoterPage = () => {
     }
   };
 
+  const handleRouting = () => {
+    router.push(`/votar-forms/${extractedText}`);
+  };
+
   return (
     <div className="my-[60px]">
       <div>
@@ -214,6 +221,14 @@ const VoterPage = () => {
             )}
           </div>
         </form>
+        <div className="flex justify-end mt-3">
+          <button
+            className="flex justify-center items-center bg-blue-700 text-zinc-100 w-56 h-12 rounded-lg"
+            onClick={handleRouting}
+          >
+            Add voters for your election
+          </button>
+        </div>
       </div>
       <VoterTable
         electionId={electionID}
