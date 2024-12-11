@@ -47,6 +47,7 @@ const deleteCandidateUrl = "user/delete-candidate";
 const voterVerificationLinkUrl = "/voter/verifyLink";
 const forgotPassword = "/user/forget-password";
 const verifyForgotPassword = "/user/verify-forgetPassword";
+const getImagesUrl = "/getImages";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -274,6 +275,10 @@ export const verifyForgotPasswordRequest = (data: {
   password?: string;
 }) => {
   return httpService.put(verifyForgotPassword, data);
+};
+
+export const getImages = (name: string, path: string) => {
+  return httpService.get(getImagesUrl, { params: { name, path } });
 };
 
 /** ADMIN */

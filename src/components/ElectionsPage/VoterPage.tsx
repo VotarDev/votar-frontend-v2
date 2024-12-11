@@ -27,9 +27,9 @@ const VoterPage = () => {
   const [election, setElection] = useState<any>([]);
   const [electionID, setElectionID] = useState("");
   const [error, setError] = useState("");
-  const url = "/elections/Best%20in%20Fooling/ELE5157D6EC";
+  const url = router.asPath;
+
   const extractedText = url.split("/").slice(-2).join("/");
-  console.log(extractedText);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id

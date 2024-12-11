@@ -10,7 +10,7 @@ import { MdOutlineCancel } from "react-icons/md";
 import { GiCheckMark } from "react-icons/gi";
 import { IoCopy } from "react-icons/io5";
 import toast from "react-hot-toast";
-import { updateProfile } from "@/utils/api";
+import { updateProfile, getImages } from "@/utils/api";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { useDispatch } from "react-redux";
 
@@ -97,6 +97,25 @@ const ProfileBody = () => {
       setError(e.message);
     }
   };
+
+  useEffect(() => {
+    const getImagesFile = async () => {
+      if (userInput.profilePicture && userInput.fullname) {
+        try {
+          const { data } = await getImages(
+            userInput.fullname,
+            userInput.profilePicture
+          );
+          if (data) {
+            console.log(data.data);
+          }
+        } catch (e: any) {
+          console.log(e);
+        }
+      }
+    };
+    getImagesFile();
+  }, []);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
