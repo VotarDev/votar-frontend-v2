@@ -161,10 +161,7 @@ const Create = () => {
     detailsFormData.append("end_date", endDateData);
 
     if (logo) detailsFormData.append("election-image", logo);
-    detailsFormData.append(
-      "max_number_candidate",
-      numberofCandidate.toString()
-    );
+    detailsFormData.append("maxNumberCandidates", numberofCandidate.toString());
 
     const ballotFormData = new FormData();
     ballotFormData.append("candidates", JSON.stringify(positions));
