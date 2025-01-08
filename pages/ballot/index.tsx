@@ -85,8 +85,6 @@ const Ballot = () => {
     "#406b83",
   ];
 
-  const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 1;
-
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -97,6 +95,8 @@ const Ballot = () => {
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
     setSelectedCandidates((prevState: any) => {
+      const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED =
+        election?.max_number_candidate || 1;
       const existingIndex = prevState.findIndex(
         (sc: any) => sc.position === position
       );
