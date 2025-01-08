@@ -110,7 +110,7 @@ export type Election = {
   election_notification: string;
   end_date: string;
   end_time: number;
-  max_number_candidate: number | undefined;
+  max_number_candidate: number;
   name_of_election: string;
   other_details: string;
   primary_color: string;
@@ -132,7 +132,7 @@ export type ElectionDetails = {
   election_notification: string;
   end_date: string;
   end_time: number;
-  max_number_candidate: number | undefined;
+  max_number_candidate: number;
   name_of_election: string;
   other_details: string;
   primary_color: string;
