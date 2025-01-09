@@ -36,6 +36,8 @@ const Details = ({
   description,
   setDescription,
   setLogo,
+  pricePerVote,
+  setPricePerVote,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
   const [backgroundUrl, setbackgroundUrl] = useState(null);
@@ -106,6 +108,15 @@ const Details = ({
   const decreaseCanditateNo = () => {
     if (candidateNo > 0) {
       setCandidateNo(candidateNo - 1);
+    }
+  };
+
+  const votingPriceIncrement = () => {
+    setPricePerVote(pricePerVote + 1);
+  };
+  const votingPriceDecrement = () => {
+    if (pricePerVote > 0) {
+      setPricePerVote(pricePerVote - 1);
     }
   };
 
@@ -368,6 +379,45 @@ const Details = ({
               </div>
             </div>
           </div>
+
+          {votarPlan === "Free Votar" && (
+            <div className="mt-[34px]">
+              <div className=" flex items-center gap-4">
+                <h2 className="lg:text-xl text-base font-bold">
+                  Monetize Election
+                </h2>
+                <input type="checkbox" name="monetize" />
+              </div>
+              <div className="mt-5 flex  items-center flex-wrap gap-4 lg:gap-10">
+                <div className="lg:text-xl text-base font-normal ">
+                  Price per Vote
+                </div>
+                <div className="flex items-center gap-4 text-2xl">
+                  <div
+                    className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
+                      pricePerVote == 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : "opacity-1 cursor-pointer"
+                    }`}
+                    onClick={votingPriceDecrement}
+                  >
+                    <AiOutlineMinus />
+                  </div>
+                  <input
+                    type="text"
+                    value={pricePerVote}
+                    className="w-10 outline-none text-center"
+                  />
+                  <div
+                    className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
+                    onClick={votingPriceIncrement}
+                  >
+                    <AiOutlinePlus />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
     </div>

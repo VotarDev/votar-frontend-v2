@@ -117,6 +117,8 @@ const Create = () => {
             description={description}
             setDescription={setDescription}
             setLogo={setLogo}
+            pricePerVote={pricePerVote}
+            setPricePerVote={setPricePerVote}
           />
         );
       case 2:
