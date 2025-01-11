@@ -37,6 +37,8 @@ const DetailsPage = ({
   const [secondaryColor, setSecondaryColor] = useState<string | null>(null);
   const [pricePerVote, setPricePerVote] = useState(0);
   const [monetizeElection, setMonetizeElection] = useState(false);
+  const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
+  const [isEditable, setIsEditable] = useState(true);
 
   useEffect(() => {
     const getElection = async () => {
@@ -57,6 +59,10 @@ const DetailsPage = ({
           if (data) {
             setElection(data.data);
             dispatch({ type: "SET_ELECTION", value: data.data });
+            const { start_date, start_time } = data.data;
+            const combinedDateTime = new Date(`${start_date}`);
+            setTargetDateTime(combinedDateTime);
+            console.log(start_date);
             setIsFetchElection(false);
           }
         }
@@ -66,6 +72,23 @@ const DetailsPage = ({
     };
     getElection();
   }, [electionId]);
+
+  useEffect(() => {
+    if (targetDateTime) {
+      const updateEditableState = () => {
+        const now = new Date();
+        setIsEditable(now < targetDateTime);
+      };
+
+      // Initial check
+      updateEditableState();
+
+      // set an interval to keep updating
+      const interval = setInterval(updateEditableState, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [targetDateTime]);
 
   const primaryColors: OptionTypes[] = [
     { value: "red", label: "Red" },
@@ -125,7 +148,7 @@ const DetailsPage = ({
     }
   };
 
-  console.log(monetizeElection);
+  console.log(election?.start_date, election?.start_time);
 
   return (
     <div>
@@ -135,6 +158,7 @@ const DetailsPage = ({
         </div>
       ) : (
         <div className="lg:my-[60px] my-10">
+          <p>Editable: {isEditable ? "Yes" : "No"}</p>
           <div className="text-2xl font-semibold">Election Details</div>
           <div className="mt-[30px]">
             <form className="font-semibold" encType="multipart/form-data">
@@ -400,28 +424,30 @@ const DetailsPage = ({
                   Max Number of Candidates to be Selected Per Position
                 </div>
                 <div className="flex items-center gap-4 text-2xl">
-                  <div
+                  <button
                     className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
                       election?.max_number_candidate == 0
                         ? "opacity-50 cursor-not-allowed"
                         : "opacity-1 cursor-pointer"
                     }`}
                     onClick={decreaseCanditateNo}
+                    disabled={!isEditable}
                   >
                     <AiOutlineMinus />
-                  </div>
+                  </button>
                   <input
                     type="text"
                     value={state.max_number_candidate}
                     className="w-10 outline-none text-center"
                     onChange={handleChange}
                   />
-                  <div
+                  <button
                     className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
                     onClick={handleCandidateNo}
+                    disabled={!isEditable}
                   >
                     <AiOutlinePlus />
-                  </div>
+                  </button>
                 </div>
               </div>
               {/* <div className="mt-5">
@@ -458,7 +484,7 @@ const DetailsPage = ({
                         Price per Vote
                       </div>
                       <div className="flex items-center gap-4 text-2xl">
-                        <div
+                        <button
                           className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
                             pricePerVote == 0
                               ? "opacity-50 cursor-not-allowed"
@@ -467,18 +493,18 @@ const DetailsPage = ({
                           onClick={votingPriceDecrement}
                         >
                           <AiOutlineMinus />
-                        </div>
+                        </button>
                         <input
                           type="text"
                           value={pricePerVote}
                           className="w-10 outline-none text-center"
                         />
-                        <div
+                        <button
                           className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
                           onClick={votingPriceIncrement}
                         >
                           <AiOutlinePlus />
-                        </div>
+                        </button>
                       </div>
                     </div>
                   )}
