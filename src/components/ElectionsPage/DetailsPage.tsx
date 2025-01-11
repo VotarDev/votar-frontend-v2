@@ -36,6 +36,7 @@ const DetailsPage = ({
   const [primaryColor, setPrimaryColor] = useState<string | null>(null);
   const [secondaryColor, setSecondaryColor] = useState<string | null>(null);
   const [pricePerVote, setPricePerVote] = useState(0);
+  const [monetizeElection, setMonetizeElection] = useState(false);
 
   useEffect(() => {
     const getElection = async () => {
@@ -124,7 +125,7 @@ const DetailsPage = ({
     }
   };
 
-  console.log(state);
+  console.log(monetizeElection);
 
   return (
     <div>
@@ -445,36 +446,42 @@ const DetailsPage = ({
                     <h2 className="lg:text-xl text-base font-bold">
                       Monetize Election
                     </h2>
-                    <input type="checkbox" name="monetize" />
+                    <input
+                      type="checkbox"
+                      name="monetize"
+                      onChange={() => setMonetizeElection(!monetizeElection)}
+                    />
                   </div>
-                  <div className="mt-5 flex  items-center flex-wrap gap-4 lg:gap-10">
-                    <div className="lg:text-xl text-base font-normal ">
-                      Price per Vote
-                    </div>
-                    <div className="flex items-center gap-4 text-2xl">
-                      <div
-                        className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
-                          pricePerVote == 0
-                            ? "opacity-50 cursor-not-allowed"
-                            : "opacity-1 cursor-pointer"
-                        }`}
-                        onClick={votingPriceDecrement}
-                      >
-                        <AiOutlineMinus />
+                  {!monetizeElection && (
+                    <div className="mt-5 flex  items-center flex-wrap gap-4 lg:gap-10">
+                      <div className="lg:text-xl text-base font-normal ">
+                        Price per Vote
                       </div>
-                      <input
-                        type="text"
-                        value={pricePerVote}
-                        className="w-10 outline-none text-center"
-                      />
-                      <div
-                        className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
-                        onClick={votingPriceIncrement}
-                      >
-                        <AiOutlinePlus />
+                      <div className="flex items-center gap-4 text-2xl">
+                        <div
+                          className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
+                            pricePerVote == 0
+                              ? "opacity-50 cursor-not-allowed"
+                              : "opacity-1 cursor-pointer"
+                          }`}
+                          onClick={votingPriceDecrement}
+                        >
+                          <AiOutlineMinus />
+                        </div>
+                        <input
+                          type="text"
+                          value={pricePerVote}
+                          className="w-10 outline-none text-center"
+                        />
+                        <div
+                          className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
+                          onClick={votingPriceIncrement}
+                        >
+                          <AiOutlinePlus />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
             </form>
