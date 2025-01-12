@@ -59,7 +59,7 @@ const DetailsPage = ({
           if (data) {
             setElection(data.data);
             dispatch({ type: "SET_ELECTION", value: data.data });
-            const { start_date, start_time } = data.data;
+            const { start_date } = data.data;
             const combinedDateTime = new Date(`${start_date}`);
             setTargetDateTime(combinedDateTime);
             console.log(start_date);
@@ -158,7 +158,6 @@ const DetailsPage = ({
         </div>
       ) : (
         <div className="lg:my-[60px] my-10">
-          <p>Editable: {isEditable ? "Yes" : "No"}</p>
           <div className="text-2xl font-semibold">Election Details</div>
           <div className="mt-[30px]">
             <form className="font-semibold" encType="multipart/form-data">

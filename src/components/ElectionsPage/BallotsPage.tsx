@@ -20,6 +20,7 @@ import { AnimatePresence } from "framer-motion";
 import { set } from "lodash";
 import DeletePositionDialog from "./DeletePositionModal";
 import DeleteCandidateDialog from "./DeleteCandidateModal";
+import { is } from "date-fns/locale";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -33,6 +34,8 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const [deleteCandidateModal, setDeleteCandidateModal] = useState(false);
   const [deletePositionModal, setDeletePositionModal] = useState(false);
   const [isDeletePositionLoading, setIsDeletePositionLoading] = useState(false);
+  const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
+  const [isEditable, setIsEditable] = useState(true);
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -66,6 +69,10 @@ const BallotsPage = ({ position, setPosition }: any) => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+            const { start_date } = data.data;
+            const combinedDateTime = new Date(`${start_date}`);
+            setTargetDateTime(combinedDateTime);
+            console.log(start_date);
             setIsLoading(false);
           }
         }
@@ -78,6 +85,23 @@ const BallotsPage = ({ position, setPosition }: any) => {
     };
     getElection();
   }, [electionID]);
+
+  useEffect(() => {
+    if (targetDateTime) {
+      const updateEditableState = () => {
+        const now = new Date();
+        setIsEditable(now < targetDateTime);
+      };
+
+      // Initial check
+      updateEditableState();
+
+      // set an interval to keep updating
+      const interval = setInterval(updateEditableState, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [targetDateTime]);
 
   const fetchData = async () => {
     try {
@@ -96,6 +120,8 @@ const BallotsPage = ({ position, setPosition }: any) => {
   useEffect(() => {
     fetchData();
   }, [electionID]);
+
+  console.log(isEditable);
 
   const handleInputChange = (
     e: any,
@@ -359,6 +385,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                     type="text"
                     placeholder="Position Name"
                     value={position.name_of_position}
+                    disabled={!isEditable}
                     className="lg:w-96 w-full h-12 rounded border border-stone-900 outline-none p-4"
                     onChange={(e) =>
                       handleInputChange(e, positionIndex, "name_of_position")
@@ -456,7 +483,10 @@ const BallotsPage = ({ position, setPosition }: any) => {
                       <div>
                         <label
                           htmlFor={`image-upload-${positionIndex}-${candidateIndex}`}
-                          className="relative cursor-pointer"
+                          className={`relative cursor-pointer ${
+                            !isEditable &&
+                            "filter grayscale pointer-events-none"
+                          }`}
                         >
                           {position.show_pictures && (
                             <>
@@ -464,7 +494,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                 <img
                                   src={placeholder.src}
                                   alt="Upload Image"
-                                  className="max-w-[256px] w-full h-64 rounded-lg object-cover"
+                                  className={`max-w-[256px] w-full h-64 rounded-lg object-cover `}
                                 />
                               ) : (
                                 <img
@@ -477,7 +507,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                         )
                                   }`}
                                   alt={`Image for ${candidate.candidate_name}`}
-                                  className="max-w-[256px] w-full h-64 rounded-lg object-cover"
+                                  className={`max-w-[256px] w-full h-64 rounded-lg object-cover `}
                                 />
                               )}
                             </>
@@ -503,6 +533,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                               type="text"
                               placeholder="Candidate Name"
                               value={candidate.candidate_name}
+                              disabled={!isEditable}
                               className="w-full h-12 rounded border border-stone-900 outline-none p-4"
                               onChange={(e) =>
                                 handleInputChange(
@@ -520,6 +551,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                               type="text"
                               placeholder="Candidate NickName"
                               value={candidate.candidate_nickname}
+                              disabled={!isEditable}
                               className="w-full h-12 rounded border border-stone-900 outline-none p-4"
                               onChange={(e) =>
                                 handleInputChange(
@@ -537,6 +569,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                           <textarea
                             placeholder="Candidate Details"
                             value={candidate.more_details}
+                            disabled={!isEditable}
                             className="w-full h-36 rounded border border-stone-900 outline-none p-4"
                             onChange={(e) =>
                               handleInputChange(
@@ -552,6 +585,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                               type="file"
                               id={`media-upload-${positionIndex}-${candidateIndex}`}
                               accept="image/*,video/*,.pdf,.doc,.docx"
+                              disabled={!isEditable}
                               onChange={(e) =>
                                 handleMediaUpload(
                                   e,
@@ -612,7 +646,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                   htmlFor={`media-upload-${positionIndex}-${candidateIndex}`}
                                   className="upload-label"
                                 >
-                                  <span className="flex items-center gap-2 cursor-pointer">
+                                  <span
+                                    className={`flex items-center gap-2 cursor-pointer `}
+                                  >
                                     Upload Media (Image, Video, PDF, DOC)
                                     <span>
                                       <FaCloudUploadAlt />
@@ -624,6 +660,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                 type="file"
                                 id={`media-upload-${positionIndex}-${candidateIndex}`}
                                 accept="image/*,video/*,.pdf,.doc,.docx"
+                                disabled={!isEditable}
                                 onChange={(e) =>
                                   handleMediaUpload(
                                     e,
@@ -638,7 +675,8 @@ const BallotsPage = ({ position, setPosition }: any) => {
                             {candidate.media && (
                               <div>
                                 <button
-                                  className="text-xl border-none outline-none bg-transparent"
+                                  className={`text-xl border-none outline-none bg-transparent `}
+                                  disabled={!isEditable}
                                   onClick={(e) =>
                                     handleDeleteMedia(
                                       e,
