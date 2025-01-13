@@ -15,10 +15,10 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.name "GitHub Action Bot"
-          git config --global user.email "bot@example.com"
+          git config --global user.name "Votar-production"
+          git config --global user.email "votarhq1@gmail.com"
 
       - name: Push Code to Target Repository
         run: |
-          git remote add target https://<other-account>:${{ secrets.PAT_TOKEN }}@github.com/<other-account>/<target-repo>.git
+          git remote add target https://Tony-kNz:${{ secrets.PAT_TOKEN }}@github.com/Tony-kNz/https://github.com/VotarDev/votar-frontend-v2.git
           git push -u target main
