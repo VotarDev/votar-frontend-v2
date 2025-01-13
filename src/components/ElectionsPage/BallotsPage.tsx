@@ -69,9 +69,15 @@ const BallotsPage = ({ position, setPosition }: any) => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+
             const { start_date } = data.data;
-            const combinedDateTime = new Date(`${start_date}`);
-            setTargetDateTime(combinedDateTime);
+            const combinedDateTime = new Date(start_date);
+
+            if (!isNaN(combinedDateTime.getTime())) {
+              setTargetDateTime(combinedDateTime);
+            } else {
+              console.error("Invalid start_date format:", start_date);
+            }
             console.log(start_date);
             setIsLoading(false);
           }

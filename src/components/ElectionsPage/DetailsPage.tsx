@@ -60,9 +60,14 @@ const DetailsPage = ({
             setElection(data.data);
             dispatch({ type: "SET_ELECTION", value: data.data });
             const { start_date } = data.data;
-            const combinedDateTime = new Date(`${start_date}`);
-            setTargetDateTime(combinedDateTime);
-            console.log(start_date);
+
+            const combinedDateTime = new Date(start_date);
+
+            if (!isNaN(combinedDateTime.getTime())) {
+              setTargetDateTime(combinedDateTime);
+            } else {
+              console.error("Invalid start_date format:", start_date);
+            }
             setIsFetchElection(false);
           }
         }
