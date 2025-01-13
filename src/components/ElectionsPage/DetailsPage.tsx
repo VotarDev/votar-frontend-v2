@@ -15,7 +15,7 @@ import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 
 const DetailsPage = ({
   electionId,
-  userId,
+
   state,
   dispatch,
 }: {
