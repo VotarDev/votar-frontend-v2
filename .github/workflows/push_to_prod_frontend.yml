@@ -20,5 +20,5 @@ jobs:
 
       - name: Push Code to Target Repository
         run: |
-          git remote add target https://Tony-kNz:${{ secrets.PAT_TOKEN }}@github.com/Tony-kNz/https://github.com/VotarDev/votar-frontend-v2.git
+          git remote add target https://Tony-kNz:${{ secrets.PAT_TOKEN }}@github.com/Tony-kNz/votar-frontend-v2.git
           git push -u target main
