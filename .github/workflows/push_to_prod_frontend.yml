@@ -1,0 +1,24 @@
+name: Push to Another Repo
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Action Bot"
+          git config --global user.email "bot@example.com"
+
+      - name: Push Code to Target Repository
+        run: |
+          git remote add target https://<other-account>:${{ secrets.PAT_TOKEN }}@github.com/<other-account>/<target-repo>.git
+          git push -u target main
