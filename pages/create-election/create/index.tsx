@@ -21,6 +21,7 @@ import { toast } from "react-hot-toast";
 import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
+import { useSelector } from "react-redux";
 
 const Create = () => {
   let step = 1;
@@ -55,6 +56,7 @@ const Create = () => {
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { votarPlan } = useSelector((state: any) => state.votarPlan);
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -161,6 +163,7 @@ const Create = () => {
 
     detailsFormData.append("start_date", startDateData);
     detailsFormData.append("end_date", endDateData);
+    detailsFormData.append("type", votarPlan);
 
     if (logo) detailsFormData.append("election-image", logo);
     detailsFormData.append("maxNumberCandidates", numberofCandidate.toString());

@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   const textRef = useRef<HTMLElement | null>(null);
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
+  console.log(electionDetails);
   const handleCopyClick = async () => {
     if (textRef.current) {
       const selectedText = textRef.current.innerText;
@@ -25,7 +26,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
     }
   };
 
-  if (votarPlan === "Free Votar")
+  if (electionDetails?.type === "Free Votar")
     return (
       <div>
         <div className="bg-ballot-header bg-cover w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4">
@@ -56,7 +57,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
       </div>
     );
 
-  if (votarPlan === "Votar Pro" || !votarPlan)
+  if (electionDetails?.type === "Votar Pro" || !votarPlan)
     return (
       <div className="mb-10">
         <div className=" relative lg:mt-0 max-w-[1600px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">

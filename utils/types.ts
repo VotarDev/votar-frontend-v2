@@ -1,3 +1,5 @@
+import { type } from "os";
+
 export interface PostItem {
   title: string;
   author: string;
@@ -118,6 +120,7 @@ export type Election = {
   start_date: string;
   start_time: number;
   updatedAt: string;
+  type: string;
   _id: string;
   __v: number;
 };
@@ -141,6 +144,7 @@ export type ElectionDetails = {
   start_time: number;
   status: string;
   updatedAt: string;
+  type: string;
   published: boolean;
   __v: number;
   _id: string;

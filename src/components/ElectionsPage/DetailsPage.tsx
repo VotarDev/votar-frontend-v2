@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect } from "react";
 import { getElectionById } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -6,16 +6,15 @@ import { DetailFormState, ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 
 import { useSelector } from "react-redux";
-import { updateElection } from "@/utils/api";
+
 import { FaCaretDown } from "react-icons/fa";
 import calendar from "../../../public/assets/icons/calendar-2.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import toast from "react-hot-toast";
-import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
+import { formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 
 const DetailsPage = ({
   electionId,
-
   state,
   dispatch,
 }: {
@@ -60,9 +59,7 @@ const DetailsPage = ({
             setElection(data.data);
             dispatch({ type: "SET_ELECTION", value: data.data });
             const { start_date } = data.data;
-
             const combinedDateTime = new Date(start_date);
-
             if (!isNaN(combinedDateTime.getTime())) {
               setTargetDateTime(combinedDateTime);
             } else {
@@ -72,6 +69,7 @@ const DetailsPage = ({
           }
         }
       } catch (e: any) {
+        setIsFetchElection(false);
         console.log(e);
       }
     };
@@ -118,6 +116,22 @@ const DetailsPage = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
+    if (name === "start_date" && state.end_date) {
+      // Validate that start_date is not greater than end_date
+      if (new Date(value) > new Date(state.end_date)) {
+        toast.error("Start date cannot be later than end date!");
+        return; // Prevent dispatch if validation fails
+      }
+    }
+
+    if (name === "end_date" && state.start_date) {
+      // Validate that end_date is not less than start_date
+      if (new Date(value) < new Date(state.start_date)) {
+        toast.error("End date cannot be earlier than start date!");
+        return;
+      }
+    }
     dispatch({
       type: "SET_FIELD",
       field: name as keyof DetailFormState,
@@ -222,7 +236,7 @@ const DetailsPage = ({
                   )}
                 </div>
               </div>
-              {votarPlan === "Free Votar" && (
+              {election?.type === "Free Votar" && (
                 <div
                   className={`${
                     election?.association_logo ? "lg:mt-0 mt-3" : "mt-[40px]"
@@ -266,7 +280,7 @@ const DetailsPage = ({
                 </div>
               )}
 
-              {votarPlan === "Votar Pro" && (
+              {election?.type === "Votar Pro" && (
                 <div className="mt-[44px] flex gap-10 lg:flex-row flex-col">
                   <div className="flex flex-col gap-1 w-full lg:w-auto">
                     <div>Choose Primary Background Color</div>
@@ -470,7 +484,7 @@ const DetailsPage = ({
                 </button>
               </div> */}
 
-              {votarPlan === "Free Votar" && (
+              {election?.type === "Free Votar" && (
                 <div className="mt-[34px]">
                   <div className=" flex items-center gap-4">
                     <h2 className="lg:text-xl text-base font-bold">
