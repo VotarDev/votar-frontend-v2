@@ -496,7 +496,7 @@ const DetailsPage = ({
                       onChange={() => setMonetizeElection(!monetizeElection)}
                     />
                   </div>
-                  {!monetizeElection && (
+                  {monetizeElection && (
                     <div className="mt-5 flex  items-center flex-wrap gap-4 lg:gap-10">
                       <div className="lg:text-xl text-base font-normal ">
                         Price per Vote
