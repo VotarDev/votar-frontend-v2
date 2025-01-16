@@ -296,7 +296,14 @@ const Details = ({
                   type="date"
                   name="date"
                   className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-                  onChange={(e) => setDate(e.target.value)}
+                  onChange={(e) => {
+                    const newStartDate = e.target.value;
+                    if (endDate && new Date(newStartDate) > new Date(endDate)) {
+                      toast.error("Start date cannot be greater than end date");
+                      return;
+                    }
+                    setDate(newStartDate);
+                  }}
                   value={startDate}
                 />
                 <span className="absolute right-4 bg-white top-1/2 -translate-y-1/2 pointer-events-none">
@@ -311,7 +318,17 @@ const Details = ({
                   type="date"
                   name="date"
                   className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={(e) => {
+                    const newEndDate = e.target.value;
+                    if (
+                      startDate &&
+                      new Date(newEndDate) < new Date(startDate)
+                    ) {
+                      toast.error("End date cannot be less than start date");
+                      return;
+                    }
+                    setEndDate(newEndDate);
+                  }}
                   value={endDate}
                 />
                 <span className="absolute right-4 bg-white top-1/2 -translate-y-1/2 pointer-events-none">
