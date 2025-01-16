@@ -18,7 +18,6 @@ const Details = ({
   setElection,
   election,
   setImage,
-  imageFile,
   backgroundImage,
   setBackground,
   primaryColor,
