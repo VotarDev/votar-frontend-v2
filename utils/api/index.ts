@@ -1,3 +1,4 @@
+import exp from "constants";
 import httpService from "../axios";
 
 const signupurl = "/auth/signup";
@@ -48,6 +49,9 @@ const voterVerificationLinkUrl = "/voter/verifyLink";
 const forgotPassword = "/user/forget-password";
 const verifyForgotPassword = "/user/verify-forgetPassword";
 const getImagesUrl = "/getImages";
+const addCardUrl = "/user/card_details/add";
+const getCardsUrl = "/user/card_details";
+const createWalletUrl = "/user/wallet";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -279,6 +283,18 @@ export const verifyForgotPasswordRequest = (data: {
 
 export const getImages = (name: string, path: string) => {
   return httpService.get(getImagesUrl, { params: { name, path } });
+};
+
+export const addCard = (data: any, id: string) => {
+  return httpService.post(addCardUrl + `/${id}`, data);
+};
+
+export const getCards = (id: string) => {
+  return httpService.get(getCardsUrl + `/${id}`);
+};
+
+export const createWallet = (id: string) => {
+  return httpService.post(createWalletUrl + `/${id}`);
 };
 
 /** ADMIN */

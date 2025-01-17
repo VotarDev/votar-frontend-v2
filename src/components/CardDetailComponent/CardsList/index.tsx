@@ -4,16 +4,24 @@ import { CardRowTypess } from "@/utils/types";
 import Modal from "../../Modal";
 import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/router";
-import { add } from "lodash";
+import { createWallet } from "@/utils/api";
+import { set } from "lodash";
+import { CircularProgress } from "@mui/material";
+import { toast } from "react-hot-toast";
 
 const CardsList = ({
   cards,
   setNewCard,
+  error,
+  userId,
 }: {
   cards: CardRowTypess[];
   setNewCard: any;
+  error: string | null;
+  userId: string;
 }) => {
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const closeModal = () => setShowModal(false);
   const router = useRouter();
@@ -39,7 +47,28 @@ const CardsList = ({
     closeModal();
   };
 
-  const addCardHandler = () => {
+  const addCardHandler = async () => {
+    if (error) {
+      setIsLoading(true);
+      try {
+        const { data } = await createWallet(userId);
+        if (data) {
+          setIsLoading(false);
+          toast.success("Wallet created successfully");
+          router.push(`/profile/billing/add`);
+          return data;
+        }
+      } catch (error: any) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString();
+        setIsLoading(false);
+        toast.error(message);
+      }
+    }
     router.push(`/profile/billing/add`);
   };
   return (
@@ -53,9 +82,14 @@ const CardsList = ({
             onClick={() => {
               addCardHandler();
             }}
-            className="border-none outline-none bg-blue-700 uppercase font-semibold p-2 w-40 h-12 flex justify-center items-center text-zinc-100 rounded-lg"
+            disabled={isLoading}
+            className="border-none outline-none bg-blue-700 uppercase font-semibold p-2 w-48 h-12 flex justify-center items-center text-zinc-100 rounded-lg gap-2"
           >
-            Add new card
+            {isLoading && (
+              <CircularProgress size={20} style={{ color: "white" }} />
+            )}
+
+            {error ? "Create Wallet" : "Add new card"}
           </button>
         </div>
       </div>

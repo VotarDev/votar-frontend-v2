@@ -1,8 +1,27 @@
 import React from "react";
 import { Checkbox, FormGroup, FormControlLabel } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateAddressDetails,
+  updateCardDetails,
+} from "@/redux/features/cardDetailsForm/cardDetailsSlice";
 
 const AddCardDetails = () => {
   const options = ["Default"];
+  const dispatch = useDispatch();
+  const { cardDetails } = useSelector((state: any) => state.cardForm);
+
+  const handleInputChange = (e: any) => {
+    const { name, value, type, checked } = e.target;
+
+    dispatch(
+      updateCardDetails({
+        [name]: type === "checkbox" ? checked : value,
+      })
+    );
+  };
+
+  console.log(cardDetails);
   return (
     <div>
       <div className="max-w-[1000px]">
@@ -28,7 +47,10 @@ const AddCardDetails = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="nameOnCard"
                 className="border w-full px-4 py-1 outline-none"
+                onChange={handleInputChange}
+                value={cardDetails.nameOnCard}
               />
             </div>
           </div>
@@ -39,7 +61,10 @@ const AddCardDetails = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="cardNumber"
                 className="border w-full px-4 py-1 outline-none"
+                onChange={handleInputChange}
+                value={cardDetails.cardNumber}
               />
             </div>
           </div>
@@ -50,7 +75,10 @@ const AddCardDetails = () => {
             <div className="flex-1 ">
               <input
                 type="text"
+                name="cardName"
                 className="border w-full px-4 py-1 outline-none"
+                onChange={handleInputChange}
+                value={cardDetails.cardName}
               />
             </div>
           </div>
@@ -69,6 +97,9 @@ const AddCardDetails = () => {
                         margin: 0,
                         color: "#6a6a6a",
                       }}
+                      name="defaultForApps"
+                      checked={cardDetails.defaultForApps}
+                      onChange={handleInputChange}
                     />
                   }
                   label="Default for Apps Marketplace payments"

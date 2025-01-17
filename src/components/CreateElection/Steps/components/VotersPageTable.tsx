@@ -15,7 +15,6 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import DeleteDialog from "./DeleteDialog";
-import { el } from "date-fns/locale";
 
 interface VotersPageTableProps {
   electionId?: string;
