@@ -1,14 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Checkbox, FormGroup, FormControlLabel } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   updateAddressDetails,
   updateCardDetails,
 } from "@/redux/features/cardDetailsForm/cardDetailsSlice";
+import Select from "react-select";
+
+type CardType = {
+  value: string;
+  label: string;
+};
 
 const AddCardDetails = () => {
   const options = ["Default"];
+  const cardOptions = [
+    { value: "MasterCard", label: "MasterCard" },
+    { value: "Visa", label: "Visa" },
+    { value: "Verve", label: "Verve" },
+  ];
   const dispatch = useDispatch();
+  const [selectedCardType, setSelectedCardType] = useState<CardType | null>(
+    null
+  );
   const { cardDetails } = useSelector((state: any) => state.cardForm);
 
   const handleInputChange = (e: any) => {
@@ -19,6 +33,11 @@ const AddCardDetails = () => {
         [name]: type === "checkbox" ? checked : value,
       })
     );
+  };
+
+  const handleCardTypeChange = (selectedOption: CardType | null) => {
+    setSelectedCardType(selectedOption);
+    dispatch(updateCardDetails({ cardType: selectedOption?.value }));
   };
 
   console.log(cardDetails);
@@ -83,6 +102,61 @@ const AddCardDetails = () => {
             </div>
           </div>
         </div>
+
+        <div>
+          <div className="flex justify-between items-center">
+            <label className="flex-1">Expires on</label>
+            <div className="flex-1">
+              <input
+                type="text"
+                name="expireDate"
+                className="border w-full px-4 py-1 outline-none"
+                onChange={handleInputChange}
+                value={cardDetails.expireDate}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center">
+            <label className="flex-1">CVV</label>
+            <div className="flex-1">
+              <input
+                type="text"
+                name="cvv"
+                className="border w-full px-4 py-1 outline-none"
+                onChange={handleInputChange}
+                value={cardDetails.cvv}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between">
+          <label className="flex-1">Card Type</label>
+          <div className="flex-1">
+            <Select
+              value={selectedCardType}
+              onChange={handleCardTypeChange}
+              options={cardOptions}
+              styles={{
+                container: (base) => ({
+                  ...base,
+                  flex: 1,
+
+                  width: "max-content",
+                  minWidth: "100%",
+                  margin: "0",
+                  padding: "0",
+                }),
+              }}
+              placeholder="Select your card type"
+              className="w-full px-4 py-1 outline-none"
+            />
+          </div>
+        </div>
+
         <div>
           <div className="flex justify-between">
             <label className="flex-1">Use as</label>

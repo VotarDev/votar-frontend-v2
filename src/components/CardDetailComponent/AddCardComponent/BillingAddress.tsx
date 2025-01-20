@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Select from "react-select";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateAddressDetails,
+  updateCardDetails,
+} from "@/redux/features/cardDetailsForm/cardDetailsSlice";
 
 type Country = {
   value: string;
@@ -9,6 +14,8 @@ type Country = {
 const BillingAddress = () => {
   const [countries, setCountries] = useState<Country[]>([]);
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const dispatch = useDispatch();
+  const { addressDetails } = useSelector((state: any) => state.cardForm);
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -29,6 +36,12 @@ const BillingAddress = () => {
   const handleCountryChange = (selectedOption: Country | null) => {
     setSelectedCountry(selectedOption);
   };
+
+  const handleInputChange = (e: any) => {
+    const { name, value } = e.target;
+    dispatch(updateAddressDetails({ [name]: value }));
+  };
+
   return (
     <div>
       <div className="max-w-[1000px]">
@@ -40,6 +53,9 @@ const BillingAddress = () => {
               <div className="flex-1">
                 <input
                   type="text"
+                  name="firstName"
+                  value={addressDetails.firstName}
+                  onChange={handleInputChange}
                   className="border w-full px-4 py-1 outline-none"
                 />
               </div>
@@ -50,6 +66,9 @@ const BillingAddress = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="lastName"
+                value={addressDetails.lastName}
+                onChange={handleInputChange}
                 className="border w-full px-4 py-1 outline-none"
               />
             </div>
@@ -60,13 +79,19 @@ const BillingAddress = () => {
               <div>
                 <input
                   type="text"
+                  name="addressLine1"
+                  value={addressDetails.addressLine1}
+                  onChange={handleInputChange}
                   className="border w-full px-4 py-1 outline-none"
                 />
               </div>
               <div className="relative">
                 <input
                   type="text"
+                  name="addressLine2"
                   className="border w-full px-4 py-1 outline-none"
+                  value={addressDetails.addressLine2}
+                  onChange={handleInputChange}
                   placeholder="Address Line 2"
                 />
                 <span className="absolute -right-24 top-1/2 -translate-y-1/2 text-sm">
@@ -80,6 +105,9 @@ const BillingAddress = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="city"
+                value={addressDetails.city}
+                onChange={handleInputChange}
                 className="border w-full px-4 py-1 outline-none"
               />
             </div>
@@ -89,6 +117,9 @@ const BillingAddress = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="state"
+                value={addressDetails.state}
+                onChange={handleInputChange}
                 className="border w-full px-4 py-1 outline-none"
               />
             </div>
@@ -98,6 +129,9 @@ const BillingAddress = () => {
             <div className="flex-1">
               <input
                 type="text"
+                name="zip"
+                value={addressDetails.zip}
+                onChange={handleInputChange}
                 className="border w-full px-4 py-1 outline-none"
               />
             </div>

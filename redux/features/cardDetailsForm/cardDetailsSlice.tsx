@@ -5,9 +5,12 @@ const initialState = {
     nameOnCard: "",
     cardNumber: "",
     cardName: "",
+    expireDate: "",
+    cvv: "",
     defaultForApps: false,
     defaultForGeneral: false,
     paymentOption: "",
+    cardType: "",
   },
   addressDetails: {
     firstName: "",
@@ -26,7 +29,6 @@ const cardFormSlice = createSlice({
   initialState,
   reducers: {
     updateCardDetails(state, action) {
-      console.log("Updating Card Details:", action.payload);
       state.cardDetails = { ...state.cardDetails, ...action.payload };
     },
     updateAddressDetails(state, action) {

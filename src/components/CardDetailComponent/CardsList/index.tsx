@@ -14,11 +14,15 @@ const CardsList = ({
   setNewCard,
   error,
   userId,
+  debitCards,
+  loadCard,
 }: {
   cards: CardRowTypess[];
   setNewCard: any;
   error: string | null;
   userId: string;
+  debitCards: any;
+  loadCard: boolean;
 }) => {
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -75,7 +79,7 @@ const CardsList = ({
     <div>
       <div className="flex justify-between pb-3 items-center">
         <div className="text-xl">
-          You have {cards.length} cards in your account.
+          You have {debitCards?.card_stored?.length} cards in your account.
         </div>
         <div>
           <button
@@ -95,7 +99,13 @@ const CardsList = ({
       </div>
       <hr></hr>
       <div>
-        <CardTable cards={cards} />
+        {loadCard ? (
+          <div className="text-center mt-5">
+            <CircularProgress size={20} style={{ color: "#015CE9" }} />
+          </div>
+        ) : (
+          <CardTable cards={cards} debitCards={debitCards} />
+        )}
       </div>
 
       <AnimatePresence mode="wait">

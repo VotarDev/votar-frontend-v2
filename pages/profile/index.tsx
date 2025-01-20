@@ -10,12 +10,15 @@ import { getCards } from "@/utils/api";
 import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
 import { useCurrentUser, useUser } from "@/utils/hooks";
+import eventEmitter from "@/utils/eventsEmitter";
+import { set } from "lodash";
 
 const Profile = () => {
   const [debitCards, setDebitCards] = useState([]);
   const [error, setError] = useState(null);
   const users = useCurrentUser();
   const user = useUser();
+  const [loadCard, setLoadCard] = useState(false);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -41,10 +44,12 @@ const Profile = () => {
       if (token) {
         setAuthToken(token);
       }
+      setLoadCard(true);
       try {
         const response = await getCards(USER_ID);
-        console.log(response.data);
-        setDebitCards(response.data);
+        console.log(response.data.data);
+        setDebitCards(response.data.data);
+        setLoadCard(false);
       } catch (error: any) {
         const message =
           (error.response &&
@@ -54,12 +59,24 @@ const Profile = () => {
           error.toString();
 
         setError(message);
+        setLoadCard(false);
 
         console.log(message);
       }
     };
 
     fetchCards();
+
+    const handleCardAdded = () => {
+      console.log("Card added event received. Fetching updated cards...");
+      fetchCards();
+    };
+
+    eventEmitter.on("cardAdded", handleCardAdded);
+
+    return () => {
+      eventEmitter.off("cardAdded", handleCardAdded);
+    };
   }, []);
   return (
     <ProtectedRoutes>
@@ -72,8 +89,10 @@ const Profile = () => {
           <CardsList
             cards={cards}
             setNewCard={setCards}
+            debitCards={debitCards}
             error={error}
             userId={USER_ID}
+            loadCard={loadCard}
           />
         </div>
       </DashboardLayout>
