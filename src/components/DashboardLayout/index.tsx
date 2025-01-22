@@ -81,11 +81,11 @@ const DashboardLayout = ({ children }: any) => {
     <>
       {isClient && (
         <div className="overflow-auto">
-          <div className="flex">
-            <div className="relative lg:block hidden">
-              <SideBar opener={opener} />
+          <div className="flex ">
+            <div className="relative lg:block hidden ">
+              <SideBar opener={opener} setOpener={setOpener} />
               <div
-                className="absolute bg-blue-700  top-14 -right-5 w-10 h-10 lg:flex items-center justify-center text-zinc-100 shadow rounded-full hidden z-[999] cursor-pointer"
+                className="absolute bg-blue-700  top-14 -right-5 w-10 h-10 lg:flex items-center justify-center text-zinc-100 shadow rounded-full hidden  cursor-pointer z-10"
                 onClick={() => setOpener(!opener)}
               >
                 <span>{opener ? <BsArrowLeft /> : <BsArrowRight />}</span>

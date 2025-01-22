@@ -95,15 +95,18 @@ const CardTable = ({ cards, debitCards }: any) => {
                 })}
               </TableRow>
             </TableHead>
-            <TableBody>
-              {debitCards?.card_stored &&
-                debitCards?.card_stored.map((row: any, index: number) => (
-                  <TableRow key={index}>
-                    <StyledTableCell align="center" className="capitalize">
-                      {row.bank_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      {/* <span
+            {debitCards?.card_stored?.length === 0 ? (
+              <div className="text-center mt-5">No card found</div>
+            ) : (
+              <TableBody>
+                {debitCards?.card_stored &&
+                  debitCards?.card_stored.map((row: any, index: number) => (
+                    <TableRow key={index}>
+                      <StyledTableCell align="center" className="capitalize">
+                        {row.bank_name}
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {/* <span
                         className={`p-2 rounded-lg ${
                           row.status === "Active"
                             ? "bg-green-400"
@@ -112,44 +115,48 @@ const CardTable = ({ cards, debitCards }: any) => {
                       >
                         {row.status}
                       </span> */}
-                    </StyledTableCell>
-                    <StyledTableCell align="center" className="capitalize">
-                      {row.billing_name}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <div className="flex items-center gap-2 justify-center">
-                        {row.pseudo_card_number?.startsWith("4") ? (
-                          <img
-                            src={visacard.src}
-                            alt="Visa Card"
-                            className="w-10 h-10 object-contain"
-                          />
-                        ) : (
-                          <img
-                            src={mastercard.src}
-                            alt="Master Card"
-                            className="w-10 h-10 object-contain"
-                          />
-                        )}
-                        <span>****</span>
-                        {row.pseudo_card_number?.slice(-4)}
-                      </div>
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      {" "}
-                      {row.expire_date}
-                    </StyledTableCell>
-                    <StyledTableCell align="center" className="cursor-pointer">
-                      <button
-                        onClick={() => editCardHandler(index + 1)}
-                        className="border-none outline-none w-40 h-12 flex items-center justify-center bg-blue-700 rounded-lg text-white"
+                      </StyledTableCell>
+                      <StyledTableCell align="center" className="capitalize">
+                        {row.billing_name}
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        <div className="flex items-center gap-2 justify-center">
+                          {row.pseudo_card_number?.startsWith("4") ? (
+                            <img
+                              src={visacard.src}
+                              alt="Visa Card"
+                              className="w-10 h-10 object-contain"
+                            />
+                          ) : (
+                            <img
+                              src={mastercard.src}
+                              alt="Master Card"
+                              className="w-10 h-10 object-contain"
+                            />
+                          )}
+                          <span>****</span>
+                          {row.pseudo_card_number?.slice(-4)}
+                        </div>
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {" "}
+                        {row.expire_date}
+                      </StyledTableCell>
+                      <StyledTableCell
+                        align="center"
+                        className="cursor-pointer"
                       >
-                        Edit
-                      </button>
-                    </StyledTableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
+                        <button
+                          onClick={() => editCardHandler(index + 1)}
+                          className="border-none outline-none w-40 h-12 flex items-center justify-center bg-blue-700 rounded-lg text-white"
+                        >
+                          Edit
+                        </button>
+                      </StyledTableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            )}
           </Table>
         </TableContainer>
       </div>

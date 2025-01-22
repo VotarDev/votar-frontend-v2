@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -13,20 +13,43 @@ import { BsPersonFill, BsFillBoxFill } from "react-icons/bs";
 import { HiMiniUserGroup } from "react-icons/hi2";
 import { LuLineChart } from "react-icons/lu";
 import { PiFiles } from "react-icons/pi";
-import { useUser } from "@/utils/hooks";
+import { useCurrentUser, useUser } from "@/utils/hooks";
 import logoutIcon from "../../../public/assets/icons/log out.svg";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { Tooltip } from "@mui/material";
+import { CircularProgress, Tooltip } from "@mui/material";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import Cookies from "universal-cookie";
+import { createCredit, getCredit } from "@/utils/api";
+import { AnimatePresence } from "framer-motion";
+import Modal from "../Modal";
+import { set } from "lodash";
+import { toast } from "react-hot-toast";
 
-const SideBar = ({ opener }: { opener?: boolean }) => {
+const SideBar = ({
+  opener,
+  setOpener,
+}: {
+  opener?: boolean;
+  setOpener: Dispatch<SetStateAction<boolean>>;
+}) => {
   const { data, status } = useSession();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+  const users = useCurrentUser();
   const user = useUser();
   const [isOpen, setIsOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isCreditAdded, setIsCreditAdded] = useState(false);
+  const [isCreditLoaded, setIsCreditLoaded] = useState(false);
+  const [values, setValues] = useState(0);
+  const [credit, setCredit] = useState(0);
+
+  let USER_ID = users?.data?.data
+    ? users?.data?.data?._id
+    : users?.id
+    ? users?.id
+    : user?.user?.id;
 
   const handleLogout = async () => {
     localStorage.removeItem("user");
@@ -42,9 +65,64 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
     router.push("/signin");
   };
 
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValues(parseInt(e.target.value));
+  };
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsCreditAdded(true);
+
+    const creditData = { amount: values };
+    try {
+      const { data } = await createCredit(creditData, USER_ID);
+      if (data) {
+        toast.success("Credit Added Successfully");
+        fetchCredit();
+        closeModal();
+      }
+    } catch (error: any) {
+      console.log(error);
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      toast.error(message);
+    } finally {
+      setIsCreditAdded(false);
+    }
+  };
+
+  const fetchCredit = async () => {
+    setIsCreditLoaded(true);
+    try {
+      const { data } = await getCredit(USER_ID);
+      if (data) {
+        setCredit(data.data.votar_credits);
+        setIsCreditLoaded(false);
+        console.log(data);
+      }
+    } catch (error: any) {
+      console.log(error);
+    } finally {
+      setIsCreditLoaded(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCredit();
+  }, []);
+
   return (
     <div
-      className={`h-screen flex flex-col  border-r border-[#8E8E8E]  p-0  overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-[999] lg:relative ${
+      className={`h-screen flex flex-col  border-r border-[#8E8E8E]  p-0  overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-[10] lg:relative ${
         isOpen ? "w-72" : "w-20"
       } ${opener ? "lg:w-[330px] lg:pl-[28px] lg:pr-5" : "lg:w-20 lg:pl-0"}`}
     >
@@ -102,16 +180,27 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
             <div className="flex justify-between">
               <div className="z-20">
                 <div className="text-xs">VotarCredits</div>
-                <div className="text-[40px]">#</div>
+                <div className="text-[40px]">
+                  {isCreditLoaded ? (
+                    <CircularProgress size={20} style={{ color: "#ffffff" }} />
+                  ) : (
+                    <>{credit}</>
+                  )}
+                </div>
                 <div>
-                  <button className="py-1 px-2 bg-white rounded-lg text-[#015CE9] outline-none text-sm">
+                  <button
+                    className="py-1 px-2 bg-white rounded-lg text-[#015CE9] outline-none text-sm"
+                    onClick={() => {
+                      setShowModal(true);
+                    }}
+                  >
                     Add Credits
                   </button>
                 </div>
               </div>
               <div className="z-20">
                 <div className="text-xs">Add Voting Credits</div>
-                <div className="text-[40px]">#</div>
+                <div className="text-[40px]">0</div>
                 <div>
                   <button className="py-1 px-2 bg-white rounded-lg text-[#015CE9] outline-none text-sm">
                     Update
@@ -307,6 +396,46 @@ const SideBar = ({ opener }: { opener?: boolean }) => {
         >
           Logout
         </span>
+      </div>
+
+      <div className="!z-[999]">
+        <AnimatePresence mode="wait">
+          {showModal && (
+            <Modal key="modal" handleClose={closeModal}>
+              <div className="bg-white rounded-lg pt-[24px] pb-[83px] px-10 text-left ">
+                <div className="w-full mx-auto min-h-[20vh] flex items-center justify-center">
+                  <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
+                    <div>
+                      <label htmlFor="addCredit">Add Credit</label>
+                      <input
+                        type="text"
+                        id="addCredit"
+                        name="addCredit"
+                        className="border border-zinc-600 w-full rounded h-12 outline-none p-4"
+                        onChange={handleInputChange}
+                      />
+                    </div>
+
+                    <div className="mt-5">
+                      <button
+                        className="w-full h-12 outline-none flex items-center gap-2 justify-center bg-blue-700 text-white rounded"
+                        disabled={isCreditAdded}
+                      >
+                        {isCreditAdded && (
+                          <CircularProgress
+                            size={20}
+                            style={{ color: "#ffffff" }}
+                          />
+                        )}
+                        Add
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </Modal>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
