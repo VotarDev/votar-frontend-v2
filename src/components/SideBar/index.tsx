@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useState, useEffect } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -100,7 +106,7 @@ const SideBar = ({
     }
   };
 
-  const fetchCredit = async () => {
+  const fetchCredit = useCallback(async () => {
     setIsCreditLoaded(true);
     try {
       const { data } = await getCredit(USER_ID);
@@ -114,11 +120,11 @@ const SideBar = ({
     } finally {
       setIsCreditLoaded(false);
     }
-  };
+  }, [USER_ID]);
 
   useEffect(() => {
     fetchCredit();
-  }, []);
+  }, [fetchCredit]);
 
   return (
     <div

@@ -38,7 +38,8 @@ const Create = () => {
   const [currentStep, setCurrentStep] = useState(step);
   const [electionName, setElectionName] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [backgroundImage, setBackgroundImage] = useState(null);
+  const [backgroundImageFile, setBackgroundImageFile] = useState(null);
   const [primaryColor, setPrimaryColor] = useState<OptionTypes | null>(null);
   const [electionID, setElectionID] = useState<string | null>("");
   const [secondaryColor, setSecondaryColor] = useState<OptionTypes | null>(
@@ -93,6 +94,9 @@ const Create = () => {
     }
   }, []);
 
+  console.log(logo);
+  console.log(backgroundImageFile);
+
   const displaySteps = (step: number) => {
     switch (step) {
       case 1:
@@ -121,6 +125,7 @@ const Create = () => {
             setLogo={setLogo}
             pricePerVote={pricePerVote}
             setPricePerVote={setPricePerVote}
+            setBackgroundImageFile={setBackgroundImageFile}
           />
         );
       case 2:
@@ -149,10 +154,6 @@ const Create = () => {
     const startDateData = formattedStartDate + "," + startTime;
     const endDateData = formattedEndDate + "," + endTIme;
 
-    console.log(startDateData);
-    console.log(endDateData);
-    console.log(numberofCandidate);
-
     const detailsFormData = new FormData();
     detailsFormData.append("name_of_election", electionName);
     detailsFormData.append("description", description);
@@ -166,6 +167,8 @@ const Create = () => {
     detailsFormData.append("type", votarPlan);
 
     if (logo) detailsFormData.append("election-image", logo);
+    if (backgroundImageFile)
+      detailsFormData.append("elect_background_img", backgroundImageFile);
     detailsFormData.append("maxNumberCandidates", numberofCandidate.toString());
 
     const ballotFormData = new FormData();

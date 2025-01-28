@@ -13,6 +13,7 @@ import calendar from "../../../../public/assets/icons/calendar-2.svg";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { OptionTypes } from "@/utils/types";
+import { set } from "lodash";
 
 const Details = ({
   setElection,
@@ -37,12 +38,13 @@ const Details = ({
   setLogo,
   pricePerVote,
   setPricePerVote,
+  setBackgroundImageFile,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
   const [backgroundUrl, setbackgroundUrl] = useState(null);
   const [monetizeElection, setMonetizeElection] = useState(false);
 
-  const handleImageUpload = (e: any, image: any, url: any) => {
+  const handleImageUpload = (e: any, image: any, url: any, fileFormat: any) => {
     const file = e.target.files[0];
     if (file) {
       const fileSizeKB = file.size / 1024;
@@ -50,7 +52,7 @@ const Details = ({
         toast.error("File too Large");
         return;
       }
-      setLogo(file);
+      fileFormat(file);
 
       // image(file);
       const reader = new FileReader();
@@ -168,7 +170,7 @@ const Details = ({
                 className="hidden"
                 id="file-input"
                 onChange={(e) =>
-                  handleImageUpload(e, setImage, setSelectedImgUrl)
+                  handleImageUpload(e, setImage, setSelectedImgUrl, setLogo)
                 }
               />
             </div>
@@ -212,7 +214,12 @@ const Details = ({
                   className="hidden"
                   id="file-input2"
                   onChange={(e) =>
-                    handleImageUpload(e, setBackground, setbackgroundUrl)
+                    handleImageUpload(
+                      e,
+                      setBackground,
+                      setbackgroundUrl,
+                      setBackgroundImageFile
+                    )
                   }
                 />
               </div>
