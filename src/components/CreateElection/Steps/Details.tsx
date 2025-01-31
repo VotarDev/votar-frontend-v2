@@ -48,7 +48,7 @@ const Details = ({
     const file = e.target.files[0];
     if (file) {
       const fileSizeKB = file.size / 1024;
-      if (fileSizeKB > 40) {
+      if (fileSizeKB > 1000) {
         toast.error("File too Large");
         return;
       }
