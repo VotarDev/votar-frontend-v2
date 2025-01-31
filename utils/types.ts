@@ -145,6 +145,7 @@ export type ElectionDetails = {
   start_time: number;
   status: string;
   updatedAt: string;
+  elect_background_img: string;
   type: string;
   published: boolean;
   __v: number;
