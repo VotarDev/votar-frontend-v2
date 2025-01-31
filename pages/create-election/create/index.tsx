@@ -94,9 +94,6 @@ const Create = () => {
     }
   }, []);
 
-  console.log(logo);
-  console.log(backgroundImageFile);
-
   const displaySteps = (step: number) => {
     switch (step) {
       case 1:
@@ -168,7 +165,7 @@ const Create = () => {
 
     if (logo) detailsFormData.append("election-image", logo);
     if (backgroundImageFile)
-      detailsFormData.append("elect_background_img", backgroundImageFile);
+      detailsFormData.append("background-image", backgroundImageFile);
     detailsFormData.append("maxNumberCandidates", numberofCandidate.toString());
 
     const ballotFormData = new FormData();

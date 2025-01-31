@@ -29,7 +29,18 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   if (electionDetails?.type === "Free Votar")
     return (
       <div>
-        <div className="bg-ballot-header bg-cover w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4">
+        <div
+          style={{
+            backgroundImage: electionDetails?.elect_background_img
+              ? `url(${electionDetails.elect_background_img})`
+              : "",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className={`w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4 ${
+            !electionDetails?.elect_background_img ? "bg-ballot-header" : ""
+          }`}
+        >
           <div className="absolute w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-0"></div>
           <div className="z-10 flex flex-col gap-2">
             <div className="flex justify-center">

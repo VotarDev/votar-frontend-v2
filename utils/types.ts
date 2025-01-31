@@ -120,6 +120,7 @@ export type Election = {
   start_date: string;
   start_time: number;
   updatedAt: string;
+  elect_background_img: string;
   type: string;
   _id: string;
   __v: number;
