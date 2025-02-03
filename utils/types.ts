@@ -175,6 +175,8 @@ export type DetailFormState = {
   secondary_color: string;
   image: File | string | null;
   imagePreview: string | null;
+  background_image?: File | string | null;
+  background_image_preview?: string | null;
   start_date: string | undefined;
   end_date: string | undefined;
   start_time: string | number | undefined;
@@ -185,6 +187,11 @@ export type DetailFormState = {
 export type DetailFormAction =
   | { type: "SET_FIELD"; field: keyof DetailFormState; value: string }
   | { type: "SET_IMAGE"; image: File; imagePreview: string }
+  | {
+      type: "SET_BACKGROUND_IMAGE";
+      background_image: File;
+      background_image_preview: string;
+    }
   | { type: "SET_PRIMARY_COLOR"; value: string }
   | { type: "SET_SECONDARY_COLOR"; value: string }
   | { type: "SET_CANDIDATE_NO"; value: number }

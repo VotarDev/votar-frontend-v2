@@ -158,6 +158,27 @@ const DetailsPage = ({
     }
   };
 
+  const handleBackgroundImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 100 * 1024) {
+        toast.error("File size exceeds 100kb. Please select a smaller image.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        dispatch({
+          type: "SET_BACKGROUND_IMAGE",
+          background_image: file,
+          background_image_preview: reader.result as string,
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const votingPriceIncrement = () => {
     setPricePerVote(pricePerVote + 1);
   };
@@ -239,7 +260,9 @@ const DetailsPage = ({
               {election?.type === "Free Votar" && (
                 <div
                   className={`${
-                    election?.association_logo ? "lg:mt-0 mt-3" : "mt-[40px]"
+                    election?.elect_background_img
+                      ? "lg:mt-0 mt-3"
+                      : "mt-[40px]"
                   } flex items-center lg:text-xl text-base font-normal flex-wrap gap-2`}
                 >
                   <div className="mr-2">
@@ -254,6 +277,7 @@ const DetailsPage = ({
                       accept=".png, .svg, .jpg, .jpeg,"
                       className="hidden"
                       id="file-input2"
+                      onChange={handleBackgroundImageUpload}
                     />
                   </div>
 
@@ -267,10 +291,13 @@ const DetailsPage = ({
                   </div>
 
                   <div>
-                    {election?.association_logo && (
+                    {election?.elect_background_img && (
                       <div>
                         <img
-                          src={election?.association_logo}
+                          src={
+                            state.background_image_preview ||
+                            election?.elect_background_img
+                          }
                           alt="logo"
                           className="lg:w-[100px] lg:h-[100px] object-contain w-14 h-14"
                         />

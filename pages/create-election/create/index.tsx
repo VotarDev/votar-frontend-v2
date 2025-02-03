@@ -122,6 +122,8 @@ const Create = () => {
             setLogo={setLogo}
             pricePerVote={pricePerVote}
             setPricePerVote={setPricePerVote}
+            numberofFreeVote={numberofFreeVote}
+            setNumberofFreeVote={setNumberofFreeVote}
             setBackgroundImageFile={setBackgroundImageFile}
           />
         );

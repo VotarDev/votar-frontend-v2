@@ -34,6 +34,8 @@ const initState: DetailFormState = {
   secondary_color: "",
   image: null,
   imagePreview: null,
+  background_image: null,
+  background_image_preview: null,
   start_date: "",
   end_date: "",
   start_time: "",
@@ -93,6 +95,14 @@ const ElectionDetail = () => {
           ...state,
           image: action.image,
           imagePreview: URL.createObjectURL(action.image),
+        };
+      case "SET_BACKGROUND_IMAGE":
+        return {
+          ...state,
+          background_image: action.background_image,
+          background_image_preview: URL.createObjectURL(
+            action.background_image
+          ),
         };
       case "SET_PRIMARY_COLOR":
         return { ...state, primary_color: action.value };
@@ -167,6 +177,9 @@ const ElectionDetail = () => {
     if (state.image) {
       formData.append("election-image", state.image);
     }
+    if (state.background_image) {
+      formData.append("background-image", state.background_image);
+    }
 
     console.log(startDateData, endDateData);
 
@@ -213,8 +226,16 @@ const ElectionDetail = () => {
           break;
       }
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error("API call failed:", error);
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+
+      toast.error(message);
       return false;
     }
   };

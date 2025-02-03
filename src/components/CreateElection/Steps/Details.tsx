@@ -39,6 +39,8 @@ const Details = ({
   pricePerVote,
   setPricePerVote,
   setBackgroundImageFile,
+  numberofFreeVote,
+  setNumberofFreeVote,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
   const [backgroundUrl, setbackgroundUrl] = useState(null);
@@ -119,6 +121,16 @@ const Details = ({
   const votingPriceDecrement = () => {
     if (pricePerVote > 0) {
       setPricePerVote(pricePerVote - 1);
+    }
+  };
+
+  const numberofFreeVoteIncrement = () => {
+    setNumberofFreeVote(numberofFreeVote + 1);
+  };
+
+  const numberofFreeVoteDecrement = () => {
+    if (numberofFreeVote > 0) {
+      setNumberofFreeVote(numberofFreeVote - 1);
     }
   };
 
@@ -405,8 +417,36 @@ const Details = ({
           </div>
 
           {votarPlan === "Free Votar" && (
-            <div className="mt-[34px]">
-              <div className=" flex items-center gap-4">
+            <div>
+              <div className="mt-[34px] flex lg:gap-10 items-center flex-wrap gap-4">
+                <div className="lg:text-xl text-base font-normal">
+                  Number of Free Votes
+                </div>
+                <div className="flex items-center gap-4 text-2xl">
+                  <div
+                    className={`w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer ${
+                      numberofFreeVote == 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : "opacity-1 cursor-pointer"
+                    }`}
+                    onClick={numberofFreeVoteDecrement}
+                  >
+                    <AiOutlineMinus />
+                  </div>
+                  <input
+                    type="text"
+                    value={numberofFreeVote}
+                    className="w-10 outline-none text-center"
+                  />
+                  <div
+                    className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
+                    onClick={numberofFreeVoteIncrement}
+                  >
+                    <AiOutlinePlus />
+                  </div>
+                </div>
+              </div>
+              <div className=" flex items-center gap-4 mt-[34px]">
                 <h2 className="lg:text-xl text-base font-bold">
                   Monetize Election
                 </h2>
