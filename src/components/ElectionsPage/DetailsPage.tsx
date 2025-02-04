@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { getElectionById } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -6,12 +6,15 @@ import { DetailFormState, ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 
 import { useSelector } from "react-redux";
-
+import getCroppedImg from "@/utils/cropImage";
+import Cropper from "react-easy-crop";
 import { FaCaretDown } from "react-icons/fa";
 import calendar from "../../../public/assets/icons/calendar-2.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import toast from "react-hot-toast";
 import { formatDateToISO, formatTimeToHHMM } from "@/utils/util";
+import { AnimatePresence } from "framer-motion";
+import Modal from "../Modal";
 
 const DetailsPage = ({
   electionId,
@@ -38,6 +41,53 @@ const DetailsPage = ({
   const [monetizeElection, setMonetizeElection] = useState(false);
   const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
   const [isEditable, setIsEditable] = useState(true);
+  //crop states
+
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [rotation, setRotation] = useState(0);
+
+  const onCropComplete = useCallback(
+    (croppedArea: any, croppedAreaPixels: any) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
+
+  const handleCropSave = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
+
+    try {
+      const croppedImage = await getCroppedImg(
+        imageSrc,
+        croppedAreaPixels,
+        rotation
+      );
+
+      if (!croppedImage) {
+        throw new Error("Cropped image is null");
+      }
+
+      console.log(croppedImage);
+      const blobUrl = URL.createObjectURL(croppedImage);
+
+      console.log("Cropped image:", blobUrl);
+
+      dispatch({
+        type: "SET_BACKGROUND_IMAGE",
+        background_image: croppedImage,
+        background_image_preview: blobUrl,
+      });
+
+      setShowCropModal(false);
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast.error("Failed to crop image. Please try again.");
+    }
+  };
 
   useEffect(() => {
     const getElection = async () => {
@@ -169,11 +219,8 @@ const DetailsPage = ({
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        dispatch({
-          type: "SET_BACKGROUND_IMAGE",
-          background_image: file,
-          background_image_preview: reader.result as string,
-        });
+        setImageSrc(reader.result as string);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
@@ -187,8 +234,6 @@ const DetailsPage = ({
       setPricePerVote(pricePerVote - 1);
     }
   };
-
-  console.log(election?.start_date, election?.start_time);
 
   return (
     <div>
@@ -291,7 +336,8 @@ const DetailsPage = ({
                   </div>
 
                   <div>
-                    {election?.elect_background_img && (
+                    {(election?.elect_background_img ||
+                      state.background_image_preview) && (
                       <div>
                         <img
                           src={
@@ -559,6 +605,77 @@ const DetailsPage = ({
           </div>
         </div>
       )}
+
+      <AnimatePresence>
+        {showCropModal && (
+          <Modal key="modal" handleClose={() => setShowCropModal(false)}>
+            <div className="bg-white p-4 rounded-lg w-96">
+              <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
+              <div className="relative w-full h-[200px]">
+                <Cropper
+                  image={imageSrc || undefined}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={16 / 9}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded mr-2"
+                  onClick={() => setShowCropModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded"
+                  onClick={handleCropSave}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
+
+      {/* {showCropModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 rounded-lg w-96">
+            <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
+
+            <Cropper
+              image={imageSrc || undefined}
+              crop={crop}
+              zoom={zoom}
+              aspect={16 / 9}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={(croppedArea, croppedAreaPixels) =>
+                setCroppedAreaPixels(croppedAreaPixels)
+              }
+            />
+
+            <div className="flex justify-end mt-4">
+              <button
+                className="px-4 py-2 bg-gray-500 text-white rounded mr-2"
+                onClick={() => setShowCropModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+                onClick={handleCropSave}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };
