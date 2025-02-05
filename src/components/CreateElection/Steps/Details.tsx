@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PlanChoice from "../VotarPlanChoice/PlanChoice";
 import { toast } from "react-hot-toast";
 import Select, {
@@ -14,6 +14,10 @@ import moment from "moment";
 import { useSelector } from "react-redux";
 import { OptionTypes } from "@/utils/types";
 import { set } from "lodash";
+import getCroppedImg from "@/utils/cropImage";
+import { AnimatePresence } from "framer-motion";
+import Modal from "../../Modal";
+import Cropper from "react-easy-crop";
 
 const Details = ({
   setElection,
@@ -43,8 +47,51 @@ const Details = ({
   setNumberofFreeVote,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
-  const [backgroundUrl, setbackgroundUrl] = useState(null);
+  const [backgroundUrl, setbackgroundUrl] = useState<string | null>(null);
   const [monetizeElection, setMonetizeElection] = useState(false);
+
+  //crop
+
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [rotation, setRotation] = useState(0);
+
+  const onCropComplete = useCallback(
+    (croppedArea: any, croppedAreaPixels: any) => {
+      setCroppedAreaPixels(croppedAreaPixels);
+    },
+    []
+  );
+
+  const handleCropSave = async () => {
+    if (!imageSrc || !croppedAreaPixels) return;
+
+    try {
+      const croppedImage = await getCroppedImg(
+        imageSrc,
+        croppedAreaPixels,
+        rotation
+      );
+
+      if (!croppedImage) {
+        throw new Error("Cropped image is null");
+      }
+
+      console.log(croppedImage);
+      const blobUrl = URL.createObjectURL(croppedImage);
+      setbackgroundUrl(blobUrl);
+
+      console.log("Cropped image:", blobUrl);
+
+      setShowCropModal(false);
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast.error("Failed to crop image. Please try again.");
+    }
+  };
 
   const handleImageUpload = (e: any, image: any, url: any, fileFormat: any) => {
     const file = e.target.files[0];
@@ -62,6 +109,24 @@ const Details = ({
         const imageUrl = event.target.result;
         url(imageUrl);
         image(imageUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBackgroundImageUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 100 * 1024) {
+        toast.error("File size exceeds 100kb. Please select a smaller image.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageSrc(reader.result as string);
+        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
@@ -225,14 +290,7 @@ const Details = ({
                   accept=".png, .svg, .jpg, .jpeg,"
                   className="hidden"
                   id="file-input2"
-                  onChange={(e) =>
-                    handleImageUpload(
-                      e,
-                      setBackground,
-                      setbackgroundUrl,
-                      setBackgroundImageFile
-                    )
-                  }
+                  onChange={handleBackgroundImageUpload}
                 />
               </div>
 
@@ -490,6 +548,42 @@ const Details = ({
           )}
         </form>
       </div>
+
+      <AnimatePresence>
+        {showCropModal && (
+          <Modal key="modal" handleClose={() => setShowCropModal(false)}>
+            <div className="bg-white p-4 rounded-lg w-96">
+              <h2 className="text-lg font-semibold mb-4">Crop Your Image</h2>
+              <div className="relative w-full h-[200px]">
+                <Cropper
+                  image={imageSrc || undefined}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={16 / 9}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={onCropComplete}
+                />
+              </div>
+
+              <div className="flex justify-end mt-4">
+                <button
+                  className="px-4 py-2 bg-gray-500 text-white rounded mr-2"
+                  onClick={() => setShowCropModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded"
+                  onClick={handleCropSave}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
