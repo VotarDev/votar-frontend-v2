@@ -17,10 +17,9 @@ import { IoCopy } from "react-icons/io5";
 import { AiOutlineEye, AiOutlineLink } from "react-icons/ai";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
-import { set } from "lodash";
+
 import DeletePositionDialog from "./DeletePositionModal";
 import DeleteCandidateDialog from "./DeleteCandidateModal";
-import { is } from "date-fns/locale";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -126,8 +125,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
   useEffect(() => {
     fetchData();
   }, [electionID]);
-
-  console.log(isEditable);
 
   const handleInputChange = (
     e: any,

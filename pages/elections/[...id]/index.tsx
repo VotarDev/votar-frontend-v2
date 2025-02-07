@@ -181,8 +181,6 @@ const ElectionDetail = () => {
       formData.append("background-image", state.background_image);
     }
 
-    console.log(startDateData, endDateData);
-
     const ballotFormData = new FormData();
     // const filterPosition = position.filter((pos: any) => !pos._id);
     // console.log(filterPosition);
@@ -227,7 +225,6 @@ const ElectionDetail = () => {
       }
       return true;
     } catch (error: any) {
-      console.error("API call failed:", error);
       const message =
         (error.response &&
           error.response.data &&

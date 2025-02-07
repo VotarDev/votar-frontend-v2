@@ -53,7 +53,6 @@ const VoterPage = () => {
       setElectionID(idType[1]);
     }
   }, [id, electionID]);
-  console.log(electionID);
 
   useEffect(() => {
     const getElection = async () => {

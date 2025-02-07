@@ -5,14 +5,20 @@ import { IoCopy } from "react-icons/io5";
 import { AiOutlineLink, AiOutlineEye } from "react-icons/ai";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useRouter } from "next/router";
 import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
 import MiniDashboard from "../../VotePage/MiniDashboard";
 
 const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   const textRef = useRef<HTMLElement | null>(null);
+  const router = useRouter();
+
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
-  console.log(electionDetails);
+  console.log(
+    router.pathname.split("/")[1].includes("cast-votes") ||
+      router.pathname.split("/")[1].includes("preview-election")
+  );
   const handleCopyClick = async () => {
     if (textRef.current) {
       const selectedText = textRef.current.innerText;
@@ -68,7 +74,10 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
         </div>
 
         <div>
-          <MiniDashboard />
+          {(router.pathname.split("/")[1].includes("cast-votes") ||
+            router.pathname.split("/")[1].includes("preview-election")) && (
+            <MiniDashboard />
+          )}
         </div>
       </div>
     );

@@ -235,8 +235,6 @@ const DetailsPage = ({
     }
   };
 
-  console.log(state.imagePreview);
-
   return (
     <div>
       {isFecthElection ? (

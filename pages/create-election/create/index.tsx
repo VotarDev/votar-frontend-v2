@@ -52,7 +52,7 @@ const Create = () => {
   const [endTIme, setEndTime] = useState("");
   const [logo, setLogo] = useState(null);
   const [numberofCandidate, setNumberofCandidate] = useState(0);
-  const [numberofFreeVote, setNumberofFreeVote] = useState(0);
+  const [numberofFreeVote, setNumberofFreeVote] = useState(1);
   const [pricePerVote, setPricePerVote] = useState(0);
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -61,8 +61,6 @@ const Create = () => {
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
-
-  console.log(backgroundImageFile);
 
   //ballot
   const [positions, setPositions] = useState<Position[]>([]);
@@ -143,7 +141,6 @@ const Create = () => {
     }
   };
 
-  console.log(logo);
   const handleClick = async (direction: string) => {
     let newStep = currentStep;
     setIsLoading(true);

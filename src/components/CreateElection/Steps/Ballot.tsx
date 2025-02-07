@@ -18,7 +18,6 @@ const Ballot = ({ positions, setPositions }: any) => {
   const [error, setError] = useState("");
   const textRef = useRef<HTMLElement | null>(null);
 
-  console.log(positions);
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
