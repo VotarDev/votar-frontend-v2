@@ -83,6 +83,7 @@ const Details = ({
       console.log(croppedImage);
       const blobUrl = URL.createObjectURL(croppedImage);
       setbackgroundUrl(blobUrl);
+      setBackgroundImageFile(croppedImage);
 
       console.log("Cropped image:", blobUrl);
 

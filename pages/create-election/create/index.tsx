@@ -62,6 +62,8 @@ const Create = () => {
   const user = useUser();
   const router = useRouter();
 
+  console.log(backgroundImageFile);
+
   //ballot
   const [positions, setPositions] = useState<Position[]>([]);
 
@@ -141,6 +143,7 @@ const Create = () => {
     }
   };
 
+  console.log(logo);
   const handleClick = async (direction: string) => {
     let newStep = currentStep;
     setIsLoading(true);

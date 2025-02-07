@@ -18,7 +18,7 @@ const BuyVotingCredit = () => {
   };
   console.log(votarCredit);
   return (
-    <div className="bg-white rounded-lg pt-[64px] pb-[83px] px-4 lg:px-0">
+    <div className="bg-white rounded-lg pt-[64px] pb-[83px] px-4 lg:px-10">
       <div className="text-blue-700 lg:text-2xl text-base font-semibold">
         Make your Preferred Candidate Emerge as the winner
         <br /> Purchase More Votar Credits

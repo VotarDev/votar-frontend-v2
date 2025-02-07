@@ -7,6 +7,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
+import MiniDashboard from "../../VotePage/MiniDashboard";
 
 const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   const textRef = useRef<HTMLElement | null>(null);
@@ -37,7 +38,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
-          className={`w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4 ${
+          className={`w-full h-[40vh]  flex justify-center items-center relative text-center text-white px-4 ${
             !electionDetails?.elect_background_img ? "bg-ballot-header" : ""
           }`}
         >
@@ -64,6 +65,10 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
               className="lg:w-14 lg:h-14 h-10 w-10 object-contain"
             />
           </div>
+        </div>
+
+        <div>
+          <MiniDashboard />
         </div>
       </div>
     );
