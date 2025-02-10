@@ -74,7 +74,15 @@ const Hero = () => {
                 />
               </div>
 
-              <div className="lg:w-[395px] lg:h-[395px] hidden lg:block rounded-[150px] bg-[#ccc]"></div>
+              <div className="lg:w-[395px] lg:h-[395px] hidden lg:block ">
+                <video
+                  src="/assets/videos/Home screen video.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  className="w-[395px] h-[395px] object-contain"
+                ></video>
+              </div>
             </div>
           </div>
         </ScrollAnimation>
