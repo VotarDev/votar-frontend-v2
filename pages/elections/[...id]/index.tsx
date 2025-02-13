@@ -139,6 +139,7 @@ const ElectionDetail = () => {
     }
   }
 
+  console.log(state.background_image);
   const handleStepApiCall = async (step: number) => {
     const [startDateString] = state.start_date
       ? state?.start_date.split(" ")

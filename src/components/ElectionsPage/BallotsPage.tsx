@@ -298,6 +298,8 @@ const BallotsPage = ({ position, setPosition }: any) => {
     return <div className="my-10">{error}</div>;
   }
 
+  console.log(election);
+
   return (
     <div className="my-[60px]">
       <Header electionDetails={election} />

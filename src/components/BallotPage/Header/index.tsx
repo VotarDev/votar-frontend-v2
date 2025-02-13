@@ -39,12 +39,14 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
         <div
           style={{
             backgroundImage: electionDetails?.elect_background_img
-              ? `url(${electionDetails.elect_background_img})`
-              : "",
+              ? `url("${
+                  electionDetails.elect_background_img
+                }?t=${new Date().getTime()}")`
+              : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
-          className={`w-full h-[40vh]  flex justify-center items-center relative text-center text-white px-4 ${
+          className={`w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4 ${
             !electionDetails?.elect_background_img ? "bg-ballot-header" : ""
           }`}
         >
