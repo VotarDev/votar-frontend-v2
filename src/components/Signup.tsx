@@ -23,7 +23,6 @@ import axios from "axios";
 import authService from "@/redux/features/auth/authService";
 
 import { toast } from "react-hot-toast";
-import { set } from "lodash";
 
 const SignupComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
