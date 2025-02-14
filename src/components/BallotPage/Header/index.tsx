@@ -76,10 +76,11 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
         </div>
 
         <div>
-          {(router.pathname.split("/")[1].includes("cast-votes") ||
-            router.pathname.split("/")[1].includes("preview-election")) && (
-            <MiniDashboard />
-          )}
+          {router.pathname.split("/")[1].includes("cast-votes") ||
+            router.pathname.split("/")[1].includes("preview-election") ||
+            (router.pathname.split("/")[0].includes("ballot") && (
+              <MiniDashboard />
+            ))}
         </div>
       </div>
     );
