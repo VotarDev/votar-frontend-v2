@@ -385,12 +385,6 @@ const Ballot = () => {
     );
   }
 
-  useEffect(() => {
-    if (status === "authenticated") {
-      setShowGoogleAuth(false);
-    }
-  }, [status]);
-
   return (
     <>
       {isClient && (
@@ -697,7 +691,7 @@ const Ballot = () => {
             </AnimatePresence>
 
             <AnimatePresence mode="wait">
-              {showGoogleAuth && (
+              {status !== "authenticated" && (
                 <Modal key="modal">
                   <div className="w-full h-full bg-white flex items-center px-6 rounded-lg justify-center">
                     <GoogleSignInButton />
