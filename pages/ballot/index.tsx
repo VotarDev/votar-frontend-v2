@@ -386,7 +386,9 @@ const Ballot = () => {
   }
 
   useEffect(() => {
-    status === "authenticated" && setShowGoogleAuth(false);
+    if (status === "authenticated") {
+      setShowGoogleAuth(false);
+    }
   }, [status]);
 
   return (
