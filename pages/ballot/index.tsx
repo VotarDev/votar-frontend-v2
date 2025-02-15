@@ -26,6 +26,9 @@ import { enterVotes } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
+import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
+import { getServerSession } from "next-auth";
+import { useSession } from "next-auth/react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -53,6 +56,7 @@ type SelectedCandidates = {
 
 const Ballot = () => {
   const dispatch = useDispatch<AppDispatch>();
+
   const voterProfile = useSelector((state: RootState) => state.voterProfile);
   const router = useRouter();
   const [candidates, setCandidates] = useState<BallotData[]>([]);
@@ -72,6 +76,9 @@ const Ballot = () => {
   const users = useCurrentUser();
   const user = useUser();
   const [showModal, setShowModal] = useState(false);
+  const [showGoogleAuth, setShowGoogleAuth] = useState(true);
+  const { data: session, status } = useSession();
+
   //   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
   //     Details[]
   //   >([]);
@@ -144,8 +151,6 @@ const Ballot = () => {
       }
     });
   };
-
-  console.log(selectedCandidates);
 
   const isCandidateActive = (position: string, candidate: Candidate) => {
     if (abstentions[position]?.abstained) {
@@ -270,8 +275,6 @@ const Ballot = () => {
           votes,
         };
 
-        console.log(electionData);
-
         const { data } = await enterVotes(electionData);
         if (data) {
           setIsCastVote(false);
@@ -308,8 +311,6 @@ const Ballot = () => {
       `You have abstained from voting for the position: ${position}`
     );
   };
-
-  console.log(abstentions);
 
   const combinedData = candidates.reduce((acc: any, curr: any) => {
     const existingPosition = acc.find(
@@ -384,11 +385,16 @@ const Ballot = () => {
     );
   }
 
+  useEffect(() => {
+    status === "authenticated" && setShowGoogleAuth(false);
+  }, [status]);
+
   return (
     <>
       {isClient && (
         <>
-          <FetchVoterProfile />
+          {election?.type === "Votar Pro" && <FetchVoterProfile />}
+
           {isFetchElection ? (
             <div className="mt-10 text-center">
               <CircularProgress size={30} style={{ color: "#015CE9" }} />
@@ -683,6 +689,16 @@ const Ballot = () => {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </Modal>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence mode="wait">
+              {showGoogleAuth && (
+                <Modal key="modal">
+                  <div className="w-full h-full bg-white flex items-center px-6 rounded-lg justify-center">
+                    <GoogleSignInButton />
                   </div>
                 </Modal>
               )}

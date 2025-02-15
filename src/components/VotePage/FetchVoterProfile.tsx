@@ -5,12 +5,13 @@ import { login, logout } from "@/redux/features/auth/voterLoginSlice";
 
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-
+import { useSession } from "next-auth/react";
 import { voterLoginCookieName } from "@/src/__env";
 
 const FetchVoterProfile = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     const runMe = async () => {

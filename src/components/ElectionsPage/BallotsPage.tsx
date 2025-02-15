@@ -257,6 +257,17 @@ const BallotsPage = ({ position, setPosition }: any) => {
     }
   };
 
+  const handleCopy = async () => {
+    const url = window.location.origin + "/ballot";
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      toast.error("Copy operation failed. Please try again.");
+    }
+  };
+
   const handleDeleteCandidate = async (
     e: any,
     positionName: string,
@@ -314,7 +325,10 @@ const BallotsPage = ({ position, setPosition }: any) => {
         </div>
         <div className="flex lg:gap-7 gap-2 flex-wrap justify-center">
           <div>
-            <button className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0">
+            <button
+              onClick={handleCopy}
+              className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0"
+            >
               <span>
                 <AiOutlineLink />
               </span>
