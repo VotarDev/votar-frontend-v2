@@ -15,10 +15,15 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
   const router = useRouter();
 
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
+
   console.log(
     router.pathname.split("/")[1].includes("cast-votes") ||
-      router.pathname.split("/")[1].includes("preview-election")
+      router.pathname.split("/")[1].includes("preview-election") ||
+      router.pathname.split("/")[1].includes("ballot")
   );
+
+  console.log(electionDetails);
+
   const handleCopyClick = async () => {
     if (textRef.current) {
       const selectedText = textRef.current.innerText;
@@ -78,7 +83,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
         <div>
           {router.pathname.split("/")[1].includes("cast-votes") ||
             router.pathname.split("/")[1].includes("preview-election") ||
-            (router.pathname.split("/")[0].includes("ballot") && (
+            (router.pathname.split("/")[1].includes("ballot") && (
               <MiniDashboard />
             ))}
         </div>

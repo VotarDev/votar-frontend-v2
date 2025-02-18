@@ -258,7 +258,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   };
 
   const handleCopy = async () => {
-    const url = window.location.origin + "/ballot";
+    const url = window.location.origin + "/ballot?candidate=" + electionID;
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Copied to clipboard!");

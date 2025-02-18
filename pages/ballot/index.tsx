@@ -59,6 +59,7 @@ const Ballot = () => {
 
   const voterProfile = useSelector((state: RootState) => state.voterProfile);
   const router = useRouter();
+
   const [candidates, setCandidates] = useState<BallotData[]>([]);
   const [election, setElection] = useState<ElectionDetails | null>(null);
   const [electionEnded, setElectionEnded] = useState(null);
@@ -77,6 +78,7 @@ const Ballot = () => {
   const user = useUser();
   const [showModal, setShowModal] = useState(false);
   const [showGoogleAuth, setShowGoogleAuth] = useState(true);
+  const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
   //   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
@@ -95,6 +97,16 @@ const Ballot = () => {
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  useEffect(() => {
+    if (router.query.candidate) {
+      const id = Array.isArray(router.query.candidate)
+        ? router.query.candidate[0]
+        : router.query.candidate;
+
+      setCandidateId(id);
+    }
+  }, [router.query.candidate]);
 
   const handleGoHome = () => {
     router.push("/vote");
@@ -194,10 +206,10 @@ const Ballot = () => {
             election_id: voterProfile.userData.election_id,
           };
           const { data } = await getElectionById(electionData);
-          console.log(data);
+
           if (data) {
             setElection(data.data);
-            console.log(data.data);
+
             setIsFetchElection(false);
           }
         }
@@ -211,37 +223,40 @@ const Ballot = () => {
     }
   }, [voterProfile.userData]);
 
+  console.log(candidateId);
+
   useEffect(() => {
     const getCandidatesData = async () => {
-      setIsFetchCandidate(false);
+      if (!voterProfile?.userData) return; // Ensure userData exists
+
+      setIsFetchCandidate(true); // Set fetching state
       const cookie = new Cookies();
       const token = cookie.get(voterLoginCookieName);
+
       if (token) {
         setAuthToken(token);
       }
-      try {
-        if (voterProfile.userData && voterProfile.userData.election_id) {
-          const electionData = {
-            election_id: voterProfile.userData.election_id,
-          };
 
-          const { data } = await getBallotCandidate(electionData);
-          console.log(data);
-          if (data) {
-            setCandidates(data.data);
-            setIsFetchCandidate(false);
-          }
+      try {
+        const electionData = {
+          election_id: candidateId || voterProfile.userData.election_id,
+        };
+
+        const { data } = await getBallotCandidate(electionData);
+
+        if (data) {
+          setCandidates(data.data);
         }
       } catch (error: any) {
         setElectionEnded(error?.response?.data?.message);
-        setIsFetchCandidate(false);
-        console.log(error);
+        console.error("Error fetching candidates:", error);
+      } finally {
+        setIsFetchCandidate(false); // Ensure state is reset
       }
     };
-    if (voterProfile.userData) {
-      getCandidatesData();
-    }
-  }, [voterProfile.userData]);
+
+    getCandidatesData();
+  }, [candidateId]);
 
   const enterVotesHandler = async () => {
     setIsCastVote(true);
@@ -250,7 +265,7 @@ const Ballot = () => {
     if (token) {
       setAuthToken(token);
     }
-    console.log(token);
+
     try {
       if (voterProfile.userData && voterProfile.userData.election_id) {
         const selectedVotes = selectedCandidates.flatMap((item) =>
@@ -280,7 +295,6 @@ const Ballot = () => {
           setIsCastVote(false);
           setIsVoteSuccessful(true);
           closeModal();
-          console.log(data);
         }
       }
     } catch (e: any) {
@@ -356,8 +370,6 @@ const Ballot = () => {
 
     setAllPositionsSelected(isAllPositionsSelected);
   }, [selectedCandidates, abstentions, combinedData]);
-
-  console.log(combinedData);
 
   if (election?.published === false) {
     return (
