@@ -29,6 +29,7 @@ import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
 import { getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -180,11 +181,14 @@ const Ballot = () => {
   };
 
   const closeModal = () => setShowModal(false);
-  const handleLogout = () => {
+  const handleLogout = async () => {
     dispatch(logout());
     const cookie = new Cookies();
     cookie.remove(voterLoginCookieName, { path: "/" });
     localStorage.removeItem("voterProfile");
+    if (session && status === "authenticated") {
+      await signOut();
+    }
     setAuthToken(null);
     router.push("/vote");
   };
@@ -201,27 +205,24 @@ const Ballot = () => {
     const getElection = async () => {
       setIsFetchElection(true);
       try {
-        if (voterProfile.userData && voterProfile.userData.election_id) {
-          const electionData = {
-            election_id: voterProfile.userData.election_id,
-          };
-          const { data } = await getElectionById(electionData);
+        const electionData = {
+          election_id: candidateId || voterProfile.userData.election_id,
+        };
+        const { data } = await getElectionById(electionData);
 
-          if (data) {
-            setElection(data.data);
+        if (data) {
+          setElection(data.data);
 
-            setIsFetchElection(false);
-          }
+          setIsFetchElection(false);
         }
       } catch (error: any) {
         console.log(error);
         setIsFetchElection(false);
       }
     };
-    if (voterProfile.userData) {
-      getElection();
-    }
-  }, [voterProfile.userData]);
+
+    getElection();
+  }, [candidateId, voterProfile.userData]);
 
   console.log(candidateId);
 
@@ -370,6 +371,18 @@ const Ballot = () => {
 
     setAllPositionsSelected(isAllPositionsSelected);
   }, [selectedCandidates, abstentions, combinedData]);
+
+  if (election?.type === "Free Votar" && status !== "authenticated") {
+    return (
+      <AnimatePresence mode="wait">
+        <Modal key="modal">
+          <div className="w-full h-full bg-white flex items-center px-6 rounded-lg justify-center">
+            <GoogleSignInButton />
+          </div>
+        </Modal>
+      </AnimatePresence>
+    );
+  }
 
   if (election?.published === false) {
     return (
@@ -697,16 +710,6 @@ const Ballot = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Modal>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence mode="wait">
-              {status !== "authenticated" && (
-                <Modal key="modal">
-                  <div className="w-full h-full bg-white flex items-center px-6 rounded-lg justify-center">
-                    <GoogleSignInButton />
                   </div>
                 </Modal>
               )}
