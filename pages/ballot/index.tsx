@@ -19,7 +19,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import { voterLoginCookieName } from "@/src/__env";
-import { getElectionById, getBallotCandidate } from "@/utils/api";
+import {
+  getElectionById,
+  getBallotCandidate,
+  registerVoter,
+} from "@/utils/api";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
 import { enterVotes } from "@/utils/api";
@@ -28,8 +32,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
 import { getServerSession } from "next-auth";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -108,6 +111,31 @@ const Ballot = () => {
       setCandidateId(id);
     }
   }, [router.query.candidate]);
+
+  console.log(session);
+
+  useEffect(() => {
+    const registerVotar = async () => {
+      try {
+        const userData = {
+          name: session?.user?.name,
+          email: session?.user?.email,
+          image: session?.user?.image,
+          election_id: candidateId,
+        };
+        const { data } = await registerVoter(userData);
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    registerVotar();
+  }, [
+    candidateId,
+    session?.user?.name,
+    session?.user?.email,
+    session?.user?.image,
+  ]);
 
   const handleGoHome = () => {
     router.push("/vote");

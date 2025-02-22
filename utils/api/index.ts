@@ -54,6 +54,7 @@ const getCardsUrl = "/user/card_details";
 const createWalletUrl = "/user/wallet";
 const createCreditUrl = "/user/add_credit";
 const getCreditUrl = "/user/get_credit";
+const registerVoterUrl = "/user/register_freeVoter";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -305,6 +306,10 @@ export const createCredit = (data: any, id: string) => {
 
 export const getCredit = (id: string) => {
   return httpService.get(getCreditUrl + `/${id}`);
+};
+
+export const registerVoter = (data: any) => {
+  return httpService.post(registerVoterUrl, data);
 };
 
 /** ADMIN */
