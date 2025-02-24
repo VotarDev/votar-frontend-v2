@@ -256,8 +256,6 @@ const Ballot = () => {
 
   useEffect(() => {
     const getCandidatesData = async () => {
-      if (!voterProfile?.userData) return; // Ensure userData exists
-
       setIsFetchCandidate(true); // Set fetching state
       const cookie = new Cookies();
       const token = cookie.get(voterLoginCookieName);
@@ -276,6 +274,7 @@ const Ballot = () => {
         if (data) {
           setCandidates(data.data);
         }
+        console.log(data.data);
       } catch (error: any) {
         setElectionEnded(error?.response?.data?.message);
         console.error("Error fetching candidates:", error);
@@ -469,7 +468,10 @@ const Ballot = () => {
               <div>
                 <div className="text-center mt-5">
                   <h1 className="text-4xl font-bold capitalize">
-                    Welcome, {voterProfile.userData?.name}
+                    Welcome,{" "}
+                    {voterProfile.userData?.name
+                      ? voterProfile.userData?.name
+                      : session?.user?.name}
                   </h1>
                 </div>
                 {isVoteSuccessful ? (
