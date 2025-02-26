@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { PiWarningCircleFill } from "react-icons/pi";
 
 const BuyVotingCredit = () => {
   const [votarCredit, setVotarCredit] = useState(0);
@@ -94,12 +95,15 @@ const BuyVotingCredit = () => {
         </div>
       </div>
       <div className="flex justify-center mt-5">
-        <button className="w-96 h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100">
+        <button className="h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100">
           Make Payment Of NGN {votarCredit}
         </button>
       </div>
       <div className=" flex items-center justify-center lg:text-[18px] text-sm text-center p-2 mt-7">
-        <div className="bg-orange-100 p-2 flex items-center justify-center">
+        <div className="bg-orange-100 p-2 flex items-center justify-center gap-2">
+          <div className="text-[#ECAE0D]">
+            <PiWarningCircleFill />
+          </div>
           You need 5 Votar Credits to give 1 vote in your election.
         </div>
       </div>
