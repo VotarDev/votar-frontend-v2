@@ -256,7 +256,7 @@ const Ballot = () => {
 
   useEffect(() => {
     const getCandidatesData = async () => {
-      setIsFetchCandidate(true); // Set fetching state
+      setIsFetchCandidate(true);
       const cookie = new Cookies();
       const token = cookie.get(voterLoginCookieName);
 
@@ -279,7 +279,7 @@ const Ballot = () => {
         setElectionEnded(error?.response?.data?.message);
         console.error("Error fetching candidates:", error);
       } finally {
-        setIsFetchCandidate(false); // Ensure state is reset
+        setIsFetchCandidate(false);
       }
     };
 

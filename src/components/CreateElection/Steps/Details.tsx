@@ -182,12 +182,11 @@ const Details = ({
   };
 
   const votingPriceIncrement = () => {
-    setPricePerVote(pricePerVote + 1);
+    setPricePerVote((prev: number) => (Number(prev) + 1).toString());
   };
+
   const votingPriceDecrement = () => {
-    if (pricePerVote > 0) {
-      setPricePerVote(pricePerVote - 1);
-    }
+    setPricePerVote((prev: number) => Math.max(0, Number(prev) - 1).toString());
   };
 
   const numberofFreeVoteIncrement = () => {
@@ -534,8 +533,11 @@ const Details = ({
                     <input
                       type="text"
                       value={pricePerVote}
-                      className="w-10 outline-none text-center"
+                      onChange={(e) => setPricePerVote(e.target.value)}
+                      size={pricePerVote.length || 1}
+                      className="px-2 outline-none text-center bg-white  rounded text-black"
                     />
+
                     <div
                       className="w-10 h-10 flex justify-center items-center bg-[#015CE9] text-white rounded cursor-pointer"
                       onClick={votingPriceIncrement}
