@@ -258,7 +258,10 @@ const BallotsPage = ({ position, setPosition }: any) => {
   };
 
   const handleCopy = async () => {
-    const url = window.location.origin + "/ballot?candidate=" + electionID;
+    const url =
+      election?.type === "Free Votar"
+        ? window.location.origin + "/freevotar/ballot?candidate=" + electionID
+        : window.location.origin + "/vote";
     try {
       await navigator.clipboard.writeText(url);
       toast.success("Copied to clipboard!");
@@ -310,6 +313,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   }
 
   console.log(election);
+  console.log(election?.type);
 
   return (
     <div className="my-[60px]">
