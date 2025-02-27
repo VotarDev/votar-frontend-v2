@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import leftline from "../../../public/assets/images/left-line.svg";
 import rightline from "../../../public/assets/images/right-line.svg";
-import { Details, ElectionDetails } from "@/utils/types";
-
-import avatar from "../../public/assets/images/avatar-placeholder.png";
+import { ElectionDetails } from "@/utils/types";
 import checked from "../../../public/assets/icons/checked.svg";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
@@ -31,11 +29,8 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
-import { getServerSession } from "next-auth";
 import { useSession, signOut } from "next-auth/react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-import { set, update } from "lodash";
-import { is } from "date-fns/locale";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -77,14 +72,13 @@ const FreeVotarBallot = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<
     SelectedCandidates[]
   >([]);
-  const [pickedCandidates, setPickedCandidates] = useState({} as any);
+
   const [abstentions, setAbstentions] = useState({} as any);
   const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const users = useCurrentUser();
-  const user = useUser();
+
   const [showModal, setShowModal] = useState(false);
-  const [showGoogleAuth, setShowGoogleAuth] = useState(true);
+
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
@@ -161,21 +155,21 @@ const FreeVotarBallot = () => {
     );
   };
 
-  const isCandidateActive = (position: string, candidate: Candidate) => {
-    if (abstentions[position]?.abstained) {
-      return false;
-    }
+  //   const isCandidateActive = (position: string, candidate: Candidate) => {
+  //     if (abstentions[position]?.abstained) {
+  //       return false;
+  //     }
 
-    const positionData = selectedCandidates.find(
-      (sc: any) => sc.position === position
-    );
+  //     const positionData = selectedCandidates.find(
+  //       (sc: any) => sc.position === position
+  //     );
 
-    return (
-      positionData?.candidates.some(
-        (c) => c.candidate_name === candidate.candidate_name && c.vote > 0
-      ) ?? false
-    );
-  };
+  //     return (
+  //       positionData?.candidates.some(
+  //         (c) => c.candidate_name === candidate.candidate_name && c.vote > 0
+  //       ) ?? false
+  //     );
+  //   };
 
   const closeModal = () => setShowModal(false);
   const handleLogout = async () => {
