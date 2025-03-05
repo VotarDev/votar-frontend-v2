@@ -3,7 +3,7 @@ import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { PiWarningCircleFill } from "react-icons/pi";
 
-const BuyVotingCredit = () => {
+const BuyVotingCredit = ({ election }: { election: any }) => {
   const [votarCredit, setVotarCredit] = useState(0);
   const handleAddVotarCredit = (increment: boolean) => {
     if (increment) {
@@ -17,7 +17,7 @@ const BuyVotingCredit = () => {
   const handleInputChange = (e: any) => {
     setVotarCredit(e.target.value);
   };
-  console.log(votarCredit);
+
   return (
     <div className="bg-white rounded-lg pt-[64px] pb-[83px] px-4 lg:px-10">
       <div className="text-blue-700 lg:text-2xl text-base font-semibold">
@@ -104,7 +104,8 @@ const BuyVotingCredit = () => {
           <div className="text-[#ECAE0D]">
             <PiWarningCircleFill />
           </div>
-          You need 5 Votar Credits to give 1 vote in your election.
+          You need {election?.price_per_vote} Votar Credits to give 1 vote in
+          your election.
         </div>
       </div>
     </div>

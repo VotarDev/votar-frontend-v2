@@ -3,7 +3,7 @@ import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import BuyVotingCredit from "../BuyVotingCredit";
 
-const MiniDashboard = () => {
+const MiniDashboard = ({ election }: { election: any }) => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
   return (
@@ -52,7 +52,7 @@ const MiniDashboard = () => {
       <AnimatePresence mode="wait">
         {showModal && (
           <Modal key="modal" handleClose={closeModal}>
-            <BuyVotingCredit />
+            <BuyVotingCredit election={election} />
           </Modal>
         )}
       </AnimatePresence>

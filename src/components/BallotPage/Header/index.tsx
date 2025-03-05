@@ -30,8 +30,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
     }
   };
 
-  console.log("Election ID:", electionDetails?.election_id);
-  console.log("Background Image URL:", electionDetails?.elect_background_img);
+  console.log(electionDetails);
   if (
     electionDetails?.type === "Free Votar" &&
     electionDetails?.elect_background_img
@@ -79,7 +78,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
           {router.pathname.split("/")[1].includes("cast-votes") ||
             router.pathname.split("/")[1].includes("preview-election") ||
             (router.pathname.split("/")[1].includes("freevotar") && (
-              <MiniDashboard />
+              <MiniDashboard election={electionDetails} />
             ))}
         </div>
       </div>
