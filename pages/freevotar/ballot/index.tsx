@@ -389,6 +389,8 @@ const FreeVotarBallot = () => {
     }
   };
 
+  console.log(election);
+
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
       <AnimatePresence mode="wait">

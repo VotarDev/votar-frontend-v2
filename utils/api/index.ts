@@ -55,6 +55,7 @@ const createWalletUrl = "/user/wallet";
 const createCreditUrl = "/user/add_credit";
 const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
+const purchaseVotarCreditUrl = "";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";

@@ -148,6 +148,7 @@ export type ElectionDetails = {
   elect_background_img: string;
   type: string;
   published: boolean;
+  price_per_vote: number;
   __v: number;
   _id: string;
 };
@@ -182,6 +183,7 @@ export type DetailFormState = {
   start_time: string | number | undefined;
   end_time: string | undefined | number;
   max_number_candidate: number;
+  price_per_vote: number;
 };
 
 export type DetailFormAction =
@@ -197,4 +199,6 @@ export type DetailFormAction =
   | { type: "SET_CANDIDATE_NO"; value: number }
   | { type: "SET_ELECTION"; value: ElectionDetails }
   | { type: "INCREMENT_CANDIDATE_NO"; value: number }
-  | { type: "DECREMENT_CANDIDATE_NO"; value: number };
+  | { type: "DECREMENT_CANDIDATE_NO"; value: number }
+  | { type: "INCREMENT_PRICE_PER_VOTE"; value: number }
+  | { type: "DECREMENT_PRICE_PER_VOTE"; value: number };

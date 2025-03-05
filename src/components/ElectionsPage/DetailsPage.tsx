@@ -155,10 +155,12 @@ const DetailsPage = ({
     { value: "violet", label: "Violet" },
   ];
 
-  const handleCandidateNo = () => {
+  const handleCandidateNo = (e: any) => {
+    e.preventDefault();
     dispatch({ type: "INCREMENT_CANDIDATE_NO", value: 1 });
   };
-  const decreaseCanditateNo = () => {
+  const decreaseCanditateNo = (e: any) => {
+    e.preventDefault();
     dispatch({ type: "DECREMENT_CANDIDATE_NO", value: 1 });
   };
 
@@ -226,13 +228,23 @@ const DetailsPage = ({
     }
   };
 
-  const votingPriceIncrement = () => {
+  const votingPriceIncrement = (e: any) => {
+    e.preventDefault();
     setPricePerVote(pricePerVote + 1);
+    dispatch({
+      type: "INCREMENT_PRICE_PER_VOTE",
+      value: 1,
+    });
   };
-  const votingPriceDecrement = () => {
+  const votingPriceDecrement = (e: any) => {
+    e.preventDefault();
     if (pricePerVote > 0) {
       setPricePerVote(pricePerVote - 1);
     }
+    dispatch({
+      type: "DECREMENT_PRICE_PER_VOTE",
+      value: 1,
+    });
   };
 
   return (
@@ -587,7 +599,7 @@ const DetailsPage = ({
                         </button>
                         <input
                           type="text"
-                          value={pricePerVote}
+                          value={state.price_per_vote || pricePerVote}
                           className="w-10 outline-none text-center"
                         />
                         <button

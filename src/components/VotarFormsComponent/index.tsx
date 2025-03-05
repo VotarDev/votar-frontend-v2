@@ -44,32 +44,34 @@ const VotarFormsComponent = ({
               </div>
             ) : (
               <div className="flex flex-col gap-5">
-                {elections.map((election, index) => (
-                  <div key={index}>
-                    <div
-                      className="flex items-center gap-2"
-                      onClick={() =>
-                        handleElectionDetails(
-                          election.name_of_election,
-                          election.election_id
-                        )
-                      }
-                    >
-                      <input
-                        type="checkbox"
-                        name="checkbox"
-                        id={`checkbox${index}`}
-                        className="w-5 h-5 bg-white rounded-full align-middle border border-gray-600 appearance-none outline-none cursor-pointer checked:bg-blue-600 checked:border-white"
-                      />
-                      <label
-                        htmlFor={`checkbox${index}`}
-                        className="text-lg cursor-pointer"
+                {elections
+                  .filter((election) => election.type !== "Free Votar")
+                  .map((election, index) => (
+                    <div key={index}>
+                      <div
+                        className="flex items-center gap-2"
+                        onClick={() =>
+                          handleElectionDetails(
+                            election.name_of_election,
+                            election.election_id
+                          )
+                        }
                       >
-                        {election.name_of_election}
-                      </label>
+                        <input
+                          type="checkbox"
+                          name="checkbox"
+                          id={`checkbox${index}`}
+                          className="w-5 h-5 bg-white rounded-full align-middle border border-gray-600 appearance-none outline-none cursor-pointer checked:bg-blue-600 checked:border-white"
+                        />
+                        <label
+                          htmlFor={`checkbox${index}`}
+                          className="text-lg cursor-pointer"
+                        >
+                          {election.name_of_election}
+                        </label>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>

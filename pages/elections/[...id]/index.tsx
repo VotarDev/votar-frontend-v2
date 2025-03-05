@@ -41,6 +41,7 @@ const initState: DetailFormState = {
   start_time: "",
   end_time: "",
   max_number_candidate: 0,
+  price_per_vote: 0,
 };
 
 const ElectionDetail = () => {
@@ -123,7 +124,19 @@ const ElectionDetail = () => {
           start_time: formatTimeToHHMM(Number(action.value.start_time || "")),
           end_time: formatTimeToHHMM(Number(action.value.end_time || "")),
           max_number_candidate: action.value.max_number_candidate,
+          price_per_vote: action.value.price_per_vote,
         };
+      case "INCREMENT_PRICE_PER_VOTE":
+        return {
+          ...state,
+          price_per_vote: state.price_per_vote + action.value,
+        };
+      case "DECREMENT_PRICE_PER_VOTE":
+        return {
+          ...state,
+          price_per_vote: state.price_per_vote - action.value,
+        };
+
       case "INCREMENT_CANDIDATE_NO":
         return {
           ...state,
@@ -139,7 +152,6 @@ const ElectionDetail = () => {
     }
   }
 
-  console.log(state.background_image);
   const handleStepApiCall = async (step: number) => {
     const [startDateString] = state.start_date
       ? state?.start_date.split(" ")
@@ -166,7 +178,7 @@ const ElectionDetail = () => {
     formData.append("secondary_color", state.secondary_color);
     formData.append("start_date", startDateData);
     formData.append("end_date", endDateData);
-
+    formData.append("price_per_vote", state.price_per_vote.toString());
     if (state.start_time)
       formData.append("start_time", String(state.start_time));
     if (state.end_time) formData.append("end_time", String(state.end_time));

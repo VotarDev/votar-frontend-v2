@@ -30,15 +30,18 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
     }
   };
 
-  if (electionDetails?.type === "Free Votar")
+  console.log("Election ID:", electionDetails?.election_id);
+  console.log("Background Image URL:", electionDetails?.elect_background_img);
+  if (
+    electionDetails?.type === "Free Votar" &&
+    electionDetails?.elect_background_img
+  )
     return (
       <div>
         <div
           style={{
             backgroundImage: electionDetails?.elect_background_img
-              ? `url("${
-                  electionDetails.elect_background_img
-                }?t=${new Date().getTime()}")`
+              ? `url("${electionDetails.elect_background_img}?t=${Date.now()}")`
               : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -53,7 +56,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
               <img
                 src={electionDetails?.association_logo}
                 alt="logo"
-                className="rounded-full w-20 h-20 "
+                className="rounded-full w-20 h-20"
               />
             </div>
             <div className="lg:text-3xl text-base font-semibold">
