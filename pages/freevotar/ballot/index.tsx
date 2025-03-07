@@ -111,6 +111,7 @@ const FreeVotarBallot = () => {
 
   useEffect(() => {
     const registerVotar = async () => {
+      const cookie = new Cookies();
       try {
         const userData = {
           name: session?.user?.name,
@@ -119,6 +120,10 @@ const FreeVotarBallot = () => {
           election_id: candidateId,
         };
         const { data } = await registerVoter(userData);
+        if (data.data) {
+          console.log(data.data.token);
+          cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
+        }
       } catch (error) {
         console.log(error);
       }

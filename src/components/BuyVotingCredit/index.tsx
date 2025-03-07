@@ -3,9 +3,13 @@ import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { PiWarningCircleFill } from "react-icons/pi";
 import { purchaseVotarCredit } from "@/utils/api";
+import Cookies from "universal-cookie";
+import { voterLoginCookieName } from "@/src/__env";
+import setAuthToken from "@/utils/setAuthToken";
 
 const BuyVotingCredit = ({ election }: { election: any }) => {
   const [votarCredit, setVotarCredit] = useState(0);
+
   const handleAddVotarCredit = (increment: boolean) => {
     if (increment) {
       let credit = Number(votarCredit);
@@ -17,7 +21,13 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
   };
 
   const handlePurchaseVotarCredit = async () => {
+    const cookie = new Cookies();
+    const token = cookie.get(voterLoginCookieName);
     try {
+      if (token) {
+        setAuthToken(token);
+        console.log("token", token);
+      }
       const bodyData = {
         email: "",
         amount: votarCredit,
