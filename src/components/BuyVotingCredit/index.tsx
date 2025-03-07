@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { PiWarningCircleFill } from "react-icons/pi";
+import { purchaseVotarCredit } from "@/utils/api";
 
 const BuyVotingCredit = ({ election }: { election: any }) => {
   const [votarCredit, setVotarCredit] = useState(0);
@@ -12,6 +13,19 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
     } else {
       let credit = Number(votarCredit);
       setVotarCredit((credit -= 1));
+    }
+  };
+
+  const handlePurchaseVotarCredit = async () => {
+    try {
+      const bodyData = {
+        email: "",
+        amount: votarCredit,
+      };
+      const response = await purchaseVotarCredit(bodyData);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
   };
   const handleInputChange = (e: any) => {
@@ -95,7 +109,10 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
         </div>
       </div>
       <div className="flex justify-center mt-5">
-        <button className="h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100">
+        <button
+          onClick={handlePurchaseVotarCredit}
+          className="h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100"
+        >
           Make Payment Of NGN {votarCredit}
         </button>
       </div>

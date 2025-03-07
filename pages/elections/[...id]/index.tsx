@@ -17,8 +17,9 @@ import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 import setAuthToken from "@/utils/setAuthToken";
 import { updateElection, updateCandidate } from "@/utils/api";
 import { BsArrowLeft } from "react-icons/bs";
+import { useSelector } from "react-redux";
 
-const steps = [
+let steps = [
   "Details",
   "Ballot",
   "Voters Page",
@@ -58,6 +59,7 @@ const ElectionDetail = () => {
     return savedStep ? Number(savedStep) : 0;
   });
   const [position, setPosition] = useState<any>([]);
+  const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
   const [state, dispatch] = useReducer(reducer, initState);
 
@@ -83,6 +85,10 @@ const ElectionDetail = () => {
   const goToStep = (stepIndex: number) => {
     setCurrentStep(stepIndex);
   };
+
+  if (votarPlan === "Free Votar") {
+    steps = ["Details", "Ballot", "Pay", "Monitor Election"];
+  }
 
   function reducer(
     state: DetailFormState,

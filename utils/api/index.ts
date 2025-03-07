@@ -1,4 +1,3 @@
-import exp from "constants";
 import httpService from "../axios";
 
 const signupurl = "/auth/signup";
@@ -55,7 +54,7 @@ const createWalletUrl = "/user/wallet";
 const createCreditUrl = "/user/add_credit";
 const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
-const purchaseVotarCreditUrl = "";
+const purchaseVotarCreditUrl = "/user/purchase_voterCredit";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -311,6 +310,10 @@ export const getCredit = (id: string) => {
 
 export const registerVoter = (data: any) => {
   return httpService.post(registerVoterUrl, data);
+};
+
+export const purchaseVotarCredit = (data: any) => {
+  return httpService.post(purchaseVotarCreditUrl, data);
 };
 
 /** ADMIN */

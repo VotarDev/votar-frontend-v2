@@ -22,7 +22,6 @@ import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { useSelector } from "react-redux";
-import { de } from "date-fns/locale";
 
 const Create = () => {
   let step = 1;
@@ -77,7 +76,7 @@ const Create = () => {
     ? users?.id
     : user?.user?.id;
 
-  const steps = [
+  let steps = [
     "Details",
     "Ballot",
     "Voters Page",
@@ -85,6 +84,10 @@ const Create = () => {
     "Pay",
     "Monitor Election",
   ];
+
+  if (votarPlan === "Free Votar") {
+    steps = ["Details", "Ballot", "Pay", "Monitor Election"];
+  }
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -166,6 +169,7 @@ const Create = () => {
     detailsFormData.append("end_date", endDateData);
     detailsFormData.append("type", votarPlan);
     detailsFormData.append("price_per_vote", pricePerVote.toString());
+    detailsFormData.append("free_votes", numberofFreeVote.toString());
 
     if (logo) detailsFormData.append("election-image", logo);
     if (backgroundImageFile)
