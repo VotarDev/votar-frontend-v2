@@ -8,7 +8,7 @@ const Vote = () => {
     <div>
       <VoteHeader />
       <div className="px-4">
-        <MiniDashboard />
+        <MiniDashboard election={null} />
         <VoteBody />
       </div>
     </div>
