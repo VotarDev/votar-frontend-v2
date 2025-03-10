@@ -52,7 +52,7 @@ const MiniDashboard = ({ election }: { election: any }) => {
       <AnimatePresence mode="wait">
         {showModal && (
           <Modal key="modal" handleClose={closeModal}>
-            <BuyVotingCredit election={election} />
+            <BuyVotingCredit election={election} setShowModal={setShowModal} />
           </Modal>
         )}
       </AnimatePresence>

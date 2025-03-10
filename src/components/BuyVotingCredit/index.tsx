@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { PiWarningCircleFill } from "react-icons/pi";
@@ -6,10 +6,30 @@ import { purchaseVotarCredit } from "@/utils/api";
 import Cookies from "universal-cookie";
 import { voterLoginCookieName } from "@/src/__env";
 import setAuthToken from "@/utils/setAuthToken";
+import { useSession, signOut } from "next-auth/react";
+import toast from "react-hot-toast";
 
-const BuyVotingCredit = ({ election }: { election: any }) => {
+const BuyVotingCredit = ({
+  election,
+  setShowModal,
+}: {
+  election: any;
+  setShowModal: Dispatch<SetStateAction<boolean>>;
+}) => {
   const [votarCredit, setVotarCredit] = useState(0);
+  const { data: session, status } = useSession();
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  const [votarCredits, setVotarCredits] = useState<any>(null);
 
+  useEffect(() => {
+    const cookie = new Cookies();
+    const credits = cookie.get("votar-credits");
+    if (credits) {
+      setVotarCredits(credits);
+    }
+  }, []);
+
+  console.log("election", election);
   const handleAddVotarCredit = (increment: boolean) => {
     if (increment) {
       let credit = Number(votarCredit);
@@ -21,6 +41,7 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
   };
 
   const handlePurchaseVotarCredit = async () => {
+    setIsPurchasing(true);
     const cookie = new Cookies();
     const token = cookie.get(voterLoginCookieName);
     try {
@@ -29,15 +50,23 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
         console.log("token", token);
       }
       const bodyData = {
-        email: "",
+        email: session?.user?.email,
         amount: votarCredit,
+        election_id: election?.election_id,
       };
-      const response = await purchaseVotarCredit(bodyData);
-      console.log(response);
+      const { data } = await purchaseVotarCredit(bodyData);
+      if (data) {
+        console.log(data.data.votar_credits);
+        toast.success("Votar Credit Purchased Successfully");
+        setShowModal(false);
+        cookie.set("votar-credits", data.data.votar_credits, { path: "/" });
+      }
     } catch (error) {
       console.log(error);
     }
   };
+
+  const voteNumber = votarCredits?.toString().split("");
   const handleInputChange = (e: any) => {
     setVotarCredit(e.target.value);
   };
@@ -64,13 +93,33 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
             Votar
             <br /> Credits
           </div>
-          <div className="flex justify-end gap-2 text-3xl">
-            <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
+          <div>
+            {/* <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
               0
             </span>
             <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
               3
-            </span>
+            </span> */}
+            <div className="flex justify-end gap-2 text-3xl">
+              {votarCredits === null && (
+                <>
+                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
+                    0
+                  </span>
+                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
+                    0
+                  </span>
+                </>
+              )}
+              {voteNumber?.map((num: any, index: any) => (
+                <div
+                  key={index}
+                  className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded"
+                >
+                  {num}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className="w-px h-[150px] border border-slate-900"></div>
@@ -120,10 +169,13 @@ const BuyVotingCredit = ({ election }: { election: any }) => {
       </div>
       <div className="flex justify-center mt-5">
         <button
+          disabled={isPurchasing}
           onClick={handlePurchaseVotarCredit}
           className="h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100"
         >
-          Make Payment Of NGN {votarCredit}
+          {isPurchasing
+            ? "Processing..."
+            : ` Make Payment Of NGN ${votarCredit} Votar Credits`}
         </button>
       </div>
       <div className=" flex items-center justify-center lg:text-[18px] text-sm text-center p-2 mt-7">
