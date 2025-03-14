@@ -1,11 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import BuyVotingCredit from "../BuyVotingCredit";
+import Cookies from "universal-cookie";
 
 const MiniDashboard = ({ election }: { election: any }) => {
   const [showModal, setShowModal] = useState(false);
   const closeModal = () => setShowModal(false);
+  const [votarCredits, setVotarCredits] = useState<any>(null);
+
+  useEffect(() => {
+    const cookie = new Cookies();
+    const credits = cookie.get("votar-credits");
+    if (credits) {
+      setVotarCredits(credits);
+    }
+  }, []);
+
+  const voteNumber = votarCredits?.toString().split("");
   return (
     <div className="flex justify-center relative mt-12">
       <div className="lg:w-[551px] w-full max-w-[40rem] py-8 flex bg-slate-50 lg:rounded-full rounded-lg justify-center items-center lg:text-[24px] text-base font-semibold flex-col gap-6">
@@ -25,7 +37,7 @@ const MiniDashboard = ({ election }: { election: any }) => {
             </div>
           </div>
           <div className="w-px h-28 border border-slate-900"></div>
-          <div className="flex flex-col gap-3">
+          {/* <div className="flex flex-col gap-3">
             <div>Votar Credits</div>
             <div className="flex gap-2">
               <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
@@ -34,6 +46,33 @@ const MiniDashboard = ({ election }: { election: any }) => {
               <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
                 0
               </span>
+            </div>
+            <div className="lg:text-[18px] text-base font-normal text-blue-700 underline">
+              Learn More
+            </div>
+          </div> */}
+          <div className="flex flex-col gap-3">
+            <div>Votar Credits</div>
+
+            <div className="flex  gap-2 ">
+              {votarCredits === null && (
+                <>
+                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
+                    0
+                  </span>
+                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
+                    0
+                  </span>
+                </>
+              )}
+              {voteNumber?.map((num: any, index: any) => (
+                <div
+                  key={index}
+                  className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded"
+                >
+                  {num}
+                </div>
+              ))}
             </div>
             <div className="lg:text-[18px] text-base font-normal text-blue-700 underline">
               Learn More

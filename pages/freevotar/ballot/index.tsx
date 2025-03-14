@@ -121,7 +121,7 @@ const FreeVotarBallot = () => {
         };
         const { data } = await registerVoter(userData);
         if (data.data) {
-          console.log(data.data.token);
+          console.log(data.data);
           cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
         }
       } catch (error) {
