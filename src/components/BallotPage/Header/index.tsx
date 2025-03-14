@@ -50,7 +50,7 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
           }`}
         >
           <div className="absolute w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-0"></div>
-          <div className="z-10 flex flex-col gap-2">
+          <div className="z-[5] flex flex-col gap-2">
             <div className="flex justify-center">
               <img
                 src={electionDetails?.association_logo}

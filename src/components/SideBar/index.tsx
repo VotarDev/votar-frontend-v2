@@ -404,7 +404,7 @@ const SideBar = ({
         </span>
       </div>
 
-      <div className="!z-[999]">
+      <div className="!z-[999999]">
         <AnimatePresence mode="wait">
           {showModal && (
             <Modal key="modal" handleClose={closeModal}>
