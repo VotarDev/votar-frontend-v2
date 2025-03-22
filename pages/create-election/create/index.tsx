@@ -99,6 +99,9 @@ const Create = () => {
   }, []);
 
   const displaySteps = (step: number) => {
+    if (step === 3 && votarPlan === "Free Votar") {
+      step = 4;
+    }
     switch (step) {
       case 1:
         return (

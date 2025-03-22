@@ -41,6 +41,7 @@ type BallotData = {
   _id: string;
   __v: number;
 };
+
 type Candidate = {
   candidate_name: string;
   candidate_nickname: string;
@@ -52,9 +53,11 @@ type Candidate = {
 
 type SelectedCandidates = {
   position: string;
-  candidates: Candidate[];
+  candidates?: Candidate[];
   abstain?: boolean;
 };
+
+const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 2;
 
 const FreeVotarBallot = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -82,9 +85,8 @@ const FreeVotarBallot = () => {
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
-  //   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
-  //     Details[]
-  //   >([]);
+  console.log(selectedCandidates);
+
   const [colors, setColors] = useState<string[]>([]);
   const cols = [
     "#b138b3",
@@ -142,41 +144,106 @@ const FreeVotarBallot = () => {
 
   const handleSelectCandidate = (
     positionName: string,
-    selectedCandidate: any
+    selectedCandidate: Candidate
   ) => {
-    setCandidates((prevData: any) =>
-      prevData.map((position: any) =>
+    if (abstentions[positionName]?.abstained) {
+      toast.error(
+        `You have abstained from voting for ${positionName}. Please remove abstention first.`
+      );
+      return;
+    }
+
+    const positionData = candidates.find(
+      (pos) => pos.name_of_position === positionName
+    );
+
+    if (!positionData) return;
+
+    const selectedCount = positionData.candidates.filter(
+      (c) => c.vote > 0
+    ).length;
+
+    const isAlreadySelected = selectedCandidate.vote > 0;
+
+    if (
+      !isAlreadySelected &&
+      selectedCount >= MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED
+    ) {
+      toast.error(
+        `You can only select up to ${MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED} candidates for ${positionName}`
+      );
+      return;
+    }
+
+    setCandidates((prevData) =>
+      prevData.map((position) =>
         position.name_of_position === positionName
           ? {
               ...position,
-              candidates: position.candidates.map((candidate: any) =>
-                candidate === selectedCandidate
+              candidates: position.candidates.map((candidate) =>
+                candidate.candidate_name === selectedCandidate.candidate_name
                   ? { ...candidate, vote: candidate.vote > 0 ? 0 : 1 }
-                  : { ...candidate, vote: 0 }
+                  : candidate
               ),
             }
           : position
       )
     );
+
+    setAbstentions((prevState: any) => ({
+      ...prevState,
+      [positionName]: { abstained: false },
+    }));
+
+    setSelectedCandidates((prevState) => {
+      const existingPositionIndex = prevState.findIndex(
+        (sc) => sc.position === positionName
+      );
+
+      const updatedState = [...prevState];
+
+      if (existingPositionIndex === -1) {
+        if (!isAlreadySelected) {
+          updatedState.push({
+            position: positionName,
+            candidates: [{ ...selectedCandidate, vote: 1 }],
+            abstain: false,
+          });
+        }
+      } else {
+        const existingPosition = updatedState[existingPositionIndex];
+        const existingCandidates = existingPosition.candidates || [];
+
+        if (isAlreadySelected) {
+          const updatedCandidates = existingCandidates.filter(
+            (c) => c.candidate_name !== selectedCandidate.candidate_name
+          );
+
+          if (updatedCandidates.length === 0) {
+            updatedState.splice(existingPositionIndex, 1);
+          } else {
+            updatedState[existingPositionIndex] = {
+              ...existingPosition,
+              candidates: updatedCandidates,
+            };
+          }
+        } else {
+          updatedState[existingPositionIndex] = {
+            ...existingPosition,
+            candidates: [
+              ...existingCandidates,
+              { ...selectedCandidate, vote: 1 },
+            ],
+          };
+        }
+      }
+
+      return updatedState;
+    });
   };
 
-  //   const isCandidateActive = (position: string, candidate: Candidate) => {
-  //     if (abstentions[position]?.abstained) {
-  //       return false;
-  //     }
-
-  //     const positionData = selectedCandidates.find(
-  //       (sc: any) => sc.position === position
-  //     );
-
-  //     return (
-  //       positionData?.candidates.some(
-  //         (c) => c.candidate_name === candidate.candidate_name && c.vote > 0
-  //       ) ?? false
-  //     );
-  //   };
-
   const closeModal = () => setShowModal(false);
+
   const handleLogout = async () => {
     dispatch(logout());
     const cookie = new Cookies();
@@ -208,7 +275,6 @@ const FreeVotarBallot = () => {
 
         if (data) {
           setElection(data.data);
-
           setIsFetchElection(false);
         }
       } catch (error: any) {
@@ -269,19 +335,24 @@ const FreeVotarBallot = () => {
 
     try {
       if (voterProfile.userData && voterProfile.userData.election_id) {
-        const selectedVotes = selectedCandidates.flatMap((item) =>
-          item.candidates
-            ? item.candidates.map((can) => ({
-                candidate_name: can.candidate_name,
-                position: item.position,
-                abstain: false,
-              }))
-            : []
-        );
+        const selectedVotes = selectedCandidates
+          .filter((item) => !item.abstain)
+          .flatMap((item) =>
+            item.candidates
+              ? item.candidates.map((can) => ({
+                  candidate_name: can.candidate_name,
+                  position: item.position,
+                  abstain: false,
+                }))
+              : []
+          );
 
-        const abstainVotes = Object.keys(abstentions).flatMap((position) =>
-          abstentions[position]?.abstained ? [{ position, abstain: true }] : []
-        );
+        const abstainVotes = selectedCandidates
+          .filter((item) => item.abstain)
+          .map((item) => ({
+            position: item.position,
+            abstain: true,
+          }));
 
         const votes = [...selectedVotes, ...abstainVotes];
 
@@ -307,70 +378,63 @@ const FreeVotarBallot = () => {
   };
 
   const handleAbstain = (position: string) => {
-    setSelectedCandidates((prevState: any) => {
-      const updatedCandidates = prevState.filter(
-        (sc: any) => sc.position !== position
+    const positionData = candidates.find(
+      (p) => p.name_of_position === position
+    );
+    const isCandidateSelected = positionData?.candidates.some(
+      (c) => c.vote > 0
+    );
+
+    if (isCandidateSelected) {
+      toast.error(
+        `You cannot abstain after selecting a candidate for ${position}`
       );
-
-      return [...updatedCandidates, { position, abstain: true }];
-    });
-
-    setAbstentions((prevState: any) => ({
-      ...prevState,
-      [position]: {
-        abstained: true,
-      },
-    }));
-
-    toast.success(
-      `You have abstained from voting for the position: ${position}`
-    );
-  };
-
-  const combinedData = candidates.reduce((acc: any, curr: any) => {
-    const existingPosition = acc.find(
-      (item: any) => item.name_of_position === curr.name_of_position
-    );
-
-    if (existingPosition) {
-      existingPosition.candidates.push(...curr.candidates);
-    } else {
-      acc.push({
-        allow_abstain: curr.allow_abstain,
-        author_id: curr.author_id,
-        candidates: [...curr.candidates],
-        name_of_position: curr.name_of_position,
-        show_pictures: curr.show_pictures,
-        _id: curr._id,
-        __v: curr.__v,
-      });
+      return;
     }
 
-    return acc;
-  }, []);
+    if (abstentions[position]?.abstained) {
+      setAbstentions((prevState: any) => {
+        const newState = { ...prevState };
+        delete newState[position];
+        return newState;
+      });
 
-  useEffect(() => {
-    const allPositions = combinedData.map((item: any) => item.name_of_position);
+      setSelectedCandidates((prevState) => {
+        return prevState.filter((sc) => sc.position !== position);
+      });
 
-    const selectedPositions = selectedCandidates.map(
-      (item: any) => item.position
-    );
+      toast.success(`Abstention removed for position: ${position}`);
+    } else {
+      setCandidates((prevData) =>
+        prevData.map((pos) =>
+          pos.name_of_position === position
+            ? {
+                ...pos,
+                candidates: pos.candidates.map((candidate) => ({
+                  ...candidate,
+                  vote: 0,
+                })),
+              }
+            : pos
+        )
+      );
 
-    const abstainedPositions = Object.keys(abstentions).filter(
-      (position) => abstentions[position]?.abstained === true
-    );
+      setSelectedCandidates((prevState) => {
+        const updatedState = prevState.filter((sc) => sc.position !== position);
 
-    const selectedAndAbstainedPositions = [
-      ...selectedPositions,
-      ...abstainedPositions,
-    ];
+        return [...updatedState, { position, abstain: true }];
+      });
 
-    const isAllPositionsSelected = allPositions.every((position: any) =>
-      selectedAndAbstainedPositions.includes(position)
-    );
+      setAbstentions((prevState: any) => ({
+        ...prevState,
+        [position]: { abstained: true },
+      }));
 
-    setAllPositionsSelected(isAllPositionsSelected);
-  }, [selectedCandidates, abstentions, combinedData]);
+      toast.success(
+        `You have abstained from voting for the position: ${position}`
+      );
+    }
+  };
 
   const handleVote = (
     positionIndex: number,
@@ -378,23 +442,77 @@ const FreeVotarBallot = () => {
     increment: boolean
   ) => {
     if (
-      combinedData &&
-      combinedData[positionIndex] &&
-      combinedData[positionIndex].candidates[candidateIndex]
+      candidates &&
+      candidates[positionIndex] &&
+      candidates[positionIndex].candidates[candidateIndex]
     ) {
-      const updatedCandidates = [...combinedData];
+      const updatedCandidates = [...candidates];
+      const positionName = updatedCandidates[positionIndex].name_of_position;
       const candidate =
         updatedCandidates[positionIndex].candidates[candidateIndex];
+
       if (increment) {
         candidate.vote += 1;
-      } else {
+      } else if (candidate.vote > 0) {
         candidate.vote -= 1;
       }
+
       setCandidates(updatedCandidates);
+
+      if (candidate.vote === 0) {
+        setSelectedCandidates((prevState) =>
+          prevState.filter((item) => item.position !== positionName)
+        );
+      } else {
+        setSelectedCandidates((prevState) => {
+          const positionExists = prevState.find(
+            (item) => item.position === positionName
+          );
+
+          if (positionExists) {
+            return prevState.map((item) =>
+              item.position === positionName
+                ? {
+                    position: positionName,
+                    candidates: [...candidates[positionIndex].candidates],
+                    abstain: false,
+                  }
+                : item
+            );
+          } else {
+            return [
+              ...prevState,
+              {
+                position: positionName,
+                candidates: [...candidates[positionIndex].candidates],
+                abstain: false,
+              },
+            ];
+          }
+        });
+
+        setAbstentions((prevState: any) => ({
+          ...prevState,
+          [positionName]: { abstained: false },
+        }));
+      }
     }
   };
 
-  console.log(election);
+  useEffect(() => {
+    if (candidates.length > 0) {
+      const allPositions = candidates.map((item) => item.name_of_position);
+      const selectedOrAbstainedPositions = selectedCandidates.map(
+        (item) => item.position
+      );
+
+      const isAllPositionsSelected = allPositions.every((position) =>
+        selectedOrAbstainedPositions.includes(position)
+      );
+
+      setAllPositionsSelected(isAllPositionsSelected);
+    }
+  }, [selectedCandidates, candidates]);
 
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
@@ -497,13 +615,13 @@ const FreeVotarBallot = () => {
                       </div>
                     ) : (
                       <div className="mt-[56px] max-w-[1200px] mx-auto">
-                        {combinedData &&
-                          combinedData.map((preview: any, index: any) => {
+                        {candidates &&
+                          candidates.map((position, positionIndex) => {
                             const randomColor =
                               cols[Math.floor(Math.random() * cols.length)];
                             return (
                               <div
-                                key={index}
+                                key={positionIndex}
                                 className="bg-slate-50 mt-20 mb-14 p-10"
                                 style={{
                                   ...(isClient && {
@@ -519,7 +637,7 @@ const FreeVotarBallot = () => {
                                       className="w-14 lg:w-full"
                                     />
                                   </div>
-                                  <div>{preview.name_of_position}</div>
+                                  <div>{position.name_of_position}</div>
                                   <div>
                                     <img
                                       src={rightline.src}
@@ -529,103 +647,126 @@ const FreeVotarBallot = () => {
                                   </div>
                                 </div>
                                 <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
-                                  {preview.candidates.map(
-                                    (candidate: any, candidateIndex: any) => (
-                                      <div
-                                        key={candidateIndex}
-                                        className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
-                                          candidate.vote > 0
-                                            ? "active"
-                                            : "duration-500"
-                                        }`}
-                                      >
-                                        {candidate.vote > 0 && (
-                                          <div className="absolute -right-2 -top-3 ">
-                                            <img src={checked.src} alt="" />
-                                          </div>
-                                        )}
+                                  {position.candidates.map(
+                                    (candidate, candidateIndex) => {
+                                      const isSelected = candidate.vote > 0;
+                                      const isAbstained =
+                                        abstentions[position.name_of_position]
+                                          ?.abstained;
 
-                                        <div>
-                                          <div className="mb-3">
-                                            <img
-                                              onClick={() =>
-                                                handleSelectCandidate(
-                                                  preview.name_of_position,
-                                                  candidate
-                                                )
-                                              }
-                                              src={candidate.candidate_picture}
-                                              className="w-[269px] h-[269px] object-cover rounded"
-                                              alt={`Image for ${candidate.candidate_name}`}
-                                            />
-                                          </div>
+                                      return (
+                                        <div
+                                          key={candidateIndex}
+                                          className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
+                                            isSelected
+                                              ? "active"
+                                              : "duration-500"
+                                          }`}
+                                        >
+                                          {isSelected && (
+                                            <div className="absolute -right-2 -top-3 ">
+                                              <img src={checked.src} alt="" />
+                                            </div>
+                                          )}
 
-                                          <div className="capitalize">
-                                            <div>
-                                              {candidate.candidate_name}
-                                            </div>
-                                            <div className="text-base">
-                                              ({candidate.candidate_nickname})
-                                            </div>
-                                          </div>
-                                          <div className="text-base text-blue-700 underline cursor-pointer font-normal">
-                                            More Details
-                                          </div>
-                                          <div className="flex justify-center pt-3 gap-4 items-center">
-                                            <div>
-                                              <button
-                                                className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                                  candidate.vote <= 0
-                                                    ? "cursor-not-allowed opacity-50"
-                                                    : ""
-                                                }`}
+                                          <div>
+                                            <div className="mb-3">
+                                              <img
                                                 onClick={() =>
-                                                  handleVote(
-                                                    index,
-                                                    candidateIndex,
-                                                    false
+                                                  handleSelectCandidate(
+                                                    position.name_of_position,
+                                                    candidate
                                                   )
                                                 }
-                                                disabled={candidate.vote <= 0}
-                                              >
-                                                <span className="text-xl">
-                                                  <AiOutlineMinus />
-                                                </span>
-                                              </button>
-                                            </div>
-                                            <div>{candidate.vote ?? 0}</div>
-                                            <div>
-                                              <button
-                                                className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100`}
-                                                onClick={() =>
-                                                  handleVote(
-                                                    index,
-                                                    candidateIndex,
-                                                    true
-                                                  )
+                                                src={
+                                                  candidate.candidate_picture
                                                 }
-                                              >
-                                                <span className="text-xl">
-                                                  <AiOutlinePlus />
-                                                </span>
-                                              </button>
+                                                className="w-[269px] h-[269px] object-cover rounded"
+                                                alt={`Image for ${candidate.candidate_name}`}
+                                              />
+                                            </div>
+
+                                            <div className="capitalize">
+                                              <div>
+                                                {candidate.candidate_name}
+                                              </div>
+                                              <div className="text-base">
+                                                ({candidate.candidate_nickname})
+                                              </div>
+                                            </div>
+                                            <div className="text-base text-blue-700 underline cursor-pointer font-normal">
+                                              More Details
+                                            </div>
+                                            <div className="flex justify-center pt-3 gap-4 items-center">
+                                              <div>
+                                                <button
+                                                  className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
+                                                    candidate.vote <= 0 ||
+                                                    isAbstained
+                                                      ? "cursor-not-allowed opacity-50"
+                                                      : ""
+                                                  }`}
+                                                  onClick={() =>
+                                                    handleVote(
+                                                      positionIndex,
+                                                      candidateIndex,
+                                                      false
+                                                    )
+                                                  }
+                                                  disabled={
+                                                    candidate.vote <= 0 ||
+                                                    isAbstained
+                                                  }
+                                                >
+                                                  <span className="text-xl">
+                                                    <AiOutlineMinus />
+                                                  </span>
+                                                </button>
+                                              </div>
+                                              <div>{candidate.vote ?? 0}</div>
+                                              <div>
+                                                <button
+                                                  className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
+                                                    isAbstained
+                                                      ? "cursor-not-allowed opacity-50"
+                                                      : ""
+                                                  }`}
+                                                  onClick={() =>
+                                                    handleVote(
+                                                      positionIndex,
+                                                      candidateIndex,
+                                                      true
+                                                    )
+                                                  }
+                                                  disabled={isAbstained}
+                                                >
+                                                  <span className="text-xl">
+                                                    <AiOutlinePlus />
+                                                  </span>
+                                                </button>
+                                              </div>
                                             </div>
                                           </div>
                                         </div>
-                                      </div>
-                                    )
+                                      );
+                                    }
                                   )}
                                 </div>
                                 <div className="flex justify-center items-center">
                                   <button
                                     onClick={() =>
-                                      handleAbstain(preview.name_of_position)
+                                      handleAbstain(position.name_of_position)
                                     }
                                     disabled={
-                                      abstentions[preview.name_of_position]
+                                      abstentions[position.name_of_position]
                                         ?.abstained
                                     }
-                                    className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl  uppercase"
+                                    className={`w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl uppercase ${
+                                      abstentions[position.name_of_position]
+                                        ?.abstained
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
                                   >
                                     Abstain
                                   </button>
@@ -639,11 +780,11 @@ const FreeVotarBallot = () => {
                             <PiWarningCircleFill />
                           </div>
                           <div className="text-[#826008]">
-                            To cast your vote using the “Enter Votes” button
+                            To cast your vote using the "Enter Votes" button
                             below, please make sure to select your preferred
                             candidate for each position in the election. If you
                             choose not to vote for a particular position, you
-                            may select “Abstain” (if this option is available in
+                            may select "Abstain" (if this option is available in
                             your election).
                           </div>
                         </div>
@@ -651,7 +792,11 @@ const FreeVotarBallot = () => {
                           <button
                             onClick={() => setShowModal(true)}
                             disabled={!allPositionsSelected}
-                            className="bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold"
+                            className={`bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold ${
+                              !allPositionsSelected
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
+                            }`}
                           >
                             Enter Votes
                           </button>
@@ -674,20 +819,21 @@ const FreeVotarBallot = () => {
                     <div className="text-center py-8 pb-5 max-w-[40rem] mx-auto ">
                       Hello{" "}
                       <span className="capitalize font-semibold">
-                        {voterProfile.userData.name}
+                        {voterProfile.userData?.name || session?.user?.name}
                       </span>
                       , the candidates you voted for in the different positions
-                      are hightlighted below. Kindly, look through to confirm
-                      they are your final choices. if they are, click on the{" "}
-                      <span>&apos;Confirm Votes&apos;</span> to submit your
-                      votes. If you would like to change your candidates
-                      selection in any position, click on{" "}
-                      <span>&apos;Go back&apos;</span> to go to your secret
-                      ballot page and reselect your prefered candidate.
+                      are highlighted below. Kindly, look through to confirm
+                      they are your final choices. If they are, click on the{" "}
+                      <span className="font-semibold">Confirm Votes</span> to
+                      submit your votes. If you would like to change your
+                      candidates selection in any position, click on{" "}
+                      <span className="font-semibold">Go back</span> to go to
+                      your secret ballot page and reselect your preferred
+                      candidate.
                     </div>
                     <div>
                       {selectedCandidates.map((selectedCandidate, index) => (
-                        <div key={index}>
+                        <div key={index} className="mb-8">
                           <div className="text-center text-slate-900 lg:text-xl text-base font-semibold flex items-center justify-center gap-2 uppercase">
                             <div>
                               <img
@@ -711,9 +857,9 @@ const FreeVotarBallot = () => {
                               You have abstained from voting for this position.
                             </div>
                           ) : (
-                            <div className="flex justify-center gap-3">
+                            <div className="flex justify-center gap-8 flex-wrap mt-4">
                               {selectedCandidate.candidates?.map(
-                                (candidate: any, candidateIndex: any) => (
+                                (candidate, candidateIndex) => (
                                   <div key={candidateIndex} className="pb-3">
                                     <div className="flex justify-center py-2">
                                       <img
@@ -722,10 +868,15 @@ const FreeVotarBallot = () => {
                                         className="w-20 h-20 object-cover rounded-full"
                                       />
                                     </div>
-                                    <div className="font-semibold">
+                                    <div className="font-semibold text-center">
                                       {candidate.candidate_name}
                                     </div>
-                                    <div>({candidate.candidate_nickname})</div>
+                                    <div className="text-center">
+                                      ({candidate.candidate_nickname})
+                                    </div>
+                                    <div className="text-center text-blue-700 font-semibold mt-1">
+                                      Votes: {candidate.vote}
+                                    </div>
                                   </div>
                                 )
                               )}
@@ -734,14 +885,14 @@ const FreeVotarBallot = () => {
                         </div>
                       ))}
 
-                      <div className="flex bg-[#FFBC11] bg-opacity-20 text-center p-4 items-center justify-center my-5">
+                      <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-5 mx-auto max-w-[700px] gap-2">
                         <div className="text-[#ECAE0D] text-xl">
                           <PiWarningCircleFill />
                         </div>
                         <div className="text-[#826008]">
-                          Please ensure that you have selected your preffered
+                          Please ensure that you have selected your preferred
                           candidate in each position as votes cannot be
-                          submitted again after the first Submission
+                          submitted again after the first submission
                         </div>
                       </div>
                       <div className="flex justify-center p-5 items-center gap-5">
