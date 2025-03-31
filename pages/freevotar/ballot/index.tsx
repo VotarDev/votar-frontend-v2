@@ -780,12 +780,12 @@ const FreeVotarBallot = () => {
                             <PiWarningCircleFill />
                           </div>
                           <div className="text-[#826008]">
-                            To cast your vote using the "Enter Votes" button
-                            below, please make sure to select your preferred
-                            candidate for each position in the election. If you
-                            choose not to vote for a particular position, you
-                            may select "Abstain" (if this option is available in
-                            your election).
+                            To cast your vote using the &quot;Enter Votes&quot;
+                            button below, please make sure to select your
+                            preferred candidate for each position in the
+                            election. If you choose not to vote for a particular
+                            position, you may select &quot;Abstain&quot; (if
+                            this option is available in your election).
                           </div>
                         </div>
                         <div className="flex justify-center mb-10">
