@@ -26,11 +26,14 @@ const OurTeam = () => {
       </div>
       <div className="flex justify-center gap-10 mt-[4rem] text-center flex-wrap">
         <div>
-          <img
-            src="/assets/images/anthony.jpeg"
-            alt=""
-            className="w-[200px] h-[200px] object-contain"
-          />
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/anthony.jpeg"
+              alt=""
+              className="  object-contain"
+            />
+          </div>
+
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
               <h3>Anthony Okon</h3>
@@ -41,11 +44,14 @@ const OurTeam = () => {
           </div>
         </div>
         <div>
-          <img
-            src="/assets/images/dare.jpeg"
-            alt=""
-            className="w-[200px] h-[200px] object-contain"
-          />
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/dare.jpeg"
+              alt=""
+              className=" object-contain"
+            />
+          </div>
+
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
               <h3>Dare Omotayo</h3>
@@ -56,11 +62,14 @@ const OurTeam = () => {
           </div>
         </div>
         <div>
-          <img
-            src="/assets/images/isreal.jpeg"
-            alt=""
-            className="w-[200px] h-[200px] object-contain"
-          />
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/isreal.jpeg"
+              alt=""
+              className="object-contain"
+            />
+          </div>
+
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
               <h3>Israel Adwumi</h3>
@@ -71,11 +80,14 @@ const OurTeam = () => {
           </div>
         </div>
         <div>
-          <img
-            src="/assets/images/tobi.jpeg"
-            alt=""
-            className="w-[200px] h-[200px] object-contain"
-          />
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/tobi.jpeg"
+              alt=""
+              className="object-contain"
+            />
+          </div>
+
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
               <h3>Tobi Faniran</h3>
