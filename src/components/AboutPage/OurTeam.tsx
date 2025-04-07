@@ -64,24 +64,6 @@ const OurTeam = () => {
         <div>
           <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
             <img
-              src="/assets/images/isreal.jpeg"
-              alt=""
-              className="object-contain"
-            />
-          </div>
-
-          <div className="mt-2">
-            <div className="leading-[20px] font-semibold text-[18px]">
-              <h3>Israel Adwumi</h3>
-            </div>
-            <div className="text-sm">
-              <p>(Branding and Design)</p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
-            <img
               src="/assets/images/tobi.jpeg"
               alt=""
               className="object-contain"
@@ -94,6 +76,42 @@ const OurTeam = () => {
             </div>
             <div className="text-sm">
               <p>(Founding Partner & Engineer)</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/irene.jpeg"
+              alt=""
+              className="object-cover w-[200px] h-[200px]"
+            />
+          </div>
+
+          <div className="mt-2">
+            <div className="leading-[20px] font-semibold text-[18px]">
+              <h3>Irene Okon</h3>
+            </div>
+            <div className="text-sm">
+              <p>(Legal)</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="overflow-hidden w-[200px] h-[200px] rounded-full">
+            <img
+              src="/assets/images/isreal.jpeg"
+              alt=""
+              className="object-contain"
+            />
+          </div>
+
+          <div className="mt-2">
+            <div className="leading-[20px] font-semibold text-[18px]">
+              <h3>Israel Adwumi</h3>
+            </div>
+            <div className="text-sm">
+              <p>(Branding and Design)</p>
             </div>
           </div>
         </div>

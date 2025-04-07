@@ -4,7 +4,7 @@ import { PiCaretDoubleRightBold } from "react-icons/pi";
 const JoinTeam = () => {
   return (
     <div className="my-[10rem] join-team  rounded-xl">
-      <div className="flex items-center justify-around flex-wrap lg:flex-row flex-col-reverse">
+      <div className="flex items-center justify-between px-10 flex-wrap lg:flex-row flex-col-reverse">
         <div className="text-white text-center lg:text-left my-7 lg:my-0">
           <div className="lg:text-[32px] text-[1.5rem] ">
             <h1>Excellence is our priority</h1>
@@ -25,7 +25,11 @@ const JoinTeam = () => {
           </div>
         </div>
         <div>
-          <img src="http://fpoimg.com/350x350" alt="" />
+          <img
+            src="/assets/images/team.jpeg"
+            className="w-[500px] h-[350px] object-cover "
+            alt=""
+          />
         </div>
       </div>
     </div>
