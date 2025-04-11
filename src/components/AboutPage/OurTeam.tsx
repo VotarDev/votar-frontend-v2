@@ -108,7 +108,7 @@ const OurTeam = () => {
 
           <div className="mt-2">
             <div className="leading-[20px] font-semibold text-[18px]">
-              <h3>Israel Adwumi</h3>
+              <h3>Israel Oladejo</h3>
             </div>
             <div className="text-sm">
               <p>(Branding and Design)</p>
