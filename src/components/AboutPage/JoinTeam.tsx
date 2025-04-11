@@ -1,5 +1,6 @@
 import React from "react";
 import { PiCaretDoubleRightBold } from "react-icons/pi";
+import Link from "next/link";
 
 const JoinTeam = () => {
   return (
@@ -16,12 +17,18 @@ const JoinTeam = () => {
             </p>
           </div>
           <div className="mt-3 flex justify-center lg:justify-start">
-            <button className="bg-[hsla(0,0%,100%,.1)] w-[200px] h-[52px] rounded flex justify-center items-center gap-2 join-team-btn">
-              Join our team{" "}
-              <span>
-                <PiCaretDoubleRightBold />
-              </span>
-            </button>
+            <a
+              target="_blank"
+              href="https://forms.gle/fZSkPPrMV2GeAp269"
+              rel="noopener noreferrer"
+            >
+              <button className="bg-[hsla(0,0%,100%,.1)] w-[200px] h-[52px] rounded flex justify-center items-center gap-2 join-team-btn">
+                Join our team{" "}
+                <span>
+                  <PiCaretDoubleRightBold />
+                </span>
+              </button>
+            </a>
           </div>
         </div>
         <div>
