@@ -21,11 +21,11 @@ import {
   getElectionById,
   getBallotCandidate,
   registerVoter,
+  enterFreeVotes,
 } from "@/utils/api";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
-import { enterVotes } from "@/utils/api";
-import { useCurrentUser, useUser } from "@/utils/hooks";
+
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
@@ -85,9 +85,6 @@ const FreeVotarBallot = () => {
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
-  console.log(selectedCandidates);
-
-  const [colors, setColors] = useState<string[]>([]);
   const cols = [
     "#b138b3",
     "#00ff00",
@@ -102,18 +99,20 @@ const FreeVotarBallot = () => {
   }, []);
 
   useEffect(() => {
-    if (router.query.candidate) {
+    if (router.isReady && router.query.candidate) {
       const id = Array.isArray(router.query.candidate)
         ? router.query.candidate[0]
         : router.query.candidate;
-
       setCandidateId(id);
     }
-  }, [router.query.candidate]);
+  }, [router.isReady, router.query.candidate]);
 
   useEffect(() => {
     const registerVotar = async () => {
+      if (!candidateId || !session?.user?.email) return;
+
       const cookie = new Cookies();
+
       try {
         const userData = {
           name: session?.user?.name,
@@ -121,22 +120,21 @@ const FreeVotarBallot = () => {
           image: session?.user?.image,
           election_id: candidateId,
         };
+
         const { data } = await registerVoter(userData);
-        if (data.data) {
-          console.log(data.data);
+
+        if (data) {
+          console.log(data);
           cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
+          cookie.set("votar-credits", data.data.votar_credit, { path: "/" });
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error registering voter:", error);
       }
     };
+
     registerVotar();
-  }, [
-    candidateId,
-    session?.user?.name,
-    session?.user?.email,
-    session?.user?.image,
-  ]);
+  }, [candidateId, session?.user?.email]);
 
   const handleGoHome = () => {
     router.push("/vote");
@@ -248,6 +246,7 @@ const FreeVotarBallot = () => {
     dispatch(logout());
     const cookie = new Cookies();
     cookie.remove(voterLoginCookieName, { path: "/" });
+
     localStorage.removeItem("voterProfile");
     if (session && status === "authenticated") {
       await signOut();
@@ -304,6 +303,7 @@ const FreeVotarBallot = () => {
           const { data } = await getBallotCandidate(electionData);
 
           if (data) {
+            console.log(data);
             const updatedCandidates = data.data.map((position: any) => ({
               ...position,
               candidates: position.candidates.map((candidate: any) => ({
@@ -334,35 +334,57 @@ const FreeVotarBallot = () => {
     }
 
     try {
-      if (voterProfile.userData && voterProfile.userData.election_id) {
-        const selectedVotes = selectedCandidates
-          .filter((item) => !item.abstain)
-          .flatMap((item) =>
-            item.candidates
-              ? item.candidates.map((can) => ({
-                  candidate_name: can.candidate_name,
-                  position: item.position,
-                  abstain: false,
-                }))
-              : []
-          );
+      if (
+        candidateId &&
+        session?.user?.email &&
+        selectedCandidates.length > 0
+      ) {
+        // const selectedVotes = selectedCandidates
+        //   .filter((item) => !item.abstain)
+        //   .flatMap((item) =>
+        //     item.candidates
+        //       ? item.candidates.map((can) => ({
+        //           candidate_name: can.candidate_name,
+        //           position: item.position,
+        //           abstain: false,
+        //         }))
+        //       : []
+        //   );
 
-        const abstainVotes = selectedCandidates
-          .filter((item) => item.abstain)
-          .map((item) => ({
-            position: item.position,
-            abstain: true,
-          }));
+        // const abstainVotes = selectedCandidates
+        //   .filter((item) => item.abstain)
+        //   .map((item) => ({
+        //     position: item.position,
+        //     abstain: true,
+        //   }));
 
-        const votes = [...selectedVotes, ...abstainVotes];
+        // const votes = [...selectedVotes, ...abstainVotes];
 
         const electionData = {
-          voter_id: voterProfile.userData.id,
-          election_id: voterProfile.userData.election_id,
-          votes,
+          email: session?.user?.email,
+          election_id: candidateId,
+          voting_details: selectedCandidates.map((position) => {
+            const candidate_details = (position.candidates ?? []).map(
+              (candidate) => ({
+                candidate_name: candidate.candidate_name,
+                vote: candidate.vote,
+              })
+            );
+
+            const free_votes = candidate_details.reduce(
+              (sum, candidate) => sum + candidate.vote,
+              0
+            );
+
+            return {
+              free_votes,
+              position: position.position,
+              candidate_details,
+            };
+          }),
         };
 
-        const { data } = await enterVotes(electionData);
+        const { data } = await enterFreeVotes(electionData);
         if (data) {
           setIsCastVote(false);
           setIsVoteSuccessful(true);
@@ -373,7 +395,6 @@ const FreeVotarBallot = () => {
       setIsCastVote(false);
       toast.error(e?.response?.data?.message);
       closeModal();
-      console.log(e);
     }
   };
 
@@ -513,6 +534,9 @@ const FreeVotarBallot = () => {
       setAllPositionsSelected(isAllPositionsSelected);
     }
   }, [selectedCandidates, candidates]);
+
+  console.log(selectedCandidates);
+  console.log(session?.user?.email);
 
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (

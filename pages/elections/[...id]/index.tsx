@@ -43,6 +43,7 @@ const initState: DetailFormState = {
   end_time: "",
   max_number_candidate: 0,
   price_per_vote: 0,
+  free_votes: 0,
 };
 
 const ElectionDetail = () => {
@@ -131,6 +132,7 @@ const ElectionDetail = () => {
           end_time: formatTimeToHHMM(Number(action.value.end_time || "")),
           max_number_candidate: action.value.max_number_candidate,
           price_per_vote: action.value.price_per_vote,
+          free_votes: action.value.free_votes,
         };
       case "INCREMENT_PRICE_PER_VOTE":
         return {
@@ -141,6 +143,16 @@ const ElectionDetail = () => {
         return {
           ...state,
           price_per_vote: state.price_per_vote - action.value,
+        };
+      case "INCREMENT_FREE_VOTE":
+        return {
+          ...state,
+          free_votes: state.free_votes + action.value,
+        };
+      case "DECREMENT_FREE_VOTE":
+        return {
+          ...state,
+          free_votes: state.free_votes - action.value,
         };
 
       case "INCREMENT_CANDIDATE_NO":
@@ -185,6 +197,7 @@ const ElectionDetail = () => {
     formData.append("start_date", startDateData);
     formData.append("end_date", endDateData);
     formData.append("price_per_vote", state.price_per_vote.toString());
+    formData.append("free_votes", state.free_votes.toString());
     if (state.start_time)
       formData.append("start_time", String(state.start_time));
     if (state.end_time) formData.append("end_time", String(state.end_time));
