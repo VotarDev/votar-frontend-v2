@@ -55,6 +55,7 @@ const createCreditUrl = "/user/add_credit";
 const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
 const purchaseVotarCreditUrl = "/user/purchase_voterCredit";
+const voteCandidateFreeVote = "/voter/free_vote";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -193,6 +194,10 @@ export const getBallotCandidate = (data: any) => {
 
 export const enterVotes = (data: any) => {
   return httpService.post(enterVotesUrl, data);
+};
+
+export const enterFreeVotes = (data: any) => {
+  return httpService.post(voteCandidateFreeVote, data);
 };
 
 export const monitorTotalVote = (id: string) => {

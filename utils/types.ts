@@ -149,6 +149,7 @@ export type ElectionDetails = {
   type: string;
   published: boolean;
   price_per_vote: number;
+  free_votes: number;
   __v: number;
   _id: string;
 };
@@ -184,6 +185,7 @@ export type DetailFormState = {
   end_time: string | undefined | number;
   max_number_candidate: number;
   price_per_vote: number;
+  free_votes: number;
 };
 
 export type DetailFormAction =
@@ -201,4 +203,6 @@ export type DetailFormAction =
   | { type: "INCREMENT_CANDIDATE_NO"; value: number }
   | { type: "DECREMENT_CANDIDATE_NO"; value: number }
   | { type: "INCREMENT_PRICE_PER_VOTE"; value: number }
-  | { type: "DECREMENT_PRICE_PER_VOTE"; value: number };
+  | { type: "DECREMENT_PRICE_PER_VOTE"; value: number }
+  | { type: "INCREMENT_FREE_VOTE"; value: number }
+  | { type: "DECREMENT_FREE_VOTE"; value: number };
