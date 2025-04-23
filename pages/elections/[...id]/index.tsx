@@ -87,9 +87,13 @@ const ElectionDetail = () => {
     setCurrentStep(stepIndex);
   };
 
-  if (votarPlan === "Free Votar") {
-    steps = ["Details", "Ballot", "Pay", "Monitor Election"];
-  }
+  const getSteps = (plan: string) => {
+    return plan === "Free Votar"
+      ? ["Details", "Ballot", "Pay", "Monitor Election"]
+      : ["Details", "Ballot", "Voters Page", "Pay", "Monitor Election"];
+  };
+
+  const steps = getSteps(votarPlan);
 
   function reducer(
     state: DetailFormState,
@@ -312,7 +316,7 @@ const ElectionDetail = () => {
         </div>
 
         <div className="mt-4">
-          {currentStep === 0 && (
+          {steps[currentStep] === "Details" && (
             <DetailsPage
               electionId={electionID}
               userId={USER_ID}
@@ -320,13 +324,14 @@ const ElectionDetail = () => {
               dispatch={dispatch}
             />
           )}
-          {currentStep === 1 && (
+          {steps[currentStep] === "Ballot" && (
             <BallotsPage position={position} setPosition={setPosition} />
           )}
-          {currentStep === 2 && <VoterPage />}
-          {/* {currentStep === 3 && <ReviewPage />} */}
-          {currentStep === 3 && <PayPage />}
-          {currentStep === 4 && <MonitorElectionPage electionId={electionID} />}
+          {steps[currentStep] === "Voters Page" && <VoterPage />}
+          {steps[currentStep] === "Pay" && <PayPage />}
+          {steps[currentStep] === "Monitor Election" && (
+            <MonitorElectionPage electionId={electionID} />
+          )}
         </div>
 
         <div className="mt-5 flex gap-4 justify-end smm:flex-row flex-col">

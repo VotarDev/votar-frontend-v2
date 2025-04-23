@@ -51,11 +51,19 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     : user?.user?.id;
 
   const handleCheckboxChange = (row: VoterResponse) => {
-    setSelectedRows((prevSelectedRows) =>
-      prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
-        ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
-        : [...prevSelectedRows, row]
-    );
+    setSelectedRows((prevSelectedRows) => {
+      const isSelected = prevSelectedRows.some(
+        (selectedRow) => selectedRow.id === row.id
+      );
+
+      if (isSelected) {
+        return prevSelectedRows.filter(
+          (selectedRow) => selectedRow.id !== row.id
+        );
+      } else {
+        return [...prevSelectedRows, row];
+      }
+    });
   };
 
   const filterDuplicates = (array: any, keys: any) => {
@@ -165,17 +173,35 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
           >
             <TableHead>
               <TableRow>
-                {headers.map((header, key) => {
-                  return (
-                    <StyledTableCell
-                      key={key}
-                      className=" border border-[#F5F5F5]"
-                      align="center"
-                    >
-                      {header}
-                    </StyledTableCell>
-                  );
-                })}
+                <StyledTableCell
+                  align="center"
+                  className="border border-[#F5F5F5]"
+                >
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={
+                      selectedRows.length === responses.length &&
+                      responses.length > 0
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedRows(responses);
+                      } else {
+                        setSelectedRows([]);
+                      }
+                    }}
+                  />
+                </StyledTableCell>
+                {headers.map((header, key) => (
+                  <StyledTableCell
+                    key={key}
+                    className="border border-[#F5F5F5]"
+                    align="center"
+                  >
+                    {header}
+                  </StyledTableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
