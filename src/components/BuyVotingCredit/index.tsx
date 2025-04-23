@@ -67,8 +67,14 @@ const BuyVotingCredit = ({
   };
 
   const voteNumber = votarCredits?.toString().split("");
-  const handleInputChange = (e: any) => {
-    setVotarCredit(e.target.value);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const input = e.target.value.replace(/,/g, "");
+
+    if (!/^\d*$/.test(input)) return;
+
+    const numericValue = parseInt(input || "0", 10);
+    setVotarCredit(numericValue);
   };
 
   return (
@@ -175,7 +181,7 @@ const BuyVotingCredit = ({
         >
           {isPurchasing
             ? "Processing..."
-            : ` Make Payment Of NGN ${votarCredit} Votar Credits`}
+            : ` Make Payment Of NGN ${votarCredit.toLocaleString()} Votar Credits`}
         </button>
       </div>
       <div className=" flex items-center justify-center lg:text-[18px] text-sm text-center p-2 mt-7">

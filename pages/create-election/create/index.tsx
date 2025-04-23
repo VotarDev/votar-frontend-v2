@@ -76,18 +76,14 @@ const Create = () => {
     ? users?.id
     : user?.user?.id;
 
-  let steps = [
-    "Details",
-    "Ballot",
-    "Voters Page",
-    // "Review",
-    "Pay",
-    "Monitor Election",
-  ];
+  const getSteps = (plan: string) => {
+    if (plan === "Free Votar") {
+      return ["Details", "Ballot", "Pay", "Monitor Election"];
+    }
+    return ["Details", "Ballot", "Voters Page", "Pay", "Monitor Election"];
+  };
 
-  if (votarPlan === "Free Votar") {
-    steps = ["Details", "Ballot", "Pay", "Monitor Election"];
-  }
+  const steps = getSteps(votarPlan);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -98,12 +94,11 @@ const Create = () => {
     }
   }, []);
 
-  const displaySteps = (step: number) => {
-    if (step === 3 && votarPlan === "Free Votar") {
-      step = 4;
-    }
-    switch (step) {
-      case 1:
+  const displaySteps = (stepIndex: number) => {
+    const currentStep = steps[stepIndex - 1];
+
+    switch (currentStep) {
+      case "Details":
         return (
           <Details
             setElection={setElectionName}
@@ -134,17 +129,16 @@ const Create = () => {
             setBackgroundImageFile={setBackgroundImageFile}
           />
         );
-      case 2:
+      case "Ballot":
         return <Ballot setPositions={setPositions} positions={positions} />;
-      case 3:
+      case "Voters Page":
         return <VotersPage />;
-      // case 4:
-      //   return <Review />;
-      case 4:
+      case "Pay":
         return <Pay />;
-      case 5:
+      case "Monitor Election":
         return <MonitorElection />;
       default:
+        return null;
     }
   };
 
