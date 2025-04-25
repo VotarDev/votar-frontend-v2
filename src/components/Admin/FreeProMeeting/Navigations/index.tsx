@@ -10,7 +10,7 @@ const Navigations = () => {
         <div className="w-40 h-14 p-3 bg-zinc-100 rounded-lg shadow border border-neutral-400 flex items-center justify-center text-center text-sm pointer-events-none">
           Proceed to Votar Meeting Page
         </div>
-        <Link href="/admin/free-pro-meeting" className="pointer-events-none">
+        <Link href="/admin/free-pro-meeting">
           <div
             className={`w-[167px] h-14 p-3 bg-zinc-100 rounded-lg shadow border border-neutral-400 flex items-center justify-center text-center text-sm ${
               pathname === "/admin/free-pro-meeting"
