@@ -15,7 +15,7 @@ import { PiCaretRightBold } from "react-icons/pi";
 import { DetailFormAction, DetailFormState } from "@/utils/types";
 import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 import setAuthToken from "@/utils/setAuthToken";
-import { updateElection, updateCandidate } from "@/utils/api";
+import { updateElection, updateCandidate, getElectionById } from "@/utils/api";
 import { BsArrowLeft } from "react-icons/bs";
 import { useSelector } from "react-redux";
 
@@ -52,6 +52,8 @@ const ElectionDetail = () => {
   const user = useUser();
   const [electionID, setElectionID] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isFetchElection, setIsFetchElection] = useState(false);
+  const [election, setElection] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<number>(() => {
     let savedStep;
     if (typeof window !== "undefined") {
@@ -83,12 +85,42 @@ const ElectionDetail = () => {
     }
   }, [id, electionID]);
 
+  useEffect(() => {
+    const getElection = async () => {
+      if (users?.data) {
+        setAuthToken(users.data.data.cookie);
+      } else {
+        if (typeof window !== "undefined") {
+          const tokenLocal = localStorage.getItem("token");
+          setAuthToken(tokenLocal);
+        }
+      }
+      setIsFetchElection(true);
+      try {
+        if (electionID) {
+          const electionData = { election_id: electionID };
+          const { data } = await getElectionById(electionData);
+
+          if (data) {
+            setElection(data.data);
+
+            setIsFetchElection(false);
+          }
+        }
+      } catch (e: any) {
+        setIsFetchElection(false);
+        console.log(e);
+      }
+    };
+    getElection();
+  }, [electionID]);
+
   const goToStep = (stepIndex: number) => {
     setCurrentStep(stepIndex);
   };
 
   const getSteps = (plan: string) => {
-    return plan === "Free Votar"
+    return election?.type === "Free Votar"
       ? ["Details", "Ballot", "Pay", "Monitor Election"]
       : ["Details", "Ballot", "Voters Page", "Pay", "Monitor Election"];
   };
@@ -288,6 +320,14 @@ const ElectionDetail = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  if (isFetchElection) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout>

@@ -5,24 +5,66 @@ import { FiSettings } from "react-icons/fi";
 import { BiPlusCircle, BiMinusCircle } from "react-icons/bi";
 import Link from "next/link";
 import cardBg from "../../../../../public/assets/images/card-bg.png";
+import { getElectionById } from "@/utils/api";
+import Cookies from "universal-cookie";
+import setAuthToken from "@/utils/setAuthToken";
+import { CircularProgress } from "@mui/material";
 
 const ElectionDetails = () => {
   const router = useRouter();
-  const [electionName, setElectionName] = useState("");
-
   const { id } = router.query;
+
+  const [electionId, setElectionId] = useState<string | null>(null);
+  const [electionName, setElectionName] = useState<string | null>(null);
+  const [isFetchElectionDetails, setIsFetchElectionDetails] = useState(false);
+  const [electionDetails, setElectionDetails] = useState<any>(null);
+
   useEffect(() => {
-    if (id) {
-      setElectionName(id[1]);
+    if (id && Array.isArray(id)) {
+      setElectionId(id[0]);
+      setElectionName(decodeURIComponent(id[1]));
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchElectionDetails = async () => {
+      setIsFetchElectionDetails(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+      try {
+        if (electionId) {
+          const { data } = await getElectionById({ election_id: electionId });
+          if (data) {
+            console.log(data.data);
+            setElectionDetails(data.data);
+            setIsFetchElectionDetails(false);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        setIsFetchElectionDetails(false);
+      }
+    };
+
+    fetchElectionDetails();
+  }, [electionId]);
+
+  if (!electionId || !electionName || isFetchElectionDetails) {
+    return (
+      <div className="text-center mt-10">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <AdminLayout>
         <div className="max-w-[1300px] mx-auto py-[81px]">
           <div className="flex justify-end items-center gap-8">
             <div className="text-xl">
-              Election ID: <span>ELE20057</span>
+              Election ID: <span>{electionId}</span>
             </div>
             <div>
               <button className="w-20 h-9 px-3.5 py-1.5 bg-blue-700 rounded-md justify-center items-center gap-2.5 flex text-center text-zinc-100 text-xl">
@@ -34,8 +76,7 @@ const ElectionDetails = () => {
             {electionName}
           </div>
           <div className="text-center text-slate-900 text-2xl max-w-[50rem] mx-auto pt-4">
-            This is an Election to select the crowned Princess of MBGA 2022. One
-            Stage, One Voice.
+            {electionDetails?.description}
           </div>
 
           <div className="pt-[62px] flex justify-between items-center">
@@ -50,7 +91,9 @@ const ElectionDetails = () => {
                 <div className="text-xl font-semibold">
                   Number Of Free Votes
                 </div>
-                <div className="text-neutral-400 text-xl font-semibold">20</div>
+                <div className="text-neutral-400 text-xl font-semibold">
+                  {electionDetails?.free_votes}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">
                     <BiPlusCircle />
@@ -68,7 +111,9 @@ const ElectionDetails = () => {
 
               <div className="flex items-center gap-5 py-5 mt-4">
                 <div className="text-xl font-semibold">Price per Votes</div>
-                <div className="text-neutral-400 text-xl font-semibold">50</div>
+                <div className="text-neutral-400 text-xl font-semibold">
+                  {electionDetails?.price_per_vote}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">
                     <BiPlusCircle />
@@ -90,7 +135,9 @@ const ElectionDetails = () => {
                 <div className="text-xl font-semibold">
                   Max Number of Candidate to be Started Per Position
                 </div>
-                <div className="text-neutral-400 text-xl font-semibold">20</div>
+                <div className="text-neutral-400 text-xl font-semibold">
+                  {electionDetails?.max_number_candidate}
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xl">
                     <BiPlusCircle />

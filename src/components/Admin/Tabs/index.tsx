@@ -27,7 +27,8 @@ const Tabs = () => {
       try {
         const { data } = await getAllElectionsAdmin();
         if (data) {
-          setElections(data.data);
+          const sortedElections = data.data.slice().reverse();
+          setElections(sortedElections);
           setIsLoadingElections(false);
         }
       } catch (error) {
@@ -38,6 +39,14 @@ const Tabs = () => {
 
     getActivities();
   }, []);
+
+  const freeVotarElections = elections.filter(
+    (election: any) => election.type === "Free Votar"
+  );
+
+  const votarProElections = elections.filter(
+    (election: any) => election.type === "Votar Pro"
+  );
 
   if (isLoadingElections)
     return (
@@ -110,8 +119,8 @@ const Tabs = () => {
             <>
               {activeTab === 1 && <Activities elections={elections} />}
               {activeTab === 2 && <VotarCredits />}
-              {activeTab === 3 && <FreeVotar />}
-              {activeTab === 4 && <VotarPro />}
+              {activeTab === 3 && <FreeVotar elections={freeVotarElections} />}
+              {activeTab === 4 && <VotarPro elections={votarProElections} />}
               {activeTab === 5 && <VotarMeeting />}
             </>
           )}

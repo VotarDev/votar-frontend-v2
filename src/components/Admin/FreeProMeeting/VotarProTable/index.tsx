@@ -12,7 +12,6 @@ import { getAdminVotarPage } from "@/utils/api";
 import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
-import { set } from "lodash";
 
 const VotarProTable = () => {
   const headers = ["S/N", "Emails", "No. of Elections"];

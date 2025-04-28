@@ -42,8 +42,8 @@ const UserElections = () => {
       const token = cookies.get("admin-token");
       if (token) setAuthToken(token);
       try {
-        if (id) {
-          const { data } = await getVotarPageByElection(userMail);
+        if (userMail && plans === "votar-pro") {
+          const { data } = await getVotarPageByElection(userMail, "Votar Pro");
           if (data) {
             setElectionDetails(data.data);
             console.log(data.data);
@@ -56,7 +56,7 @@ const UserElections = () => {
       }
     };
     getVotarProPower();
-  }, [userMail]);
+  }, [userMail, plans]);
 
   const headers = [
     "S/N",
@@ -80,7 +80,7 @@ const UserElections = () => {
       border: "none",
     },
   }));
-  console.log(plans);
+
   if (isFetchElectionDetails)
     return (
       <AdminLayout>
@@ -128,6 +128,13 @@ const UserElections = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    {electionDetails.length === 0 && (
+                      <TableRow>
+                        <StyledTableCell colSpan={7} align="center">
+                          No election found
+                        </StyledTableCell>
+                      </TableRow>
+                    )}
                     {electionDetails &&
                       electionDetails.length > 0 &&
                       electionDetails.map((row: any, index: number) => (
@@ -154,16 +161,15 @@ const UserElections = () => {
                             {row.numberOfVoters.toLocaleString()}
                           </StyledTableCell>
                           <StyledTableCell align="center">
-                            {/* <span
+                            <span
                               className={`${
-                                row.status === "pending"
+                                row.status === "Pending"
                                   ? "text-[#E88749]"
                                   : "text-green-400"
                               } capitalize`}
                             >
                               {row.status}
-                            </span> */}
-                            #
+                            </span>
                           </StyledTableCell>
                           <StyledTableCell align="center">#</StyledTableCell>
                           <StyledTableCell align="center">

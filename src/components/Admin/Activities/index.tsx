@@ -185,8 +185,6 @@ const Activities = ({ elections }: any) => {
                 <StyledTableCell>
                   {row.start_date} - {row.end_date}
                   <br />
-                  {formatTimeToHHMM(row.start_time)} -{" "}
-                  {formatTimeToHHMM(row.end_time)}
                 </StyledTableCell>
                 <StyledTableCell>{row.quantity}</StyledTableCell>
                 <StyledTableCell>#</StyledTableCell>

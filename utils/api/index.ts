@@ -334,8 +334,10 @@ export const getAllElectionsAdmin = () => {
   return httpService.get(adminGetAllElectionsUrl);
 };
 
-export const getVotarPageByElection = (email: string) => {
-  return httpService.get(adminVotarPageByElectionUrl + `/${email}`);
+export const getVotarPageByElection = (email: string, type: string) => {
+  return httpService.get(adminVotarPageByElectionUrl + `/${email}`, {
+    params: { type },
+  });
 };
 
 export const adminGetAllUsers = () => {
