@@ -10,21 +10,52 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { freeVotarAccessRequest, votarProAcessRequest } from "@/utils/util";
 import SwitchButton from "@/src/components/Admin/AdminProfile/SwitchButton";
+import setAuthToken from "@/utils/setAuthToken";
+import { getVotarPageByElection } from "@/utils/api";
+import Cookies from "universal-cookie";
+import { CircularProgress } from "@mui/material";
+import { v4 } from "uuid";
 
 const UserElections = () => {
   const router = useRouter();
   const [userMail, setUserMail] = useState("");
   const [plans, setPlans] = useState("");
   const { id } = router.query;
+
+  const [electionDetails, setElectionDetails] = useState<any>([]);
+  const [isFetchElectionDetails, setIsFetchElectionDetails] = useState(false);
   const handleEmailClick = (id: string | number, name: string) => {
     router.push(`/admin/free-pro-meeting/election-details/${id}/${name}`);
   };
   useEffect(() => {
     if (id) {
-      setUserMail(id[2]);
+      setUserMail(id[1]);
       setPlans(id[0]);
     }
   }, [id]);
+
+  useEffect(() => {
+    const getVotarProPower = async () => {
+      setIsFetchElectionDetails(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+      try {
+        if (userMail && plans === "free-votar") {
+          const { data } = await getVotarPageByElection(userMail, "Free Votar");
+          if (data) {
+            setElectionDetails(data.data);
+
+            setIsFetchElectionDetails(false);
+          }
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchElectionDetails(false);
+      }
+    };
+    getVotarProPower();
+  }, [userMail, plans]);
 
   const headers = [
     "S/N",
@@ -48,7 +79,17 @@ const UserElections = () => {
       border: "none",
     },
   }));
-  console.log(plans);
+
+  console.log(electionDetails);
+  if (isFetchElectionDetails)
+    return (
+      <AdminLayout>
+        <div className="text-center mt-10">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      </AdminLayout>
+    );
+
   return (
     <div>
       <AdminLayout>
@@ -92,29 +133,43 @@ const UserElections = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {freeVotarAccessRequest.map((row, index) => (
-                        <TableRow key={row.id}>
-                          <StyledTableCell align="center">
-                            {index <= 9 ? `0${index + 1}` : index + 1}
+                      {electionDetails.length === 0 && (
+                        <TableRow>
+                          <StyledTableCell colSpan={7} align="center">
+                            No election found
                           </StyledTableCell>
-                          <StyledTableCell
-                            align="center"
-                            className="cursor-pointer hover:shadow-md duration-150"
-                            onClick={() => handleEmailClick(row.id, row.name)}
-                          >
-                            {row.name}
-                          </StyledTableCell>
+                        </TableRow>
+                      )}
+                      {electionDetails &&
+                        electionDetails.length > 0 &&
+                        electionDetails.map((row: any, index: number) => (
+                          <TableRow key={v4()}>
+                            <StyledTableCell align="center">
+                              {index < 9 ? `0${index + 1}` : index + 1}
+                            </StyledTableCell>
+                            <StyledTableCell
+                              align="center"
+                              className="cursor-pointer hover:shadow-md duration-150"
+                              onClick={() =>
+                                handleEmailClick(
+                                  row.election_id,
+                                  row.nameOfElection
+                                )
+                              }
+                            >
+                              {row.nameOfElection}
+                            </StyledTableCell>
 
-                          <StyledTableCell align="center">
-                            {row.date}
-                            <br />
-                            {row.time}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.votarNumber.toLocaleString()}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            <span
+                            <StyledTableCell align="center">
+                              {row.date}
+                              <br />
+                              {row.start_time} - {row.close_time}
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              {row.numberOfVoters.toLocaleString()}
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              {/* <span
                               className={`${
                                 row.status === "pending"
                                   ? "text-[#E88749]"
@@ -122,16 +177,19 @@ const UserElections = () => {
                               } capitalize`}
                             >
                               {row.status}
-                            </span>
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            NGN {row.amount.toLocaleString()}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            <SwitchButton />
-                          </StyledTableCell>
-                        </TableRow>
-                      ))}
+                            </span> */}
+                              #
+                            </StyledTableCell>
+                            <StyledTableCell align="center">#</StyledTableCell>
+                            <StyledTableCell align="center">
+                              <SwitchButton
+                                id={index}
+                                row={row}
+                                userMail={userMail}
+                              />
+                            </StyledTableCell>
+                          </TableRow>
+                        ))}
                     </TableBody>
                   </Table>
                 </TableContainer>
