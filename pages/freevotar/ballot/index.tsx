@@ -592,7 +592,7 @@ const FreeVotarBallot = () => {
             </div>
           )}
 
-          <div>
+          <div className="px-4">
             <div className="mt-5 flex justify-end mr-10">
               <button
                 onClick={handleLogout}
@@ -605,7 +605,7 @@ const FreeVotarBallot = () => {
               <div className="mt-10 text-center">Fetching candidates...</div>
             ) : (
               <div>
-                <div className="text-center mt-5">
+                <div className="text-center mt-10">
                   <h1 className="text-4xl font-bold capitalize">
                     Welcome,{" "}
                     {voterProfile.userData?.name
@@ -646,7 +646,7 @@ const FreeVotarBallot = () => {
                             return (
                               <div
                                 key={positionIndex}
-                                className="bg-slate-50 mt-20 mb-14 p-10"
+                                className="bg-slate-50 mt-0 mb-14 p-10"
                                 style={{
                                   ...(isClient && {
                                     borderLeft: `4px solid ${randomColor}`,
@@ -799,7 +799,7 @@ const FreeVotarBallot = () => {
                             );
                           })}
 
-                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 w-[700px] mx-auto gap-2">
+                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
                           <div className="text-[#ECAE0D] text-xl">
                             <PiWarningCircleFill />
                           </div>
