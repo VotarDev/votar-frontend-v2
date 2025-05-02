@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import logo from "../../../../public/assets/images/random-logo.png";
 import watermark from "../../../../public/assets/logos/votar.svg";
 import { IoCopy } from "react-icons/io5";
@@ -10,7 +10,13 @@ import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
 import MiniDashboard from "../../VotePage/MiniDashboard";
 
-const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
+const Header = ({
+  electionDetails,
+  getVoterCredit,
+}: {
+  electionDetails: Election | null;
+  getVoterCredit?: () => void;
+}) => {
   const textRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
@@ -78,7 +84,10 @@ const Header = ({ electionDetails }: { electionDetails: Election | null }) => {
           {router.pathname.split("/")[1].includes("cast-votes") ||
             router.pathname.split("/")[1].includes("preview-election") ||
             (router.pathname.split("/")[1].includes("freevotar") && (
-              <MiniDashboard election={electionDetails} />
+              <MiniDashboard
+                election={electionDetails}
+                getVotarCredit={getVoterCredit}
+              />
             ))}
         </div>
       </div>
