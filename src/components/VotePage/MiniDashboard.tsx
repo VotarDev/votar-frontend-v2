@@ -3,14 +3,26 @@ import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import BuyVotingCredit from "../BuyVotingCredit";
 import Cookies from "universal-cookie";
+import { useRouter } from "next/router";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
-const MiniDashboard = ({ election }: { election: any }) => {
+const MiniDashboard = ({
+  election,
+  getVotarCredit,
+}: {
+  election: any;
+  getVotarCredit?: () => void;
+}) => {
   const [showModal, setShowModal] = useState(false);
   const cookie = new Cookies();
   const closeModal = () => setShowModal(false);
+  const { pathname } = useRouter();
   const [votarCredits, setVotarCredits] = useState(
     cookie.get("votar-credits") || "0"
   );
+
+  const credit = useSelector((state: RootState) => state.votarCredit.credit);
 
   useEffect(() => {
     const cookie = new Cookies();
@@ -39,7 +51,7 @@ const MiniDashboard = ({ election }: { election: any }) => {
     };
   }, [votarCredits]);
 
-  const voteNumber = votarCredits?.toString().split("");
+  const voteNumber = credit?.toString().split("");
   const freeVotes = election?.free_votes?.toString().split("");
 
   return (
@@ -121,7 +133,11 @@ const MiniDashboard = ({ election }: { election: any }) => {
       <AnimatePresence mode="wait">
         {showModal && (
           <Modal key="modal" handleClose={closeModal}>
-            <BuyVotingCredit election={election} setShowModal={setShowModal} />
+            <BuyVotingCredit
+              election={election}
+              setShowModal={setShowModal}
+              getVotarCredit={getVotarCredit}
+            />
           </Modal>
         )}
       </AnimatePresence>

@@ -31,6 +31,10 @@ import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
 import { useSession, signOut } from "next-auth/react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import {
+  loadVotarCreditFromStorage,
+  setVotarCredit,
+} from "@/redux/features/votarCredit/votarCreditSlice";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -107,34 +111,46 @@ const FreeVotarBallot = () => {
     }
   }, [router.isReady, router.query.candidate]);
 
-  useEffect(() => {
-    const registerVotar = async () => {
-      if (!candidateId || !session?.user?.email) return;
+  const registerVotar = async () => {
+    if (!candidateId || !session?.user?.email) return;
 
-      const cookie = new Cookies();
+    const cookie = new Cookies();
 
-      try {
-        const userData = {
-          name: session?.user?.name,
-          email: session?.user?.email,
-          image: session?.user?.image,
-          election_id: candidateId,
-        };
+    try {
+      const userData = {
+        name: session?.user?.name,
+        email: session?.user?.email,
+        image: session?.user?.image,
+        election_id: candidateId,
+      };
 
-        const { data } = await registerVoter(userData);
+      const { data } = await registerVoter(userData);
 
-        if (data) {
-          console.log(data);
-          cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
-          cookie.set("votar-credits", data.data.votar_credit, { path: "/" });
-        }
-      } catch (error) {
-        console.error("Error registering voter:", error);
+      if (data) {
+        console.log(data);
+        cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
+        cookie.set("votar-credits", data.data.votar_credit, { path: "/" });
+        dispatch(setVotarCredit(data.data.votar_credit));
       }
-    };
+    } catch (error) {
+      console.error("Error registering voter:", error);
+    }
+  };
 
+  useEffect(() => {
     registerVotar();
-  }, [candidateId, session?.user?.email]);
+  }, [
+    session,
+    status,
+    candidateId,
+    voterProfile.userData?.email,
+    voterProfile.userData?.name,
+    voterProfile.userData?.image,
+  ]);
+
+  useEffect(() => {
+    dispatch(loadVotarCreditFromStorage());
+  }, [dispatch]);
 
   const handleGoHome = () => {
     router.push("/vote");
@@ -554,7 +570,7 @@ const FreeVotarBallot = () => {
     return (
       <>
         <div>
-          <Header electionDetails={election} />
+          <Header electionDetails={election} getVoterCredit={registerVotar} />
         </div>
         <div className="mt-5 flex justify-end mr-10">
           <button
@@ -588,7 +604,10 @@ const FreeVotarBallot = () => {
             </div>
           ) : (
             <div>
-              <Header electionDetails={election} />
+              <Header
+                electionDetails={election}
+                getVoterCredit={registerVotar}
+              />
             </div>
           )}
 

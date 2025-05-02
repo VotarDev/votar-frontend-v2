@@ -8,18 +8,25 @@ import { voterLoginCookieName } from "@/src/__env";
 import setAuthToken from "@/utils/setAuthToken";
 import { useSession, signOut } from "next-auth/react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useRouter } from "next/router";
 
 const BuyVotingCredit = ({
   election,
   setShowModal,
+  getVotarCredit,
 }: {
   election: any;
   setShowModal: Dispatch<SetStateAction<boolean>>;
+  getVotarCredit?: () => void;
 }) => {
   const [votarCredit, setVotarCredit] = useState(0);
   const { data: session, status } = useSession();
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [votarCredits, setVotarCredits] = useState<any>(null);
+  const credit = useSelector((state: RootState) => state.votarCredit.credit);
+  const { pathname } = useRouter();
 
   useEffect(() => {
     const cookie = new Cookies();
@@ -29,7 +36,13 @@ const BuyVotingCredit = ({
     }
   }, []);
 
-  console.log("election", election);
+  useEffect(() => {
+    if (getVotarCredit && pathname.includes("ballot")) {
+      console.log("getVotarCredit");
+      getVotarCredit();
+    }
+  }, []);
+
   const handleAddVotarCredit = (increment: boolean) => {
     if (increment) {
       let credit = Number(votarCredit);
@@ -58,6 +71,7 @@ const BuyVotingCredit = ({
       if (data) {
         console.log(data.data.votar_credits);
         toast.success("Votar Credit Purchased Successfully");
+        getVotarCredit && getVotarCredit();
         setShowModal(false);
         cookie.set("votar-credits", data.data.votar_credits, { path: "/" });
       }
@@ -66,7 +80,7 @@ const BuyVotingCredit = ({
     }
   };
 
-  const voteNumber = votarCredits?.toString().split("");
+  const voteNumber = credit?.toString().split("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value.replace(/,/g, "");
