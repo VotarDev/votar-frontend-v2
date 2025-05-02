@@ -404,6 +404,7 @@ const FreeVotarBallot = () => {
         if (data) {
           setIsCastVote(false);
           setIsVoteSuccessful(true);
+          registerVotar();
           closeModal();
         }
       }
