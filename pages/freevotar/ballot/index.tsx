@@ -552,9 +552,6 @@ const FreeVotarBallot = () => {
     }
   }, [selectedCandidates, candidates]);
 
-  console.log(selectedCandidates);
-  console.log(session?.user?.email);
-
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
       <AnimatePresence mode="wait">
@@ -663,6 +660,9 @@ const FreeVotarBallot = () => {
                           candidates.map((position, positionIndex) => {
                             const randomColor =
                               cols[Math.floor(Math.random() * cols.length)];
+                            const freeVotes = election?.free_votes
+                              ?.toString()
+                              .split("");
                             return (
                               <div
                                 key={positionIndex}
@@ -690,10 +690,39 @@ const FreeVotarBallot = () => {
                                     />
                                   </div>
                                 </div>
+                                <div className="mt-7 flex flex-col items-center">
+                                  <h1 className="text-lg font-semibold">
+                                    Free Votes
+                                  </h1>
+                                  <div className="flex ">
+                                    {freeVotes?.map((num: any, index: any) => {
+                                      const formatted =
+                                        parseInt(num) < 10
+                                          ? `${num}`
+                                          : `${num}`;
+                                      return (
+                                        <div key={index} className="flex gap-2">
+                                          {formatted
+                                            .split("")
+                                            .map((digit, i) => (
+                                              <div
+                                                key={i}
+                                                className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded font-bold mr-2"
+                                              >
+                                                {digit}
+                                              </div>
+                                            ))}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
                                 <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
                                   {position.candidates.map(
                                     (candidate, candidateIndex) => {
                                       const isSelected = candidate.vote > 0;
+
                                       const isAbstained =
                                         abstentions[position.name_of_position]
                                           ?.abstained;

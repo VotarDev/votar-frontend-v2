@@ -9,7 +9,7 @@ import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { logout } from "@/redux/features/auth/authSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
 import Avatar from "@mui/material/Avatar";
 import Link from "next/link";
@@ -25,7 +25,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { CircularProgress, Tooltip } from "@mui/material";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import Cookies from "universal-cookie";
-import { createCredit, getCredit } from "@/utils/api";
+import { createCredit, getCredit, purchaseVotarCredit } from "@/utils/api";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { set } from "lodash";
@@ -50,6 +50,7 @@ const SideBar = ({
   const [isCreditLoaded, setIsCreditLoaded] = useState(false);
   const [values, setValues] = useState(0);
   const [credit, setCredit] = useState(0);
+  const userProfile = useSelector((state: any) => state.userProfile);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -57,6 +58,7 @@ const SideBar = ({
     ? users?.id
     : user?.user?.id;
 
+  console.log(userProfile.user.data);
   const handleLogout = async () => {
     localStorage.removeItem("user");
     // localStorage.removeItem("token");
@@ -84,8 +86,12 @@ const SideBar = ({
     setIsCreditAdded(true);
 
     const creditData = { amount: values };
+    const bodyData = {
+      email: userProfile.user.data.email,
+      amount: values,
+    };
     try {
-      const { data } = await createCredit(creditData, USER_ID);
+      const { data } = await purchaseVotarCredit(bodyData);
       if (data) {
         toast.success("Credit Added Successfully");
         fetchCredit();
