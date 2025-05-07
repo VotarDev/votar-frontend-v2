@@ -60,7 +60,6 @@ const BuyVotingCredit = ({
     try {
       if (token) {
         setAuthToken(token);
-        console.log("token", token);
       }
       const bodyData = {
         email: session?.user?.email,

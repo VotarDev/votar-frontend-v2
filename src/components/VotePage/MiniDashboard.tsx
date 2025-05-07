@@ -56,9 +56,9 @@ const MiniDashboard = ({
 
   return (
     <div className="flex justify-center relative mt-12 px-4">
-      <div className="lg:w-[551px] w-full max-w-[40rem] py-8 flex bg-slate-50 lg:rounded-full rounded-lg justify-center items-center lg:text-[24px] text-base font-semibold flex-col gap-6">
+      <div className="lg:w-[451px] w-full max-w-[40rem] py-8 flex bg-slate-50 lg:rounded-full rounded-lg justify-center items-center lg:text-[24px] text-base font-semibold flex-col gap-6">
         <div className="flex justify-center items-center gap-10">
-          <div className="text-right flex flex-col gap-3">
+          {/* <div className="text-right flex flex-col gap-3">
             <div>Free Votes</div>
             <div className="flex justify-end gap-2">
               {freeVotes === null && (
@@ -91,9 +91,9 @@ const MiniDashboard = ({
               Login
             </div>
           </div>
-          <div className="w-px h-28 border border-slate-900"></div>
+          <div className="w-px h-28 border border-slate-900"></div> */}
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 text-center">
             <div>Votar Credits</div>
 
             <div className="flex  gap-2 ">
