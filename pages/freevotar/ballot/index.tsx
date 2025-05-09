@@ -67,6 +67,9 @@ const FreeVotarBallot = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   const voterProfile = useSelector((state: RootState) => state.voterProfile);
+  const votarCredit = useSelector(
+    (state: RootState) => state.votarCredit.credit
+  ); // Access votar_credit
   const router = useRouter();
 
   const [candidates, setCandidates] = useState<BallotData[]>([]);
@@ -79,14 +82,15 @@ const FreeVotarBallot = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<
     SelectedCandidates[]
   >([]);
-
   const [abstentions, setAbstentions] = useState({} as any);
   const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
-
   const [showModal, setShowModal] = useState(false);
-
   const [candidateId, setCandidateId] = useState<string | null>(null);
+  const [freeVoteDetails, setFreeVoteDetails] = useState<
+    { position: string; free_votes: number; _id: string }[]
+  >([]);
+
   const { data: session, status } = useSession();
 
   const cols = [
@@ -131,6 +135,7 @@ const FreeVotarBallot = () => {
         cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
         cookie.set("votar-credits", data.data.votar_credit, { path: "/" });
         dispatch(setVotarCredit(data.data.votar_credit));
+        setFreeVoteDetails(data.data.freeVoteDetails);
       }
     } catch (error) {
       console.error("Error registering voter:", error);
@@ -355,27 +360,6 @@ const FreeVotarBallot = () => {
         session?.user?.email &&
         selectedCandidates.length > 0
       ) {
-        // const selectedVotes = selectedCandidates
-        //   .filter((item) => !item.abstain)
-        //   .flatMap((item) =>
-        //     item.candidates
-        //       ? item.candidates.map((can) => ({
-        //           candidate_name: can.candidate_name,
-        //           position: item.position,
-        //           abstain: false,
-        //         }))
-        //       : []
-        //   );
-
-        // const abstainVotes = selectedCandidates
-        //   .filter((item) => item.abstain)
-        //   .map((item) => ({
-        //     position: item.position,
-        //     abstain: true,
-        //   }));
-
-        // const votes = [...selectedVotes, ...abstainVotes];
-
         const electionData = {
           email: session?.user?.email,
           election_id: candidateId,
@@ -489,7 +473,32 @@ const FreeVotarBallot = () => {
       const candidate =
         updatedCandidates[positionIndex].candidates[candidateIndex];
 
+      // Calculate total votes for the position
+      const totalVotes = updatedCandidates[positionIndex].candidates.reduce(
+        (sum, c) => sum + c.vote,
+        0
+      );
+
+      // Get free_votes for the position
+      const freeVotes =
+        freeVoteDetails.find((detail) => detail.position === positionName)
+          ?.free_votes || 0;
+
       if (increment) {
+        // If free_votes > 0, check against free_votes limit
+        if (freeVotes > 0 && totalVotes >= freeVotes) {
+          toast.error(
+            `Cannot add more votes for ${positionName}. You have reached the limit of ${freeVotes} free votes.`
+          );
+          return;
+        }
+        // If free_votes === 0, check votar_credit
+        if (freeVotes === 0 && votarCredit <= 0) {
+          toast.error(
+            `Cannot add more votes for ${positionName}. You have no votar credits available.`
+          );
+          return;
+        }
         candidate.vote += 1;
       } else if (candidate.vote > 0) {
         candidate.vote -= 1;
@@ -660,9 +669,19 @@ const FreeVotarBallot = () => {
                           candidates.map((position, positionIndex) => {
                             const randomColor =
                               cols[Math.floor(Math.random() * cols.length)];
-                            const freeVotes = election?.free_votes
-                              ?.toString()
-                              .split("");
+                            // Find the free_votes for the current position
+                            const positionFreeVotes =
+                              freeVoteDetails.find(
+                                (detail) =>
+                                  detail.position === position.name_of_position
+                              )?.free_votes || 0;
+
+                            // Calculate total votes for the position
+                            const totalVotes = position.candidates.reduce(
+                              (sum, c) => sum + c.vote,
+                              0
+                            );
+
                             return (
                               <div
                                 key={positionIndex}
@@ -694,27 +713,20 @@ const FreeVotarBallot = () => {
                                   <h1 className="text-lg font-semibold">
                                     Free Votes
                                   </h1>
-                                  <div className="flex ">
-                                    {freeVotes?.map((num: any, index: any) => {
-                                      const formatted =
-                                        parseInt(num) < 10
-                                          ? `${num}`
-                                          : `${num}`;
-                                      return (
-                                        <div key={index} className="flex gap-2">
-                                          {formatted
-                                            .split("")
-                                            .map((digit, i) => (
-                                              <div
-                                                key={i}
-                                                className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded font-bold mr-2"
-                                              >
-                                                {digit}
-                                              </div>
-                                            ))}
-                                        </div>
-                                      );
-                                    })}
+                                  <div className="flex">
+                                    <div className="flex gap-2">
+                                      {positionFreeVotes
+                                        .toString()
+                                        .split("")
+                                        .map((digit, i) => (
+                                          <div
+                                            key={i}
+                                            className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded font-bold mr-2"
+                                          >
+                                            {digit}
+                                          </div>
+                                        ))}
+                                    </div>
                                   </div>
                                 </div>
 
@@ -722,10 +734,18 @@ const FreeVotarBallot = () => {
                                   {position.candidates.map(
                                     (candidate, candidateIndex) => {
                                       const isSelected = candidate.vote > 0;
-
                                       const isAbstained =
                                         abstentions[position.name_of_position]
                                           ?.abstained;
+                                      // Disable increment button if:
+                                      // - free_votes > 0 and totalVotes >= free_votes
+                                      // - free_votes === 0 and votarCredit <= 0
+                                      const isIncrementDisabled =
+                                        (positionFreeVotes > 0 &&
+                                          totalVotes >= positionFreeVotes) ||
+                                        (positionFreeVotes === 0 &&
+                                          votarCredit <= 0) ||
+                                        isAbstained;
 
                                       return (
                                         <div
@@ -800,7 +820,7 @@ const FreeVotarBallot = () => {
                                               <div>
                                                 <button
                                                   className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                                    isAbstained
+                                                    isIncrementDisabled
                                                       ? "cursor-not-allowed opacity-50"
                                                       : ""
                                                   }`}
@@ -811,7 +831,7 @@ const FreeVotarBallot = () => {
                                                       true
                                                     )
                                                   }
-                                                  disabled={isAbstained}
+                                                  disabled={isIncrementDisabled}
                                                 >
                                                   <span className="text-xl">
                                                     <AiOutlinePlus />
@@ -853,12 +873,12 @@ const FreeVotarBallot = () => {
                             <PiWarningCircleFill />
                           </div>
                           <div className="text-[#826008]">
-                            To cast your vote using the &quot;Enter Votes&quot;
-                            button below, please make sure to select your
-                            preferred candidate for each position in the
-                            election. If you choose not to vote for a particular
-                            position, you may select &quot;Abstain&quot; (if
-                            this option is available in your election).
+                            To cast your vote using the "Enter Votes" button
+                            below, please make sure to select your preferred
+                            candidate for each position in the election. If you
+                            choose not to vote for a particular position, you
+                            may select "Abstain" (if this option is available in
+                            your election).
                           </div>
                         </div>
                         <div className="flex justify-center mb-10">
@@ -914,6 +934,7 @@ const FreeVotarBallot = () => {
                                 alt="line"
                                 className="w-40"
                               />
+                              рукой
                             </div>
                             <div>{selectedCandidate.position}</div>
                             <div>
