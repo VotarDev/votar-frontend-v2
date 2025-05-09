@@ -23,7 +23,7 @@ import Link from "next/link";
 import Chat from "@/src/components/Chat";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import url from "url";
+
 import setAuthToken from "@/utils/setAuthToken";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { googleAuth } from "@/redux/features/auth/authSlice";
@@ -50,22 +50,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     : users?.id
     ? users?.id
     : user?.user?.id;
-
-  // useEffect(() => {
-  //   const userToken = cookies.get("user-token");
-  //   console.log(userToken);
-
-  //   // If the userToken or the token from props does not exist, redirect to signin
-  //   if (userToken) {
-  //     return; // Do nothing, user is authenticated
-  //   }
-  //   if (token) {
-  //     return;
-  //   } else {
-  //     // If neither token exists, redirect to signin
-  //     router.push("/signin");
-  //   }
-  // }, [router, token]);
 
   useEffect(() => {
     if (userInfo.token) setAuthToken(userInfo.token);
@@ -223,7 +207,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const { query } = context; // Use context.query to get query parameters
+  const { query } = context;
 
   let token: string | null = null;
 
@@ -233,19 +217,8 @@ export const getServerSideProps: GetServerSideProps = async (
     token = query.token[0];
   }
 
-  // Check if token is undefined or null and handle accordingly
-  // if (!token) {
-  //   // If the token is not found, handle the redirect or set a default value as needed
-  //   return {
-  //     redirect: {
-  //       destination: "/signin", // Redirect to signin if token is not available
-  //       permanent: false,
-  //     },
-  //   };
-  // }
-
   return {
-    props: { token, userInfo: query }, // Pass token and other user info as props
+    props: { token, userInfo: query },
   };
 };
 
