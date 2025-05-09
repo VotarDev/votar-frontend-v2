@@ -58,7 +58,6 @@ const SideBar = ({
     ? users?.id
     : user?.user?.id;
 
-  console.log(userProfile.user.data);
   const handleLogout = async () => {
     localStorage.removeItem("user");
     // localStorage.removeItem("token");
