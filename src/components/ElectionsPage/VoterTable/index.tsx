@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -8,7 +8,6 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 
 import { TrackeChanges, VoterResponse } from "@/utils/types";
-import { TableRowTypes } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -29,13 +28,14 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   setSelectedRows,
 }) => {
   const headers = [
-    "",
     "S/N",
     "ID",
     "Name",
     "Sub-Group",
     "Phone Number",
     "Email",
+    "Changes",
+    "Edit",
   ];
 
   const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
@@ -66,38 +66,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     });
   };
 
-  const filterDuplicates = (array: any, keys: any) => {
-    const seen = new Set();
-    return array
-      .filter((item: any) => {
-        const compositeKey = keys.map((key: any) => item[key]).join("|");
-        const isDuplicate = seen.has(compositeKey);
-        seen.add(compositeKey);
-        return !isDuplicate;
-      })
-      .map(
-        ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        }: {
-          email: string;
-          name: string;
-          phoneNumber: string;
-          id: string;
-          subgroup: string;
-        }) => ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        })
-      );
-  };
-
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -113,7 +81,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   }));
 
   useEffect(() => {
-    setResponses([]);
     const handleResponseExported = async () => {
       setResponses([]);
       setIsFetchVoters(true);
@@ -135,7 +102,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             setIsFetchVoters(false);
             setResponses(data.data);
           }
-          return;
         }
       } catch (e) {
         console.log(e);
@@ -144,8 +110,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     };
     handleResponseExported();
   }, [electionId]);
-
-  console.log(responses);
 
   if (isFetchVoters) {
     return (
@@ -232,9 +196,12 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                   </StyledTableCell>
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
-                    {trackChanges.length > 0 && (
-                      <DropdownComponent tracked={trackChanges} index={index} />
-                    )}
+                    <DropdownComponent
+                      tracked={trackChanges.filter(
+                        (change) => change.oldData.id === row.id
+                      )}
+                      voterId={row.id}
+                    />
                   </StyledTableCell>
                   <StyledTableCell align="center" className="cursor-pointer">
                     <EditVotersInfo
@@ -246,16 +213,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                       setUsers={setResponses}
                     />
                   </StyledTableCell>
-                  {/* <StyledTableCell align="center" className="cursor-pointer">
-                    <DeleteDialog
-                      selectedVoter={row.name}
-                      row={row}
-                      id={index}
-                      getUpdatedList={() => handleResponseExported()}
-                      voters={responses}
-                      setVoters={setResponses}
-                    />
-                  </StyledTableCell> */}
                 </TableRow>
               ))}
             </TableBody>
@@ -266,4 +223,5 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   );
 };
 
+// Remove filterDuplicates as it's unused
 export default VoterTable;
