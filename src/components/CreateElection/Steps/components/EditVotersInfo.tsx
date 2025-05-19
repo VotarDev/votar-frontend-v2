@@ -43,7 +43,10 @@ const EditVotersInfo = ({
   };
 
   const handleEditUser = async () => {
+    console.log("Starting handleEditUser");
     setIsEditing(true);
+    console.log("isEditing set to true");
+
     const updatedUsers = users.map((item, key) => {
       if (key === index) {
         return {
@@ -68,6 +71,9 @@ const EditVotersInfo = ({
     if (changedData.length > 0) {
       const trackedData: TrackeChanges = { oldData, newData, changedData };
       setTrackChanges([...trackChanges, trackedData]);
+      console.log("Tracked changes:", trackedData);
+    } else {
+      console.log("No changes detected");
     }
 
     try {
@@ -79,23 +85,31 @@ const EditVotersInfo = ({
         id,
         email,
       };
+      console.log("Sending API request with body:", bodyData);
 
       const { data } = await editVoter(bodyData);
+      console.log("API response data:", data);
+
       if (data) {
-        console.log(data);
-        setIsEditing(false);
-        handleResponseExported();
+        console.log("API call successful, updating state");
         setUsers(updatedUsers);
+        handleResponseExported();
+        setIsEditing(false);
         handleClickClose();
         toast.success("Voter updated successfully");
+        console.log("Modal should close now");
+      } else {
+        console.log("No data returned from API");
       }
     } catch (error: any) {
-      console.log(error?.response?.data?.message);
-      toast.error(error?.response?.data?.message);
+      console.error(
+        "API error:",
+        error?.response?.data?.message || error.message
+      );
       setIsEditing(false);
+      toast.error(error?.response?.data?.message || "Failed to update voter");
+      console.log("Modal should stay open due to error");
     }
-
-    console.log("Updated Users:", updatedUsers);
   };
 
   const formDetails = [
