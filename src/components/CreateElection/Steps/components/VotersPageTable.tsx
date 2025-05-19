@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, use, useCallback } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -103,40 +103,40 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
+  const handleResponseExported = useCallback(async () => {
+    setResponses([]);
+    setIsFetchVoters(true);
+
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
+      }
+    }
+
+    try {
+      if (typeof window !== "undefined") {
+        const electionID = localStorage.getItem("ElectionId");
+        const { data } = await getVoters(USER_ID, {
+          election_id: electionID,
+        });
+        if (data) {
+          setIsFetchVoters(false);
+          setResponses(data.data);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      setIsFetchVoters(false);
+    }
+  }, [users]);
+
   useEffect(() => {
     setResponses([]);
-    const handleResponseExported = async () => {
-      setResponses([]);
-      setIsFetchVoters(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
-
-      try {
-        if (typeof window !== "undefined") {
-          const electionID = localStorage.getItem("ElectionId");
-          const { data } = await getVoters(USER_ID, {
-            election_id: electionID,
-          });
-          if (data) {
-            setIsFetchVoters(false);
-            setResponses(data.data);
-          }
-        }
-      } catch (e) {
-        console.log(e);
-        setIsFetchVoters(false);
-      }
-    };
     handleResponseExported();
-  }, [electionId]);
-
-  console.log(responses);
+  }, [handleResponseExported]);
 
   if (isFetchVoters) {
     return (
@@ -220,6 +220,7 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       setTrackChanges={setTrackChanges}
                       trackChanges={trackChanges}
                       setUsers={setResponses}
+                      handleResponseExported={handleResponseExported}
                     />
                   </StyledTableCell>
                   {/* <StyledTableCell align="center" className="cursor-pointer">

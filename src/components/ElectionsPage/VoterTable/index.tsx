@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -80,36 +80,37 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
-  useEffect(() => {
-    const handleResponseExported = async () => {
-      setResponses([]);
-      setIsFetchVoters(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+  const handleResponseExported = useCallback(async () => {
+    setResponses([]);
+    setIsFetchVoters(true);
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else {
+      if (typeof window !== "undefined") {
+        const tokenLocal = localStorage.getItem("token");
+        setAuthToken(tokenLocal);
       }
+    }
 
-      try {
-        if (electionId) {
-          const { data } = await getVoters(USER_ID, {
-            election_id: electionId,
-          });
-          if (data) {
-            setIsFetchVoters(false);
-            setResponses(data.data);
-          }
+    try {
+      if (electionId) {
+        const { data } = await getVoters(USER_ID, {
+          election_id: electionId,
+        });
+        if (data) {
+          setIsFetchVoters(false);
+          setResponses(data.data);
         }
-      } catch (e) {
-        console.log(e);
-        setIsFetchVoters(false);
       }
-    };
+    } catch (e) {
+      console.log(e);
+      setIsFetchVoters(false);
+    }
+  }, [users, electionId]);
+
+  useEffect(() => {
     handleResponseExported();
-  }, [electionId]);
+  }, [handleResponseExported]);
 
   if (isFetchVoters) {
     return (
@@ -211,6 +212,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                       setTrackChanges={setTrackChanges}
                       trackChanges={trackChanges}
                       setUsers={setResponses}
+                      handleResponseExported={handleResponseExported}
                     />
                   </StyledTableCell>
                 </TableRow>

@@ -56,6 +56,7 @@ const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
 const purchaseVotarCreditUrl = "/user/purchase_voterCredit";
 const voteCandidateFreeVote = "/voter/free_vote";
+const editVotersUrl = "/user/edit_voter";
 
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
@@ -319,6 +320,10 @@ export const registerVoter = (data: any) => {
 
 export const purchaseVotarCredit = (data: any) => {
   return httpService.post(purchaseVotarCreditUrl, data);
+};
+
+export const editVoter = (data: any) => {
+  return httpService.patch(editVotersUrl, data);
 };
 
 /** ADMIN */

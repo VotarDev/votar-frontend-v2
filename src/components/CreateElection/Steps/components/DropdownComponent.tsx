@@ -26,7 +26,7 @@ const DropdownComponent = ({ tracked, voterId }: DropdownProps) => {
   if (tracked.length === 0) return null;
 
   return (
-    <div className="relative max-w-full">
+    <div className="relative w-full max-w-full overflow-visible">
       <div
         className="flex items-center justify-center cursor-pointer text-xl font-semibold"
         onClick={toggleDropdown}
@@ -39,7 +39,7 @@ const DropdownComponent = ({ tracked, voterId }: DropdownProps) => {
       <AnimatePresence>
         {isDropdownOpen && (
           <motion.div
-            className="absolute top-full -left-1/2 transform  w-[400px] max-h-64 overflow-y-auto bg-white shadow-lg rounded-lg mt-2 z-20 p-4"
+            className="absolute top-full right-0 w-[350px] max-w-[90vw] bg-white shadow-lg rounded-lg mt-2 z-20 p-4 max-h-64 overflow-y-auto"
             variants={drop}
             initial="hidden"
             animate="visible"
