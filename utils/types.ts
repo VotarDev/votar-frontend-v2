@@ -163,6 +163,7 @@ export type VoterResponse = {
   isDuplicate?: boolean;
   subgroup?: string;
   isExported?: boolean;
+  election_id?: string;
 };
 
 export type OptionTypes = {
