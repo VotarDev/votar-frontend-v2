@@ -323,7 +323,7 @@ export const purchaseVotarCredit = (data: any) => {
 };
 
 export const editVoter = (data: any) => {
-  return httpService.patch(editVotersUrl, data);
+  return httpService.put(editVotersUrl, data);
 };
 
 /** ADMIN */
