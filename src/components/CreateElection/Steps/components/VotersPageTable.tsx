@@ -206,7 +206,10 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
                     {trackChanges.length > 0 && (
-                      <DropdownComponent tracked={trackChanges} index={index} />
+                      <DropdownComponent
+                        tracked={trackChanges}
+                        voterId={row.id}
+                      />
                     )}
                   </StyledTableCell>
                   <StyledTableCell align="center" className="cursor-pointer">
