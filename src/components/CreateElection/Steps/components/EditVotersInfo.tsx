@@ -176,7 +176,10 @@ const EditVotersInfo = ({
                   Cancel
                 </button>
                 <button
-                  onClick={handleEditUser}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleEditUser();
+                  }}
                   disabled={isEditing}
                   className="bg-blue-700 text-white w-40 h-12 rounded flex items-center justify-center outline-none hover:bg-blue-800"
                 >
