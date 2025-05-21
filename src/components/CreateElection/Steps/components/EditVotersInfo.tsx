@@ -43,40 +43,22 @@ const EditVotersInfo = ({
   };
 
   const handleEditUser = async () => {
-    console.log("Starting handleEditUser");
     setIsEditing(true);
-    console.log("isEditing set to true");
-
-    const updatedUsers = users.map((item, key) => {
-      if (key === index) {
-        return {
-          ...item,
-          name: inputData.name || item.name,
-          subgroup: inputData.subgroup || item.subgroup,
-          phoneNumber: inputData.phoneNumber || item.phoneNumber,
-          email: inputData.email || item.email,
-        };
-      }
-      return item;
-    });
-
-    const oldData = users[index];
-    const newData = updatedUsers[index];
-    const changedData = Object.keys(inputData).filter(
-      (key) =>
-        inputData[key as keyof typeof inputData] !==
-          oldData[key as keyof VoterResponse] && key !== "id"
-    );
-
-    if (changedData.length > 0) {
-      const trackedData: TrackeChanges = { oldData, newData, changedData };
-      setTrackChanges([...trackChanges, trackedData]);
-      console.log("Tracked changes:", trackedData);
-    } else {
-      console.log("No changes detected");
-    }
 
     try {
+      const updatedUsers = users.map((item, key) => {
+        if (key === index) {
+          return {
+            ...item,
+            name: inputData.name || item.name,
+            subgroup: inputData.subgroup || item.subgroup,
+            phoneNumber: inputData.phoneNumber || item.phoneNumber,
+            email: inputData.email || item.email,
+          };
+        }
+        return item;
+      });
+
       const { election_id, phoneNumber, name, id, email } = updatedUsers[index];
       const bodyData = {
         election_id,
@@ -85,21 +67,30 @@ const EditVotersInfo = ({
         id,
         email,
       };
-      console.log("Sending API request with body:", bodyData);
 
       const { data } = await editVoter(bodyData);
-      console.log("API response data:", data);
 
       if (data) {
-        console.log("API call successful, updating state");
         setUsers(updatedUsers);
         handleResponseExported();
         setIsEditing(false);
         handleClickClose();
         toast.success("Voter updated successfully");
-        console.log("Modal should close now");
-      } else {
-        console.log("No data returned from API");
+
+        const oldData = users[index];
+        const newData = updatedUsers[index];
+        const changedData = Object.keys(inputData).filter(
+          (key) =>
+            inputData[key as keyof typeof inputData] !==
+              oldData[key as keyof VoterResponse] && key !== "id"
+        );
+
+        if (changedData.length > 0) {
+          const trackedData: TrackeChanges = { oldData, newData, changedData };
+          setTrackChanges([...trackChanges, trackedData]);
+        } else {
+          console.log("No changes detected");
+        }
       }
     } catch (error: any) {
       console.error(
@@ -108,7 +99,6 @@ const EditVotersInfo = ({
       );
       setIsEditing(false);
       toast.error(error?.response?.data?.message || "Failed to update voter");
-      console.log("Modal should stay open due to error");
     }
   };
 
