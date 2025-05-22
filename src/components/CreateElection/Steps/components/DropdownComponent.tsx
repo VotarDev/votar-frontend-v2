@@ -1,88 +1,108 @@
 import React, { useState } from "react";
-import { BsCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
 import { FaAnglesRight } from "react-icons/fa6";
-import { motion, Variants } from "framer-motion";
+import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
-import { TrackeChanges } from "@/utils/types";
+import { VoterResponse } from "@/utils/types";
 
-interface DropdownProps {
-  tracked: TrackeChanges[];
-  voterId: string | number;
+interface ChangeLog {
+  _id: string;
+  name?: string;
+  email?: string;
+  phoneNumber?: string;
 }
 
-const drop: Variants = {
-  hidden: { opacity: 0, y: -10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.2 } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.2 } },
-};
+interface ChangeLogModalProps {
+  changeLogs: ChangeLog[];
+  voterId: string | number;
+  currentVoter: VoterResponse;
+}
 
-const DropdownComponent = ({ tracked, voterId }: DropdownProps) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const ChangeLogModal = ({
+  changeLogs,
+  voterId,
+  currentVoter,
+}: ChangeLogModalProps) => {
+  const [open, setOpen] = useState(false);
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen((prev) => !prev);
-  };
+  const handleClickOpen = () => setOpen(true);
+  const handleClickClose = () => setOpen(false);
 
-  if (tracked.length === 0) return null;
+  if (changeLogs.length === 0) return null;
+
+  const relevantFields = ["name", "email", "phoneNumber", "subgroup"];
 
   return (
-    <div className="relative w-full max-w-full overflow-visible">
+    <div>
       <div
-        className="flex items-center justify-center cursor-pointer text-xl font-semibold"
-        onClick={toggleDropdown}
+        onClick={handleClickOpen}
+        className="cursor-pointer text-blue-700 hover:text-blue-800 font-semibold"
       >
-        <span className="text-green-500">
-          {isDropdownOpen ? <BsFillCaretUpFill /> : <BsCaretDownFill />}
-        </span>
+        View Changes
       </div>
-
-      <AnimatePresence>
-        {isDropdownOpen && (
-          <motion.div
-            className="absolute top-full right-0 w-[350px] max-w-[90vw] bg-white shadow-lg rounded-lg mt-2 z-20 p-4 max-h-64 overflow-y-auto"
-            variants={drop}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            style={{
-              scrollbarWidth: "thin",
-              scrollbarColor: "#015ce9 #f5f5f5",
-            }}
-          >
-            <h3 className="text-sm font-bold text-gray-700 mb-2">
-              Changes for Voter ID: {voterId}
-            </h3>
-            {tracked.map((item, index) => (
-              <div
-                key={index}
-                className="py-2 border-b border-gray-100 last:border-b-0"
-              >
-                {item.changedData.map((field, idx) => (
-                  <div
-                    key={idx}
-                    className="flex justify-between items-center gap-3 text-sm"
-                  >
-                    <span className="capitalize text-gray-600">{field}:</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-800">
-                        {item.oldData[field] || "N/A"}
-                      </span>
-                      <span className="text-green-500">
-                        <FaAnglesRight />
-                      </span>
-                      <span className="text-gray-800">
-                        {item.newData[field] || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+      <AnimatePresence mode="wait">
+        {open && (
+          <Modal key="modal" handleClose={handleClickClose}>
+            <div className="bg-white rounded-lg py-6 px-10 text-left max-w-[800px] w-full">
+              <div className="text-xl font-semibold pb-5">
+                Change Log for Voter ID: {voterId}
               </div>
-            ))}
-          </motion.div>
+              <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                {changeLogs.map((log, index) => {
+                  const changedFields = relevantFields.filter(
+                    (field) =>
+                      log[field as keyof ChangeLog] !== undefined &&
+                      log[field as keyof ChangeLog] !==
+                        currentVoter[field as keyof VoterResponse]
+                  );
+
+                  if (changedFields.length === 0) return null;
+
+                  return (
+                    <div
+                      key={log._id}
+                      className="py-2 border-b border-gray-100 last:border-b-0"
+                    >
+                      {changedFields.map((field) => (
+                        <div
+                          key={field}
+                          className="flex justify-between items-center gap-3 "
+                        >
+                          <span className="capitalize text-lg font-semibold">
+                            {field}:
+                          </span>
+                          <div className="flex items-center gap-2 text-base">
+                            <span className="text-gray-800">
+                              {log[field as keyof ChangeLog] || "N/A"}
+                            </span>
+                            <span className="text-green-500">
+                              <FaAnglesRight />
+                            </span>
+                            <span className="text-gray-800">
+                              {currentVoter[field as keyof VoterResponse] ||
+                                "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleClickClose}
+                  className="bg-gray-300 text-gray-800 w-40 h-12 rounded flex items-center justify-center outline-none hover:bg-gray-400"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </Modal>
         )}
       </AnimatePresence>
     </div>
   );
 };
 
-export default DropdownComponent;
+export default ChangeLogModal;
