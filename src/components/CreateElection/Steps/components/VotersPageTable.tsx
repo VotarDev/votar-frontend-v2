@@ -15,6 +15,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import DeleteDialog from "./DeleteDialog";
+import ChangeLogModal from "./DropdownComponent";
 
 interface VotersPageTableProps {
   electionId?: string;
@@ -206,9 +207,14 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
                     {trackChanges.length > 0 && (
-                      <DropdownComponent
-                        tracked={trackChanges}
+                      // <DropdownComponent
+                      //   tracked={trackChanges}
+                      //   voterId={row.id}
+                      // />
+                      <ChangeLogModal
+                        changeLogs={row.change_logs || []}
                         voterId={row.id}
+                        currentVoter={row}
                       />
                     )}
                   </StyledTableCell>
@@ -217,8 +223,6 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       users={responses}
                       selectedRow={row}
                       index={index}
-                      setTrackChanges={setTrackChanges}
-                      trackChanges={trackChanges}
                       setUsers={setResponses}
                       handleResponseExported={handleResponseExported}
                     />
