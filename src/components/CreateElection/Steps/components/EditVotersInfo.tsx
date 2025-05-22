@@ -1,8 +1,8 @@
-import React, { MouseEventHandler, useState } from "react";
+import React, { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
-import { TrackeChanges, VoterResponse } from "@/utils/types";
+import { VoterResponse } from "@/utils/types";
 import { editVoter } from "@/utils/api";
 import { toast } from "react-hot-toast";
 
@@ -11,8 +11,6 @@ interface EditVotersInfoProps {
   selectedRow: VoterResponse;
   index: number;
   setUsers: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
-  setTrackChanges: React.Dispatch<React.SetStateAction<TrackeChanges[]>>;
-  trackChanges: TrackeChanges[];
   handleResponseExported: () => Promise<void>;
 }
 
@@ -21,8 +19,6 @@ const EditVotersInfo = ({
   selectedRow,
   index,
   setUsers,
-  setTrackChanges,
-  trackChanges,
   handleResponseExported,
 }: EditVotersInfoProps) => {
   const [open, setOpen] = useState(false);
@@ -76,21 +72,6 @@ const EditVotersInfo = ({
         setIsEditing(false);
         handleClickClose();
         toast.success("Voter updated successfully");
-
-        const oldData = users[index];
-        const newData = updatedUsers[index];
-        const changedData = Object.keys(inputData).filter(
-          (key) =>
-            inputData[key as keyof typeof inputData] !==
-              oldData[key as keyof VoterResponse] && key !== "id"
-        );
-
-        if (changedData.length > 0) {
-          const trackedData: TrackeChanges = { oldData, newData, changedData };
-          setTrackChanges([...trackChanges, trackedData]);
-        } else {
-          console.log("No changes detected");
-        }
       }
     } catch (error: any) {
       console.error(

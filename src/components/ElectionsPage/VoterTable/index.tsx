@@ -13,8 +13,8 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 
-import DropdownComponent from "../../CreateElection/Steps/components/DropdownComponent";
 import EditVotersInfo from "../../CreateElection/Steps/components/EditVotersInfo";
+import ChangeLogModal from "../../CreateElection/Steps/components/DropdownComponent";
 
 interface VotersPageTableProps {
   electionId?: string;
@@ -38,7 +38,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     "Edit",
   ];
 
-  const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
   const [isFetchVoters, setIsFetchVoters] = useState(false);
   const users = useCurrentUser();
@@ -197,11 +196,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                   </StyledTableCell>
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
-                    <DropdownComponent
-                      tracked={trackChanges.filter(
-                        (change) => change.oldData.id === row.id
-                      )}
+                    <ChangeLogModal
+                      changeLogs={row.change_logs || []}
                       voterId={row.id}
+                      currentVoter={row}
                     />
                   </StyledTableCell>
                   <StyledTableCell align="center" className="cursor-pointer">
@@ -209,8 +207,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                       users={responses}
                       selectedRow={row}
                       index={index}
-                      setTrackChanges={setTrackChanges}
-                      trackChanges={trackChanges}
                       setUsers={setResponses}
                       handleResponseExported={handleResponseExported}
                     />
@@ -225,5 +221,4 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   );
 };
 
-// Remove filterDuplicates as it's unused
 export default VoterTable;

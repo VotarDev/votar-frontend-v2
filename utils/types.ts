@@ -160,6 +160,7 @@ export type VoterResponse = {
   name: string;
   phoneNumber: string;
   _id: string;
+  change_logs: any;
   isDuplicate?: boolean;
   subgroup?: string;
   isExported?: boolean;

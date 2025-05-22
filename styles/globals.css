@@ -290,3 +290,17 @@
   position: absolute;
   visibility: hidden;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #015ce9;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #0147b7;
+}
