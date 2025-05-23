@@ -103,7 +103,6 @@ const Ballot = ({ positions, setPositions }: any) => {
     }
   };
 
-  console.log(electionId, "election");
   return (
     <div className="my-[60px]">
       <Header electionDetails={election} />

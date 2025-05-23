@@ -210,7 +210,6 @@ const Create = () => {
           newStep++;
           break;
         case "Ballot":
-          console.log(positions);
           const ballotData = await createCandidate(ballotFormData, USER_ID);
           if (ballotData.data) {
             // toast.success(ballotData.data.status);
