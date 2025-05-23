@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -6,39 +6,37 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import EditVotersInfo from "./EditVotersInfo";
-import DropdownComponent from "./DropdownComponent";
+
 import { TrackeChanges, VoterResponse } from "@/utils/types";
-import { TableRowTypes } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
-import DeleteDialog from "./DeleteDialog";
 import ChangeLogModal from "./DropdownComponent";
+import EditVotersInfo from "./EditVotersInfo";
 
 interface VotersPageTableProps {
-  electionId?: string;
+  electionId?: string | null;
   selectedRows: VoterResponse[];
   setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
 }
 
-const VotersPageTable: React.FC<VotersPageTableProps> = ({
+const VoterTable: React.FC<VotersPageTableProps> = ({
   electionId,
   selectedRows,
   setSelectedRows,
 }) => {
   const headers = [
-    "",
     "S/N",
     "ID",
     "Name",
     "Sub-Group",
     "Phone Number",
     "Email",
+    "Changes",
+    "Edit",
   ];
 
-  const [trackChanges, setTrackChanges] = useState<TrackeChanges[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
   const [isFetchVoters, setIsFetchVoters] = useState(false);
   const users = useCurrentUser();
@@ -51,43 +49,19 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     : user?.user?.id;
 
   const handleCheckboxChange = (row: VoterResponse) => {
-    setSelectedRows((prevSelectedRows) =>
-      prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
-        ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
-        : [...prevSelectedRows, row]
-    );
-  };
-
-  const filterDuplicates = (array: any, keys: any) => {
-    const seen = new Set();
-    return array
-      .filter((item: any) => {
-        const compositeKey = keys.map((key: any) => item[key]).join("|");
-        const isDuplicate = seen.has(compositeKey);
-        seen.add(compositeKey);
-        return !isDuplicate;
-      })
-      .map(
-        ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        }: {
-          email: string;
-          name: string;
-          phoneNumber: string;
-          id: string;
-          subgroup: string;
-        }) => ({
-          email,
-          name,
-          phoneNumber,
-          id,
-          subgroup,
-        })
+    setSelectedRows((prevSelectedRows) => {
+      const isSelected = prevSelectedRows.some(
+        (selectedRow) => selectedRow.id === row.id
       );
+
+      if (isSelected) {
+        return prevSelectedRows.filter(
+          (selectedRow) => selectedRow.id !== row.id
+        );
+      } else {
+        return [...prevSelectedRows, row];
+      }
+    });
   };
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -107,7 +81,6 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
   const handleResponseExported = useCallback(async () => {
     setResponses([]);
     setIsFetchVoters(true);
-
     if (users?.data) {
       setAuthToken(users.data.data.cookie);
     } else {
@@ -118,10 +91,9 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
     }
 
     try {
-      if (typeof window !== "undefined") {
-        const electionID = localStorage.getItem("ElectionId");
+      if (electionId) {
         const { data } = await getVoters(USER_ID, {
-          election_id: electionID,
+          election_id: electionId,
         });
         if (data) {
           setIsFetchVoters(false);
@@ -132,10 +104,9 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
       console.log(e);
       setIsFetchVoters(false);
     }
-  }, [users]);
+  }, [users, electionId]);
 
   useEffect(() => {
-    setResponses([]);
     handleResponseExported();
   }, [handleResponseExported]);
 
@@ -165,17 +136,35 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
           >
             <TableHead>
               <TableRow>
-                {headers.map((header, key) => {
-                  return (
-                    <StyledTableCell
-                      key={key}
-                      className=" border border-[#F5F5F5]"
-                      align="center"
-                    >
-                      {header}
-                    </StyledTableCell>
-                  );
-                })}
+                <StyledTableCell
+                  align="center"
+                  className="border border-[#F5F5F5]"
+                >
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 cursor-pointer"
+                    checked={
+                      selectedRows.length === responses.length &&
+                      responses.length > 0
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedRows(responses);
+                      } else {
+                        setSelectedRows([]);
+                      }
+                    }}
+                  />
+                </StyledTableCell>
+                {headers.map((header, key) => (
+                  <StyledTableCell
+                    key={key}
+                    className="border border-[#F5F5F5]"
+                    align="center"
+                  >
+                    {header}
+                  </StyledTableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -206,17 +195,11 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                   </StyledTableCell>
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
-                    {trackChanges.length > 0 && (
-                      // <DropdownComponent
-                      //   tracked={trackChanges}
-                      //   voterId={row.id}
-                      // />
-                      <ChangeLogModal
-                        changeLogs={row.change_logs || []}
-                        voterId={row.id}
-                        currentVoter={row}
-                      />
-                    )}
+                    <ChangeLogModal
+                      changeLogs={row.change_logs || []}
+                      voterId={row.id}
+                      currentVoter={row}
+                    />
                   </StyledTableCell>
                   <StyledTableCell align="center" className="cursor-pointer">
                     <EditVotersInfo
@@ -227,16 +210,6 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
                       handleResponseExported={handleResponseExported}
                     />
                   </StyledTableCell>
-                  {/* <StyledTableCell align="center" className="cursor-pointer">
-                    <DeleteDialog
-                      selectedVoter={row.name}
-                      row={row}
-                      id={index}
-                      getUpdatedList={() => handleResponseExported()}
-                      voters={responses}
-                      setVoters={setResponses}
-                    />
-                  </StyledTableCell> */}
                 </TableRow>
               ))}
             </TableBody>
@@ -247,4 +220,4 @@ const VotersPageTable: React.FC<VotersPageTableProps> = ({
   );
 };
 
-export default VotersPageTable;
+export default VoterTable;

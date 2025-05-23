@@ -11,6 +11,7 @@ import { getElectionById, sendVoterCred } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const VotersPage = () => {
   const [preference, setPreference] = useState("");
@@ -19,6 +20,8 @@ const VotersPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsloading] = useState(false);
   const [election, setElection] = useState<any>([]);
+  const [electionId, setElectionId] = useState<string | null>("");
+  const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
   const user = useUser();
@@ -90,7 +93,7 @@ const VotersPage = () => {
       }
       try {
         const electionId = localStorage.getItem("ElectionId");
-        console.log(electionId);
+        setElectionId(electionId);
         if (electionId) {
           const electionData = { election_id: electionId };
           const { data } = await getElectionById(electionData);
@@ -107,9 +110,9 @@ const VotersPage = () => {
     getElection();
   }, []);
 
-  console.log(election?.published);
-
-  console.log(selectedRows);
+  const handleRouting = () => {
+    router.push(`/votar-forms/${election?.name_of_election}/${electionId}`);
+  };
 
   return (
     <div className="my-[60px]">
@@ -203,8 +206,17 @@ const VotersPage = () => {
             )}
           </div>
         </form>
+        <div className="flex justify-end mt-3">
+          <button
+            className="flex justify-center items-center bg-blue-700 text-zinc-100 w-56 h-12 rounded-lg"
+            onClick={handleRouting}
+          >
+            Add voters for your election
+          </button>
+        </div>
       </div>
       <VotersPageTable
+        electionId={electionId}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
       />
