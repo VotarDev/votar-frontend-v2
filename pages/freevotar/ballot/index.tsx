@@ -934,7 +934,6 @@ const FreeVotarBallot = () => {
                                 alt="line"
                                 className="w-40"
                               />
-                              рукой
                             </div>
                             <div>{selectedCandidate.position}</div>
                             <div>

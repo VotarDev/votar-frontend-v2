@@ -124,13 +124,16 @@ const ResponseTable = () => {
     getElectionsData();
   }, []);
 
+  console.log(electionID);
   const getVoterResponses = async () => {
     setIsFetchResponse(true);
     try {
       if (electionID) {
         const bodyData = { election_id: electionID };
         const { data } = await getVoterResponse(USER_ID, bodyData);
+
         console.log(data);
+
         if (data.data) {
           const fetchedResponses = data.data.voter_response;
 
@@ -324,8 +327,6 @@ const ResponseTable = () => {
       election_id: electionID,
     };
 
-    console.log("Exporting Response Data:", responseData);
-
     try {
       const { data } = await exportVoters(responseData, USER_ID);
       if (data) {
@@ -357,7 +358,6 @@ const ResponseTable = () => {
         );
 
         setVotarResponses(updatedResponses);
-        console.log("Exported Data:", data);
       }
     } catch (error: any) {
       const message =
@@ -370,8 +370,6 @@ const ResponseTable = () => {
       console.log(error);
       setIsExporting(false);
     }
-
-    console.log("Unique Items after Filtering:", uniqueItems);
   };
 
   const handleOpen = () => setToggleExportToElection(true);
