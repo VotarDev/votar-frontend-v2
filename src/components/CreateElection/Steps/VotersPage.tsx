@@ -12,6 +12,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import Cookies from "universal-cookie";
 
 const VotersPage = () => {
   const [preference, setPreference] = useState("");
@@ -25,6 +26,7 @@ const VotersPage = () => {
   const maxCharacterLength = 100;
   const users = useCurrentUser();
   const user = useUser();
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -43,14 +45,18 @@ const VotersPage = () => {
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
+    // if (users?.data) {
+    //   setAuthToken(users.data.data.cookie);
+    // } else {
+    //   if (typeof window !== "undefined") {
+    //     const tokenLocal = localStorage.getItem("token");
+    //     setAuthToken(tokenLocal);
+    //   }
+    // }
     const credentials = selectedRows.map((row) => ({
       email: row.email,
       phoneNumber: row.phoneNumber,
@@ -83,14 +89,18 @@ const VotersPage = () => {
   useEffect(() => {
     const getElection = async () => {
       setIsloading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       try {
         const electionId = localStorage.getItem("ElectionId");
         setElectionId(electionId);

@@ -11,6 +11,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import Header from "@/src/components/BallotPage/Header";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
+import Cookies from "universal-cookie";
 
 const Responses = () => {
   const router = useRouter();
@@ -19,6 +20,7 @@ const Responses = () => {
   const [isFecthElection, setIsFetchElection] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -35,16 +37,21 @@ const Responses = () => {
 
   useEffect(() => {
     const getElection = async () => {
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      const token = cookies.get("user-token");
+
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       setIsFetchElection(true);
       try {
+        if (token) {
+          setAuthToken(token);
+        }
         if (electionID) {
           const electionId = localStorage.getItem("ElectionId");
           const electionData = { election_id: electionID };

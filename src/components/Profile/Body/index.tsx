@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import { updateProfile, getImages } from "@/utils/api";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { useDispatch } from "react-redux";
+import Cookies from "universal-cookie";
 
 interface User {
   fullname: string;
@@ -44,6 +45,7 @@ const ProfileBody = () => {
     referralId: "",
     profilePicture: "",
   });
+  const cookies = new Cookies();
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
@@ -63,13 +65,9 @@ const ProfileBody = () => {
   };
 
   const getUser = async () => {
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
     setIsLoading(true);
 

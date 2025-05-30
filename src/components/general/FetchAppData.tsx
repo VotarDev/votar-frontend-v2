@@ -12,14 +12,13 @@ const FetchAppData = () => {
   useEffect(() => {
     const getUser = async () => {
       if (user) setAuthToken(user.data.data.cookie);
-      console.log(user.data.data);
+
       try {
         const userId = user.data.data._id ? user.data.data._id : user.data.data;
         const { data } = await getUserData(userId);
 
         if (data) {
           dispatch(userData(data));
-          console.log(data.data);
         }
       } catch (e: any) {
         console.log(e);

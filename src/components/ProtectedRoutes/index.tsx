@@ -6,26 +6,41 @@ import Cookies from "universal-cookie";
 function ProtectedRoutes({ children, googletoken }: any) {
   const user = useCurrentUser();
   const router = useRouter();
-
-  const [loading, setLoading] = useState(true); // State to manage loading while checking authentication
+  const [loading, setLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
 
   useEffect(() => {
     const cookies = new Cookies();
     const token = cookies.get("user-token");
 
-    if (!token || !user) {
-      router.push("/signin"); // Redirect to sign-in if no token or user state is null
-    } else {
-      setLoading(false); // Set loading to false only if authenticated
-    }
-  }, [user, router]); // Add `user` and `router` to the dependency array
+    const checkAuth = () => {
+      const updatedToken = cookies.get("user-token");
+      const hasValidToken = updatedToken || googletoken;
 
-  // Render a loading spinner or nothing while checking authentication
-  if (loading) {
-    return <div>Loading...</div>; // Replace with your loading component if available
+      if (!hasValidToken) {
+        setRedirecting(true);
+        router.push("/signin");
+        return;
+      }
+
+      setLoading(false);
+    };
+
+    checkAuth();
+    const timeoutId = setTimeout(checkAuth, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [router, googletoken]);
+
+  if (loading || redirecting) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
   }
 
-  return <>{children}</>; // Render protected content if authenticated
+  return <>{children}</>;
 }
 
 export default ProtectedRoutes;

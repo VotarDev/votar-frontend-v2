@@ -14,6 +14,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import ChangeLogModal from "./DropdownComponent";
 import EditVotersInfo from "./EditVotersInfo";
+import Cookies from "universal-cookie";
 
 interface VotersPageTableProps {
   electionId?: string | null;
@@ -41,6 +42,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const [isFetchVoters, setIsFetchVoters] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -81,14 +83,18 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const handleResponseExported = useCallback(async () => {
     setResponses([]);
     setIsFetchVoters(true);
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
+    // if (users?.data) {
+    //   setAuthToken(users.data.data.cookie);
+    // } else {
+    //   if (typeof window !== "undefined") {
+    //     const tokenLocal = localStorage.getItem("token");
+    //     setAuthToken(tokenLocal);
+    //   }
+    // }
 
     try {
       if (electionId) {
