@@ -18,6 +18,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { updateElection, updateCandidate, getElectionById } from "@/utils/api";
 import { BsArrowLeft } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import Cookies from "universal-cookie";
 
 let steps = [
   "Details",
@@ -65,6 +66,7 @@ const ElectionDetail = () => {
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
   const [state, dispatch] = useReducer(reducer, initState);
+  const cookies = new Cookies();
 
   useEffect(() => {
     localStorage.setItem("currentStep", String(currentStep));
@@ -87,14 +89,18 @@ const ElectionDetail = () => {
 
   useEffect(() => {
     const getElection = async () => {
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       setIsFetchElection(true);
       try {
         if (electionID) {
@@ -207,6 +213,8 @@ const ElectionDetail = () => {
   }
 
   const handleStepApiCall = async (step: number) => {
+    const token = cookies.get("user-token");
+
     const [startDateString] = state.start_date
       ? state?.start_date.split(" ")
       : [""];
@@ -266,6 +274,9 @@ const ElectionDetail = () => {
     try {
       switch (step) {
         case 0:
+          if (token) {
+            setAuthToken(token);
+          }
           const { data } = await updateElection(formData, USER_ID);
 
           if (data) {
@@ -275,6 +286,9 @@ const ElectionDetail = () => {
           }
           break;
         case 1:
+          if (token) {
+            setAuthToken(token);
+          }
           const candidateRes = await updateCandidate(USER_ID, ballotFormData);
 
           if (candidateRes) toast.success("Successfully Updated");

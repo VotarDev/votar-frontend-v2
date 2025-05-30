@@ -30,6 +30,7 @@ import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { set } from "lodash";
 import { toast } from "react-hot-toast";
+import setAuthToken from "@/utils/setAuthToken";
 
 const SideBar = ({
   opener,
@@ -50,6 +51,7 @@ const SideBar = ({
   const [isCreditLoaded, setIsCreditLoaded] = useState(false);
   const [values, setValues] = useState(0);
   const [credit, setCredit] = useState(0);
+  const cookies = new Cookies();
   const userProfile = useSelector((state: any) => state.userProfile);
 
   let USER_ID = users?.data?.data
@@ -61,7 +63,7 @@ const SideBar = ({
   const handleLogout = async () => {
     localStorage.removeItem("user");
     // localStorage.removeItem("token");
-    const cookies = new Cookies();
+
     cookies.remove("user-token", { path: "/" });
     dispatch(logout());
     dispatch(userData({}));
@@ -85,11 +87,17 @@ const SideBar = ({
     setIsCreditAdded(true);
 
     const creditData = { amount: values };
+
+    const token = cookies.get("user-token");
+
     const bodyData = {
       email: userProfile.user.data.email,
       amount: values,
     };
     try {
+      if (token) {
+        setAuthToken(token);
+      }
       const { data } = await purchaseVotarCredit(bodyData);
       if (data) {
         toast.success("Credit Added Successfully");

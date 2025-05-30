@@ -12,6 +12,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import { createVotarForms } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
+import Cookies from "universal-cookie";
 
 interface Item {
   id: number;
@@ -27,6 +28,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   const [newItemContent, setNewItemContent] = useState<string>("Add option");
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [electionID, setElectionID] = useState("");
+  const cookies = new Cookies();
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -91,14 +93,18 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
 
   const formHandler = async () => {
     setIsLoading(true);
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
+    // if (users?.data) {
+    //   setAuthToken(users.data.data.cookie);
+    // } else {
+    //   if (typeof window !== "undefined") {
+    //     const tokenLocal = localStorage.getItem("token");
+    //     setAuthToken(tokenLocal);
+    //   }
+    // }
     try {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
@@ -119,8 +125,6 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       setIsLoading(false);
     }
   };
-
-  console.log(electionID);
 
   const copyLink = () => {
     navigator.clipboard.writeText(formLink ?? "");

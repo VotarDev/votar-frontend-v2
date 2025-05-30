@@ -22,6 +22,7 @@ import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { useSelector } from "react-redux";
+import Cookies from "universal-cookie";
 
 const Create = () => {
   let step = 1;
@@ -35,6 +36,8 @@ const Create = () => {
       step = 1;
     }
   }
+
+  const cookies = new Cookies();
   const [currentStep, setCurrentStep] = useState(step);
   const [electionName, setElectionName] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -143,6 +146,8 @@ const Create = () => {
   };
 
   const handleClick = async (direction: string) => {
+    const token = cookies.get("user-token");
+
     let newStep = currentStep;
     setIsLoading(true);
     const [startDateString] = startDate.split(" ");
@@ -202,6 +207,9 @@ const Create = () => {
     try {
       switch (steps[currentStep - 1]) {
         case "Details":
+          if (token) {
+            setAuthToken(token);
+          }
           const { data } = await createElection(detailsFormData, USER_ID);
           if (data) {
             toast.success(data.status);
@@ -210,6 +218,9 @@ const Create = () => {
           newStep++;
           break;
         case "Ballot":
+          if (token) {
+            setAuthToken(token);
+          }
           const ballotData = await createCandidate(ballotFormData, USER_ID);
           if (ballotData.data) {
             // toast.success(ballotData.data.status);

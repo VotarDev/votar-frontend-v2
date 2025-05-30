@@ -12,6 +12,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import ProtectedRoutes from "../ProtectedRoutes";
 import DashboardNavbar from "../DashboardNavbar";
+import Cookies from "universal-cookie";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -23,6 +24,7 @@ const DashboardLayout = ({ children }: any) => {
   const users = useCurrentUser();
   const user = useUser();
   const dispatch = useDispatch();
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -40,16 +42,20 @@ const DashboardLayout = ({ children }: any) => {
 
   useEffect(() => {
     const getUser = async () => {
-      if (users) {
-        if (users.data) {
-          setAuthToken(users.data.data.cookie);
-        }
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users) {
+      //   if (users.data) {
+      //     setAuthToken(users.data.data.cookie);
+      //   }
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       try {
         const { data } = await getUserData(USER_ID);
         // console.log(data);

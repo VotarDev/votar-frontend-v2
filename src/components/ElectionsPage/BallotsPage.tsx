@@ -20,6 +20,7 @@ import { AnimatePresence } from "framer-motion";
 
 import DeletePositionDialog from "./DeletePositionModal";
 import DeleteCandidateDialog from "./DeleteCandidateModal";
+import Cookies from "universal-cookie";
 
 const BallotsPage = ({ position, setPosition }: any) => {
   const users = useCurrentUser();
@@ -35,6 +36,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const [isDeletePositionLoading, setIsDeletePositionLoading] = useState(false);
   const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
   const [isEditable, setIsEditable] = useState(true);
+  const cookies = new Cookies();
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -54,14 +56,18 @@ const BallotsPage = ({ position, setPosition }: any) => {
   useEffect(() => {
     const getElection = async () => {
       setIsLoading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       try {
         if (electionID) {
           const electionData = { election_id: electionID };

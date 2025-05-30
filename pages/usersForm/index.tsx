@@ -11,6 +11,7 @@ import { ElectionDetails, OptionTypes } from "@/utils/types";
 import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import Header from "@/src/components/BallotPage/Header";
+import Cookies from "universal-cookie";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
@@ -21,6 +22,7 @@ const UsersForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const users = useCurrentUser();
   const router = useRouter();
+  const cookies = new Cookies();
   const user = useUser();
   const { token, electionID } = router.query;
   const [isClient, setIsClient] = useState(false);
@@ -39,14 +41,18 @@ const UsersForm = () => {
 
   useEffect(() => {
     const getElection = async () => {
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       setIsFetchElection(true);
       try {
         const electionData = { election_id: electionID };
@@ -69,13 +75,17 @@ const UsersForm = () => {
 
   useEffect(() => {
     const getForm = async () => {
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
       try {
         const { data } = await getForms(USER_ID);

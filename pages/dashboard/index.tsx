@@ -52,56 +52,118 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     : user?.user?.id;
 
   useEffect(() => {
-    if (userInfo.token) setAuthToken(userInfo.token);
-    if (userInfo.user) {
-      dispatch(userData(JSON.parse(userInfo.user)));
-      dispatch(googleAuth(JSON.parse(userInfo.user)));
-      localStorage.setItem("user", JSON.stringify(JSON.parse(userInfo.user)));
+    const cookies = new Cookies();
+
+    if (router.query.token && typeof router.query.token === "string") {
+      cookies.set("user-token", router.query.token, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      const cleanQuery = { ...router.query };
+      delete cleanQuery.token;
+
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: cleanQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
     }
-  }, [dispatch, userInfo]);
+  }, [router]);
 
   useEffect(() => {
+    const authToken = userInfo.token || token;
+
+    if (authToken) {
+      setAuthToken(authToken);
+
+      const cookies = new Cookies();
+      const existingToken = cookies.get("user-token");
+
+      if (!existingToken) {
+        cookies.set("user-token", authToken, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 7,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+        });
+      }
+    }
+
+    if (userInfo.user) {
+      try {
+        const parsedUser = JSON.parse(userInfo.user);
+        dispatch(userData(parsedUser));
+        dispatch(googleAuth(parsedUser));
+        localStorage.setItem("user", JSON.stringify(parsedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, [dispatch, userInfo, token]);
+
+  useEffect(() => {
+    if (!USER_ID) return;
+
     setIsFetchElections(true);
     const getElectionsData = async () => {
       try {
         const { data } = await getElections(USER_ID);
         if (data) {
           setElection(data.data);
-          setIsFetchElections(false);
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching elections:", error);
+      } finally {
+        setIsFetchElections(false);
       }
     };
-    getElectionsData();
-  }, []);
 
+    getElectionsData();
+  }, [USER_ID]);
+
+  // Fetch dashboard cards
   useEffect(() => {
+    if (!USER_ID) return;
+
     const getDashboardCards = async () => {
       setIsFetchCards(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      console.log("token card", token);
+
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else if (typeof window !== "undefined") {
+      //   const tokenLocal = localStorage.getItem("token");
+      //   if (tokenLocal) {
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
+
       try {
         const authorId = { author_id: USER_ID };
         const { data } = await dashboardCards(authorId);
         if (data) {
           setCardDetails(data.data);
-
-          setIsFetchCards(false);
         }
       } catch (e: any) {
-        console.log(e);
+        console.error("Error fetching dashboard cards:", e);
+      } finally {
         setIsFetchCards(false);
       }
     };
+
     getDashboardCards();
-  }, []);
+  }, [USER_ID, users?.data, token]);
 
   return (
     <ProtectedRoutes googletoken={token}>
@@ -129,8 +191,10 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
                   key={election._id}
                   className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
                   style={{
-                    backgroundColor: `${elections[index].style}`,
-                    borderLeft: `3px solid ${elections[index].border}`,
+                    backgroundColor: `${elections[index]?.style || "#015CE9"}`,
+                    borderLeft: `3px solid ${
+                      elections[index]?.border || "#015CE9"
+                    }`,
                   }}
                 >
                   <div>
@@ -207,18 +271,32 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
 export const getServerSideProps: GetServerSideProps = async (
   context: GetServerSidePropsContext
 ) => {
-  const { query } = context;
+  const { req, query } = context;
+  const cookies = new Cookies(req.headers.cookie);
+  let token = cookies.get("user-token") || query.token;
 
-  let token: string | null = null;
+  // console.log(
+  //   "getServerSideProps - Token from cookie:",
+  //   cookies.get("user-token")
+  // );
+  // console.log("getServerSideProps - Token from query:", query.token);
 
-  if (typeof query.token === "string") {
-    token = query.token;
-  } else if (Array.isArray(query.token)) {
-    token = query.token[0];
+  if (!token) {
+    // console.log("No token found, redirecting to signin");
+    return {
+      redirect: {
+        destination: "/signin",
+        permanent: false,
+      },
+    };
   }
 
+  // console.log("Token found, allowing access to dashboard");
   return {
-    props: { token, userInfo: query },
+    props: {
+      token: token.toString(),
+      userInfo: query,
+    },
   };
 };
 

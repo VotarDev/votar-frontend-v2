@@ -11,6 +11,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { ElectionDetails } from "@/utils/types";
 import Header from "@/src/components/BallotPage/Header";
 import { CircularProgress } from "@mui/material";
+import Cookies from "universal-cookie";
 
 const CreateForm = () => {
   const router = useRouter();
@@ -20,6 +21,7 @@ const CreateForm = () => {
   const [electionID, setElectionID] = useState("");
   const [isFecthElection, setIsFetchElection] = useState(false);
   const [election, setElection] = useState<ElectionDetails | null>(null);
+  const cookies = new Cookies();
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
 
@@ -40,18 +42,20 @@ const CreateForm = () => {
     }
   }, [id, electionID]);
 
-  console.log(electionID);
-
   useEffect(() => {
     const getElection = async () => {
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       setIsFetchElection(true);
       try {
         if (electionID) {
@@ -70,7 +74,6 @@ const CreateForm = () => {
     getElection();
   }, [electionID]);
 
-  console.log(electionID);
   return (
     <ProtectedRoutes>
       <DashboardLayout>

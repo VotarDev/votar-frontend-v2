@@ -24,7 +24,7 @@ import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { importFromCsv } from "@/utils/api";
 import DeleteDialog from "./DeleteDialog";
-import { set } from "lodash";
+import Cookies from "universal-cookie";
 
 type ResponseData = {
   voters: VoterResponse[];
@@ -56,6 +56,7 @@ const ResponseTable = () => {
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
+  const cookies = new Cookies();
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
 
@@ -184,8 +185,13 @@ const ResponseTable = () => {
   const handleFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    event.preventDefault();
+    const token = cookies.get("user-token");
     try {
       setIsImporting(true);
+      if (token) {
+        setAuthToken(token);
+      }
       if (selectedFile) {
         const reader = new FileReader();
 
@@ -259,7 +265,6 @@ const ResponseTable = () => {
               ]),
             };
 
-            console.log(bodyData);
             const res = await importFromCsv(USER_ID, bodyData);
             setIsImporting(false);
             console.log(res);
@@ -310,15 +315,19 @@ const ResponseTable = () => {
     ]).filter((item) => !item.isExported);
 
     setIsExporting(true);
-
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else if (typeof window !== "undefined") {
-      const tokenLocal = localStorage.getItem("token");
-      if (tokenLocal) {
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
+
+    // if (users?.data) {
+    //   setAuthToken(users.data.data.cookie);
+    // } else if (typeof window !== "undefined") {
+    //   const tokenLocal = localStorage.getItem("token");
+    //   if (tokenLocal) {
+    //     setAuthToken(tokenLocal);
+    //   }
+    // }
 
     if (electionID) localStorage.setItem("ElectionId", electionID);
 

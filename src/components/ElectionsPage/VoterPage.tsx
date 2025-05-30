@@ -13,6 +13,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 import VoterTable from "./VoterTable";
+import Cookies from "universal-cookie";
 
 const VoterPage = () => {
   const [preference, setPreference] = useState("");
@@ -28,6 +29,7 @@ const VoterPage = () => {
   const [electionID, setElectionID] = useState("");
   const [error, setError] = useState("");
   const url = router.asPath;
+  const cookies = new Cookies();
 
   const extractedText = url.split("/").slice(-2).join("/");
 
@@ -57,14 +59,18 @@ const VoterPage = () => {
   useEffect(() => {
     const getElection = async () => {
       setIsLoading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
+      // if (users?.data) {
+      //   setAuthToken(users.data.data.cookie);
+      // } else {
+      //   if (typeof window !== "undefined") {
+      //     const tokenLocal = localStorage.getItem("token");
+      //     setAuthToken(tokenLocal);
+      //   }
+      // }
       try {
         if (electionID) {
           const electionData = { election_id: electionID };
@@ -87,14 +93,18 @@ const VoterPage = () => {
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);
-    if (users?.data) {
-      setAuthToken(users.data.data.cookie);
-    } else {
-      if (typeof window !== "undefined") {
-        const tokenLocal = localStorage.getItem("token");
-        setAuthToken(tokenLocal);
-      }
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
     }
+    // if (users?.data) {
+    //   setAuthToken(users.data.data.cookie);
+    // } else {
+    //   if (typeof window !== "undefined") {
+    //     const tokenLocal = localStorage.getItem("token");
+    //     setAuthToken(tokenLocal);
+    //   }
+    // }
     const credentials = selectedRows.map((row) => ({
       email: row.email,
       phoneNumber: row.phoneNumber,

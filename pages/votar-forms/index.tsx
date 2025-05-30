@@ -5,12 +5,15 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { getElections } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { ElectionDetails } from "@/utils/types";
+import Cookies from "universal-cookie";
+import setAuthToken from "@/utils/setAuthToken";
 
 const VotarForms = () => {
   const users = useCurrentUser();
   const user = useUser();
   const [elections, setElections] = useState<ElectionDetails[]>([]);
   const [isFetchElections, setIsFetchElections] = useState(false);
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -19,6 +22,10 @@ const VotarForms = () => {
     : user?.user?.id;
 
   useEffect(() => {
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
+    }
     setIsFetchElections(true);
     const getElectionsData = async () => {
       try {

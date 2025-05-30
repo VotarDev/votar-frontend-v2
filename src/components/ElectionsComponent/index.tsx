@@ -9,7 +9,8 @@ import { MdDelete } from "react-icons/md";
 import Modal from "@/src/components/Modal";
 import { AnimatePresence } from "framer-motion";
 import DeleteDialog from "./DeleteDialog";
-import { set } from "lodash";
+import Cookies from "universal-cookie";
+import setAuthToken from "@/utils/setAuthToken";
 
 const ElectionsComponent = () => {
   const users = useCurrentUser();
@@ -20,6 +21,7 @@ const ElectionsComponent = () => {
   const [open, setOpen] = useState(false);
   const handleClickOpen = () => setOpen(true);
   const handleClickClose = () => setOpen(false);
+  const cookies = new Cookies();
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -29,6 +31,10 @@ const ElectionsComponent = () => {
 
   const getElectionsData = async () => {
     setIsFetchElections(true);
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
+    }
     try {
       const { data } = await getElections(USER_ID);
       if (data) {
