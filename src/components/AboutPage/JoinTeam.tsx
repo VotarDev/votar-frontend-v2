@@ -4,8 +4,8 @@ import Link from "next/link";
 
 const JoinTeam = () => {
   return (
-    <div className="my-[10rem] join-team  rounded-xl">
-      <div className="flex items-center justify-between px-10 flex-wrap lg:flex-row flex-col-reverse">
+    <div className="my-[10rem] join-team  rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between lg:px-10 flex-wrap lg:flex-row flex-col-reverse ">
         <div className="text-white text-center lg:text-left my-7 lg:my-0">
           <div className="lg:text-[32px] text-[1.5rem] ">
             <h1>Excellence is our priority</h1>
