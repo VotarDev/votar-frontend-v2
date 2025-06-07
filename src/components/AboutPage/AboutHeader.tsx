@@ -18,10 +18,10 @@ const AboutHeader = () => {
 
   return (
     <div className="lg:my-[4rem] mt-[7rem]">
-      <div className=" lg:text-left text-center">
-        <div>
+      <div className=" lg:text-left text-center flex items-center justify-between lg:flex-row flex-wrap flex-col">
+        <div className="flex-1">
           <div className="flex justify-center lg:justify-start">
-            <div className="flex bg-[#EDF0F5] lg:w-[20%] w-[80%] justify-center rounded-[50px] gap-3 items-center p-[10px] lg:justify-start text-[12px]">
+            <div className="flex bg-[#EDF0F5] lg:w-[30%] w-[80%] justify-center rounded-[50px] gap-3 items-center p-[10px] lg:justify-start text-[12px]">
               <div className="bg-[#015CE9] py-[0.75rem] px-[1rem] rounded-[20px] h-2 flex justify-center items-center text-white">
                 <p>New!</p>
               </div>
@@ -53,6 +53,10 @@ const AboutHeader = () => {
               <p>Users processed...</p>
             </div>
           </div>
+        </div>
+
+        <div className="flex-1">
+          <img src="/assets/images/about-hero.jpeg" alt="about hero" />
         </div>
       </div>
       <div className="flex justify-center items-center mt-10">
