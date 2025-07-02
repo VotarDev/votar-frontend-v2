@@ -43,7 +43,7 @@ const UserElections = () => {
       if (token) setAuthToken(token);
       try {
         if (userMail && plans === "votar-pro") {
-          const { data } = await getVotarPageByElection(userMail, "Votar Pro");
+          const { data } = await getVotarPageByElection(userMail, "");
           if (data) {
             setElectionDetails(data.data);
             console.log(data.data);
