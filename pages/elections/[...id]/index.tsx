@@ -240,8 +240,8 @@ const ElectionDetail = () => {
     formData.append("secondary_color", state.secondary_color);
     formData.append("start_date", startDateData);
     formData.append("end_date", endDateData);
-    formData.append("price_per_vote", state.price_per_vote.toString());
-    formData.append("free_votes", state.free_votes.toString());
+    formData.append("price_per_vote", String(state.price_per_vote));
+    formData.append("free_votes", String(state.free_votes));
     if (state.start_time)
       formData.append("start_time", String(state.start_time));
     if (state.end_time) formData.append("end_time", String(state.end_time));
