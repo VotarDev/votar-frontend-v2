@@ -3,6 +3,7 @@ import AdminLayout from "../AdminLayout";
 import Tabs from "./Tabs";
 import FreeVotarTable from "./FreeVotarTable";
 import Navigations from "./Navigations";
+import { usePathname } from "next/navigation";
 
 const FreeProMeeting = () => {
   return (

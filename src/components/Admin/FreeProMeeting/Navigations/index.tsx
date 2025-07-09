@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const Navigations = () => {
   const pathname = usePathname();
+
   return (
     <div>
       <div className="flex items-center gap-8">

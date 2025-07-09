@@ -1,7 +1,7 @@
 import AdminLayout from "@/src/components/Admin/AdminLayout";
 import Navigations from "@/src/components/Admin/FreeProMeeting/Navigations";
 import VotarProTable from "@/src/components/Admin/FreeProMeeting/VotarProTable";
-import React from "react";
+import React, { useState } from "react";
 
 const Pro = () => {
   return (
