@@ -12,6 +12,7 @@ import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
 import { getAdminVotarPage } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
+import { usePathname } from "next/navigation";
 
 const FreeVotarTable = () => {
   const headers = ["S/N", "Emails", "No. of Elections"];
@@ -31,6 +32,7 @@ const FreeVotarTable = () => {
     },
   }));
   const router = useRouter();
+  const pathname = usePathname();
   const handleEmailClick = (email: string) => {
     router.push(`/admin/free-pro-meeting/details/free-votar/${email}`);
   };
@@ -40,9 +42,13 @@ const FreeVotarTable = () => {
       setIsFetchUsers(true);
       const cookies = new Cookies();
       const token = cookies.get("admin-token");
+      const types = pathname.toLowerCase().endsWith("/pro")
+        ? "Votar Pro"
+        : "Free Votar";
+
       if (token) setAuthToken(token);
       try {
-        const { data } = await getAdminVotarPage();
+        const { data } = await getAdminVotarPage(types);
         if (data) {
           setUsers(data.data);
           console.log(data.data);

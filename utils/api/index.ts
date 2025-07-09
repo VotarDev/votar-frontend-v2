@@ -327,8 +327,8 @@ export const editVoter = (data: any) => {
 };
 
 /** ADMIN */
-export const getAdminVotarPage = () => {
-  return httpService.get(adminVotarPageUrl);
+export const getAdminVotarPage = (type?: string) => {
+  return httpService.get(adminVotarPageUrl, { params: { type } });
 };
 
 export const adminLogin = (data: { username: string; password: string }) => {
