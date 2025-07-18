@@ -16,6 +16,8 @@ import { CircularProgress } from "@mui/material";
 import EditVotersInfo from "../../CreateElection/Steps/components/EditVotersInfo";
 import ChangeLogModal from "../../CreateElection/Steps/components/DropdownComponent";
 import Cookies from "universal-cookie";
+import { AnimatePresence } from "framer-motion";
+import Modal from "../../Modal";
 
 interface VotersPageTableProps {
   electionId?: string;
@@ -44,6 +46,9 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const users = useCurrentUser();
   const user = useUser();
   const cookies = new Cookies();
+  const [rangeStart, setRangeStart] = useState(1);
+  const [rangeEnd, setRangeEnd] = useState(1);
+  const [openRangeModal, setOpenRangeModal] = useState(false);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -81,17 +86,24 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
+  const handleRangeSelect = () => {
+    if (
+      rangeStart < 1 ||
+      rangeEnd > responses.length ||
+      rangeStart > rangeEnd
+    ) {
+      setOpenRangeModal(true);
+      return;
+    }
+
+    const selectedInRange = responses.slice(rangeStart - 1, rangeEnd);
+    setSelectedRows(selectedInRange);
+  };
+
   const handleResponseExported = useCallback(async () => {
     setResponses([]);
     setIsFetchVoters(true);
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else {
-    //   if (typeof window !== "undefined") {
-    //     const tokenLocal = localStorage.getItem("token");
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
+
     const token = cookies.get("user-token");
     if (token) {
       setAuthToken(token);
@@ -113,6 +125,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     }
   }, [users, electionId]);
 
+  const handleClose = () => {
+    setOpenRangeModal(false);
+  };
+
   useEffect(() => {
     handleResponseExported();
   }, [handleResponseExported]);
@@ -130,6 +146,37 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
       <div className="pb-3">
         Number of Voters Selected: <strong>{selectedRows.length}</strong> of{" "}
         <strong>{responses.length}</strong>
+      </div>
+
+      <div className="flex items-center gap-4 pb-4">
+        <label>
+          From:{" "}
+          <input
+            type="number"
+            min={1}
+            max={responses.length}
+            value={rangeStart}
+            onChange={(e) => setRangeStart(Number(e.target.value))}
+            className="border px-2 py-1 w-20"
+          />
+        </label>
+        <label>
+          To:{" "}
+          <input
+            type="number"
+            min={1}
+            max={responses.length}
+            value={rangeEnd}
+            onChange={(e) => setRangeEnd(Number(e.target.value))}
+            className="border px-2 py-1 w-20"
+          />
+        </label>
+        <button
+          onClick={handleRangeSelect}
+          className="bg-blue-600 text-white px-4 py-1 rounded"
+        >
+          Select Range
+        </button>
       </div>
 
       <div>
@@ -223,6 +270,27 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
           </Table>
         </TableContainer>
       </div>
+
+      <AnimatePresence mode="wait">
+        {openRangeModal && (
+          <Modal key="modal" handleClose={handleClose}>
+            <div className="p-8 bg-white rounded-lg">
+              <h2 className="text-2xl font-bold mb-4">Invalid Range</h2>
+              <p className="mb-4">
+                Please ensure that the range you selected is valid. The start
+                should be less than or equal to the end, and both should be
+                within the total number of voters.
+              </p>
+              <button
+                onClick={handleClose}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
