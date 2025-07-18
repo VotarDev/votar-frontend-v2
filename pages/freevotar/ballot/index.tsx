@@ -485,20 +485,19 @@ const FreeVotarBallot = () => {
           ?.free_votes || 0;
 
       if (increment) {
-        // If free_votes > 0, check against free_votes limit
-        if (freeVotes > 0 && totalVotes >= freeVotes) {
-          toast.error(
-            `Cannot add more votes for ${positionName}. You have reached the limit of ${freeVotes} free votes.`
-          );
-          return;
-        }
-        // If free_votes === 0, check votar_credit
-        if (freeVotes === 0 && votarCredit <= 0) {
-          toast.error(
-            `Cannot add more votes for ${positionName}. You have no votar credits available.`
-          );
-          return;
-        }
+        // if (freeVotes > 0 && totalVotes >= freeVotes) {
+        //   toast.error(
+        //     `Cannot add more votes for ${positionName}. You have reached the limit of ${freeVotes} free votes.`
+        //   );
+        //   return;
+        // }
+
+        // if (freeVotes === 0 && votarCredit <= 0) {
+        //   toast.error(
+        //     `Cannot add more votes for ${positionName}. You have no votar credits available.`
+        //   );
+        //   return;
+        // }
         candidate.vote += 1;
       } else if (candidate.vote > 0) {
         candidate.vote -= 1;
@@ -806,10 +805,6 @@ const FreeVotarBallot = () => {
                                                       false
                                                     )
                                                   }
-                                                  disabled={
-                                                    candidate.vote <= 0 ||
-                                                    isAbstained
-                                                  }
                                                 >
                                                   <span className="text-xl">
                                                     <AiOutlineMinus />
@@ -819,11 +814,7 @@ const FreeVotarBallot = () => {
                                               <div>{candidate.vote ?? 0}</div>
                                               <div>
                                                 <button
-                                                  className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                                    isIncrementDisabled
-                                                      ? "cursor-not-allowed opacity-50"
-                                                      : ""
-                                                  }`}
+                                                  className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 `}
                                                   onClick={() =>
                                                     handleVote(
                                                       positionIndex,
@@ -831,7 +822,6 @@ const FreeVotarBallot = () => {
                                                       true
                                                     )
                                                   }
-                                                  disabled={isIncrementDisabled}
                                                 >
                                                   <span className="text-xl">
                                                     <AiOutlinePlus />
