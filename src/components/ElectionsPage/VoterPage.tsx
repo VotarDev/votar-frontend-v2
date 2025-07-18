@@ -97,14 +97,7 @@ const VoterPage = () => {
     if (token) {
       setAuthToken(token);
     }
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else {
-    //   if (typeof window !== "undefined") {
-    //     const tokenLocal = localStorage.getItem("token");
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
+
     const credentials = selectedRows.map((row) => ({
       email: row.email,
       phoneNumber: row.phoneNumber,
