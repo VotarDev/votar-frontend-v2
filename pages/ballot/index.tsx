@@ -459,7 +459,7 @@ const Ballot = () => {
             ) : (
               <div>
                 <div className="text-center mt-5">
-                  <h1 className="text-4xl font-bold capitalize">
+                  <h1 className="md:text-4xl text-2xl font-bold capitalize">
                     Welcome,{" "}
                     {voterProfile.userData?.name
                       ? voterProfile.userData?.name
@@ -491,7 +491,7 @@ const Ballot = () => {
                         {electionEnded}
                       </div>
                     ) : (
-                      <div className="mt-[56px] max-w-[1200px] mx-auto">
+                      <div className="mt-[56px] max-w-[1200px] mx-auto px-4">
                         {combinedData &&
                           combinedData.map((preview: any, index: any) => {
                             const randomColor =
@@ -595,7 +595,7 @@ const Ballot = () => {
                             );
                           })}
 
-                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 w-[700px] mx-auto gap-2">
+                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
                           <div className="text-[#ECAE0D] text-xl">
                             <PiWarningCircleFill />
                           </div>
@@ -695,7 +695,7 @@ const Ballot = () => {
                         </div>
                       ))}
 
-                      <div className="flex bg-[#FFBC11] bg-opacity-20 text-center p-4 items-center justify-center my-5">
+                      <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
                         <div className="text-[#ECAE0D] text-xl">
                           <PiWarningCircleFill />
                         </div>
