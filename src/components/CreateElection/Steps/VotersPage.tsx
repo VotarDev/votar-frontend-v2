@@ -1,4 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Checkbox,
   CircularProgress,
@@ -7,7 +13,7 @@ import {
 } from "@mui/material";
 import VotersPageTable from "./components/VotersPageTable";
 import { VoterResponse } from "@/utils/types";
-import { getElectionById, sendVoterCred } from "@/utils/api";
+import { getElectionById, getVoters, sendVoterCred } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
@@ -18,6 +24,8 @@ const VotersPage = () => {
   const [preference, setPreference] = useState("");
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
+  const [responses, setResponses] = useState<VoterResponse[]>([]);
+  const [isFetchVoters, setIsFetchVoters] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsloading] = useState(false);
   const [election, setElection] = useState<any>([]);
@@ -42,6 +50,33 @@ const VotersPage = () => {
     if (inputValue.length <= maxCharacterLength) setText(inputValue);
   };
 
+  const handleResponseExported = useCallback(async () => {
+    setResponses([]);
+    setIsFetchVoters(true);
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
+    }
+
+    try {
+      if (typeof window !== "undefined") {
+        const electionId = localStorage.getItem("ElectionId");
+        if (electionId) {
+          const { data } = await getVoters(USER_ID, {
+            election_id: electionId,
+          });
+          if (data) {
+            setIsFetchVoters(false);
+            setResponses(data.data);
+          }
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      setIsFetchVoters(false);
+    }
+  }, [electionId]);
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);
@@ -49,14 +84,7 @@ const VotersPage = () => {
     if (token) {
       setAuthToken(token);
     }
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else {
-    //   if (typeof window !== "undefined") {
-    //     const tokenLocal = localStorage.getItem("token");
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
+
     const credentials = selectedRows.map((row) => ({
       email: row.email,
       phoneNumber: row.phoneNumber,
@@ -64,7 +92,7 @@ const VotersPage = () => {
       sub_group: row.subgroup,
       name: row.name,
     }));
-    console.log(credentials);
+
     try {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
@@ -76,11 +104,12 @@ const VotersPage = () => {
         if (data) {
           console.log(data);
           setIsSending(false);
+          handleResponseExported();
           toast.success("Voters Credentials sent successfully");
         }
       }
     } catch (e: any) {
-      console.log(e);
+      handleResponseExported();
       toast.error("An error occurred, please try again");
       setIsSending(false);
     }
@@ -93,14 +122,7 @@ const VotersPage = () => {
       if (token) {
         setAuthToken(token);
       }
-      // if (users?.data) {
-      //   setAuthToken(users.data.data.cookie);
-      // } else {
-      //   if (typeof window !== "undefined") {
-      //     const tokenLocal = localStorage.getItem("token");
-      //     setAuthToken(tokenLocal);
-      //   }
-      // }
+
       try {
         const electionId = localStorage.getItem("ElectionId");
         setElectionId(electionId);
@@ -109,6 +131,7 @@ const VotersPage = () => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+
             setIsloading(false);
           }
         }
@@ -229,6 +252,10 @@ const VotersPage = () => {
         electionId={electionId}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
+        handleResponseExported={handleResponseExported}
+        responses={responses}
+        isFetchVoters={isFetchVoters}
+        setResponses={setResponses}
       />
     </div>
   );

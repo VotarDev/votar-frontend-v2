@@ -6,29 +6,39 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-
 import { TrackeChanges, VoterResponse } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress } from "@mui/material";
-
+import { CircularProgress, IconButton, Menu, MenuItem } from "@mui/material";
 import EditVotersInfo from "../../CreateElection/Steps/components/EditVotersInfo";
 import ChangeLogModal from "../../CreateElection/Steps/components/DropdownComponent";
 import Cookies from "universal-cookie";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../../Modal";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 interface VotersPageTableProps {
   electionId?: string;
   selectedRows: VoterResponse[];
   setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
+  handleResponseExported: () => Promise<void>;
+  responses: VoterResponse[];
+  isFetchVoters: boolean;
+  setResponses: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
+
+  refreshTable: () => void;
 }
 
 const VoterTable: React.FC<VotersPageTableProps> = ({
   electionId,
   selectedRows,
   setSelectedRows,
+  refreshTable,
+  handleResponseExported,
+  responses,
+  isFetchVoters,
+  setResponses,
 }) => {
   const headers = [
     "S/N",
@@ -39,16 +49,18 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     "Email",
     "Changes",
     "Edit",
+    "Status",
   ];
 
-  const [responses, setResponses] = useState<VoterResponse[]>([]);
-  const [isFetchVoters, setIsFetchVoters] = useState(false);
   const users = useCurrentUser();
   const user = useUser();
   const cookies = new Cookies();
   const [rangeStart, setRangeStart] = useState(1);
   const [rangeEnd, setRangeEnd] = useState(1);
   const [openRangeModal, setOpenRangeModal] = useState(false);
+  const [openStatusModal, setOpenStatusModal] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -100,33 +112,19 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     setSelectedRows(selectedInRange);
   };
 
-  const handleResponseExported = useCallback(async () => {
-    setResponses([]);
-    setIsFetchVoters(true);
-
-    const token = cookies.get("user-token");
-    if (token) {
-      setAuthToken(token);
-    }
-
-    try {
-      if (electionId) {
-        const { data } = await getVoters(USER_ID, {
-          election_id: electionId,
-        });
-        if (data) {
-          setIsFetchVoters(false);
-          setResponses(data.data);
-        }
-      }
-    } catch (e) {
-      console.log(e);
-      setIsFetchVoters(false);
-    }
-  }, [users, electionId]);
-
   const handleClose = () => {
     setOpenRangeModal(false);
+    setOpenStatusModal(false);
+    setAnchorEl(null);
+  };
+
+  const handleStatusClick = (
+    event: React.MouseEvent<HTMLElement>,
+    status: string
+  ) => {
+    setSelectedStatus(status);
+    setAnchorEl(event.currentTarget);
+    setOpenStatusModal(true);
   };
 
   useEffect(() => {
@@ -143,6 +141,23 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
 
   return (
     <div className="pt-24">
+      <div className="pb-3 flex items-center gap-2">
+        <label>Select All:</label>
+        <input
+          type="checkbox"
+          className="w-4 h-4 cursor-pointer"
+          checked={
+            selectedRows.length === responses.length && responses.length > 0
+          }
+          onChange={(e) => {
+            if (e.target.checked) {
+              setSelectedRows(responses);
+            } else {
+              setSelectedRows([]);
+            }
+          }}
+        />
+      </div>
       <div className="pb-3">
         Number of Voters Selected: <strong>{selectedRows.length}</strong> of{" "}
         <strong>{responses.length}</strong>
@@ -193,23 +208,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                 <StyledTableCell
                   align="center"
                   className="border border-[#F5F5F5]"
-                >
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 cursor-pointer"
-                    checked={
-                      selectedRows.length === responses.length &&
-                      responses.length > 0
-                    }
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedRows(responses);
-                      } else {
-                        setSelectedRows([]);
-                      }
-                    }}
-                  />
-                </StyledTableCell>
+                ></StyledTableCell>
                 {headers.map((header, key) => (
                   <StyledTableCell
                     key={key}
@@ -264,6 +263,27 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                       handleResponseExported={handleResponseExported}
                     />
                   </StyledTableCell>
+                  <StyledTableCell align="center">
+                    {row.email_status === "pending" ? (
+                      <span className="text-orange-300 capitalize">
+                        {row.email_status}
+                      </span>
+                    ) : (
+                      <div className="flex items-center justify-center">
+                        <span
+                          className="text-green-600 cursor-pointer"
+                          onClick={(e) =>
+                            handleStatusClick(e, row.email_reason)
+                          }
+                        >
+                          Email Sent
+                        </span>
+                        <IconButton>
+                          <ArrowDropDownIcon style={{ color: "#015CE9" }} />
+                        </IconButton>
+                      </div>
+                    )}
+                  </StyledTableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -273,7 +293,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
 
       <AnimatePresence mode="wait">
         {openRangeModal && (
-          <Modal key="modal" handleClose={handleClose}>
+          <Modal key="range-modal" handleClose={handleClose}>
             <div className="p-8 bg-white rounded-lg">
               <h2 className="text-2xl font-bold mb-4">Invalid Range</h2>
               <p className="mb-4">
@@ -281,6 +301,20 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                 should be less than or equal to the end, and both should be
                 within the total number of voters.
               </p>
+              <button
+                onClick={handleClose}
+                className="bg-blue-600 text-white px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
+        )}
+        {openStatusModal && (
+          <Modal key="status-modal" handleClose={handleClose}>
+            <div className="p-8 bg-white rounded-lg max-w-[300px] w-full">
+              <h2 className="text-2xl font-bold mb-4">Email Status</h2>
+              <p className="mb-4">{selectedStatus}</p>
               <button
                 onClick={handleClose}
                 className="bg-blue-600 text-white px-4 py-2 rounded"
