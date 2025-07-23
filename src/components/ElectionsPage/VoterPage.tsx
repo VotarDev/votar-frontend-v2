@@ -1,13 +1,18 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Checkbox,
   CircularProgress,
   FormControlLabel,
   FormGroup,
 } from "@mui/material";
-import VotersPageTable from "../CreateElection/Steps/components/VotersPageTable";
 import { VoterResponse } from "@/utils/types";
-import { getElectionById, sendVoterCred } from "@/utils/api";
+import { getElectionById, getVoters, sendVoterCred } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
@@ -19,6 +24,8 @@ const VoterPage = () => {
   const [preference, setPreference] = useState("");
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
+  const [responses, setResponses] = useState<VoterResponse[]>([]);
+  const [isFetchVoters, setIsFetchVoters] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const router = useRouter();
   const maxCharacterLength = 100;
@@ -63,14 +70,7 @@ const VoterPage = () => {
       if (token) {
         setAuthToken(token);
       }
-      // if (users?.data) {
-      //   setAuthToken(users.data.data.cookie);
-      // } else {
-      //   if (typeof window !== "undefined") {
-      //     const tokenLocal = localStorage.getItem("token");
-      //     setAuthToken(tokenLocal);
-      //   }
-      // }
+
       try {
         if (electionID) {
           const electionData = { election_id: electionID };
@@ -90,6 +90,35 @@ const VoterPage = () => {
     getElection();
   }, [electionID]);
 
+  const handleResponseExported = useCallback(async () => {
+    setResponses([]);
+    setIsFetchVoters(true);
+
+    const token = cookies.get("user-token");
+    if (token) {
+      setAuthToken(token);
+    }
+
+    try {
+      if (electionID) {
+        const { data } = await getVoters(USER_ID, {
+          election_id: electionID,
+        });
+        if (data) {
+          setIsFetchVoters(false);
+          setResponses(data.data);
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      setIsFetchVoters(false);
+    }
+  }, [users, electionID]);
+
+  const refreshTable = useCallback(() => {
+    // This function will be passed to VoterTable to trigger refresh
+  }, []);
+
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);
@@ -105,7 +134,7 @@ const VoterPage = () => {
       sub_group: row.subgroup,
       name: row.name,
     }));
-    console.log(credentials);
+
     try {
       if (typeof window !== "undefined") {
         const electionId = localStorage.getItem("ElectionId");
@@ -116,12 +145,13 @@ const VoterPage = () => {
           voters: credentials,
         };
         const { data } = await sendVoterCred(credentialsData, USER_ID);
-        console.log(data);
+        handleResponseExported();
         setIsSending(false);
         toast.success("Voters have been successfully sent");
+        refreshTable();
       }
     } catch (error) {
-      console.error(error);
+      handleResponseExported();
       setIsSending(false);
       toast.error("An error occurred. Please try again");
     }
@@ -236,6 +266,11 @@ const VoterPage = () => {
         electionId={electionID}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
+        refreshTable={refreshTable}
+        handleResponseExported={handleResponseExported}
+        responses={responses}
+        isFetchVoters={isFetchVoters}
+        setResponses={setResponses}
       />
     </div>
   );

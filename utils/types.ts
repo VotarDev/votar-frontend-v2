@@ -165,6 +165,8 @@ export type VoterResponse = {
   subgroup?: string;
   isExported?: boolean;
   election_id?: string;
+  email_status: "pending" | "sent" | "failed";
+  email_reason: string;
 };
 
 export type OptionTypes = {
