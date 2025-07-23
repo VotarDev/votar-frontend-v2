@@ -265,23 +265,40 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                   </StyledTableCell>
                   <StyledTableCell align="center">
                     {row.email_status === "pending" ? (
-                      <span className="text-orange-300 capitalize">
+                      <span
+                        className="text-orange-300 capitalize cursor-pointer"
+                        onClick={(e) =>
+                          handleStatusClick(e, row.email_reason || "No reason")
+                        }
+                      >
                         {row.email_status}
                       </span>
-                    ) : (
+                    ) : row.email_status === "sent" ? (
                       <div className="flex items-center justify-center">
                         <span
                           className="text-green-600 cursor-pointer"
                           onClick={(e) =>
-                            handleStatusClick(e, row.email_reason)
+                            handleStatusClick(
+                              e,
+                              row.email_reason || "No reason"
+                            )
                           }
                         >
                           Email Sent
                         </span>
                         <IconButton>
-                          <ArrowDropDownIcon style={{ color: "#015CE9" }} />
+                          <ArrowDropDownIcon style={{ color: "#16A34A" }} />
                         </IconButton>
                       </div>
+                    ) : (
+                      <span
+                        className="text-red-600 capitalize cursor-pointer"
+                        onClick={(e) =>
+                          handleStatusClick(e, row.email_reason || "No reason")
+                        }
+                      >
+                        {row.email_status}
+                      </span>
                     )}
                   </StyledTableCell>
                 </TableRow>
