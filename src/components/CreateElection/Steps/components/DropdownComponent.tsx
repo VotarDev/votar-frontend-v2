@@ -37,7 +37,7 @@ const ChangeLogModal = ({
         onClick={handleClickOpen}
         className="cursor-pointer text-blue-700 hover:text-blue-800 font-semibold"
       >
-        View Changes
+        View
       </div>
       <AnimatePresence mode="wait">
         {open && (
