@@ -245,7 +245,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
       {/* Mobile Card View */}
       <div className="block sm:hidden mt-5">
         <div className="space-y-4">
-          {paginatedResponses.map((row, index) => {
+          {responses.map((row, index) => {
             const actualIndex = page * rowsPerPage + index;
             return (
               <div
@@ -385,7 +385,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               minWidth: 700,
               borderCollapse: "separate",
               borderSpacing: "0",
-              tableLayout: "fixed",
             }}
           >
             <TableHead sx={{ position: "sticky", top: 0, zIndex: 10 }}>
@@ -402,7 +401,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedResponses.map((row, index) => {
+              {responses.map((row, index) => {
                 const actualIndex = page * rowsPerPage + index;
                 return (
                   <TableRow key={index}>

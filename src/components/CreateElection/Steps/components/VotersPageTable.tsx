@@ -247,7 +247,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
       {/* Mobile Card View */}
       <div className="block sm:hidden mt-5">
         <div className="space-y-4">
-          {paginatedResponses.map((row, index) => {
+          {responses.map((row, index) => {
             const actualIndex = page * rowsPerPage + index;
             return (
               <div
