@@ -347,7 +347,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             );
           })}
         </div>
-        <div className="mt-4">
+        {/* <div className="mt-4">
           <TablePagination
             component="div"
             count={responses.length}
@@ -370,7 +370,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               },
             }}
           />
-        </div>
+        </div> */}
       </div>
 
       <div className="hidden sm:block mt-10">
@@ -472,7 +472,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
+        {/* <TablePagination
           component="div"
           count={responses.length}
           page={page}
@@ -487,7 +487,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               minHeight: "52px",
             },
           }}
-        />
+        /> */}
       </div>
 
       <AnimatePresence mode="wait">
