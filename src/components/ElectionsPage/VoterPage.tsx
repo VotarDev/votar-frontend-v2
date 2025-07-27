@@ -115,10 +115,6 @@ const VoterPage = () => {
     }
   }, [users, electionID]);
 
-  const refreshTable = useCallback(() => {
-    // This function will be passed to VoterTable to trigger refresh
-  }, []);
-
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSending(true);
@@ -148,7 +144,6 @@ const VoterPage = () => {
         handleResponseExported();
         setIsSending(false);
         toast.success("Voters have been successfully sent");
-        refreshTable();
       }
     } catch (error) {
       handleResponseExported();
@@ -181,7 +176,7 @@ const VoterPage = () => {
               className="w-full h-80 rounded-lg border border-stone-900 resize-none outline-none p-4"
             ></textarea>
           </div>
-          <div className="flex justify-between pb-2">
+          <div className="flex justify-between pb-2 flex-wrap gap-1">
             <div className="flex items-center gap-7">
               <div>
                 <FormGroup>
@@ -233,7 +228,7 @@ const VoterPage = () => {
               per Page)
             </div>
           </div>
-          <div className="flex justify-center">
+          <div className="flex justify-center lg:my-0 my-5">
             {isLoading ? (
               <CircularProgress size={20} />
             ) : (
@@ -253,7 +248,7 @@ const VoterPage = () => {
             )}
           </div>
         </form>
-        <div className="flex justify-end mt-3">
+        <div className="flex lg:justify-end justify-center mt-10 lg:mt-3">
           <button
             className="flex justify-center items-center bg-blue-700 text-zinc-100 w-56 h-12 rounded-lg"
             onClick={handleRouting}
@@ -266,7 +261,6 @@ const VoterPage = () => {
         electionId={electionID}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}
-        refreshTable={refreshTable}
         handleResponseExported={handleResponseExported}
         responses={responses}
         isFetchVoters={isFetchVoters}
