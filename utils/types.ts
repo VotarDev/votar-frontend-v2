@@ -156,7 +156,7 @@ export type ElectionDetails = {
 
 export type VoterResponse = {
   email: string;
-  id: string | number;
+  id: string;
   name: string;
   phoneNumber: string;
   _id: string;
