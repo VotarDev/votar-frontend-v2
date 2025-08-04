@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -12,7 +12,7 @@ import { CircularProgress, TablePagination } from "@mui/material";
 import EditVotersInfo from "../../CreateElection/Steps/components/EditVotersInfo";
 import ChangeLogModal from "../../CreateElection/Steps/components/DropdownComponent";
 import Cookies from "universal-cookie";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Modal from "../../Modal";
 
 interface VotersPageTableProps {
@@ -58,6 +58,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const rowRefs = useRef<{ [key: string]: HTMLTableRowElement }>({});
 
   const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) => {
@@ -79,7 +83,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-
       fontSize: 14,
       fontWeight: "bold",
       padding: "12px 8px",
@@ -99,6 +102,13 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
+    },
+  }));
+
   const handleRangeSelect = () => {
     if (
       rangeStart < 1 ||
@@ -115,6 +125,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
+    setHighlightedRowId(null);
   };
 
   const handleChangeRowsPerPage = (
@@ -122,6 +133,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+    setHighlightedRowId(null);
   };
 
   const paginatedResponses = responses.slice(
@@ -132,6 +144,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const handleClose = () => {
     setOpenRangeModal(false);
     setOpenStatusModal(false);
+    setShowToast(false);
     setAnchorEl(null);
   };
 
@@ -143,6 +156,41 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     setAnchorEl(event.currentTarget);
     setOpenStatusModal(true);
   };
+
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim()) {
+      setHighlightedRowId(null);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const matchedRow = responses.find(
+      (row) =>
+        row.id.toLowerCase().includes(query) ||
+        row.name.toLowerCase().includes(query) ||
+        row.subgroup?.toLowerCase().includes(query) ||
+        row.phoneNumber?.toLowerCase().includes(query) ||
+        row.email?.toLowerCase().includes(query)
+    );
+
+    if (matchedRow) {
+      const rowIndex = responses.indexOf(matchedRow);
+      const newPage = Math.floor(rowIndex / rowsPerPage);
+      setPage(newPage);
+      setHighlightedRowId(matchedRow.id);
+
+      setTimeout(() => {
+        const rowElement = rowRefs.current[matchedRow.id];
+        if (rowElement) {
+          rowElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    } else {
+      setShowToast(true);
+      setHighlightedRowId(null);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  }, [searchQuery, responses, rowsPerPage]);
 
   const getStatusDisplay = (row: VoterResponse) => {
     if (row.email_status === "pending") {
@@ -179,6 +227,14 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     handleResponseExported();
   }, [handleResponseExported]);
 
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      handleSearch();
+    }, 500); // Debounce search
+
+    return () => clearTimeout(handler);
+  }, [searchQuery, handleSearch]);
+
   if (isFetchVoters) {
     return (
       <div className="my-10 flex justify-center">
@@ -189,6 +245,31 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
 
   return (
     <div className="lg:pt-24 pt-10">
+      {/* Search Input */}
+      <div className="pb-4">
+        <input
+          type="text"
+          placeholder="Search by ID, Name, Sub-Group, Phone, or Email"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border px-3 py-2 w-full max-w-md rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg"
+          >
+            No results found for "{searchQuery}"
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="pb-3 flex items-center gap-2">
         <label>Select All:</label>
         <input
@@ -245,12 +326,14 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
       {/* Mobile Card View */}
       <div className="block sm:hidden mt-5">
         <div className="space-y-4">
-          {responses.map((row, index) => {
+          {paginatedResponses.map((row, index) => {
             const actualIndex = page * rowsPerPage + index;
             return (
               <div
                 key={index}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${
+                  highlightedRowId === row.id ? "bg-yellow-100" : ""
+                }`}
               >
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-3">
@@ -345,30 +428,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             );
           })}
         </div>
-        {/* <div className="mt-4">
-          <TablePagination
-            component="div"
-            count={responses.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Items per page:"
-            sx={{
-              "& .MuiTablePagination-toolbar": {
-                flexWrap: "wrap",
-                gap: 1,
-              },
-              "& .MuiTablePagination-selectLabel": {
-                fontSize: "14px",
-              },
-              "& .MuiTablePagination-displayedRows": {
-                fontSize: "14px",
-              },
-            }}
-          />
-        </div> */}
       </div>
 
       {/* Desktop Table View */}
@@ -401,10 +460,16 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {responses.map((row, index) => {
+              {paginatedResponses.map((row, index) => {
                 const actualIndex = page * rowsPerPage + index;
                 return (
-                  <TableRow key={index}>
+                  <StyledTableRow
+                    key={index}
+                    className={highlightedRowId === row.id ? "highlighted" : ""}
+                    ref={(el) => {
+                      if (el) rowRefs.current[row.id] = el;
+                    }}
+                  >
                     <StyledTableCell align="center">
                       <div className="flex items-center justify-center">
                         <input
@@ -472,28 +537,12 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
                     <StyledTableCell align="center">
                       {getStatusDisplay(row)}
                     </StyledTableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 );
               })}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* <TablePagination
-          component="div"
-          count={responses.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          labelRowsPerPage="Items per page:"
-          sx={{
-            borderTop: "1px solid #e5e7eb",
-            "& .MuiTablePagination-toolbar": {
-              minHeight: "52px",
-            },
-          }}
-        /> */}
       </div>
 
       <AnimatePresence mode="wait">
