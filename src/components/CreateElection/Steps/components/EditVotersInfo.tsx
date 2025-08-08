@@ -42,8 +42,16 @@ const EditVotersInfo = ({
     setIsEditing(true);
 
     try {
+      // Find the actual index of the selected row in the full users array
+      const actualIndex = users.findIndex((user) => user.id === selectedRow.id);
+
+      if (actualIndex === -1) {
+        throw new Error("User not found in the array");
+      }
+
       const updatedUsers = users.map((item, key) => {
-        if (key === index) {
+        if (key === actualIndex) {
+          // Use actualIndex instead of index
           return {
             ...item,
             name: inputData.name || item.name,
@@ -55,7 +63,8 @@ const EditVotersInfo = ({
         return item;
       });
 
-      const { election_id, phoneNumber, name, id, email } = updatedUsers[index];
+      const { election_id, phoneNumber, name, id, email } =
+        updatedUsers[actualIndex];
       const bodyData = {
         election_id,
         phoneNumber,

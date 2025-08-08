@@ -263,7 +263,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg"
+            className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50"
           >
             No results found for "{searchQuery}"
           </motion.div>
@@ -544,6 +544,42 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
           </Table>
         </TableContainer>
       </div>
+
+      {/* Pagination Component - Add this section */}
+      {responses.length > 0 && (
+        <div className="mt-4">
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
+            component="div"
+            count={responses.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            sx={{
+              "& .MuiTablePagination-toolbar": {
+                paddingLeft: 2,
+                paddingRight: 2,
+              },
+              "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                {
+                  margin: 0,
+                  fontSize: "14px",
+                },
+              "& .MuiTablePagination-select": {
+                fontSize: "14px",
+              },
+              "& .MuiTablePagination-actions": {
+                marginLeft: 8,
+              },
+            }}
+            labelRowsPerPage="Rows per page:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} of ${count !== -1 ? count : `more than ${to}`}`
+            }
+          />
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         {openRangeModal && (
