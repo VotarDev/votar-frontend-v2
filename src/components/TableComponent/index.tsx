@@ -22,21 +22,29 @@ const Tables = ({ election }: any) => {
   ];
 
   const user = useUser();
-
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    [`&.${tableCellClasses.body}`]: {
       fontSize: 14,
       fontWeight: "bold",
-      border: "1px solid #B9B9B9",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 13,
+      fontWeight: 500,
+
+      padding: "16px",
+      textAlign: "center",
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
+      border: "1px solid #b9b9b9",
     },
   }));
-  console.log(user);
 
   return (
     <div>
@@ -49,7 +57,7 @@ const Tables = ({ election }: any) => {
           }}
           aria-label="sticky table"
         >
-          <TableHead>
+          <TableHead sx={{ position: "sticky", top: 0, zIndex: 10 }}>
             <TableRow className="text-white font-bold">
               {headers.map((header, key) => {
                 return (

@@ -230,7 +230,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   useEffect(() => {
     const handler = setTimeout(() => {
       handleSearch();
-    }, 500); // Debounce search
+    }, 500);
 
     return () => clearTimeout(handler);
   }, [searchQuery, handleSearch]);

@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import { usePathname } from "next/navigation";
@@ -31,6 +32,11 @@ import Modal from "../Modal";
 import { set } from "lodash";
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
+import { AppDispatch } from "@/redux/store";
+import {
+  setCredit,
+  setCreditLoaded,
+} from "@/redux/features/creditSlice/creditSlice";
 
 const SideBar = ({
   opener,
@@ -41,7 +47,7 @@ const SideBar = ({
 }) => {
   const { data, status } = useSession();
   const pathname = usePathname();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const users = useCurrentUser();
   const user = useUser();
@@ -50,9 +56,12 @@ const SideBar = ({
   const [isCreditAdded, setIsCreditAdded] = useState(false);
   const [isCreditLoaded, setIsCreditLoaded] = useState(false);
   const [values, setValues] = useState(0);
-  const [credit, setCredit] = useState(0);
+  const [credits, setCredits] = useState(0);
   const cookies = new Cookies();
   const userProfile = useSelector((state: any) => state.userProfile);
+  const { credit, isLoaded } = useSelector((state: any) => state.credit);
+
+  const hasInitiallyFetched = useRef(false);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -60,9 +69,12 @@ const SideBar = ({
     ? users?.id
     : user?.user?.id;
 
+  useEffect(() => {
+    return () => {};
+  }, []);
+
   const handleLogout = async () => {
     localStorage.removeItem("user");
-    // localStorage.removeItem("token");
 
     cookies.remove("user-token", { path: "/" });
     dispatch(logout());
@@ -82,18 +94,34 @@ const SideBar = ({
     setValues(parseInt(e.target.value));
   };
 
+  const fetchCredit = async (userId?: string) => {
+    const currentUserId = userId || USER_ID;
+    if (!currentUserId) return;
+
+    setIsCreditLoaded(true);
+    try {
+      const { data } = await getCredit(currentUserId);
+      if (data) {
+        setCredits(data.data.votar_credits);
+        console.log(data);
+      }
+    } catch (error: any) {
+      console.log(error);
+    } finally {
+      setIsCreditLoaded(false);
+    }
+  };
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsCreditAdded(true);
 
-    const creditData = { amount: values };
-
     const token = cookies.get("user-token");
-
     const bodyData = {
       email: userProfile.user.data.email,
       amount: values,
     };
+
     try {
       if (token) {
         setAuthToken(token);
@@ -101,7 +129,8 @@ const SideBar = ({
       const { data } = await purchaseVotarCredit(bodyData);
       if (data) {
         toast.success("Credit Added Successfully");
-        fetchCredit();
+
+        await fetchCredit();
         closeModal();
       }
     } catch (error: any) {
@@ -119,25 +148,18 @@ const SideBar = ({
     }
   };
 
-  const fetchCredit = useCallback(async () => {
-    setIsCreditLoaded(true);
-    try {
-      const { data } = await getCredit(USER_ID);
-      if (data) {
-        setCredit(data.data.votar_credits);
-        setIsCreditLoaded(false);
-        console.log(data);
-      }
-    } catch (error: any) {
-      console.log(error);
-    } finally {
-      setIsCreditLoaded(false);
-    }
-  }, [USER_ID]);
-
   useEffect(() => {
-    fetchCredit();
-  }, [fetchCredit]);
+    if (USER_ID && credit === null) {
+      dispatch(setCreditLoaded(true));
+      getCredit(USER_ID)
+        .then(({ data }) => {
+          dispatch(setCredit(data.data.votar_credits));
+        })
+        .finally(() => {
+          dispatch(setCreditLoaded(false));
+        });
+    }
+  }, [USER_ID, credit, dispatch]);
 
   return (
     <div
@@ -203,7 +225,7 @@ const SideBar = ({
                   {isCreditLoaded ? (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
                   ) : (
-                    <>{credit}</>
+                    <>{credits}</>
                   )}
                 </div>
                 <div>

@@ -138,7 +138,6 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
       if (token) {
         setAuthToken(token);
       }
-      console.log("token card", token);
 
       // if (users?.data) {
       //   setAuthToken(users.data.data.cookie);
@@ -275,14 +274,7 @@ export const getServerSideProps: GetServerSideProps = async (
   const cookies = new Cookies(req.headers.cookie);
   let token = cookies.get("user-token") || query.token;
 
-  // console.log(
-  //   "getServerSideProps - Token from cookie:",
-  //   cookies.get("user-token")
-  // );
-  // console.log("getServerSideProps - Token from query:", query.token);
-
   if (!token) {
-    // console.log("No token found, redirecting to signin");
     return {
       redirect: {
         destination: "/signin",
@@ -291,7 +283,6 @@ export const getServerSideProps: GetServerSideProps = async (
     };
   }
 
-  // console.log("Token found, allowing access to dashboard");
   return {
     props: {
       token: token.toString(),
