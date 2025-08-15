@@ -6,6 +6,7 @@ import voterProfilesReducer from "./features/auth/voterLoginSlice";
 import adminSlice from "./features/adminProfile/adminProfileSlice";
 import cardFormReducer from "./features/cardDetailsForm/cardDetailsSlice";
 import votarCreditReducer from "./features/votarCredit/votarCreditSlice";
+import creditSliceReducer from "./features/creditSlice/creditSlice";
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     admin: adminSlice,
     cardForm: cardFormReducer,
     votarCredit: votarCreditReducer,
+    credit: creditSliceReducer,
   },
 });
 
