@@ -45,7 +45,6 @@ const MonitorElection = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <h1 className="text-4xl">Monitor an election</h1>
         <MonitorAnElection
           elections={elections}
           isFetchElections={isFetchElections}

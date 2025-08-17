@@ -7,7 +7,12 @@ const Participate = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <h1 className="text-4xl">Paricipate in an Election</h1>
+        <div className="w-full h-[70vh] flex items-center justify-center">
+          <p className="mt-4 text-gray-600 max-w-xl text-center">
+            Coming soon! We are working hard to bring you the best experience
+            for participating in elections. Stay tuned for updates!
+          </p>
+        </div>
       </DashboardLayout>
     </ProtectedRoutes>
   );

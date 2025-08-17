@@ -46,19 +46,10 @@ const DashboardLayout = ({ children }: any) => {
       if (token) {
         setAuthToken(token);
       }
-      // if (users) {
-      //   if (users.data) {
-      //     setAuthToken(users.data.data.cookie);
-      //   }
-      // } else {
-      //   if (typeof window !== "undefined") {
-      //     const tokenLocal = localStorage.getItem("token");
-      //     setAuthToken(tokenLocal);
-      //   }
-      // }
+
       try {
         const { data } = await getUserData(USER_ID);
-        // console.log(data);
+
         if (data) {
           dispatch(userData(data));
           setIsLoading(false);
@@ -76,13 +67,6 @@ const DashboardLayout = ({ children }: any) => {
     setIsClient(true);
   }, []);
 
-  // if (isLoading)
-  //   return (
-  //     <div className="flex justify-center m-20">
-  //       <CircularProgress size={30} style={{ color: "#015CE9" }} />
-  //     </div>
-  //   );
-
   return (
     <>
       {isClient && (
@@ -90,16 +74,10 @@ const DashboardLayout = ({ children }: any) => {
           <div className="flex ">
             <div className="relative lg:block hidden ">
               <SideBar opener={opener} setOpener={setOpener} />
-              <div
-                className="absolute bg-blue-700  top-14 -right-5 w-10 h-10 lg:flex items-center justify-center text-zinc-100 shadow rounded-full hidden  cursor-pointer z-10"
-                onClick={() => setOpener(!opener)}
-              >
-                <span>{opener ? <BsArrowLeft /> : <BsArrowRight />}</span>
-              </div>
             </div>
             <div className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0">
               <div className="lg:block hidden">
-                <Header />
+                <Header opener={opener} />
               </div>
               <div className="lg:hidden">
                 <DashboardNavbar />

@@ -57,7 +57,7 @@ const Tables = ({ election }: any) => {
           }}
           aria-label="sticky table"
         >
-          <TableHead sx={{ position: "sticky", top: 0, zIndex: 10 }}>
+          <TableHead sx={{ position: "sticky", top: 0, zIndex: 1 }}>
             <TableRow className="text-white font-bold">
               {headers.map((header, key) => {
                 return (

@@ -73,7 +73,6 @@ const ProfileBody = () => {
 
     try {
       const { data } = await getUserData(USER_ID);
-      console.log(data);
 
       if (data) {
         dispatch(userData(data));
@@ -203,14 +202,14 @@ const ProfileBody = () => {
         <div className="bg-[#015CE9] font-semibold  px-5 py-4 rounded-lg mt-5 text-white text-center relative max-w-[17rem] mx-auto">
           <div className="bg-card bg-center bg-cover opacity-30 w-full h-full absolute top-0 right-0 left-0 "></div>
           <div className="flex justify-between">
-            <div className="z-20">
+            <div className="z-1">
               <div className="">
                 Unredeemed <br /> Referral
               </div>
               <div className="text-[40px]">##</div>
             </div>
 
-            <div className="z-20">
+            <div className="z-1">
               <div className="">
                 Redeemed
                 <br /> Referral

@@ -32,6 +32,7 @@ import { getElections } from "@/utils/api";
 import { CircularProgress } from "@mui/material";
 import { dashboardCards } from "@/utils/api";
 import Cookies from "universal-cookie";
+import { Trophy, Vote } from "lucide-react";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
@@ -167,7 +168,7 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   return (
     <ProtectedRoutes googletoken={token}>
       <DashboardLayout>
-        {isFetchCards ? (
+        {/* {isFetchCards ? (
           <div className="my-10 flex justify-center">
             <CircularProgress size={30} style={{ color: "#015CE9" }} />
           </div>
@@ -229,15 +230,16 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
               ))}
             </Swiper>
           </div>
-        )}
+        )} */}
 
         {isFetchElections ? (
-          <div className="text-center mt-10">
+          <div className="text-center h-full flex items-center justify-center flex-col">
             <CircularProgress size={30} style={{ color: "#015CE9" }} />
+            <p className="mt-4 text-gray-600">Loading elections...</p>
           </div>
         ) : (
           <>
-            <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
+            {/* <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
               <span>
                 <img
                   src={vote.src}
@@ -246,6 +248,38 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
                 />
               </span>
               You have participated in {election.length} Votar Elections
+            </div> */}
+            <div className="w-full">
+              <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 w-full max-w-2xl mx-auto rounded-r-lg">
+                <div className="flex items-center justify-between p-3 sm:p-4">
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-blue-700 font-medium text-xs sm:text-sm md:text-base leading-tight">
+                        <span className="block sm:inline">
+                          Participated in{" "}
+                        </span>
+                        <span className="font-bold">
+                          {election.length} Votar elections
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex-shrink-0 ml-2">
+                    <div className="text-right">
+                      <div className="text-blue-600 font-bold text-lg sm:text-xl">
+                        {election.length}
+                      </div>
+                      <div className="text-blue-500 text-xs uppercase tracking-wide">
+                        Total
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="mt-9">

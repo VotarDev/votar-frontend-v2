@@ -6,11 +6,15 @@ import { BiMessageSquareDetail } from "react-icons/bi";
 import { IoNotificationsOutline } from "react-icons/io5";
 import { CiSearch } from "react-icons/ci";
 
-const Header = () => {
+const Header = ({ opener }: { opener?: boolean }) => {
   const user = useUser();
   const { data } = useSession();
   return (
-    <div className="absolute w-full flex h-[75px] border-b border-[#8E8E8E] items-center lg:px-[51px] px-4 justify-between flex-wrap">
+    <div
+      className={`fixed left-0 right-0 -z-1  bg-white w-full flex h-[75px] border-b border-[#8E8E8E] items-center ${
+        opener ? "lg:pl-[370px]" : "lg:pl-[120px]"
+      } px-4 justify-between flex-wrap`}
+    >
       <div className="lg:text-2xl font-semibold text-base capitalize">
         Welcome,{" "}
         <span>
@@ -19,12 +23,12 @@ const Header = () => {
         </span>
       </div>
       <div className="flex items-center gap-4">
-        <div className="relative md:flex items-center hidden">
+        <div className="relative xl:flex items-center hidden">
           <input
             type="text"
             name="search"
             placeholder="Search..."
-            className="lg:w-[429px] h-[44px] w-full py-3 pl-12 pr-5 outline-none bg-[#FDFDFD] rounded-lg"
+            className="lg:w-[429px] h-[44px] w-full py-3 pl-12 pr-5 outline-none bg-[#FDFDFD] shadow-sm border rounded-lg"
           />
           <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl">
             <CiSearch />

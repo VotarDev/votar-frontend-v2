@@ -254,11 +254,6 @@ const Create = () => {
       console.log(e);
     }
 
-    // if (!error) return;
-    // direction === "next" ? newStep++ : newStep--;
-
-    // if (newStep <= 0) router.back();
-
     newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
   };
 
