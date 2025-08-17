@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  use,
 } from "react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import { usePathname } from "next/navigation";
@@ -16,7 +17,12 @@ import Avatar from "@mui/material/Avatar";
 import Link from "next/link";
 import { BiSolidDashboard } from "react-icons/bi";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsPersonFill, BsFillBoxFill } from "react-icons/bs";
+import {
+  BsPersonFill,
+  BsFillBoxFill,
+  BsArrowLeft,
+  BsArrowRight,
+} from "react-icons/bs";
 import { HiMiniUserGroup } from "react-icons/hi2";
 import { LuLineChart } from "react-icons/lu";
 import { PiFiles } from "react-icons/pi";
@@ -29,7 +35,7 @@ import Cookies from "universal-cookie";
 import { createCredit, getCredit, purchaseVotarCredit } from "@/utils/api";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { set } from "lodash";
+
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { AppDispatch } from "@/redux/store";
@@ -94,21 +100,28 @@ const SideBar = ({
     setValues(parseInt(e.target.value));
   };
 
-  const fetchCredit = async (userId?: string) => {
+  const fetchCredit = async (
+    userId?: string,
+    showSpinner: boolean = true
+  ): Promise<void> => {
     const currentUserId = userId || USER_ID;
     if (!currentUserId) return;
 
-    setIsCreditLoaded(true);
+    if (showSpinner) {
+      dispatch(setCreditLoaded(false));
+    }
+
     try {
       const { data } = await getCredit(currentUserId);
       if (data) {
-        setCredits(data.data.votar_credits);
-        console.log(data);
+        dispatch(setCredit(data.data.votar_credits));
       }
     } catch (error: any) {
       console.log(error);
     } finally {
-      setIsCreditLoaded(false);
+      if (showSpinner) {
+        dispatch(setCreditLoaded(true));
+      }
     }
   };
 
@@ -134,7 +147,6 @@ const SideBar = ({
         closeModal();
       }
     } catch (error: any) {
-      console.log(error);
       const message =
         (error.response &&
           error.response.data &&
@@ -147,25 +159,42 @@ const SideBar = ({
       setIsCreditAdded(false);
     }
   };
+  useEffect(() => {
+    if (USER_ID && !isLoaded) {
+      fetchCredit(USER_ID, true);
+    }
+  }, [USER_ID]);
 
   useEffect(() => {
-    if (USER_ID && credit === null) {
-      dispatch(setCreditLoaded(true));
-      getCredit(USER_ID)
-        .then(({ data }) => {
-          dispatch(setCredit(data.data.votar_credits));
-        })
-        .finally(() => {
-          dispatch(setCreditLoaded(false));
-        });
+    if (USER_ID && isLoaded) {
+      const interval = setInterval(() => {
+        fetchCredit(USER_ID, false);
+      }, 30000);
+
+      return () => clearInterval(interval);
     }
-  }, [USER_ID, credit, dispatch]);
+  }, [USER_ID, isLoaded]);
+
+  const refreshCredits = () => {
+    if (USER_ID) {
+      fetchCredit(USER_ID, false);
+    }
+  };
+
+  useEffect(() => {
+    if (!hasInitiallyFetched.current) {
+      hasInitiallyFetched.current = true;
+      refreshCredits();
+    }
+  }, [USER_ID]);
 
   return (
     <div
-      className={`h-screen flex flex-col  border-r border-[#8E8E8E]  p-0  overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-[10] lg:relative ${
+      className={`h-screen flex flex-col  border-r border-[#8E8E8E] overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-10 lg:relative ${
         isOpen ? "w-72" : "w-20"
-      } ${opener ? "lg:w-[330px] lg:pl-[28px] lg:pr-5" : "lg:w-20 lg:pl-0"}`}
+      } ${
+        opener ? "lg:w-[330px] lg:pl-[28px] lg:pr-5" : "lg:w-[100px] lg:pl-0"
+      }`}
     >
       <div className="pl-4 pr-2">
         <div
@@ -175,6 +204,23 @@ const SideBar = ({
         >
           <div className="mt-5 lg:mt-0">
             <img src={logo.src} alt="logo" className="h-20 object-contain" />
+          </div>
+
+          <div
+            className={`absolute top-14 right-0 z-20 cursor-pointer 
+            w-7 h-12 
+            bg-gradient-to-r from-blue-600 to-blue-700 
+            hover:from-blue-700 hover:to-blue-800
+            rounded-l-lg shadow-lg
+            text-white
+            flex items-center justify-center
+            transition-all duration-300 ease-in-out
+            hover:scale-105 active:scale-95
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+  ${isOpen ? "translate-x-0" : "translate-x-1"}`}
+            onClick={() => setOpener(!opener)}
+          >
+            <span>{opener ? <BsArrowLeft /> : <BsArrowRight />}</span>
           </div>
           <div
             className="lg:hidden block my-2 pl-3 text-xl font-bold"
@@ -222,10 +268,10 @@ const SideBar = ({
               <div className="z-20">
                 <div className="text-xs">VotarCredits</div>
                 <div className="text-[40px]">
-                  {isCreditLoaded ? (
+                  {!isLoaded ? (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
                   ) : (
-                    <>{credits}</>
+                    <>{credit}</>
                   )}
                 </div>
                 <div>

@@ -44,8 +44,6 @@ const VotarForms = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <h1 className="text-4xl">Votar Forms</h1>
-
         <VotarFormsComponent
           elections={elections}
           isFetchElections={isFetchElections}

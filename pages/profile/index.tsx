@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import withAuth from "@/hoc/withAuth";
 import DashboardLayout from "@/src/components/DashboardLayout";
 import ProfileHeader from "@/src/components/Profile/Header";
@@ -11,7 +11,6 @@ import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import eventEmitter from "@/utils/eventsEmitter";
-import { set } from "lodash";
 
 const Profile = () => {
   const [debitCards, setDebitCards] = useState([]);
@@ -47,7 +46,7 @@ const Profile = () => {
       setLoadCard(true);
       try {
         const response = await getCards(USER_ID);
-        console.log(response.data.data);
+
         setDebitCards(response.data.data);
         setLoadCard(false);
       } catch (error: any) {
@@ -68,7 +67,6 @@ const Profile = () => {
     fetchCards();
 
     const handleCardAdded = () => {
-      console.log("Card added event received. Fetching updated cards...");
       fetchCards();
     };
 

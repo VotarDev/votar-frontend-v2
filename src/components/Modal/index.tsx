@@ -12,7 +12,7 @@ const Modal = ({ handleClose, children, classname }: any) => {
         initial="hidden"
         animate="visible"
         exit="exit"
-        className={`flex flex-col justify-center px-4 lg:w-[clamp(50%_,700px_,90%)] w-full ${classname} h-1/2 !z-[999] items-center`}
+        className={`flex flex-col justify-center px-4 lg:w-[clamp(50%_,700px_,90%)] w-full ${classname} h-1/2 z-50 items-center`}
       >
         {children}
       </motion.div>

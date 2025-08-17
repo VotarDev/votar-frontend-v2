@@ -220,7 +220,7 @@ const ElectionsComponent = () => {
                             {/* Description */}
                             {election.description && (
                               <div className="mb-4">
-                                <div className="flex items-center gap-2 text-gray-700 mb-2 max-w-[120px] p-2  rounded bg-[#015ce9] text-white">
+                                <div className="flex items-center gap-2  mb-2 max-w-[120px] p-2  rounded bg-[#015ce9] text-white">
                                   <MdDescription className="w-4 h-4" />
                                   <span className="text-sm font-medium">
                                     Description
