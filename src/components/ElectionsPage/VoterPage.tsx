@@ -77,6 +77,7 @@ const VoterPage = () => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+
             setIsLoading(false);
           }
         }
@@ -105,8 +106,15 @@ const VoterPage = () => {
           election_id: electionID,
         });
         if (data) {
+          const votersArray = Array.isArray(data.data?.voters)
+            ? data.data.voters
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+
           setIsFetchVoters(false);
-          setResponses(data.data);
+
+          setResponses(votersArray);
         }
       }
     } catch (e) {
