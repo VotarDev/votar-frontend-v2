@@ -66,8 +66,13 @@ const VotersPage = () => {
             election_id: electionId,
           });
           if (data) {
+            const votersArray = Array.isArray(data.data?.voters)
+              ? data.data.voters
+              : Array.isArray(data.data)
+              ? data.data
+              : [];
             setIsFetchVoters(false);
-            setResponses(data.data);
+            setResponses(votersArray);
           }
         }
       }
