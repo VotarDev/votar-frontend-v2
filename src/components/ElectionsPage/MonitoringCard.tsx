@@ -1,4 +1,5 @@
 import { Check, Copy, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 interface MonitoringCardProps {
   title: string;
@@ -49,7 +50,9 @@ export default function MonitoringCard({
             ref={copyRef}
             className="text-sm text-blue-600 font-mono break-all bg-white rounded p-3 border border-gray-200"
           >
-            {url}
+            <Link href={url} target="_blank">
+              {url}
+            </Link>
           </div>
         </div>
 

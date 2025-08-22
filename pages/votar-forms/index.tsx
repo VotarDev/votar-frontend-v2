@@ -31,7 +31,12 @@ const VotarForms = () => {
       try {
         const { data } = await getElections(USER_ID);
         if (data) {
-          setElections(data.data);
+          const electionsArray = Array.isArray(data.data?.elections)
+            ? data.data.elections
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+          setElections(electionsArray);
           setIsFetchElections(false);
         }
       } catch (error) {
