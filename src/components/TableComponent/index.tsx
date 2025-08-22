@@ -73,23 +73,45 @@ const Tables = ({ election }: any) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {election.map((row: any, index: number) => (
-              <TableRow key={v4()}>
-                <StyledTableCell align="center">{index + 1}</StyledTableCell>
-                <StyledTableCell align="center">
-                  {row.name_of_election}
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  {row.start_date} {formatTimeToHHMM(row.start_time)}
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  {row.end_date} {formatTimeToHHMM(row.end_time)}
-                </StyledTableCell>
-                <StyledTableCell align="center">
-                  {user?.user?.data?.userName}
-                </StyledTableCell>
-              </TableRow>
-            ))}
+            {election.elections
+              ? election.elections?.map((row: any, index: number) => (
+                  <TableRow key={v4()}>
+                    <StyledTableCell align="center">
+                      {index + 1}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.name_of_election}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.start_date} {formatTimeToHHMM(row.start_time)}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.end_date} {formatTimeToHHMM(row.end_time)}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {user?.user?.data?.userName}
+                    </StyledTableCell>
+                  </TableRow>
+                ))
+              : election.map((row: any, index: number) => (
+                  <TableRow key={v4()}>
+                    <StyledTableCell align="center">
+                      {index + 1}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.name_of_election}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.start_date} {formatTimeToHHMM(row.start_time)}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.end_date} {formatTimeToHHMM(row.end_time)}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {user?.user?.data?.userName}
+                    </StyledTableCell>
+                  </TableRow>
+                ))}
           </TableBody>
         </Table>
       </TableContainer>
