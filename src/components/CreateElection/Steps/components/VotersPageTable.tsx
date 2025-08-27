@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -10,12 +10,11 @@ import { TrackeChanges, VoterResponse } from "@/utils/types";
 import { getVoters } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress, IconButton, TablePagination } from "@mui/material";
+import { CircularProgress, IconButton } from "@mui/material";
 import ChangeLogModal from "./DropdownComponent";
 import EditVotersInfo from "./EditVotersInfo";
 import Cookies from "universal-cookie";
-import { AnimatePresence } from "framer-motion";
-
+import { AnimatePresence, motion } from "framer-motion";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import Modal from "@/src/components/Modal";
 
@@ -23,22 +22,26 @@ interface VotersPageTableProps {
   electionId?: string | null;
   selectedRows: VoterResponse[];
   setSelectedRows: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
-
-  handleResponseExported: () => Promise<void>;
+  handleResponseExported: (page?: number) => Promise<void>;
   responses: VoterResponse[];
   isFetchVoters: boolean;
   setResponses: React.Dispatch<React.SetStateAction<VoterResponse[]>>;
+  currentPage: number;
+  itemsPerPage: number;
+  onItemsPerPageChange: (newLimit: number) => void;
 }
 
 const VoterTable: React.FC<VotersPageTableProps> = ({
   electionId,
   selectedRows,
   setSelectedRows,
-
   handleResponseExported,
   responses,
   isFetchVoters,
   setResponses,
+  currentPage,
+  itemsPerPage,
+  onItemsPerPageChange,
 }) => {
   const headers = [
     "Select",
@@ -61,8 +64,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const [openRangeModal, setOpenRangeModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const rowRefs = useRef<{ [key: string]: HTMLTableRowElement }>({});
 
   const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) => {
@@ -84,7 +89,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-
       fontSize: 14,
       fontWeight: "bold",
       padding: "12px 8px",
@@ -104,6 +108,13 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     },
   }));
 
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
+    },
+  }));
+
   const handleRangeSelect = () => {
     if (
       rangeStart < 1 ||
@@ -118,24 +129,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     setSelectedRows(selectedInRange);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  const paginatedResponses = responses.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
   const handleClose = () => {
+    setOpenRangeModal(false);
     setOpenStatusModal(false);
+    setShowToast(false);
   };
 
   const handleStatusClick = (
@@ -145,6 +142,37 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     setSelectedStatus(status);
     setOpenStatusModal(true);
   };
+
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim()) {
+      setHighlightedRowId(null);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+    const matchedRow = responses.find(
+      (row) =>
+        row.id.toLowerCase().includes(query) ||
+        row.name.toLowerCase().includes(query) ||
+        row.subgroup?.toLowerCase().includes(query) ||
+        row.phoneNumber?.toLowerCase().includes(query) ||
+        row.email?.toLowerCase().includes(query)
+    );
+
+    if (matchedRow) {
+      setHighlightedRowId(matchedRow.id);
+      setTimeout(() => {
+        const rowElement = rowRefs.current[matchedRow.id];
+        if (rowElement) {
+          rowElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 100);
+    } else {
+      setShowToast(true);
+      setHighlightedRowId(null);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  }, [searchQuery, responses]);
 
   const getStatusDisplay = (row: VoterResponse) => {
     if (row.email_status === "pending") {
@@ -178,8 +206,12 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   };
 
   useEffect(() => {
-    handleResponseExported();
-  }, [handleResponseExported]);
+    const handler = setTimeout(() => {
+      handleSearch();
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery, handleSearch]);
 
   if (isFetchVoters) {
     return (
@@ -189,28 +221,64 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     );
   }
 
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
   return (
     <div className="lg:pt-24 pt-10">
+      {/* Search Input */}
+      <div className="pb-4">
+        <input
+          type="text"
+          placeholder="Search by ID, Name, Sub-Group, Phone, or Email"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border px-3 py-2 w-full max-w-md rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50"
+          >
+            No results found for "{searchQuery}"
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="pb-3 flex items-center gap-2">
-        <label>Select All:</label>
+        <label>Select All (Current Page):</label>
         <input
           type="checkbox"
           className="w-4 h-4 cursor-pointer"
           checked={
-            selectedRows.length === responses.length && responses.length > 0
+            responses.length > 0 &&
+            responses.every((row) =>
+              selectedRows.some((selected) => selected.id === row.id)
+            )
           }
           onChange={(e) => {
             if (e.target.checked) {
-              setSelectedRows(responses);
+              const newSelections = responses.filter(
+                (row) =>
+                  !selectedRows.some((selected) => selected.id === row.id)
+              );
+              setSelectedRows([...selectedRows, ...newSelections]);
             } else {
-              setSelectedRows([]);
+              const currentPageIds = responses.map((row) => row.id);
+              setSelectedRows(
+                selectedRows.filter((row) => !currentPageIds.includes(row.id))
+              );
             }
           }}
         />
       </div>
       <div className="pb-3">
-        Number of Voters Selected: <strong>{selectedRows.length}</strong> of{" "}
-        <strong>{responses.length}</strong>
+        Number of Voters Selected: <strong>{selectedRows.length}</strong>
       </div>
 
       <div className="flex items-center gap-4 pb-4 flex-wrap">
@@ -240,7 +308,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
           onClick={handleRangeSelect}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
         >
-          Select Range
+          Select Range (Current Page)
         </button>
       </div>
 
@@ -248,11 +316,13 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
       <div className="block sm:hidden mt-5">
         <div className="space-y-4">
           {responses.map((row, index) => {
-            const actualIndex = page * rowsPerPage + index;
+            const actualIndex = startIndex + index;
             return (
               <div
-                key={index}
-                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+                key={row.id}
+                className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${
+                  highlightedRowId === row.id ? "bg-yellow-100" : ""
+                }`}
               >
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-3">
@@ -347,32 +417,9 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             );
           })}
         </div>
-        {/* <div className="mt-4">
-          <TablePagination
-            component="div"
-            count={responses.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Items per page:"
-            sx={{
-              "& .MuiTablePagination-toolbar": {
-                flexWrap: "wrap",
-                gap: 1,
-              },
-              "& .MuiTablePagination-selectLabel": {
-                fontSize: "14px",
-              },
-              "& .MuiTablePagination-displayedRows": {
-                fontSize: "14px",
-              },
-            }}
-          />
-        </div> */}
       </div>
 
+      {/* Desktop Table View */}
       <div className="hidden sm:block mt-10">
         <TableContainer
           sx={{
@@ -383,7 +430,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
         >
           <Table
             sx={{
-              minWidth: 1020,
+              minWidth: 700,
               borderCollapse: "separate",
               borderSpacing: "0",
             }}
@@ -402,103 +449,118 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {responses.map((row, index) => (
-                <TableRow key={index}>
-                  <StyledTableCell align="center">
-                    <div className="flex items-center justify-center">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 cursor-pointer"
-                        checked={selectedRows.some(
-                          (selectedRow) => selectedRow.id === row.id
-                        )}
-                        onChange={() => handleCheckboxChange(row)}
+              {responses.map((row, index) => {
+                const actualIndex = startIndex + index;
+                return (
+                  <StyledTableRow
+                    key={row.id}
+                    className={highlightedRowId === row.id ? "highlighted" : ""}
+                    ref={(el) => {
+                      if (el) rowRefs.current[row.id] = el;
+                    }}
+                  >
+                    <StyledTableCell align="center">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer"
+                          checked={selectedRows.some(
+                            (selectedRow) => selectedRow.id === row.id
+                          )}
+                          onChange={() => handleCheckboxChange(row)}
+                        />
+                      </div>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <span className="font-semibold text-gray-700">
+                        {actualIndex < 9
+                          ? `0${actualIndex + 1}`
+                          : actualIndex + 1}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div className="truncate">{row.id}</div>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div
+                        className="truncate font-medium text-gray-900"
+                        title={row.name}
+                      >
+                        {row.name}
+                      </div>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div className="truncate" title={row.subgroup}>
+                        {row.subgroup}
+                      </div>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div className="truncate" title={row.phoneNumber}>
+                        {row.phoneNumber}
+                      </div>
+                    </StyledTableCell>
+                    <StyledTableCell>
+                      <div
+                        title={row.email}
+                        className="truncate break-all text-gray-900"
+                      >
+                        {row.email}
+                      </div>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <ChangeLogModal
+                        changeLogs={row.change_logs || []}
+                        voterId={row.id}
+                        currentVoter={row}
                       />
-                    </div>
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {index < 9 ? `0${index + 1}` : index + 1}
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div className="truncate">{row.id}</div>
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div
-                      className="truncate font-medium text-gray-900"
-                      title={row.name}
-                    >
-                      {row.name}
-                    </div>
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div className="truncate" title={row.subgroup}>
-                      {row.subgroup}
-                    </div>
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div className="truncate" title={row.phoneNumber}>
-                      {row.phoneNumber}
-                    </div>
-                  </StyledTableCell>
-                  <StyledTableCell>
-                    <div
-                      title={row.email}
-                      className="truncate break-all text-gray-900"
-                    >
-                      {row.email}
-                    </div>
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <ChangeLogModal
-                      changeLogs={row.change_logs || []}
-                      voterId={row.id}
-                      currentVoter={row}
-                    />
-                  </StyledTableCell>
-                  <StyledTableCell align="center" className="cursor-pointer">
-                    <EditVotersInfo
-                      users={responses}
-                      selectedRow={row}
-                      index={index}
-                      setUsers={setResponses}
-                      handleResponseExported={handleResponseExported}
-                    />
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {getStatusDisplay(row)}
-                  </StyledTableCell>
-                </TableRow>
-              ))}
+                    </StyledTableCell>
+                    <StyledTableCell align="center" className="cursor-pointer">
+                      <EditVotersInfo
+                        users={responses}
+                        selectedRow={row}
+                        index={index}
+                        setUsers={setResponses}
+                        handleResponseExported={handleResponseExported}
+                      />
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {getStatusDisplay(row)}
+                    </StyledTableCell>
+                  </StyledTableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>
-        {/* <TablePagination
-          component="div"
-          count={responses.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[10, 25, 50, 100]}
-          labelRowsPerPage="Items per page:"
-          sx={{
-            borderTop: "1px solid #e5e7eb",
-            "& .MuiTablePagination-toolbar": {
-              minHeight: "52px",
-            },
-          }}
-        /> */}
       </div>
 
       <AnimatePresence mode="wait">
-        {openStatusModal && (
-          <Modal key="status-modal" handleClose={handleClose}>
-            <div className="p-8 bg-white rounded-lg max-w-[300px] w-full">
-              <h2 className="text-2xl font-bold mb-4">Email Status</h2>
-              <p className="mb-4">{selectedStatus}</p>
+        {openRangeModal && (
+          <Modal key="range-modal" handleClose={handleClose}>
+            <div className="p-8 bg-white rounded-lg max-w-md mx-auto">
+              <h2 className="text-2xl font-bold mb-4">Invalid Range</h2>
+              <p className="mb-4 text-gray-600">
+                Please ensure that the range you selected is valid. The start
+                should be less than or equal to the end, and both should be
+                within the total number of voters on the current page.
+              </p>
               <button
                 onClick={handleClose}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
+        )}
+        {openStatusModal && (
+          <Modal key="status-modal" handleClose={handleClose}>
+            <div className="p-8 bg-white rounded-lg max-w-[300px] w-full mx-auto">
+              <h2 className="text-2xl font-bold mb-4">Email Status</h2>
+              <p className="mb-4 text-gray-600">{selectedStatus}</p>
+              <button
+                onClick={handleClose}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
               >
                 Close
               </button>
