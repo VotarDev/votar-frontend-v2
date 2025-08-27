@@ -169,8 +169,15 @@ export const exportVoters = (data: any, id: string) => {
   return httpService.post(exportVotersUrl + `/${id}`, data);
 };
 
-export const getVoters = (id: string, data: any) => {
-  return httpService.post(getVoterUrl + `/${id}`, data);
+export const getVoters = (
+  id: string,
+  data: any,
+  page: string,
+  limit: string
+) => {
+  return httpService.post(getVoterUrl + `/${id}`, data, {
+    params: { page, limit },
+  });
 };
 
 export const getCandidates = (id: string, data: any) => {

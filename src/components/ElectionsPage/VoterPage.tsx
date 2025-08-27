@@ -10,6 +10,9 @@ import {
   CircularProgress,
   FormControlLabel,
   FormGroup,
+  Pagination,
+  Box,
+  Typography,
 } from "@mui/material";
 import { VoterResponse } from "@/utils/types";
 import { getElectionById, getVoters, sendVoterCred } from "@/utils/api";
@@ -27,6 +30,13 @@ const VoterPage = () => {
   const [responses, setResponses] = useState<VoterResponse[]>([]);
   const [isFetchVoters, setIsFetchVoters] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+
   const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
@@ -49,9 +59,24 @@ const VoterPage = () => {
   const handlePreference = (e: ChangeEvent<HTMLInputElement>) => {
     setPreference(e.target.value);
   };
+
   const handleTextArea = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value;
     if (inputValue.length <= maxCharacterLength) setText(inputValue);
+  };
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown> | null,
+    value: number
+  ) => {
+    setCurrentPage(value);
+    setSelectedRows([]);
+  };
+
+  const handleItemsPerPageChange = (newLimit: number) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+    setSelectedRows([]);
   };
 
   const { id } = router.query;
@@ -77,7 +102,6 @@ const VoterPage = () => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
-
             setIsLoading(false);
           }
         }
@@ -91,37 +115,77 @@ const VoterPage = () => {
     getElection();
   }, [electionID]);
 
-  const handleResponseExported = useCallback(async () => {
-    setResponses([]);
-    setIsFetchVoters(true);
+  const handleResponseExported = useCallback(
+    async (page?: number) => {
+      const pageToFetch = page || currentPage;
+      setResponses([]);
+      setIsFetchVoters(true);
 
-    const token = cookies.get("user-token");
-    if (token) {
-      setAuthToken(token);
-    }
-
-    try {
-      if (electionID) {
-        const { data } = await getVoters(USER_ID, {
-          election_id: electionID,
-        });
-        if (data) {
-          const votersArray = Array.isArray(data.data?.voters)
-            ? data.data.voters
-            : Array.isArray(data.data)
-            ? data.data
-            : [];
-
-          setIsFetchVoters(false);
-
-          setResponses(votersArray);
-        }
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
       }
-    } catch (e) {
-      console.log(e);
-      setIsFetchVoters(false);
+
+      try {
+        if (electionID) {
+          const { data } = await getVoters(
+            USER_ID,
+            {
+              election_id: electionID,
+            },
+            pageToFetch.toString(),
+            itemsPerPage.toString()
+          );
+
+          if (data) {
+            const votersArray = Array.isArray(data.data?.voters)
+              ? data.data.voters
+              : Array.isArray(data.data)
+              ? data.data
+              : [];
+
+            setResponses(votersArray);
+
+            if (data.data) {
+              const currentPageFromBackend = data.data.page || pageToFetch;
+              const limitFromBackend = data.data.limit || itemsPerPage;
+              const votersCount = votersArray.length;
+
+              if (votersCount < limitFromBackend) {
+                setTotalPages(currentPageFromBackend);
+                setTotalItems(
+                  (currentPageFromBackend - 1) * limitFromBackend + votersCount
+                );
+              } else {
+                setTotalPages(currentPageFromBackend + 1);
+                setTotalItems(currentPageFromBackend * limitFromBackend);
+              }
+            } else {
+              const hasMore = votersArray.length === itemsPerPage;
+              setTotalPages(hasMore ? currentPage + 1 : currentPage);
+              setTotalItems(
+                hasMore
+                  ? currentPage * itemsPerPage
+                  : (currentPage - 1) * itemsPerPage + votersArray.length
+              );
+            }
+
+            setIsFetchVoters(false);
+          }
+        }
+      } catch (e) {
+        console.log("Error fetching voters:", e);
+        setIsFetchVoters(false);
+      }
+    },
+    [USER_ID, electionID, currentPage, itemsPerPage]
+  );
+
+  useEffect(() => {
+    if (electionID && USER_ID) {
+      handleResponseExported();
     }
-  }, [users, electionID]);
+  }, [currentPage, itemsPerPage, electionID, USER_ID]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -141,7 +205,6 @@ const VoterPage = () => {
 
     try {
       if (typeof window !== "undefined") {
-        const electionId = localStorage.getItem("ElectionId");
         const credentialsData = {
           election_id: electionID,
           preferences: preference,
@@ -149,12 +212,12 @@ const VoterPage = () => {
           voters: credentials,
         };
         const { data } = await sendVoterCred(credentialsData, USER_ID);
-        handleResponseExported();
+        handleResponseExported(currentPage);
         setIsSending(false);
         toast.success("Voters have been successfully sent");
       }
     } catch (error) {
-      handleResponseExported();
+      handleResponseExported(currentPage);
       setIsSending(false);
       toast.error("An error occurred. Please try again");
     }
@@ -265,6 +328,7 @@ const VoterPage = () => {
           </button>
         </div>
       </div>
+
       <VoterTable
         electionId={electionID}
         selectedRows={selectedRows}
@@ -273,7 +337,88 @@ const VoterPage = () => {
         responses={responses}
         isFetchVoters={isFetchVoters}
         setResponses={setResponses}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
       />
+
+      {responses.length > 0 && (
+        <div
+          // sx={{
+          //   display: "flex",
+          //   width: "100%",
+          //   border: "1px solid #E0E0E0",
+          //   justifyItems: "space-between",
+          //   mt: 3,
+          //   gap: 2,
+
+          //   borderRadius: 2,
+          //   padding: 2,
+          // }}
+          className="flex justify-between items-center lg:px-6 flex-wrap gap-2 mt-5"
+        >
+          <div>
+            <Typography variant="body2" color="text.secondary">
+              Page {currentPage} - Showing {responses.length} voters
+              {responses.length === itemsPerPage && " (more pages available)"}
+            </Typography>
+          </div>
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  fontSize: "1rem",
+                },
+              }}
+            />
+          )}
+          <div className="flex items-center gap-2">
+            <Typography variant="body2">Items per page:</Typography>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          {/* Navigation Controls */}
+          {/* <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <button
+              onClick={() =>
+                handlePageChange(null, Math.max(1, currentPage - 1))
+              }
+              disabled={currentPage <= 1}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Previous
+            </button>
+
+            <span className="px-4 py-2 border rounded bg-white font-medium">
+              {currentPage}
+            </span>
+
+            <button
+              onClick={() => handlePageChange(null, currentPage + 1)}
+              disabled={responses.length < itemsPerPage}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              Next →
+            </button>
+          </Box> */}
+        </div>
+      )}
     </div>
   );
 };

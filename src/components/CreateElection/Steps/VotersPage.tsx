@@ -10,6 +10,9 @@ import {
   CircularProgress,
   FormControlLabel,
   FormGroup,
+  Pagination,
+  Box,
+  Typography,
 } from "@mui/material";
 import VotersPageTable from "./components/VotersPageTable";
 import { VoterResponse } from "@/utils/types";
@@ -27,9 +30,15 @@ const VotersPage = () => {
   const [responses, setResponses] = useState<VoterResponse[]>([]);
   const [isFetchVoters, setIsFetchVoters] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [election, setElection] = useState<any>([]);
   const [electionId, setElectionId] = useState<string | null>("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
+
   const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
@@ -45,42 +54,100 @@ const VotersPage = () => {
   const handlePreference = (e: ChangeEvent<HTMLInputElement>) => {
     setPreference(e.target.value);
   };
+
   const handleTextArea = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const inputValue = e.target.value;
     if (inputValue.length <= maxCharacterLength) setText(inputValue);
   };
 
-  const handleResponseExported = useCallback(async () => {
-    setResponses([]);
-    setIsFetchVoters(true);
-    const token = cookies.get("user-token");
-    if (token) {
-      setAuthToken(token);
-    }
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown> | null,
+    value: number
+  ) => {
+    setCurrentPage(value);
+    setSelectedRows([]);
+  };
 
-    try {
-      if (typeof window !== "undefined") {
-        const electionId = localStorage.getItem("ElectionId");
-        if (electionId) {
-          const { data } = await getVoters(USER_ID, {
-            election_id: electionId,
-          });
-          if (data) {
-            const votersArray = Array.isArray(data.data?.voters)
-              ? data.data.voters
-              : Array.isArray(data.data)
-              ? data.data
-              : [];
-            setIsFetchVoters(false);
-            setResponses(votersArray);
+  const handleItemsPerPageChange = (newLimit: number) => {
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
+    setSelectedRows([]);
+  };
+
+  const handleResponseExported = useCallback(
+    async (page?: number) => {
+      const pageToFetch = page || currentPage;
+      setResponses([]);
+      setIsFetchVoters(true);
+      const token = cookies.get("user-token");
+      if (token) {
+        setAuthToken(token);
+      }
+
+      try {
+        if (typeof window !== "undefined") {
+          const electionIdFromStorage = localStorage.getItem("ElectionId");
+          if (electionIdFromStorage) {
+            const { data } = await getVoters(
+              USER_ID,
+              {
+                election_id: electionIdFromStorage,
+              },
+              pageToFetch.toString(),
+              itemsPerPage.toString()
+            );
+
+            if (data) {
+              const votersArray = Array.isArray(data.data?.voters)
+                ? data.data.voters
+                : Array.isArray(data.data)
+                ? data.data
+                : [];
+
+              setResponses(votersArray);
+
+              if (data.data) {
+                const currentPageFromBackend = data.data.page || pageToFetch;
+                const limitFromBackend = data.data.limit || itemsPerPage;
+                const votersCount = votersArray.length;
+
+                if (votersCount < limitFromBackend) {
+                  setTotalPages(currentPageFromBackend);
+                  setTotalItems(
+                    (currentPageFromBackend - 1) * limitFromBackend +
+                      votersCount
+                  );
+                } else {
+                  setTotalPages(currentPageFromBackend + 1);
+                  setTotalItems(currentPageFromBackend * limitFromBackend);
+                }
+              } else {
+                const hasMore = votersArray.length === itemsPerPage;
+                setTotalPages(hasMore ? currentPage + 1 : currentPage);
+                setTotalItems(
+                  hasMore
+                    ? currentPage * itemsPerPage
+                    : (currentPage - 1) * itemsPerPage + votersArray.length
+                );
+              }
+
+              setIsFetchVoters(false);
+            }
           }
         }
+      } catch (e) {
+        console.log("Error fetching voters:", e);
+        setIsFetchVoters(false);
       }
-    } catch (e) {
-      console.log(e);
-      setIsFetchVoters(false);
+    },
+    [USER_ID, electionId, currentPage, itemsPerPage]
+  );
+
+  useEffect(() => {
+    if (electionId && USER_ID) {
+      handleResponseExported();
     }
-  }, [electionId]);
+  }, [currentPage, itemsPerPage, electionId, USER_ID]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -100,21 +167,22 @@ const VotersPage = () => {
 
     try {
       if (typeof window !== "undefined") {
-        const electionId = localStorage.getItem("ElectionId");
+        const electionIdFromStorage = localStorage.getItem("ElectionId");
         const credentialsData = {
-          election_id: electionId,
+          election_id: electionIdFromStorage,
+          preferences: preference,
+          message: text,
           voters: credentials,
         };
         const { data } = await sendVoterCred(credentialsData, USER_ID);
         if (data) {
-          console.log(data);
           setIsSending(false);
-          handleResponseExported();
+          handleResponseExported(currentPage);
           toast.success("Voters Credentials sent successfully");
         }
       }
     } catch (e: any) {
-      handleResponseExported();
+      handleResponseExported(currentPage);
       toast.error("An error occurred, please try again");
       setIsSending(false);
     }
@@ -122,27 +190,26 @@ const VotersPage = () => {
 
   useEffect(() => {
     const getElection = async () => {
-      setIsloading(true);
+      setIsLoading(true);
       const token = cookies.get("user-token");
       if (token) {
         setAuthToken(token);
       }
 
       try {
-        const electionId = localStorage.getItem("ElectionId");
-        setElectionId(electionId);
-        if (electionId) {
-          const electionData = { election_id: electionId };
+        const electionIdFromStorage = localStorage.getItem("ElectionId");
+        setElectionId(electionIdFromStorage);
+        if (electionIdFromStorage) {
+          const electionData = { election_id: electionIdFromStorage };
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
-
-            setIsloading(false);
+            setIsLoading(false);
           }
         }
       } catch (e: any) {
         console.log(e?.response?.data?.message);
-        setIsloading(false);
+        setIsLoading(false);
       }
     };
     getElection();
@@ -253,6 +320,7 @@ const VotersPage = () => {
           </button>
         </div>
       </div>
+
       <VotersPageTable
         electionId={electionId}
         selectedRows={selectedRows}
@@ -261,7 +329,50 @@ const VotersPage = () => {
         responses={responses}
         isFetchVoters={isFetchVoters}
         setResponses={setResponses}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
       />
+
+      {responses.length > 0 && (
+        <div className="flex justify-between items-center px-6 flex-wrap gap-2">
+          <div>
+            <Typography variant="body2" color="text.secondary">
+              Page {currentPage} - Showing {responses.length} voters
+              {responses.length === itemsPerPage && " (more pages available)"}
+            </Typography>
+          </div>
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  fontSize: "1rem",
+                },
+              }}
+            />
+          )}
+          <div className="flex items-center gap-2">
+            <Typography variant="body2">Items per page:</Typography>
+            <select
+              value={itemsPerPage}
+              onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+              className="border rounded px-2 py-1"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+            </select>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
