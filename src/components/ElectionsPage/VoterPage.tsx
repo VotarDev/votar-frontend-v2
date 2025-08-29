@@ -343,20 +343,7 @@ const VoterPage = () => {
       />
 
       {responses.length > 0 && (
-        <div
-          // sx={{
-          //   display: "flex",
-          //   width: "100%",
-          //   border: "1px solid #E0E0E0",
-          //   justifyItems: "space-between",
-          //   mt: 3,
-          //   gap: 2,
-
-          //   borderRadius: 2,
-          //   padding: 2,
-          // }}
-          className="flex justify-between items-center lg:px-6 flex-wrap gap-2 mt-5"
-        >
+        <div className="flex justify-between items-center lg:px-6 flex-wrap gap-2 mt-5">
           <div>
             <Typography variant="body2" color="text.secondary">
               Page {currentPage} - Showing {responses.length} voters

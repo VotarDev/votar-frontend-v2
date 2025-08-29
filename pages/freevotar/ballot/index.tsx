@@ -69,7 +69,7 @@ const FreeVotarBallot = () => {
   const voterProfile = useSelector((state: RootState) => state.voterProfile);
   const votarCredit = useSelector(
     (state: RootState) => state.votarCredit.credit
-  ); // Access votar_credit
+  );
   const router = useRouter();
 
   const [candidates, setCandidates] = useState<BallotData[]>([]);
@@ -131,7 +131,6 @@ const FreeVotarBallot = () => {
       const { data } = await registerVoter(userData);
 
       if (data) {
-        console.log(data);
         cookie.set(voterLoginCookieName, data.data.token, { path: "/" });
         cookie.set("votar-credits", data.data.votar_credit, { path: "/" });
         dispatch(setVotarCredit(data.data.votar_credit));
@@ -377,7 +376,7 @@ const FreeVotarBallot = () => {
             );
 
             return {
-              free_votes,
+              free_votes: free_votes > 0 ? free_votes : 0,
               position: position.position,
               candidate_details,
             };
@@ -668,14 +667,16 @@ const FreeVotarBallot = () => {
                           candidates.map((position, positionIndex) => {
                             const randomColor =
                               cols[Math.floor(Math.random() * cols.length)];
-                            // Find the free_votes for the current position
-                            const positionFreeVotes =
-                              freeVoteDetails.find(
-                                (detail) =>
-                                  detail.position === position.name_of_position
-                              )?.free_votes || 0;
 
-                            // Calculate total votes for the position
+                            const positionFreeVotes =
+                              (Array.isArray(freeVoteDetails) &&
+                                freeVoteDetails.find(
+                                  (detail) =>
+                                    detail.position ===
+                                    position.name_of_position
+                                )?.free_votes) ||
+                              0;
+
                             const totalVotes = position.candidates.reduce(
                               (sum, c) => sum + c.vote,
                               0
