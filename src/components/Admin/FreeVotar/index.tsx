@@ -115,13 +115,29 @@ const FreeVotar = ({ elections }: any) => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 13,
+      fontWeight: 500,
       border: "none",
+      padding: "16px",
+
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
+    },
+  }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
     },
   }));
 
@@ -155,7 +171,7 @@ const FreeVotar = ({ elections }: any) => {
           aria-label="sticky table"
         >
           <TableHead>
-            <TableRow className="text-white font-bold">
+            <StyledTableRow className="text-white font-bold">
               {headers.map((header, key) => {
                 return (
                   <StyledTableCell
@@ -166,7 +182,7 @@ const FreeVotar = ({ elections }: any) => {
                   </StyledTableCell>
                 );
               })}
-            </TableRow>
+            </StyledTableRow>
           </TableHead>
           <TableBody>
             {(rowsPerPage > 0
@@ -178,14 +194,20 @@ const FreeVotar = ({ elections }: any) => {
             ).map((row: any) => (
               <TableRow key={uuidv4()}>
                 <StyledTableCell>{row.name_of_election}</StyledTableCell>
-                <StyledTableCell>{row.type}</StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.type}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.start_date} - {row.end_date}
                   <br />
                 </StyledTableCell>
-                <StyledTableCell>{row.quantity}</StyledTableCell>
-                <StyledTableCell>#</StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.quantity}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  #
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {/* <span
                     className={`${
                       row.status === "Pending"
@@ -200,13 +222,13 @@ const FreeVotar = ({ elections }: any) => {
               </TableRow>
             ))}
             {emptyRows > 0 && (
-              <TableRow style={{ height: 53 * emptyRows }}>
-                <TableCell colSpan={6} />
-              </TableRow>
+              <StyledTableCell style={{ height: 53 * emptyRows }}>
+                <StyledTableCell colSpan={6} />
+              </StyledTableCell>
             )}
           </TableBody>
           <TableFooter>
-            <TableRow>
+            <StyledTableRow>
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
                 colSpan={3}
@@ -223,7 +245,7 @@ const FreeVotar = ({ elections }: any) => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 ActionsComponent={TablePaginationActions}
               />
-            </TableRow>
+            </StyledTableRow>
           </TableFooter>
         </Table>
       </TableContainer>
