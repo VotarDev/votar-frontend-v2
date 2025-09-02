@@ -18,7 +18,6 @@ import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import { v4 as uuidv4 } from "uuid";
-import { formatTimeToHHMM } from "@/utils/util";
 
 interface TablePaginationActionsProps {
   count: number;
@@ -112,17 +111,34 @@ const Activities = ({ elections }: any) => {
     "Amount",
     "Status",
   ];
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 13,
+      fontWeight: 500,
       border: "none",
+      padding: "16px",
+
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
+    },
+  }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
     },
   }));
 
@@ -179,28 +195,23 @@ const Activities = ({ elections }: any) => {
                 )
               : elections
             ).map((row: any) => (
-              <TableRow key={uuidv4()}>
+              <StyledTableRow key={uuidv4()}>
                 <StyledTableCell>{row.name_of_election}</StyledTableCell>
-                <StyledTableCell>{row.type}</StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.type}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.start_date} - {row.end_date}
                   <br />
                 </StyledTableCell>
-                <StyledTableCell>{row.quantity}</StyledTableCell>
-                <StyledTableCell>#</StyledTableCell>
-                <StyledTableCell>
-                  {/* <span
-                    className={`${
-                      row.status === "Pending"
-                        ? "text-[#E88749]"
-                        : "text-green-400"
-                    } capitalize`}
-                  >
-                    {row.status}
-                  </span> */}
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.quantity}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   #
                 </StyledTableCell>
-              </TableRow>
+                <StyledTableCell></StyledTableCell>
+              </StyledTableRow>
             ))}
             {emptyRows > 0 && (
               <TableRow style={{ height: 53 * emptyRows }}>

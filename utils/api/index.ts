@@ -342,8 +342,8 @@ export const adminLogin = (data: { username: string; password: string }) => {
   return httpService.post(adminLoginUrl, data);
 };
 
-export const getAllElectionsAdmin = () => {
-  return httpService.get(adminGetAllElectionsUrl);
+export const getAllElectionsAdmin = (page: string, limit: string) => {
+  return httpService.get(adminGetAllElectionsUrl, { params: { page, limit } });
 };
 
 export const getVotarPageByElection = (email: string, type: string) => {
