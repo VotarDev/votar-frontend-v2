@@ -25,13 +25,22 @@ const VotarCredits = () => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 13,
+      fontWeight: 500,
       border: "none",
+      padding: "16px",
+
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
     },
   }));
   return (
@@ -65,19 +74,21 @@ const VotarCredits = () => {
             {votarCredits.map((row, index) => (
               <TableRow key={row.id}>
                 <StyledTableCell>{row.name}</StyledTableCell>
-                <StyledTableCell>{row.type}</StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.type}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.date}
                   <br />
                   {row.time}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.quantity.toLocaleString()}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   NGN {row.amount.toLocaleString()}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   <span
                     className={`${
                       row.status === "pending"
