@@ -25,9 +25,14 @@ const Tabs = () => {
       const token = cookies.get("admin-token");
       if (token) setAuthToken(token);
       try {
-        const { data } = await getAllElectionsAdmin();
+        const { data } = await getAllElectionsAdmin("1", "10");
         if (data) {
-          const sortedElections = data.data.slice().reverse();
+          const electionsArray = Array.isArray(data.data?.elections)
+            ? data.data.elections
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+          const sortedElections = electionsArray.slice().reverse();
           setElections(sortedElections);
           setIsLoadingElections(false);
         }

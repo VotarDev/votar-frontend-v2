@@ -52,7 +52,7 @@ const ElectionsComponent = () => {
           ? data.data
           : [];
         setElections(electionsArray);
-        console.log(electionsArray);
+
         setIsFetchElections(false);
       }
     } catch (error) {
