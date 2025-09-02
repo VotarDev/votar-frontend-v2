@@ -24,15 +24,32 @@ const VotarMeeting = () => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 13,
+      fontWeight: 500,
       border: "none",
+      padding: "16px",
+
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
     },
   }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
+    },
+  }));
+
   return (
     <div>
       <TableContainer sx={{ maxHeight: 440 }} className="table-scroll">
@@ -47,7 +64,7 @@ const VotarMeeting = () => {
           aria-label="sticky table"
         >
           <TableHead>
-            <TableRow className="text-white font-bold">
+            <StyledTableRow className="text-white font-bold">
               {headers.map((header, key) => {
                 return (
                   <StyledTableCell
@@ -58,28 +75,30 @@ const VotarMeeting = () => {
                   </StyledTableCell>
                 );
               })}
-            </TableRow>
+            </StyledTableRow>
           </TableHead>
           <TableBody>
             {votarMeeting.length === 0 && (
-              <div className="p-4 text-lg text-red-600">No votar Meeting</div>
+              <div className="p-4 text-base text-red-600">No votar Meeting</div>
             )}
             {votarMeeting.map((row, index) => (
               <TableRow key={row.id}>
                 <StyledTableCell>{row.name}</StyledTableCell>
-                <StyledTableCell>{row.type}</StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
+                  {row.type}
+                </StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.date}
                   <br />
                   {row.time}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   {row.quantity.toLocaleString()}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   NGN {row.amount.toLocaleString()}
                 </StyledTableCell>
-                <StyledTableCell>
+                <StyledTableCell style={{ textAlign: "center" }}>
                   <span
                     className={`${
                       row.status === "pending"
