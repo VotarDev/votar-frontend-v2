@@ -7,43 +7,80 @@ import VotarMeeting from "../VotarMeeting";
 import setAuthToken from "@/utils/setAuthToken";
 import { getAdminVotarPage, getAllElectionsAdmin } from "@/utils/api";
 import Cookies from "universal-cookie";
-import { set } from "lodash";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Pagination } from "@mui/material";
 
 const Tabs = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [elections, setElections] = useState([]);
   const [isLoadingElections, setIsLoadingElections] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalElections, setTotalElections] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
+
+  const totalPages = Math.max(1, Math.ceil(totalElections / rowsPerPage));
+
   const handleTabClick = (tabNumber: number) => {
     setActiveTab(tabNumber);
+    setCurrentPage(1);
+  };
+
+  const fetchElections = async (page: number, limit: number) => {
+    setIsLoadingElections(true);
+    const cookies = new Cookies();
+    const token = cookies.get("admin-token");
+    if (token) setAuthToken(token);
+
+    try {
+      const { data } = await getAllElectionsAdmin(
+        page.toString(),
+        limit.toString()
+      );
+      if (data) {
+        const electionsArray = Array.isArray(data.data?.elections)
+          ? data.data.elections
+          : Array.isArray(data.data)
+          ? data.data
+          : [];
+
+        const sortedElections = electionsArray.sort((a: any, b: any) => {
+          const dateA = new Date(a.createdAt);
+          const dateB = new Date(b.createdAt);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        setElections(sortedElections);
+
+        if (page === 1) {
+          setTotalElections(
+            data.data?.total || data.total || electionsArray.length
+          );
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoadingElections(false);
+    }
   };
 
   useEffect(() => {
-    const getActivities = async () => {
-      setIsLoadingElections(true);
-      const cookies = new Cookies();
-      const token = cookies.get("admin-token");
-      if (token) setAuthToken(token);
-      try {
-        const { data } = await getAllElectionsAdmin("1", "10");
-        if (data) {
-          const electionsArray = Array.isArray(data.data?.elections)
-            ? data.data.elections
-            : Array.isArray(data.data)
-            ? data.data
-            : [];
-          const sortedElections = electionsArray.slice().reverse();
-          setElections(sortedElections);
-          setIsLoadingElections(false);
-        }
-      } catch (error) {
-        console.log(error);
-        setIsLoadingElections(false);
-      }
-    };
+    fetchElections(currentPage, rowsPerPage);
+  }, [currentPage, rowsPerPage]);
 
-    getActivities();
-  }, []);
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    page: number
+  ) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newRowsPerPage = parseInt(event.target.value);
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+  };
 
   const freeVotarElections = elections.filter(
     (election: any) => election.type === "Free Votar"
@@ -118,6 +155,7 @@ const Tabs = () => {
           </div>
         </div>
       </div>
+
       <div className="mt-4 lg:p-4 p-0 relative">
         <div className="w-full h-full">
           {elections && elections.length > 0 && (
@@ -131,6 +169,42 @@ const Tabs = () => {
           )}
         </div>
       </div>
+
+      {elections && elections.length > 0 && (
+        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Rows per page:</span>
+            <select
+              value={rowsPerPage}
+              onChange={handleRowsPerPageChange}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+            >
+              <option value={50}>50</option>
+            </select>
+          </div>
+
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="medium"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  color: "#015CE9",
+                },
+                "& .Mui-selected": {
+                  backgroundColor: "#015CE9 !important",
+                  color: "white",
+                },
+              }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import { formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
+import { PiArrowLeft } from "react-icons/pi";
 
 const DetailsPage = ({
   electionId,
@@ -42,7 +43,6 @@ const DetailsPage = ({
   const [numberofFreeVote, setNumberofFreeVote] = useState(0);
   const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
   const [isEditable, setIsEditable] = useState(true);
-  //crop states
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
@@ -72,10 +72,7 @@ const DetailsPage = ({
         throw new Error("Cropped image is null");
       }
 
-      console.log(croppedImage);
       const blobUrl = URL.createObjectURL(croppedImage);
-
-      console.log("Cropped image:", blobUrl);
 
       dispatch({
         type: "SET_BACKGROUND_IMAGE",
@@ -85,7 +82,6 @@ const DetailsPage = ({
 
       setShowCropModal(false);
     } catch (error) {
-      console.error("Error cropping image:", error);
       toast.error("Failed to crop image. Please try again.");
     }
   };
@@ -134,10 +130,8 @@ const DetailsPage = ({
         setIsEditable(now < targetDateTime);
       };
 
-      // Initial check
       updateEditableState();
 
-      // set an interval to keep updating
       const interval = setInterval(updateEditableState, 1000);
 
       return () => clearInterval(interval);
@@ -171,15 +165,13 @@ const DetailsPage = ({
     const { name, value } = e.target;
 
     if (name === "start_date" && state.end_date) {
-      // Validate that start_date is not greater than end_date
       if (new Date(value) > new Date(state.end_date)) {
         toast.error("Start date cannot be later than end date!");
-        return; // Prevent dispatch if validation fails
+        return;
       }
     }
 
     if (name === "end_date" && state.start_date) {
-      // Validate that end_date is not less than start_date
       if (new Date(value) < new Date(state.start_date)) {
         toast.error("End date cannot be earlier than start date!");
         return;
@@ -268,8 +260,6 @@ const DetailsPage = ({
     });
   };
 
-  console.log(state.free_votes);
-
   return (
     <div>
       {isFecthElection ? (
@@ -277,7 +267,15 @@ const DetailsPage = ({
           <CircularProgress size={30} style={{ color: "#015CE9" }} />
         </div>
       ) : (
-        <div className="lg:my-[60px] my-10">
+        <div className="lg:my-[40px] my-10">
+          <div className="mb-6">
+            <button
+              className=" py-2 text-blue-700 rounded flex items-center justify-center gap-2 font-semibold"
+              onClick={() => window.history.back()}
+            >
+              <PiArrowLeft /> Back
+            </button>
+          </div>
           <div className="text-2xl font-semibold">Election Details</div>
           <div className="mt-[30px]">
             <form className="font-semibold" encType="multipart/form-data">
