@@ -53,8 +53,13 @@ const VotarProTable = () => {
       try {
         const { data } = await getAdminVotarPage(types);
         if (data) {
-          setUsers(data.data);
-          console.log(data.data);
+          const electionsArray = Array.isArray(data.data?.elections)
+            ? data.data.elections
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+          setUsers(electionsArray);
+
           setIsFetchUsers(false);
         }
       } catch (e: any) {
@@ -110,12 +115,12 @@ const VotarProTable = () => {
                   <StyledTableCell
                     align="center"
                     className="cursor-pointer hover:shadow-md duration-150"
-                    onClick={() => handleEmailClick(row.email)}
+                    onClick={() => handleEmailClick(row.author_email)}
                   >
-                    {row.email}
+                    {row.author_email}
                   </StyledTableCell>
                   <StyledTableCell align="center">
-                    {row.numberOfElection}
+                    {row.number_of_election}
                   </StyledTableCell>
                 </TableRow>
               ))}
