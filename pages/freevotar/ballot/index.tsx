@@ -375,8 +375,26 @@ const FreeVotarBallot = () => {
               0
             );
 
+            const freeVotes =
+              freeVoteDetails.find(
+                (detail) => detail.position === position.position
+              )?.free_votes || 0;
+
+            console.log(
+              freeVotes === 0
+                ? 0
+                : free_votes > 0 && free_votes > freeVotes
+                ? freeVotes
+                : free_votes
+            );
+
             return {
-              free_votes: free_votes > 0 ? free_votes : 0,
+              free_votes:
+                freeVotes === 0
+                  ? 0
+                  : free_votes > 0 && free_votes > freeVotes
+                  ? freeVotes
+                  : free_votes,
               position: position.position,
               candidate_details,
             };
@@ -472,13 +490,11 @@ const FreeVotarBallot = () => {
       const candidate =
         updatedCandidates[positionIndex].candidates[candidateIndex];
 
-      // Calculate total votes for the position
       const totalVotes = updatedCandidates[positionIndex].candidates.reduce(
         (sum, c) => sum + c.vote,
         0
       );
 
-      // Get free_votes for the position
       const freeVotes =
         freeVoteDetails.find((detail) => detail.position === positionName)
           ?.free_votes || 0;
