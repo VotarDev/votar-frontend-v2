@@ -271,7 +271,7 @@ const SideBar = ({
                   {!isLoaded ? (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
                   ) : (
-                    <>{credit}</>
+                    <>{credit || 0}</>
                   )}
                 </div>
                 <div>
