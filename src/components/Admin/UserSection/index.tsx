@@ -73,16 +73,19 @@ const UserSection = () => {
       if (token) setAuthToken(token);
       try {
         const { data } = await adminGetAllUsers();
+
         const mergedDataArray: MergedData[] = [];
         if (data) {
-          data.data.electionCreators.forEach((creator: any) => {
-            mergedDataArray.push({
-              name: creator.userName,
-              email: creator.email,
-              category: "Election Creator",
-            });
-          });
-          data.data.voters.forEach((voter: any) => {
+          data.data.electionCreators.electionCreators.forEach(
+            (creator: any) => {
+              mergedDataArray.push({
+                name: creator.userName,
+                email: creator.email,
+                category: "Election Creator",
+              });
+            }
+          );
+          data.data.voters.voters.forEach((voter: any) => {
             const existingCreatorIndex = mergedDataArray.findIndex(
               (user) => user.email === voter.email
             );
