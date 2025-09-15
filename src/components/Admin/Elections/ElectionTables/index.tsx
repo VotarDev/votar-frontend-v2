@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { BsCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
 
 import { motion } from "framer-motion";
@@ -13,10 +13,18 @@ import TableRow from "@mui/material/TableRow";
 import { electionsAdmin } from "@/utils/util";
 import SwitchButton from "../../AdminProfile/SwitchButton";
 import { drop } from "@/utils/util";
+import { getAdminVotarPage } from "@/utils/api";
+import setAuthToken from "@/utils/setAuthToken";
+import Cookies from "universal-cookie";
+import { usePathname } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 
 const ElectionTables = () => {
   const [isDropDown, setIsDropdown] = useState(false);
   const [filteredOption, setFilteredOption] = useState("Date");
+  const [users, setUsers] = useState<any[]>([]);
+  const [isFetchUsers, setIsFetchUsers] = useState(false);
+  const pathname = usePathname();
 
   const options = ["Date", "Election", "Time", "Status"];
 
@@ -35,19 +43,73 @@ const ElectionTables = () => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 14,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 13,
+      fontWeight: 500,
       border: "none",
+      padding: "16px",
+      verticalAlign: "middle",
+      maxWidth: "150px",
+      wordWrap: "break-word",
+      lineHeight: "1.4",
     },
   }));
+
+  const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    "&.highlighted": {
+      backgroundColor: "#fef9c3",
+      transition: "background-color 0.3s ease",
+    },
+  }));
+
+  useEffect(() => {
+    const getVotarProPower = async () => {
+      setIsFetchUsers(true);
+      const cookies = new Cookies();
+      const token = cookies.get("admin-token");
+      const types = pathname.toLowerCase().endsWith("/pro")
+        ? "Votar Pro"
+        : "Free Votar";
+
+      if (token) setAuthToken(token);
+      try {
+        const { data } = await getAdminVotarPage();
+        if (data) {
+          const electionsArray = Array.isArray(data.data?.elections)
+            ? data.data.elections
+            : Array.isArray(data.data)
+            ? data.data
+            : [];
+
+          setUsers(electionsArray);
+
+          setIsFetchUsers(false);
+        }
+      } catch (e: any) {
+        console.log(e);
+        setIsFetchUsers(false);
+      }
+    };
+    getVotarProPower();
+  }, []);
+
   const filteredOptionHandler = (opt: string) => {
     setFilteredOption(opt);
     setIsDropdown(false);
   };
+
+  if (isFetchUsers)
+    return (
+      <div className="text-center">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
+    );
 
   return (
     <div>
@@ -106,7 +168,7 @@ const ElectionTables = () => {
             aria-label="sticky table"
           >
             <TableHead>
-              <TableRow className="text-white font-bold">
+              <StyledTableRow className="text-white font-bold">
                 {headers.map((header, key) => {
                   return (
                     <StyledTableCell
@@ -118,46 +180,54 @@ const ElectionTables = () => {
                     </StyledTableCell>
                   );
                 })}
-              </TableRow>
+              </StyledTableRow>
             </TableHead>
             <TableBody>
-              {electionsAdmin.map((row, index) => (
-                <TableRow key={row.id}>
-                  <StyledTableCell align="center">
-                    {index <= 9 ? `0${index + 1}` : index + 1}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.election}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <span>{row.time}</span>
-                    <br />
-                    <span>{row.date}</span>
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.voterNo.toLocaleString()}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {" "}
-                    <span
-                      className={`${
-                        row.status === "pending"
-                          ? "text-[#E88749]"
-                          : "text-green-400"
-                      } capitalize`}
-                    >
-                      {row.status}
-                    </span>
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.amount.toLocaleString()}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <SwitchButton />
-                  </StyledTableCell>
-                  <StyledTableCell align="center">{row.email}</StyledTableCell>
-                </TableRow>
-              ))}
+              {users &&
+                users.length > 0 &&
+                users.map((row, index) => (
+                  <TableRow key={row.id}>
+                    <StyledTableCell align="center">
+                      {index <= 9 ? `0${index + 1}` : index + 1}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.name_of_election}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <span>{row.start_date}</span>
+                      <br />
+                      <span>{row.end_date}</span>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {/* {row.voterNo.toLocaleString()} */}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {/* {" "}
+                      <span
+                        className={`${
+                          row.status === "pending"
+                            ? "text-[#E88749]"
+                            : "text-green-400"
+                        } capitalize`}
+                      >
+                        {row.status}
+                      </span> */}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {/* {row.amount.toLocaleString()} */}
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <SwitchButton
+                        id={index}
+                        row={row}
+                        userMail={row.author_email}
+                      />
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.author_email}
+                    </StyledTableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>

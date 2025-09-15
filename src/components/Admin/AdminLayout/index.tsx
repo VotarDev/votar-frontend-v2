@@ -1,11 +1,10 @@
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import AdminHeader from "../AdminHeader";
 import { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
 import Login from "../AdminLogin";
 import { useRouter } from "next/router";
 import Cookies from "universal-cookie";
-import { ro } from "date-fns/locale";
 
 const AdminLayout = ({ children }: any) => {
   const { available, loading, tested } = useSelector(
@@ -26,7 +25,7 @@ const AdminLayout = ({ children }: any) => {
       <div>
         <AdminHeader />
       </div>
-      <div className="ml-14 px-4 lg:ml-0 lg:px-0">{children}</div>
+      <div className="ml-14 px-4 lg:ml-0 lg:px-0 ">{children}</div>
     </div>
   );
 };
