@@ -53,8 +53,6 @@ const Activities = ({ elections }: any) => {
     },
   }));
 
-  console.log(elections);
-
   return (
     <div>
       <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
