@@ -10,6 +10,7 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { Pagination, Stack } from "@mui/material";
 import { electionsAdmin } from "@/utils/util";
 import SwitchButton from "../../AdminProfile/SwitchButton";
 import { drop } from "@/utils/util";
@@ -24,6 +25,10 @@ const ElectionTables = () => {
   const [filteredOption, setFilteredOption] = useState("Date");
   const [users, setUsers] = useState<any[]>([]);
   const [isFetchUsers, setIsFetchUsers] = useState(false);
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalElections, setTotalElections] = useState(0);
+  const [limit] = useState(30);
   const pathname = usePathname();
 
   const options = ["Date", "Election", "Time", "Status"];
@@ -68,40 +73,69 @@ const ElectionTables = () => {
     },
   }));
 
-  useEffect(() => {
-    const getVotarProPower = async () => {
-      setIsFetchUsers(true);
-      const cookies = new Cookies();
-      const token = cookies.get("admin-token");
-      const types = pathname.toLowerCase().endsWith("/pro")
-        ? "Votar Pro"
-        : "Free Votar";
+  const getVotarProPower = async (page: any = currentPage) => {
+    setIsFetchUsers(true);
+    const cookies = new Cookies();
+    const token = cookies.get("admin-token");
+    const types = pathname.toLowerCase().endsWith("/pro")
+      ? "Votar Pro"
+      : "Free Votar";
 
-      if (token) setAuthToken(token);
+    if (token) setAuthToken(token);
+    try {
+      let response;
       try {
-        const { data } = await getAdminVotarPage();
-        if (data) {
-          const electionsArray = Array.isArray(data.data?.elections)
-            ? data.data.elections
-            : Array.isArray(data.data)
-            ? data.data
-            : [];
+        response = await getAdminVotarPage("", page, limit);
+      } catch (paramError) {
+        response = await getAdminVotarPage();
+      }
 
-          setUsers(electionsArray);
+      const { data } = response;
+      if (data) {
+        const electionsArray = Array.isArray(data.data?.elections)
+          ? data.data.elections
+          : Array.isArray(data.data)
+          ? data.data
+          : [];
 
-          setIsFetchUsers(false);
-        }
-      } catch (e: any) {
-        console.log(e);
+        const total = data.data?.total || data.total || electionsArray.length;
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedUsers = data.data?.total
+          ? electionsArray
+          : electionsArray.slice(startIndex, endIndex);
+
+        setUsers(paginatedUsers);
+        setTotalElections(total);
+        setTotalPages(Math.ceil(total / limit));
         setIsFetchUsers(false);
       }
-    };
+    } catch (e: any) {
+      console.log("Error fetching elections:", e);
+      setIsFetchUsers(false);
+    }
+  };
+
+  useEffect(() => {
     getVotarProPower();
   }, []);
 
   const filteredOptionHandler = (opt: string) => {
     setFilteredOption(opt);
     setIsDropdown(false);
+  };
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setCurrentPage(value);
+    getVotarProPower(value);
+  };
+
+  const getSerialNumber = (index: number) => {
+    const serialNumber = (currentPage - 1) * limit + index + 1;
+    return serialNumber <= 9 ? `0${serialNumber}` : serialNumber.toString();
   };
 
   if (isFetchUsers)
@@ -112,7 +146,7 @@ const ElectionTables = () => {
     );
 
   return (
-    <div>
+    <div className="pb-4">
       <div className="flex justify-end items-center gap-5">
         <div className="relative max-w-[260px] ">
           <div
@@ -153,11 +187,11 @@ const ElectionTables = () => {
           </AnimatePresence>
         </div>
         <div className="text-xl font-semibold">
-          Election Number : {electionsAdmin.length}
+          Election Number : {totalElections}
         </div>
       </div>
       <div className="w-full mt-5">
-        <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
+        <TableContainer sx={{ maxHeight: "80%" }} className="table-scroll">
           <Table
             sx={{
               minWidth: 700,
@@ -186,9 +220,9 @@ const ElectionTables = () => {
               {users &&
                 users.length > 0 &&
                 users.map((row, index) => (
-                  <TableRow key={row.id}>
+                  <TableRow key={row.election_id}>
                     <StyledTableCell align="center">
-                      {index <= 9 ? `0${index + 1}` : index + 1}
+                      {getSerialNumber(index)}
                     </StyledTableCell>
                     <StyledTableCell align="center">
                       {row.name_of_election}
@@ -199,38 +233,73 @@ const ElectionTables = () => {
                       <span>{row.end_date}</span>
                     </StyledTableCell>
                     <StyledTableCell align="center">
-                      {/* {row.voterNo.toLocaleString()} */}
+                      {row.number_of_election || "-"}
                     </StyledTableCell>
                     <StyledTableCell align="center">
-                      {/* {" "}
                       <span
                         className={`${
-                          row.status === "pending"
-                            ? "text-[#E88749]"
-                            : "text-green-400"
+                          row.payment_status === "Paid"
+                            ? "text-green-400"
+                            : "text-[#E88749]"
                         } capitalize`}
                       >
-                        {row.status}
-                      </span> */}
+                        {row.payment_status || "Pending"}
+                      </span>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">-</StyledTableCell>
+                    <StyledTableCell align="center">
+                      {row.hasOwnProperty("published") && (
+                        <SwitchButton
+                          id={row.election_id}
+                          row={row}
+                          userMail={row.author_email}
+                          initialStatus={row.published}
+                        />
+                      )}
                     </StyledTableCell>
                     <StyledTableCell align="center">
-                      {/* {row.amount.toLocaleString()} */}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <SwitchButton
-                        id={index}
-                        row={row}
-                        userMail={row.author_email}
-                      />
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.author_email}
+                      {row.author_email || row.createdBy || "-"}
                     </StyledTableCell>
                   </TableRow>
                 ))}
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={handlePageChange}
+              color="primary"
+              size="large"
+              showFirstButton
+              showLastButton
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  color: "#015CE9",
+                  "&.Mui-selected": {
+                    backgroundColor: "#015CE9",
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: "#0146c7",
+                    },
+                  },
+                  "&:hover": {
+                    backgroundColor: "#e3f2fd",
+                  },
+                },
+              }}
+            />
+            <div className="text-sm text-gray-600">
+              Showing {(currentPage - 1) * limit + 1} to{" "}
+              {Math.min(currentPage * limit, totalElections)} of{" "}
+              {totalElections} elections
+            </div>
+          </Stack>
+        )}
       </div>
     </div>
   );
