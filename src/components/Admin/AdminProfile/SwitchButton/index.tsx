@@ -6,9 +6,9 @@ import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 
 interface SwitchButtonProps {
-  id: string;
-  row: any;
-  userMail: string;
+  id?: string | number;
+  row?: any;
+  userMail?: string;
   initialStatus?: boolean;
 }
 
@@ -24,8 +24,6 @@ const SwitchButton = ({
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Remove the useEffect that causes infinite re-renders
-  // Only fetch election details if initialStatus is not provided
   const getElectionDetails = async () => {
     if (initialStatus !== undefined) {
       setElectionStatus(initialStatus);
