@@ -349,6 +349,7 @@ const FreeVotarBallot = () => {
     setIsCastVote(true);
     const cookie = new Cookies();
     const token = cookie.get(voterLoginCookieName);
+    console.log(token);
     if (token) {
       setAuthToken(token);
     }
