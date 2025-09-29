@@ -356,8 +356,8 @@ export const getVotarPageByElection = (email: string, type: string) => {
   });
 };
 
-export const adminGetAllUsers = () => {
-  return httpService.get(adminGetAllUsersUrl);
+export const adminGetAllUsers = (page: string, limit: string) => {
+  return httpService.get(adminGetAllUsersUrl, { params: { page, limit } });
 };
 
 export const adminPublishElection = (data: any) => {
