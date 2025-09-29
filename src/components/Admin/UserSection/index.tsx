@@ -11,6 +11,7 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { Pagination, Stack } from "@mui/material";
 import { users } from "@/utils/util";
 import { drop } from "@/utils/util";
 import Cookies from "universal-cookie";
@@ -31,6 +32,11 @@ const UserSection = () => {
   const [filteredOption, setFilteredOption] = useState("All");
   const [usersData, setUsersData] = useState<MergedData[]>([]);
   const [isFetchUsers, setIsFetchUsers] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(30);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalCreators, setTotalCreators] = useState(0);
+  const [totalVoters, setTotalVoters] = useState(0);
 
   const options = ["All", "Election Creator", "Voter"];
 
@@ -42,40 +48,68 @@ const UserSection = () => {
       color: theme.palette.common.white,
       fontSize: 18,
       fontWeight: "bold",
+      padding: "12px 8px",
+      whiteSpace: "nowrap",
+      textAlign: "center",
     },
     [`&.${tableCellClasses.body}`]: {
       fontSize: 16,
       fontWeight: 600,
       border: "none",
+      padding: "16px",
+      verticalAlign: "middle",
     },
   }));
+
   const filteredOptionHandler = (opt: string) => {
     setFilteredOption(opt);
     setIsDropdown(false);
+    setCurrentPage(1);
+    getAllAdminUsers(1, opt);
   };
-  const sortUsers =
-    usersData &&
-    usersData.filter((item) => {
-      if (filteredOption === "All") {
-        return item;
-      } else {
-        return item.category
-          .toLowerCase()
-          .includes(filteredOption.toLowerCase());
-      }
-    });
 
-  useEffect(() => {
-    const getAllAdminUsers = async () => {
-      setIsFetchUsers(true);
-      const cookies = new Cookies();
-      const token = cookies.get("admin-token");
-      if (token) setAuthToken(token);
-      try {
-        const { data } = await adminGetAllUsers();
+  // Calculate total based on filter
+  const getDisplayTotal = () => {
+    if (filteredOption === "All") {
+      return totalCreators + totalVoters;
+    } else if (filteredOption === "Election Creator") {
+      return totalCreators;
+    } else if (filteredOption === "Voter") {
+      return totalVoters;
+    }
+    return 0;
+  };
+
+  const displayTotal = getDisplayTotal();
+  const totalPages = Math.ceil(displayTotal / limit);
+
+  const getAllAdminUsers = async (
+    page: number = currentPage,
+    filter: string = filteredOption
+  ) => {
+    setIsFetchUsers(true);
+    const cookies = new Cookies();
+    const token = cookies.get("admin-token");
+    if (token) setAuthToken(token);
+
+    try {
+      const { data } = await adminGetAllUsers(
+        page.toString(),
+        limit.toString()
+      );
+
+      if (data) {
+        const creatorsTotal = data.data.electionCreators.total || 0;
+        const votersTotal = data.data.voters.total || 0;
+
+        setTotalCreators(creatorsTotal);
+        setTotalVoters(votersTotal);
+        setTotalUsers(creatorsTotal + votersTotal);
 
         const mergedDataArray: MergedData[] = [];
-        if (data) {
+
+        // Add creators based on filter
+        if (filter === "All" || filter === "Election Creator") {
           data.data.electionCreators.electionCreators.forEach(
             (creator: any) => {
               mergedDataArray.push({
@@ -85,11 +119,16 @@ const UserSection = () => {
               });
             }
           );
+        }
+
+        // Add voters based on filter
+        if (filter === "All" || filter === "Voter") {
           data.data.voters.voters.forEach((voter: any) => {
             const existingCreatorIndex = mergedDataArray.findIndex(
               (user) => user.email === voter.email
             );
             if (existingCreatorIndex > -1) {
+              // User exists as creator, add Voter to category
               if (
                 !mergedDataArray[existingCreatorIndex].category.includes(
                   "Voter"
@@ -105,14 +144,31 @@ const UserSection = () => {
               });
             }
           });
-          setUsersData(mergedDataArray);
-          setIsFetchUsers(false);
         }
-      } catch (e: any) {
+
+        setUsersData(mergedDataArray);
         setIsFetchUsers(false);
-        console.log(e);
       }
-    };
+    } catch (e: any) {
+      setIsFetchUsers(false);
+      console.log(e);
+    }
+  };
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setCurrentPage(value);
+    getAllAdminUsers(value);
+  };
+
+  const getSerialNumber = (index: number) => {
+    const serialNumber = (currentPage - 1) * limit + index + 1;
+    return serialNumber <= 9 ? `0${serialNumber}` : serialNumber.toString();
+  };
+
+  useEffect(() => {
     getAllAdminUsers();
   }, []);
 
@@ -167,12 +223,12 @@ const UserSection = () => {
               )}
             </AnimatePresence>
           </div>
-        </div>
-        <div className="text-xl font-semibold text-center">
-          Number of users : {sortUsers.length}
+          <div className="text-xl font-semibold">
+            Number of users : {displayTotal}
+          </div>
         </div>
         <div className="w-full mt-5">
-          <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
+          <TableContainer sx={{ maxHeight: "80%" }} className="table-scroll">
             <Table
               sx={{
                 minWidth: 700,
@@ -198,10 +254,10 @@ const UserSection = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortUsers.map((row, index) => (
+                {usersData.map((row, index) => (
                   <TableRow key={uuidv4()}>
                     <StyledTableCell align="center">
-                      {index <= 9 ? `0${index + 1}` : index + 1}
+                      {getSerialNumber(index)}
                     </StyledTableCell>
                     <StyledTableCell align="center">{row.name}</StyledTableCell>
                     <StyledTableCell align="center">
@@ -215,6 +271,41 @@ const UserSection = () => {
               </TableBody>
             </Table>
           </TableContainer>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+                sx={{
+                  "& .MuiPaginationItem-root": {
+                    color: "#015CE9",
+                    "&.Mui-selected": {
+                      backgroundColor: "#015CE9",
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#0146c7",
+                      },
+                    },
+                    "&:hover": {
+                      backgroundColor: "#e3f2fd",
+                    },
+                  },
+                }}
+              />
+              <div className="text-sm text-gray-600">
+                Showing {(currentPage - 1) * limit + 1} to{" "}
+                {Math.min(currentPage * limit, displayTotal)} of {displayTotal}{" "}
+                users
+              </div>
+            </Stack>
+          )}
         </div>
       </div>
     </AdminLayout>

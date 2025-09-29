@@ -6,12 +6,15 @@ const AboutHeader = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (count < 100) {
-        setCount(count + 1);
-      } else {
-        clearInterval(interval);
-      }
-    }, 10);
+      setCount((prevCount) => {
+        if (prevCount < 15000) {
+          return prevCount + 10;
+        } else {
+          clearInterval(interval);
+          return prevCount;
+        }
+      });
+    }, 1);
 
     return () => clearInterval(interval);
   }, [count]);
@@ -45,9 +48,9 @@ const AboutHeader = () => {
               our business
             </p>
           </div>
-          <div className="lg:border-r-2 border-[#747474] lg:max-w-[10rem] border-none max-w-full">
+          <div className="lg:border-r-2 border-[#747474] lg:max-w-[12rem] border-none max-w-full">
             <div className="lg:text-2xl text-base font-semibold mt-5 leading-7">
-              <p>{count.toLocaleString()} Million+</p>
+              <p>{count.toLocaleString()} +</p>
             </div>
             <div className="text-[#747474] text-[0.75rem]">
               <p>Users processed...</p>
