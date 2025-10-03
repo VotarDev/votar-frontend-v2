@@ -61,6 +61,7 @@ const editVotersUrl = "/user/edit_voter";
 /** ADMIN */
 const adminLoginUrl = "/admin/login";
 const adminVotarPageUrl = "/admin/get-votarPage";
+
 const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
@@ -336,6 +337,20 @@ export const editVoter = (data: any) => {
 /** ADMIN */
 export const getAdminVotarPage = (type?: string) => {
   return httpService.get(adminVotarPageUrl + `/${type}`);
+};
+
+export const getAdminVotarElection = (
+  type: string,
+  page: string,
+  limit: string
+) => {
+  return httpService.get(adminVotarPageUrl, {
+    params: {
+      type,
+      page,
+      limit,
+    },
+  });
 };
 
 export const adminLogin = (data: { username: string; password: string }) => {
