@@ -47,8 +47,8 @@ const VotarProTable = () => {
       if (token) setAuthToken(token);
 
       const types = pathname.toLowerCase().endsWith("/pro")
-        ? "Votar Pro"
-        : "Free Votar";
+        ? "votar-pro"
+        : "free-voter";
 
       try {
         const { data } = await getAdminVotarPage(types);
