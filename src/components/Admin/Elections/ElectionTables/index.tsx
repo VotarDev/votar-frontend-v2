@@ -14,7 +14,7 @@ import { Pagination, Stack } from "@mui/material";
 import { electionsAdmin } from "@/utils/util";
 import SwitchButton from "../../AdminProfile/SwitchButton";
 import { drop } from "@/utils/util";
-import { getAdminVotarPage } from "@/utils/api";
+import { getAdminVotarElection, getAdminVotarPage } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
 import { usePathname } from "next/navigation";
@@ -28,7 +28,7 @@ const ElectionTables = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalElections, setTotalElections] = useState(0);
-  const [limit] = useState(30);
+  const [limit] = useState<any>(30);
   const pathname = usePathname();
 
   const options = ["Date", "Election", "Time", "Status"];
@@ -85,7 +85,7 @@ const ElectionTables = () => {
     try {
       let response;
       try {
-        response = await getAdminVotarPage("", page, limit);
+        response = await getAdminVotarElection("", page, limit);
       } catch (paramError) {
         response = await getAdminVotarPage();
       }
