@@ -501,20 +501,40 @@ const FreeVotarBallot = () => {
           ?.free_votes || 0;
 
       if (increment) {
-        // if (freeVotes > 0 && totalVotes >= freeVotes) {
-        //   toast.error(
-        //     `Cannot add more votes for ${positionName}. You have reached the limit of ${freeVotes} free votes.`
-        //   );
-        //   return;
-        // }
+        if (freeVotes === 0 && votarCredit <= 0) {
+          toast.error(
+            `You cannot proceed because you don't have any free vote or votar credit.`
+          );
+          return;
+        }
 
-        // if (freeVotes === 0 && votarCredit <= 0) {
-        //   toast.error(
-        //     `Cannot add more votes for ${positionName}. You have no votar credits available.`
-        //   );
-        //   return;
-        // }
-        candidate.vote += 1;
+        if (freeVotes > 0 && totalVotes >= freeVotes) {
+          if (votarCredit > 0) {
+            candidate.vote += 1;
+          } else {
+            toast.error(
+              `You have used up all your votar credits. You cannot add more votes for ${positionName}.`
+            );
+            return;
+          }
+        } else if (freeVotes === 0 && votarCredit > 0) {
+          const totalUsedCredits = candidates.reduce(
+            (sum, pos) =>
+              sum + pos.candidates.reduce((posSum, c) => posSum + c.vote, 0),
+            0
+          );
+
+          if (totalUsedCredits >= votarCredit) {
+            toast.error(
+              `You cannot go above your available votar credits (${votarCredit}).`
+            );
+            return;
+          }
+
+          candidate.vote += 1;
+        } else {
+          candidate.vote += 1;
+        }
       } else if (candidate.vote > 0) {
         candidate.vote -= 1;
       }
