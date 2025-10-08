@@ -500,37 +500,26 @@ const FreeVotarBallot = () => {
         freeVoteDetails.find((detail) => detail.position === positionName)
           ?.free_votes || 0;
 
+      const pricePerVote = election?.price_per_vote || 0;
+
       if (increment) {
-        if (freeVotes === 0 && votarCredit <= 0) {
+        if (freeVotes === 0 && votarCredit < pricePerVote) {
           toast.error(
-            `You cannot proceed because you don't have any free vote or votar credit.`
+            `You need at least ${pricePerVote} votar credits to cast one vote.`
           );
           return;
         }
 
         if (freeVotes > 0 && totalVotes >= freeVotes) {
-          if (votarCredit > 0) {
-            candidate.vote += 1;
+          if (votarCredit < pricePerVote) {
+            toast.error(
+              `You don’t have enough votar credits (${votarCredit}) to continue. Each vote costs ${pricePerVote}.`
+            );
+            return;
           } else {
-            toast.error(
-              `You have used up all your votar credits. You cannot add more votes for ${positionName}.`
-            );
-            return;
+            candidate.vote += 1;
           }
-        } else if (freeVotes === 0 && votarCredit > 0) {
-          const totalUsedCredits = candidates.reduce(
-            (sum, pos) =>
-              sum + pos.candidates.reduce((posSum, c) => posSum + c.vote, 0),
-            0
-          );
-
-          if (totalUsedCredits >= votarCredit) {
-            toast.error(
-              `You cannot go above your available votar credits (${votarCredit}).`
-            );
-            return;
-          }
-
+        } else if (freeVotes === 0 && votarCredit >= pricePerVote) {
           candidate.vote += 1;
         } else {
           candidate.vote += 1;
