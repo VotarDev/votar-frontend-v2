@@ -482,91 +482,108 @@ const FreeVotarBallot = () => {
     increment: boolean
   ) => {
     if (
-      candidates &&
-      candidates[positionIndex] &&
-      candidates[positionIndex].candidates[candidateIndex]
+      !candidates ||
+      !candidates[positionIndex] ||
+      !candidates[positionIndex].candidates[candidateIndex]
     ) {
-      const updatedCandidates = [...candidates];
-      const positionName = updatedCandidates[positionIndex].name_of_position;
-      const candidate =
-        updatedCandidates[positionIndex].candidates[candidateIndex];
+      return;
+    }
 
-      const totalVotes = updatedCandidates[positionIndex].candidates.reduce(
-        (sum, c) => sum + c.vote,
-        0
-      );
+    const updatedCandidates = [...candidates];
+    const positionName = updatedCandidates[positionIndex].name_of_position;
+    const candidate =
+      updatedCandidates[positionIndex].candidates[candidateIndex];
 
-      const freeVotes =
-        freeVoteDetails.find((detail) => detail.position === positionName)
+    const totalVotes = updatedCandidates[positionIndex].candidates.reduce(
+      (sum, c) => sum + c.vote,
+      0
+    );
+
+    const positionFreeVotes =
+      freeVoteDetails.find((detail) => detail.position === positionName)
+        ?.free_votes || 0;
+
+    const pricePerVote = Number(election?.price_per_vote ?? 0);
+
+    const allowedPaidVotes =
+      pricePerVote > 0 ? Math.floor(votarCredit / pricePerVote) : Infinity;
+
+    const currentPaidVotesUsed = updatedCandidates.reduce((acc, pos) => {
+      const posFree =
+        freeVoteDetails.find((d) => d.position === pos.name_of_position)
           ?.free_votes || 0;
+      const posTotal = pos.candidates.reduce((s, c) => s + c.vote, 0);
+      return acc + Math.max(0, posTotal - posFree);
+    }, 0);
 
-      const pricePerVote = election?.price_per_vote || 0;
+    const willUsePaidVote =
+      positionFreeVotes === 0 ? true : totalVotes >= positionFreeVotes;
 
-      if (increment) {
-        if (freeVotes === 0 && votarCredit < pricePerVote) {
+    if (increment) {
+      if (willUsePaidVote) {
+        if (allowedPaidVotes === 0) {
           toast.error(
-            `You need at least ${pricePerVote} votar credits to cast one vote.`
+            `Each paid vote costs ${pricePerVote} votar credits. You don't have enough votar credits to add a paid vote.`
           );
           return;
         }
 
-        if (freeVotes > 0 && totalVotes >= freeVotes) {
-          if (votarCredit < pricePerVote) {
-            toast.error(
-              `You don’t have enough votar credits (${votarCredit}) to continue. Each vote costs ${pricePerVote}.`
-            );
-            return;
-          } else {
-            candidate.vote += 1;
-          }
-        } else if (freeVotes === 0 && votarCredit >= pricePerVote) {
-          candidate.vote += 1;
-        } else {
-          candidate.vote += 1;
-        }
-      } else if (candidate.vote > 0) {
-        candidate.vote -= 1;
-      }
-
-      setCandidates(updatedCandidates);
-
-      if (candidate.vote === 0) {
-        setSelectedCandidates((prevState) =>
-          prevState.filter((item) => item.position !== positionName)
-        );
-      } else {
-        setSelectedCandidates((prevState) => {
-          const positionExists = prevState.find(
-            (item) => item.position === positionName
+        if (currentPaidVotesUsed >= allowedPaidVotes) {
+          const remainingPaid = allowedPaidVotes - currentPaidVotesUsed;
+          toast.error(
+            remainingPaid > 0
+              ? `You can only add ${remainingPaid} more paid vote(s). Each vote costs ${pricePerVote} votar credits.`
+              : `You don't have enough votar credits to add another vote. Each vote costs ${pricePerVote} votar credits.`
           );
+          return;
+        }
 
-          if (positionExists) {
-            return prevState.map((item) =>
-              item.position === positionName
-                ? {
-                    position: positionName,
-                    candidates: [...candidates[positionIndex].candidates],
-                    abstain: false,
-                  }
-                : item
-            );
-          } else {
-            return [
-              ...prevState,
-              {
-                position: positionName,
-                candidates: [...candidates[positionIndex].candidates],
-                abstain: false,
-              },
-            ];
-          }
-        });
-
-        setAbstentions((prevState: any) => ({
-          ...prevState,
-          [positionName]: { abstained: false },
-        }));
+        candidate.vote += 1;
+      } else {
+        candidate.vote += 1;
       }
+    } else if (candidate.vote > 0) {
+      candidate.vote -= 1;
+    }
+
+    setCandidates(updatedCandidates);
+
+    if (candidate.vote === 0) {
+      setSelectedCandidates((prevState) =>
+        prevState.filter((item) => item.position !== positionName)
+      );
+    } else {
+      setSelectedCandidates((prevState) => {
+        const positionExists = prevState.find(
+          (item) => item.position === positionName
+        );
+
+        if (positionExists) {
+          return prevState.map((item) =>
+            item.position === positionName
+              ? {
+                  position: positionName,
+                  candidates: [...updatedCandidates[positionIndex].candidates],
+                  abstain: false,
+                }
+              : item
+          );
+        } else {
+          return [
+            ...prevState,
+            {
+              position: positionName,
+              candidates: [...updatedCandidates[positionIndex].candidates],
+              abstain: false,
+            },
+          ];
+        }
+      });
+
+      setAbstentions((prevState: any) => ({
+        ...prevState,
+        [positionName]: { abstained: false },
+      }));
     }
   };
 
@@ -763,15 +780,47 @@ const FreeVotarBallot = () => {
                                       const isAbstained =
                                         abstentions[position.name_of_position]
                                           ?.abstained;
-                                      // Disable increment button if:
-                                      // - free_votes > 0 and totalVotes >= free_votes
-                                      // - free_votes === 0 and votarCredit <= 0
+
+                                      const pricePerVote = Number(
+                                        election?.price_per_vote ?? 0
+                                      );
+
+                                      const allowedPaidVotes =
+                                        pricePerVote > 0
+                                          ? Math.floor(
+                                              votarCredit / pricePerVote
+                                            )
+                                          : Infinity;
+
+                                      const currentPaidVotesUsed =
+                                        candidates.reduce((acc, pos) => {
+                                          const posFree =
+                                            freeVoteDetails.find(
+                                              (d) =>
+                                                d.position ===
+                                                pos.name_of_position
+                                            )?.free_votes || 0;
+                                          const posTotal =
+                                            pos.candidates.reduce(
+                                              (s, c) => s + c.vote,
+                                              0
+                                            );
+                                          return (
+                                            acc +
+                                            Math.max(0, posTotal - posFree)
+                                          );
+                                        }, 0);
+
+                                      const willUsePaidVoteForThisPosition =
+                                        positionFreeVotes === 0
+                                          ? true
+                                          : totalVotes >= positionFreeVotes;
+
                                       const isIncrementDisabled =
-                                        (positionFreeVotes > 0 &&
-                                          totalVotes >= positionFreeVotes) ||
-                                        (positionFreeVotes === 0 &&
-                                          votarCredit <= 0) ||
-                                        isAbstained;
+                                        isAbstained ||
+                                        (willUsePaidVoteForThisPosition &&
+                                          currentPaidVotesUsed >=
+                                            allowedPaidVotes);
 
                                       return (
                                         <div
@@ -841,6 +890,7 @@ const FreeVotarBallot = () => {
                                               <div>{candidate.vote ?? 0}</div>
                                               <div>
                                                 <button
+                                                  disabled={isIncrementDisabled}
                                                   className={`w-10 h-10 bg-blue-700 rounded flex items-center justify-center text-neutral-100 `}
                                                   onClick={() =>
                                                     handleVote(
