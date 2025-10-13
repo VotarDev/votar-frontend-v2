@@ -34,10 +34,8 @@ const MiniDashboard = ({
       }
     };
 
-    // Initial load
     fetchCredits();
 
-    // Refresh when tab becomes visible again
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         fetchCredits();
@@ -58,41 +56,6 @@ const MiniDashboard = ({
     <div className="flex justify-center relative mt-12 px-4">
       <div className="lg:w-[451px] w-full max-w-[40rem] py-8 flex bg-slate-50 lg:rounded-full rounded-lg justify-center items-center lg:text-[24px] text-base font-semibold flex-col gap-6">
         <div className="flex justify-center items-center gap-10">
-          {/* <div className="text-right flex flex-col gap-3">
-            <div>Free Votes</div>
-            <div className="flex justify-end gap-2">
-              {freeVotes === null && (
-                <>
-                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-                    0
-                  </span>
-                  <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-                    0
-                  </span>
-                </>
-              )}
-              {freeVotes?.map((num: any, index: any) => {
-                const formatted = parseInt(num) < 10 ? `0${num}` : `${num}`;
-                return (
-                  <div key={index} className="flex gap-1">
-                    {formatted.split("").map((digit, i) => (
-                      <div
-                        key={i}
-                        className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded"
-                      >
-                        {digit}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-            <div className="lg:text-[18px] text-base font-normal text-blue-700 underline">
-              Login
-            </div>
-          </div>
-          <div className="w-px h-28 border border-slate-900"></div> */}
-
           <div className="flex flex-col gap-3 text-center">
             <div>Votar Credits</div>
 
