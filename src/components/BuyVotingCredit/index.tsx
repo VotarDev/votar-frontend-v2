@@ -113,12 +113,6 @@ const BuyVotingCredit = ({
             <br /> Credits
           </div>
           <div>
-            {/* <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span>
-            <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              3
-            </span> */}
             <div className="flex justify-end gap-2 text-3xl">
               {votarCredits === null && (
                 <>
@@ -148,12 +142,6 @@ const BuyVotingCredit = ({
             <br /> Credit
           </div>
           <div className="flex gap-2">
-            {/* <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span>
-            <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span> */}
             <input
               type="text"
               value={votarCredit}

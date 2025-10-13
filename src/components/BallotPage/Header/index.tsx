@@ -1,10 +1,6 @@
-import React, { useEffect, useRef } from "react";
-import logo from "../../../../public/assets/images/random-logo.png";
+import React, { useRef } from "react";
 import watermark from "../../../../public/assets/logos/votar.svg";
-import { IoCopy } from "react-icons/io5";
-import { AiOutlineLink, AiOutlineEye } from "react-icons/ai";
-import Link from "next/link";
-import toast from "react-hot-toast";
+
 import { useRouter } from "next/router";
 import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
@@ -17,26 +13,10 @@ const Header = ({
   electionDetails: Election | null;
   getVoterCredit?: () => void;
 }) => {
-  const textRef = useRef<HTMLElement | null>(null);
   const router = useRouter();
 
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
-  const handleCopyClick = async () => {
-    if (textRef.current) {
-      const selectedText = textRef.current.innerText;
-      try {
-        await navigator.clipboard.writeText(selectedText);
-
-        toast.success("Copied to clipboard!");
-      } catch (error) {
-        console.error("Failed to copy text:", error);
-        toast.error("Copy operation failed. Please try again.");
-      }
-    }
-  };
-
-  console.log(electionDetails);
   if (
     electionDetails?.type === "Free Votar" &&
     electionDetails?.elect_background_img
