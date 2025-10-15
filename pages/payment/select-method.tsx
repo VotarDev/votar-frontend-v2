@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { AlertCircle, Building2, CreditCard, X } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  CreditCard,
+  X,
+  MessageCircle,
+} from "lucide-react";
 import { useRouter } from "next/router";
 
 const SelectPaymentMethod = () => {
@@ -46,14 +52,15 @@ const SelectPaymentMethod = () => {
         >
           <div className="flex flex-col items-center gap-4">
             <div className="w-16 h-16 bg-blue-700 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-200">
-              <Building2 size={32} />
+              <MessageCircle size={32} />
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-blue-700 mb-2">
-                Bank Transfer
+                Chat with Support
               </h3>
               <p className="text-sm text-gray-600">
-                Transfer directly to our bank account
+                Talk to our team to make a payment, and we’ll manually top up
+                your Votar credits.
               </p>
             </div>
           </div>
@@ -69,10 +76,11 @@ const SelectPaymentMethod = () => {
             </div>
             <div className="text-center">
               <h3 className="text-lg font-semibold text-blue-700 mb-2">
-                Card Payment
+                Pay with Your Card
               </h3>
               <p className="text-sm text-gray-600">
-                Pay securely with your debit/credit card
+                Buy credits instantly and securely — they’ll show up in your
+                account right away!
               </p>
             </div>
           </div>
