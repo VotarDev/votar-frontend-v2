@@ -54,15 +54,14 @@ const Pay = () => {
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">
                   You're Important to Us
                 </h3>
-                <div className="space-y-4 text-gray-700 leading-relaxed">
+                <div className="space-y-2 text-gray-700 leading-relaxed">
                   <p>
-                    You are important to us, and we take your patronage of our
-                    service very seriously as you are part of the advanced
-                    thinkers creating a sustainable future by utilizing Votar.
+                    Thank you for choosing Votar. Your use of our platform
+                    reflects your commitment to transparency and innovation.
                   </p>
                   <p>
-                    We would like to have a brief chat with you and provide the
-                    payment details required for your election to be activated.
+                    We’d like to have a quick chat with you and share the
+                    payment details for the purchase of your Votar credits.
                   </p>
                 </div>
               </div>
