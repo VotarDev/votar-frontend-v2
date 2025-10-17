@@ -174,11 +174,9 @@ const UserSection = () => {
 
   if (isFetchUsers)
     return (
-      <AdminLayout>
-        <div className="text-center mt-10">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      </AdminLayout>
+      <div className="text-center ">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
     );
 
   return (
