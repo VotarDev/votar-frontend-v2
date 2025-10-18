@@ -11,16 +11,20 @@ import { BiPlusCircle, BiMinusCircle } from "react-icons/bi";
 import { useRouter } from "next/router";
 import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
-import { adminGetAllUsers } from "@/utils/api";
-import { set } from "lodash";
-import AdminLayout from "../../AdminLayout";
+import { adminGetAllUsers, adminTopUp } from "@/utils/api";
+import { toast } from "react-hot-toast";
 import { CircularProgress, Pagination, Stack } from "@mui/material";
+import UserRow from "./UserRow";
 
 const VotarCreditTable = () => {
   const headers = ["S/N", "Emails", "Total Votar Credits", "Add Votar Credits"];
   const [usersData, setUsersData] = useState<any[]>([]);
   const [isFetchUsers, setIsFetchUsers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedUserEmail, setSelectedUserEmail] = useState("");
+  const [topUpAmounts, setTopUpAmounts] = useState<Record<string, string>>({});
+  const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
+  const [loadingUserEmail, setLoadingUserEmail] = useState<string | null>(null);
 
   const [totalUsers, setTotalUsers] = useState(0);
   const [limit] = useState(30);
@@ -51,6 +55,30 @@ const VotarCreditTable = () => {
     } catch (error) {
       console.error("Error fetching users:", error);
       setIsFetchUsers(false);
+    }
+  };
+
+  const adminTopUpVotarCredit = async (email: string, amount: number) => {
+    setLoadingUserEmail(email);
+    try {
+      const token = cookies.get("admin-token");
+      if (token) setAuthToken(token);
+
+      const bodyData = { email, amount };
+      const { data } = await adminTopUp(bodyData);
+
+      if (data) {
+        toast.success(
+          `Successfully topped up ${amount} votar credits to ${email}`
+        );
+        setTopUpAmounts((prev) => ({ ...prev, [email]: "" }));
+        await getAllUsers();
+      }
+    } catch (error) {
+      console.error("Error topping up votar credits:", error);
+      toast.error("Failed to top up votar credits. Please try again.");
+    } finally {
+      setLoadingUserEmail(null);
     }
   };
 
@@ -113,35 +141,16 @@ const VotarCreditTable = () => {
           <TableBody>
             {usersData.length > 0 &&
               usersData.map((row, index) => (
-                <TableRow key={row.id}>
-                  <StyledTableCell align="center">
-                    {index <= 8 ? `0${index + 1}` : index + 1}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">{row.email}</StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.votar_credit}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <div className="w-40  h-11 bg-neutral-100 flex items-center justify-center mx-auto gap-3">
-                      <div className="text-neutral-400 text-xl font-semibold">
-                        <input type="text" />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">
-                          <BiPlusCircle />
-                        </span>
-                        <span className="text-xl">
-                          <BiMinusCircle />
-                        </span>
-                      </div>
-                      <div>
-                        <button className="w-10 h-6 flex items-center justify-center bg-blue-700 rounded-lg text-center text-zinc-100 text-sm font-semibold">
-                          Add
-                        </button>
-                      </div>
-                    </div>
-                  </StyledTableCell>
-                </TableRow>
+                <UserRow
+                  key={row.email}
+                  row={row}
+                  index={index}
+                  topUpAmounts={topUpAmounts}
+                  setTopUpAmounts={setTopUpAmounts}
+                  adminTopUpVotarCredit={adminTopUpVotarCredit}
+                  loadingUserEmail={loadingUserEmail}
+                  StyledTableCell={StyledTableCell}
+                />
               ))}
           </TableBody>
         </Table>
