@@ -2,6 +2,15 @@ import { AlertCircle, CheckCircle2, CreditCard, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
+import Cookies from "universal-cookie";
+import { toast } from "react-hot-toast";
+import { voterLoginCookieName } from "@/src/__env";
+import setAuthToken from "@/utils/setAuthToken";
+import { purchaseVotarCredit } from "@/utils/api";
+
+interface Election {
+  election_id: string;
+}
 
 interface PaystackSetupOptions {
   key: string | undefined;
@@ -10,7 +19,7 @@ interface PaystackSetupOptions {
   currency?: string;
   ref?: string;
   metadata?: any;
-  callback?: (response: any) => void;
+  callback: (response: any) => void;
   onClose?: () => void;
 }
 
@@ -24,35 +33,99 @@ declare global {
   }
 }
 
-const CardMethod = () => {
+const CardMethod: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { data: session, status } = useSession();
-
   const [amount, setAmount] = useState(0);
-
   const router = useRouter();
 
   useEffect(() => {
     const storedAmount = localStorage.getItem("payment_amount");
     if (!storedAmount) {
+      toast.error("Payment amount not found. Redirecting to home.");
       router.push("/");
     } else {
-      setAmount(parseInt(storedAmount));
+      const parsedAmount = parseInt(storedAmount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        toast.error("Invalid payment amount. Please try again.");
+        router.push("/");
+      } else {
+        setAmount(parsedAmount);
+      }
     }
-  }, []);
+  }, [router]);
 
   const onBack = () => {
     router.back();
   };
 
-  const handlePaystackPayment = () => {
-    setIsProcessing(true);
+  const handlePurchaseVotarCredit = async (electionId: string | null) => {
+    if (!session?.user?.email) {
+      toast.error("User email not found. Please log in.");
+      setIsProcessing(false);
+      return false;
+    }
 
+    if (amount <= 0) {
+      toast.error("Invalid amount for purchase.");
+      setIsProcessing(false);
+      return false;
+    }
+
+    setIsProcessing(true);
+    const cookie = new Cookies();
+    const token = cookie.get(voterLoginCookieName);
+
+    try {
+      if (token) {
+        setAuthToken(token);
+      }
+
+      const bodyData = {
+        email: session.user.email,
+        amount: amount,
+        election_id: electionId,
+      };
+
+      const { data } = await purchaseVotarCredit(bodyData);
+
+      if (data) {
+        toast.success(
+          `Votar Credit Purchased Successfully: ${data.votar_credits} credits added`
+        );
+        cookie.set("votar-credits", data.votar_credits, { path: "/" });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      toast.error("Failed to update Votar Credits");
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handlePaystackPayment = () => {
+    if (!session?.user?.email) {
+      toast.error("Please log in to proceed with payment.");
+      return;
+    }
+
+    if (!window.PaystackPop) {
+      toast.error("Payment service unavailable. Please try again later.");
+      return;
+    }
+
+    if (amount <= 0) {
+      toast.error("Invalid payment amount. Please try again.");
+      return;
+    }
+
+    setIsProcessing(true);
     const PaystackPop = window.PaystackPop;
-    const amount = parseInt(localStorage.getItem("payment_amount") || "0");
 
     const returnUrl = localStorage.getItem("payment_return_url");
-    let electionId = null;
+    let electionId: any = null;
 
     if (returnUrl) {
       const url = new URL(returnUrl, window.location.origin);
@@ -61,7 +134,7 @@ const CardMethod = () => {
 
     const handler = PaystackPop.setup({
       key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-      email: session?.user?.email || "",
+      email: session.user.email,
       amount: amount * 100,
       currency: "NGN",
       ref: `VOTAR_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -75,22 +148,33 @@ const CardMethod = () => {
           },
         ],
       },
-      callback: function (response: any) {
-        setIsProcessing(false);
+      callback: (response: any) => {
+        handlePurchaseVotarCredit(electionId)
+          .then((success) => {
+            if (success) {
+              const returnUrl =
+                localStorage.getItem("payment_return_url") || "/";
 
-        const returnUrl = localStorage.getItem("payment_return_url") || "/";
+              localStorage.removeItem("payment_amount");
+              localStorage.removeItem("payment_return_url");
+              localStorage.removeItem("election_id");
 
-        localStorage.removeItem("payment_amount");
-        localStorage.removeItem("payment_return_url");
-        localStorage.removeItem("election_id");
+              const url = new URL(returnUrl, window.location.origin);
+              url.searchParams.set("payment", "success");
+              url.searchParams.set("reference", response.reference);
 
-        const url = new URL(returnUrl, window.location.origin);
-        url.searchParams.set("payment", "success");
-        url.searchParams.set("reference", response.reference);
-
-        window.location.href = url.toString();
+              window.location.href = url.toString();
+            } else {
+              toast.error("Payment successful but failed to update credits");
+              setIsProcessing(false);
+            }
+          })
+          .catch((error) => {
+            toast.error("Payment successful but failed to update credits");
+            setIsProcessing(false);
+          });
       },
-      onClose: function () {
+      onClose: () => {
         setIsProcessing(false);
         alert("Payment cancelled. Please try again.");
       },

@@ -36,15 +36,16 @@ const VotarCreditTable = () => {
       if (token) setAuthToken(token);
 
       const { data } = await adminGetAllUsers(
-        "voters",
+        "creators",
         page.toString(),
         limit.toString()
       );
 
       if (data) {
-        setUsersData(data.data.voters);
+        setUsersData(data.data.users);
+        console.log("users data", data.data);
 
-        setTotalUsers(data.data.total);
+        setTotalUsers(data.data.pagination.total);
         setIsFetchUsers(false);
       }
     } catch (error) {
@@ -77,11 +78,9 @@ const VotarCreditTable = () => {
 
   if (isFetchUsers)
     return (
-      <AdminLayout>
-        <div className="text-center mt-10">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      </AdminLayout>
+      <div className="text-center mt-10">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
     );
 
   return (
@@ -116,16 +115,16 @@ const VotarCreditTable = () => {
               usersData.map((row, index) => (
                 <TableRow key={row.id}>
                   <StyledTableCell align="center">
-                    {index <= 9 ? `0${index + 1}` : index + 1}
+                    {index <= 8 ? `0${index + 1}` : index + 1}
                   </StyledTableCell>
                   <StyledTableCell align="center">{row.email}</StyledTableCell>
                   <StyledTableCell align="center">
-                    {/* {row.totalCredits} */}
+                    {row.votar_credit}
                   </StyledTableCell>
                   <StyledTableCell align="center">
-                    <div className="w-40 h-11 bg-neutral-100 flex items-center justify-center mx-auto gap-3">
+                    <div className="w-40  h-11 bg-neutral-100 flex items-center justify-center mx-auto gap-3">
                       <div className="text-neutral-400 text-xl font-semibold">
-                        {/* {row.defaultCredit} */}
+                        <input type="text" />
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xl">
