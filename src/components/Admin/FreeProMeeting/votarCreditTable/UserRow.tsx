@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from "react";
+import React, { memo, useState } from "react";
 import { BiPlusCircle, BiMinusCircle } from "react-icons/bi";
 import { CircularProgress, TableRow } from "@mui/material";
 import { toast } from "react-hot-toast";
@@ -24,20 +24,21 @@ const UserRow = memo(function UserRow({
 }: UserRowProps) {
   const key = row.email;
 
-  const [localValue, setLocalValue] = useState(topUpAmounts[key] ?? "");
-
-  useEffect(() => {
-    setLocalValue(topUpAmounts[key] ?? "");
-  }, [topUpAmounts[key]]);
+  const [localValue, setLocalValue] = useState("");
 
   const handleChange = (value: string) => {
     const cleaned = value.replace(/[^0-9]/g, "");
     setLocalValue(cleaned);
+  };
 
-    setTopUpAmounts((prev) => ({
-      ...prev,
-      [key]: cleaned,
-    }));
+  const handleTopUp = async () => {
+    const amount = localValue;
+    if (amount && Number(amount) > 0) {
+      await adminTopUpVotarCredit(row.email, Number(amount));
+      setLocalValue("");
+    } else {
+      toast.error("Please enter a valid amount before topping up");
+    }
   };
 
   return (
@@ -78,15 +79,7 @@ const UserRow = memo(function UserRow({
           </button>
 
           <button
-            onClick={(e) => {
-              const amount = localValue;
-              if (amount && Number(amount) > 0) {
-                adminTopUpVotarCredit(row.email, Number(amount));
-              } else {
-                e.currentTarget.blur();
-                toast.error("Please enter a valid amount before topping up");
-              }
-            }}
+            onClick={handleTopUp}
             disabled={loadingUserEmail === row.email || !localValue}
             className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               loadingUserEmail === row.email
