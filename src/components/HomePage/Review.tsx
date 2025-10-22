@@ -9,7 +9,7 @@ const Review = () => {
   }, []);
   return (
     <div
-      className="bg-review-bg w-full bg-no-repeat bg-cover mt-[130px] pt-[82px] pb-[90px] lg:px-[50px] px-4"
+      className="bg-review-bg w-full bg-no-repeat bg-cover mt-[130px]  py-[90px] lg:px-[50px] px-4"
       data-aos="fade-up"
       data-aos-easing="ease-in-out"
       data-aos-duration="1000"
