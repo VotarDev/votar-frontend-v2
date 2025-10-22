@@ -8,11 +8,12 @@ import illustrationThree from "../../../public/assets/illustrations/illustration
 import testimony from "../../../public/assets/testimonies/testmonies.png";
 import ScrollAnimation from "react-animate-on-scroll";
 import Link from "next/link";
+import Marquee from "react-fast-marquee";
 
 const Hero = () => {
   return (
-    <div className="lg:mt-[1rem] mt-[4rem] max-w-[1300px] mx-auto lg:px-[50px] px-4 overflow-x-hidden">
-      <div className="lg:flex-row flex-col-reverse flex justify-between items-center w-full text-center lg:text-left">
+    <div className="lg:mt-[1rem]  mt-[4rem]   px-4 overflow-hidden">
+      <div className="lg:flex-row flex-col-reverse flex justify-between items-center w-full text-center lg:text-left max-w-[1300px] lg:px-[50px] mx-auto">
         <ScrollAnimation
           animateIn="animate__fadeIn"
           animateOut="animate__fadeOut"
@@ -51,7 +52,7 @@ const Hero = () => {
               width={300}
               height={300}
               alt="illustration"
-              className="w-[300px] h-[300px] object-contain lg:w-full lg:h-auto"
+              className="w-[200px] h-[200px] object-contain lg:w-full lg:h-auto"
             />
             <div className="relative tilt-inward-left hidden lg:block">
               <div className="absolute top-[-4rem] left-[-3rem]">
@@ -87,7 +88,45 @@ const Hero = () => {
           </div>
         </ScrollAnimation>
       </div>
-      <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
+
+      <div className="w-full overflow-hidden pt-10 relative">
+        <div className="absolute left-0 top-0 h-full w-5 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+
+        <div className="absolute right-0 top-0 h-full w-5 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
+        <Marquee
+          pauseOnHover
+          speed={50}
+          gradientColor="white"
+          gradientWidth={200}
+        >
+          <div className="flex w-full">
+            {[
+              "/assets/images/hero-image1.jpeg",
+              "/assets/images/hero-image2.jpeg",
+              "/assets/images/hero-image3.jpeg",
+              "/assets/images/hero-image4.jpeg",
+              "/assets/images/hero-image-5.jpeg",
+              "/assets/images/hero-image6.jpeg",
+              "/assets/images/hero-image7.jpeg",
+            ].map((src, index) => (
+              <div
+                key={index}
+                className="flex-1 min-w-[20%] flex justify-center items-center px-4"
+              >
+                <Image
+                  src={src}
+                  alt={`logo-${index + 1}`}
+                  width={300}
+                  height={200}
+                  className="h-[200px] w-full object-cover rounded-lg"
+                />
+              </div>
+            ))}
+          </div>
+        </Marquee>
+      </div>
+
+      {/* <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
         <Image
           src={testimony.src}
           alt="testimonies"
@@ -104,7 +143,7 @@ const Hero = () => {
             Britt K. - Digital Payments Hub Product Manager
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
