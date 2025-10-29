@@ -19,19 +19,26 @@ const Hero = () => {
           animateOut="animate__fadeOut"
         >
           <div className="mt-0 lg:mt-0">
-            <Typed
+            {/* <Typed
               strings={[`Your Choice is Visible <br/> Your Voice is Heard`]}
               typeSpeed={70}
               backSpeed={80}
               showCursor={false}
-              className="font-bold lg:text-5xl text-[30px] lg:leading-[4.5rem] leading-[44px] "
-            />
+              className="font-bold lg:text-5xl text-[20px] lg:leading-[4.5rem] leading-[44px] "
+            /> */}
+            <h1 className="font-bold lg:text-5xl text-[28px] lg:leading-[4.5rem] leading-[36px] ">
+              Better Visibility For You...
+            </h1>
           </div>
           <div className="max-w-[506px] lg:text-xl text-base  mt-3 lg:mb-7 mb-5">
-            <p className="tracking-[0.1px] leading-[30px]">
+            {/* <p className="tracking-[0.1px] leading-[30px]">
               Votar guarantees election, integrity and security. Enhances Voter
               engagement, saves election cordination, time, and resources
               <br /> Enter the Votar experience for free
+            </p> */}
+            <p className="max-w-[506px] lg:text-xl text-base mt-3 lg:mb-7 mb-5 leading-[40px]">
+              We bring trust to your choice visualization processes Enjoy the
+              Votar experience!…
             </p>
           </div>
           <div className="flex justify-center lg:block">
