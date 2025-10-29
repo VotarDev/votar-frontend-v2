@@ -108,6 +108,8 @@ const Hero = () => {
               "/assets/images/hero-image-5.jpeg",
               "/assets/images/hero-image6.jpeg",
               "/assets/images/hero-image7.jpeg",
+              "/assets/images/hero-image8.jpeg",
+              "/assets/images/hero-image9.jpeg",
             ].map((src, index) => (
               <div
                 key={index}
