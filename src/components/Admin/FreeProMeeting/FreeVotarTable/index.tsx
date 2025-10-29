@@ -44,7 +44,7 @@ const FreeVotarTable = () => {
       const token = cookies.get("admin-token");
       const types = pathname.toLowerCase().endsWith("/pro")
         ? "Votar Pro"
-        : "Free Votar";
+        : "free-votar";
 
       if (token) setAuthToken(token);
       try {
