@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 interface UserRowProps {
   row: any;
   index: number;
+  serialNumber: number;
   topUpAmounts: Record<string, string>;
   setTopUpAmounts: React.Dispatch<React.SetStateAction<Record<string, string>>>;
   adminTopUpVotarCredit: (email: string, amount: number) => Promise<void>;
@@ -16,6 +17,7 @@ interface UserRowProps {
 const UserRow = memo(function UserRow({
   row,
   index,
+  serialNumber,
   topUpAmounts,
   setTopUpAmounts,
   adminTopUpVotarCredit,
@@ -44,7 +46,7 @@ const UserRow = memo(function UserRow({
   return (
     <TableRow key={key}>
       <StyledTableCell align="center">
-        {index <= 8 ? `0${index + 1}` : index + 1}
+        {serialNumber <= 9 ? `0${serialNumber}` : serialNumber}
       </StyledTableCell>
 
       <StyledTableCell align="center">{row.email}</StyledTableCell>

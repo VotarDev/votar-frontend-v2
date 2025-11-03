@@ -13,18 +13,27 @@ import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
 import { adminGetAllUsers, adminTopUp } from "@/utils/api";
 import { toast } from "react-hot-toast";
-import { CircularProgress, Pagination, Stack } from "@mui/material";
+import {
+  CircularProgress,
+  Pagination,
+  Stack,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
 import UserRow from "./UserRow";
+import { BiSearch } from "react-icons/bi";
 
 const VotarCreditTable = () => {
   const headers = ["S/N", "Emails", "Total Votar Credits", "Add Votar Credits"];
   const [usersData, setUsersData] = useState<any[]>([]);
+  const [filteredUsersData, setFilteredUsersData] = useState<any[]>([]);
   const [isFetchUsers, setIsFetchUsers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedUserEmail, setSelectedUserEmail] = useState("");
   const [topUpAmounts, setTopUpAmounts] = useState<Record<string, string>>({});
   const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
   const [loadingUserEmail, setLoadingUserEmail] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [totalUsers, setTotalUsers] = useState(0);
   const [limit] = useState(30);
@@ -46,14 +55,26 @@ const VotarCreditTable = () => {
       );
 
       if (data) {
-        setUsersData(data.data.users);
-        console.log("users data", data.data);
-
+        const users = data.data.users;
+        setUsersData(users);
         setTotalUsers(data.data.pagination.total);
-        setIsFetchUsers(false);
+
+        if (searchQuery) {
+          const filtered = users.filter((user: any) => {
+            const email = user.email?.toLowerCase() || "";
+            const votarCredits = user.votarCredits?.toString() || "";
+            return (
+              email.includes(searchQuery) || votarCredits.includes(searchQuery)
+            );
+          });
+          setFilteredUsersData(filtered);
+        } else {
+          setFilteredUsersData(users);
+        }
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
       setIsFetchUsers(false);
     }
   };
@@ -86,10 +107,50 @@ const VotarCreditTable = () => {
     setCurrentPage(value);
     getAllUsers(value);
   };
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (!query) {
+      setFilteredUsersData(usersData);
+      return;
+    }
+
+    const filtered = usersData.filter((user) => {
+      const email = user.email?.toLowerCase() || "";
+      const credits = user.votar_credit?.toString() || "";
+      return email.includes(query) || credits.includes(query);
+    });
+
+    setFilteredUsersData(filtered);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setFilteredUsersData(usersData);
+  };
 
   useEffect(() => {
     getAllUsers();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery) {
+      const filtered = usersData.filter((user) => {
+        const email = user.email?.toLowerCase() || "";
+        const votarCredits = user.votarCredits?.toString() || "";
+
+        return (
+          email.includes(searchQuery.toLowerCase()) ||
+          votarCredits.includes(searchQuery.toLowerCase())
+        );
+      });
+      setFilteredUsersData(filtered);
+    } else {
+      setFilteredUsersData(usersData);
+    }
+  }, [usersData]);
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -113,6 +174,49 @@ const VotarCreditTable = () => {
 
   return (
     <div>
+      {/* Search Bar */}
+      <div className="mb-4">
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search by email or votar credits..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <BiSearch size={20} color="#015CE9" />
+              </InputAdornment>
+            ),
+            endAdornment: searchQuery && (
+              <InputAdornment position="end">
+                <button
+                  onClick={clearSearch}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              "&:hover fieldset": {
+                borderColor: "#015CE9",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#015CE9",
+              },
+            },
+          }}
+        />
+        {searchQuery && (
+          <div className="text-sm text-gray-600 mt-2">
+            Found {filteredUsersData.length} user(s)
+          </div>
+        )}
+      </div>
+
       <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
         <Table
           sx={{
@@ -139,19 +243,31 @@ const VotarCreditTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {usersData.length > 0 &&
-              usersData.map((row, index) => (
+            {filteredUsersData.length > 0 ? (
+              filteredUsersData.map((row, index) => (
                 <UserRow
                   key={row.email}
                   row={row}
                   index={index}
+                  serialNumber={(currentPage - 1) * limit + index + 1}
                   topUpAmounts={topUpAmounts}
                   setTopUpAmounts={setTopUpAmounts}
                   adminTopUpVotarCredit={adminTopUpVotarCredit}
                   loadingUserEmail={loadingUserEmail}
                   StyledTableCell={StyledTableCell}
                 />
-              ))}
+              ))
+            ) : (
+              <TableRow>
+                <StyledTableCell colSpan={4} align="center">
+                  <div className="py-8 text-gray-500">
+                    {searchQuery
+                      ? "No users found matching your search"
+                      : "No users available"}
+                  </div>
+                </StyledTableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
