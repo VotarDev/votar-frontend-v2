@@ -24,7 +24,7 @@ const Tabs = () => {
             }}
           ></div>
           <div
-            className={`cursor-pointer p-2 w-full   ${
+            className={`cursor-pointer p-2 w-full text-sm    ${
               activeTab === 1 ? "text-neutral-100 " : "text-neutral-400"
             }`}
             onClick={() => handleTabClick(1)}
@@ -32,7 +32,7 @@ const Tabs = () => {
             Free Votar
           </div>
           <div
-            className={`cursor-pointer p-2  w-full ${
+            className={`cursor-pointer p-2  w-full text-sm ${
               activeTab === 2 ? "text-neutral-100 " : "text-neutral-400"
             }`}
             onClick={() => handleTabClick(2)}
