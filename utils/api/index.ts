@@ -175,10 +175,11 @@ export const getVoters = (
   id: string,
   data: any,
   page: string,
-  limit: string
+  limit: string,
+  search?: string
 ) => {
   return httpService.post(getVoterUrl + `/${id}`, data, {
-    params: { page, limit },
+    params: { page, limit, search },
   });
 };
 
