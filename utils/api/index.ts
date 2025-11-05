@@ -372,10 +372,11 @@ export const getVotarPageByElection = (email: string, type: string) => {
 export const adminGetAllUsers = (
   filter?: string,
   page?: string,
-  limit?: string
+  limit?: string,
+  search?: string
 ) => {
   return httpService.get(adminGetAllUsersUrl, {
-    params: { filter, page, limit },
+    params: { filter, page, limit, search },
   });
 };
 
