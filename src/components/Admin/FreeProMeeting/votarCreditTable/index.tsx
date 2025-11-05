@@ -34,6 +34,7 @@ const VotarCreditTable = () => {
   const [isTopUpInProgress, setIsTopUpInProgress] = useState(false);
   const [loadingUserEmail, setLoadingUserEmail] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
   const [totalUsers, setTotalUsers] = useState(0);
   const [limit] = useState(30);
@@ -42,7 +43,19 @@ const VotarCreditTable = () => {
 
   const totalPages = Math.ceil(totalUsers / limit);
 
-  const getAllUsers = async (page: number = currentPage) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const getAllUsers = async (
+    page: number = currentPage,
+    search: string = debouncedSearchQuery
+  ) => {
     setIsFetchUsers(true);
     try {
       const token = cookies.get("admin-token");
@@ -51,26 +64,15 @@ const VotarCreditTable = () => {
       const { data } = await adminGetAllUsers(
         "creators",
         page.toString(),
-        limit.toString()
+        limit.toString(),
+        search.trim() || undefined
       );
 
       if (data) {
         const users = data.data.users;
         setUsersData(users);
+        setFilteredUsersData(users);
         setTotalUsers(data.data.pagination.total);
-
-        if (searchQuery) {
-          const filtered = users.filter((user: any) => {
-            const email = user.email?.toLowerCase() || "";
-            const votarCredits = user.votarCredits?.toString() || "";
-            return (
-              email.includes(searchQuery) || votarCredits.includes(searchQuery)
-            );
-          });
-          setFilteredUsersData(filtered);
-        } else {
-          setFilteredUsersData(users);
-        }
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -108,31 +110,17 @@ const VotarCreditTable = () => {
     getAllUsers(value);
   };
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    if (!query) {
-      setFilteredUsersData(usersData);
-      return;
-    }
-
-    const filtered = usersData.filter((user) => {
-      const email = user.email?.toLowerCase() || "";
-      const credits = user.votar_credit?.toString() || "";
-      return email.includes(query) || credits.includes(query);
-    });
-
-    setFilteredUsersData(filtered);
+    setSearchQuery(event.target.value);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
-    setFilteredUsersData(usersData);
+    setDebouncedSearchQuery("");
   };
 
   useEffect(() => {
-    getAllUsers();
-  }, []);
+    getAllUsers(currentPage, debouncedSearchQuery);
+  }, [debouncedSearchQuery]);
 
   useEffect(() => {
     if (searchQuery) {
