@@ -37,6 +37,10 @@ const VoterPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
   const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
@@ -78,6 +82,21 @@ const VoterPage = () => {
     setCurrentPage(1);
     setSelectedRows([]);
   };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page on new search
+    setSelectedRows([]); // Clear selections on new search
+  };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
@@ -134,7 +153,8 @@ const VoterPage = () => {
               election_id: electionID,
             },
             pageToFetch.toString(),
-            itemsPerPage.toString()
+            itemsPerPage.toString(),
+            debouncedSearchQuery.trim() || undefined
           );
 
           if (data) {
@@ -178,14 +198,14 @@ const VoterPage = () => {
         setIsFetchVoters(false);
       }
     },
-    [USER_ID, electionID, currentPage, itemsPerPage]
+    [USER_ID, electionID, currentPage, itemsPerPage, debouncedSearchQuery]
   );
 
   useEffect(() => {
     if (electionID && USER_ID) {
       handleResponseExported();
     }
-  }, [currentPage, itemsPerPage, electionID, USER_ID]);
+  }, [currentPage, itemsPerPage, electionID, USER_ID, debouncedSearchQuery]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -340,6 +360,8 @@ const VoterPage = () => {
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         onItemsPerPageChange={handleItemsPerPageChange}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
       />
 
       {responses.length > 0 && (
@@ -348,6 +370,8 @@ const VoterPage = () => {
             <Typography variant="body2" color="text.secondary">
               Page {currentPage} - Showing {responses.length} voters
               {responses.length === itemsPerPage && " (more pages available)"}
+              {debouncedSearchQuery &&
+                ` (filtered by: "${debouncedSearchQuery}")`}
             </Typography>
           </div>
           {totalPages > 1 && (
@@ -379,31 +403,12 @@ const VoterPage = () => {
               <option value={50}>50</option>
             </select>
           </div>
+        </div>
+      )}
 
-          {/* Navigation Controls */}
-          {/* <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-            <button
-              onClick={() =>
-                handlePageChange(null, Math.max(1, currentPage - 1))
-              }
-              disabled={currentPage <= 1}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              ← Previous
-            </button>
-
-            <span className="px-4 py-2 border rounded bg-white font-medium">
-              {currentPage}
-            </span>
-
-            <button
-              onClick={() => handlePageChange(null, currentPage + 1)}
-              disabled={responses.length < itemsPerPage}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-            >
-              Next →
-            </button>
-          </Box> */}
+      {responses.length === 0 && !isFetchVoters && debouncedSearchQuery && (
+        <div className="text-center py-8 text-gray-500">
+          No voters found matching "{debouncedSearchQuery}"
         </div>
       )}
     </div>
