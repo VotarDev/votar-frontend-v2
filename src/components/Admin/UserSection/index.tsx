@@ -94,6 +94,7 @@ const UserSection = () => {
 
     try {
       const { data } = await adminGetAllUsers(
+        "",
         page.toString(),
         limit.toString()
       );
