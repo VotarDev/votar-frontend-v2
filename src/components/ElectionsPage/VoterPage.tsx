@@ -85,15 +85,14 @@ const VoterPage = () => {
 
   const handleSearchChange = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page on new search
-    setSelectedRows([]); // Clear selections on new search
+    setCurrentPage(1);
+    setSelectedRows([]);
   };
 
-  // Debounce search query
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-    }, 500); // 500ms delay
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);

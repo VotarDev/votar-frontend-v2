@@ -39,6 +39,10 @@ const VotersPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
   const router = useRouter();
   const maxCharacterLength = 100;
   const users = useCurrentUser();
@@ -74,6 +78,21 @@ const VotersPage = () => {
     setSelectedRows([]);
   };
 
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+    setSelectedRows([]);
+  };
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const handleResponseExported = useCallback(
     async (page?: number) => {
       const pageToFetch = page || currentPage;
@@ -94,7 +113,8 @@ const VotersPage = () => {
                 election_id: electionIdFromStorage,
               },
               pageToFetch.toString(),
-              itemsPerPage.toString()
+              itemsPerPage.toString(),
+              debouncedSearchQuery.trim() || undefined
             );
 
             if (data) {
@@ -140,14 +160,14 @@ const VotersPage = () => {
         setIsFetchVoters(false);
       }
     },
-    [USER_ID, electionId, currentPage, itemsPerPage]
+    [USER_ID, electionId, currentPage, itemsPerPage, debouncedSearchQuery]
   );
 
   useEffect(() => {
     if (electionId && USER_ID) {
       handleResponseExported();
     }
-  }, [currentPage, itemsPerPage, electionId, USER_ID]);
+  }, [currentPage, itemsPerPage, electionId, USER_ID, debouncedSearchQuery]);
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -332,6 +352,8 @@ const VotersPage = () => {
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
         onItemsPerPageChange={handleItemsPerPageChange}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearchChange}
       />
 
       {responses.length > 0 && (
@@ -340,6 +362,8 @@ const VotersPage = () => {
             <Typography variant="body2" color="text.secondary">
               Page {currentPage} - Showing {responses.length} voters
               {responses.length === itemsPerPage && " (more pages available)"}
+              {debouncedSearchQuery &&
+                ` (filtered by: "${debouncedSearchQuery}")`}
             </Typography>
           </div>
           {totalPages > 1 && (
@@ -371,6 +395,12 @@ const VotersPage = () => {
               <option value={50}>50</option>
             </select>
           </div>
+        </div>
+      )}
+
+      {responses.length === 0 && !isFetchVoters && debouncedSearchQuery && (
+        <div className="text-center py-8 text-gray-500">
+          No voters found matching "{debouncedSearchQuery}"
         </div>
       )}
     </div>

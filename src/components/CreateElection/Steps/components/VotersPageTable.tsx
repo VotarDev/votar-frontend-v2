@@ -29,6 +29,8 @@ interface VotersPageTableProps {
   currentPage: number;
   itemsPerPage: number;
   onItemsPerPageChange: (newLimit: number) => void;
+  searchQuery: string;
+  onSearchChange: (query: string) => void;
 }
 
 const VoterTable: React.FC<VotersPageTableProps> = ({
@@ -42,6 +44,8 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   currentPage,
   itemsPerPage,
   onItemsPerPageChange,
+  searchQuery,
+  onSearchChange,
 }) => {
   const headers = [
     "Select",
@@ -64,10 +68,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const [openRangeModal, setOpenRangeModal] = useState(false);
   const [openStatusModal, setOpenStatusModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [highlightedRowId, setHighlightedRowId] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
-  const rowRefs = useRef<{ [key: string]: HTMLTableRowElement }>({});
 
   const handleCheckboxChange = (row: VoterResponse) => {
     setSelectedRows((prevSelectedRows) => {
@@ -109,9 +109,8 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   }));
 
   const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    "&.highlighted": {
-      backgroundColor: "#fef9c3",
-      transition: "background-color 0.3s ease",
+    "&:nth-of-type(even)": {
+      backgroundColor: theme.palette.action.hover,
     },
   }));
 
@@ -132,7 +131,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
   const handleClose = () => {
     setOpenRangeModal(false);
     setOpenStatusModal(false);
-    setShowToast(false);
   };
 
   const handleStatusClick = (
@@ -142,37 +140,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     setSelectedStatus(status);
     setOpenStatusModal(true);
   };
-
-  const handleSearch = useCallback(() => {
-    if (!searchQuery.trim()) {
-      setHighlightedRowId(null);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase().trim();
-    const matchedRow = responses.find(
-      (row) =>
-        row.id.toLowerCase().includes(query) ||
-        row.name.toLowerCase().includes(query) ||
-        row.subgroup?.toLowerCase().includes(query) ||
-        row.phoneNumber?.toLowerCase().includes(query) ||
-        row.email?.toLowerCase().includes(query)
-    );
-
-    if (matchedRow) {
-      setHighlightedRowId(matchedRow.id);
-      setTimeout(() => {
-        const rowElement = rowRefs.current[matchedRow.id];
-        if (rowElement) {
-          rowElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 100);
-    } else {
-      setShowToast(true);
-      setHighlightedRowId(null);
-      setTimeout(() => setShowToast(false), 3000);
-    }
-  }, [searchQuery, responses]);
 
   const getStatusDisplay = (row: VoterResponse) => {
     if (row.email_status === "pending") {
@@ -205,14 +172,6 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
     }
   };
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      handleSearch();
-    }, 500);
-
-    return () => clearTimeout(handler);
-  }, [searchQuery, handleSearch]);
-
   if (isFetchVoters) {
     return (
       <div className="my-10 flex justify-center">
@@ -231,24 +190,10 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
           type="text"
           placeholder="Search by ID, Name, Sub-Group, Phone, or Email"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => onSearchChange(e.target.value)}
           className="border px-3 py-2 w-full max-w-md rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
       </div>
-
-      {/* Toast Notification */}
-      <AnimatePresence>
-        {showToast && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50"
-          >
-            No results found for "{searchQuery}"
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <div className="pb-3 flex items-center gap-2">
         <label>Select All (Current Page):</label>
@@ -320,9 +265,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
             return (
               <div
                 key={row.id}
-                className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${
-                  highlightedRowId === row.id ? "bg-yellow-100" : ""
-                }`}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
                   <div className="flex items-center gap-3">
@@ -452,13 +395,7 @@ const VoterTable: React.FC<VotersPageTableProps> = ({
               {responses.map((row, index) => {
                 const actualIndex = startIndex + index;
                 return (
-                  <StyledTableRow
-                    key={row.id}
-                    className={highlightedRowId === row.id ? "highlighted" : ""}
-                    ref={(el) => {
-                      if (el) rowRefs.current[row.id] = el;
-                    }}
-                  >
+                  <StyledTableRow key={row.id}>
                     <StyledTableCell align="center">
                       <div className="flex items-center justify-center">
                         <input
