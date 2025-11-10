@@ -173,6 +173,8 @@ const UserSection = () => {
     getAllAdminUsers();
   }, []);
 
+  console.log("usersData", usersData);
+
   if (isFetchUsers)
     return (
       <div className="text-center ">
