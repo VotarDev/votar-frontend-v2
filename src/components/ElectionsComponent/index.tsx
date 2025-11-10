@@ -182,7 +182,7 @@ const ElectionsComponent = () => {
                 <AnimatePresence>
                   {filteredElections
                     .slice()
-                    .reverse()
+
                     .map((election, index) => (
                       <motion.div
                         key={election.election_id}
