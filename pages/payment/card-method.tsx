@@ -59,7 +59,10 @@ const CardMethod: React.FC = () => {
     router.back();
   };
 
-  const handlePurchaseVotarCredit = async (electionId: string | null) => {
+  const handlePurchaseVotarCredit = async (
+    electionId: string | null,
+    paymentResponse?: any
+  ) => {
     if (!session?.user?.email) {
       toast.error("User email not found. Please log in.");
       setIsProcessing(false);
@@ -85,6 +88,7 @@ const CardMethod: React.FC = () => {
         email: session.user.email,
         amount: amount,
         election_id: electionId,
+        payment_data: paymentResponse,
       };
 
       const { data } = await purchaseVotarCredit(bodyData);
@@ -149,7 +153,7 @@ const CardMethod: React.FC = () => {
         ],
       },
       callback: (response: any) => {
-        handlePurchaseVotarCredit(electionId)
+        handlePurchaseVotarCredit(electionId, response)
           .then((success) => {
             if (success) {
               const returnUrl =
@@ -162,14 +166,13 @@ const CardMethod: React.FC = () => {
               const url = new URL(returnUrl, window.location.origin);
               url.searchParams.set("payment", "success");
               url.searchParams.set("reference", response.reference);
-
               window.location.href = url.toString();
             } else {
               toast.error("Payment successful but failed to update credits");
               setIsProcessing(false);
             }
           })
-          .catch((error) => {
+          .catch(() => {
             toast.error("Payment successful but failed to update credits");
             setIsProcessing(false);
           });
