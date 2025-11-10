@@ -69,7 +69,7 @@ const VotarCreditTable = () => {
       );
 
       if (data) {
-        const users = data.data.users;
+        const users = data.data.electionCreators;
         setUsersData(users);
         setFilteredUsersData(users);
         setTotalUsers(data.data.pagination.total);
