@@ -318,14 +318,11 @@ const BallotsPage = ({ position, setPosition }: any) => {
     return <div className="my-10">{error}</div>;
   }
 
-  console.log(election);
-  console.log(election?.type);
-
   return (
     <div className="my-[60px]">
       <Header electionDetails={election} />
       <div className="lg:mt-10 mt-5 flex lg:justify-end items-center lg:gap-10 gap-2 flex-wrap justify-center">
-        <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
+        <div className="flex items-center gap-4 lg:text-lg text-base text-blue-700 font-semibold">
           <div>
             Election ID: <span ref={textRef}>{election?.election_id}</span>
           </div>
@@ -337,7 +334,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
           <div>
             <button
               onClick={handleCopy}
-              className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0"
+              className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-lg text-xs text-blue-700 font-semibold p-4 lg:p-0"
             >
               <span>
                 <AiOutlineLink />
@@ -351,7 +348,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
               rel="noopener noreferrer"
               target="_blank"
             >
-              <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-xl text-xs p-4 font-semibold text-zinc-100 lg:p-0">
+              <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-lg text-xs p-4 font-semibold text-zinc-100 lg:p-0">
                 <span>
                   <AiOutlineEye />
                 </span>
