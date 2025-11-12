@@ -271,6 +271,7 @@ const ElectionDetail = () => {
         }
       }
     }
+
     try {
       switch (step) {
         case 0:

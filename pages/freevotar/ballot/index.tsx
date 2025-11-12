@@ -50,6 +50,7 @@ type Candidate = {
   candidate_name: string;
   candidate_nickname: string;
   candidate_picture: string;
+  more_details?: string;
   media: string;
   vote: number;
   _id: string;
@@ -90,6 +91,8 @@ const FreeVotarBallot = () => {
   const [freeVoteDetails, setFreeVoteDetails] = useState<
     { position: string; free_votes: number; _id: string }[]
   >([]);
+  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [selectedDetails, setSelecteDetails] = useState<string | null>(null);
 
   const { data: session, status } = useSession();
 
@@ -602,6 +605,11 @@ const FreeVotarBallot = () => {
     }
   }, [selectedCandidates, candidates]);
 
+  const handleDetails = (details: string) => {
+    setShowDetails(true);
+    setSelecteDetails(details);
+  };
+
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
       <AnimatePresence mode="wait">
@@ -862,7 +870,14 @@ const FreeVotarBallot = () => {
                                                 ({candidate.candidate_nickname})
                                               </div>
                                             </div>
-                                            <div className="text-base text-blue-700 underline cursor-pointer font-normal">
+                                            <div
+                                              onClick={() =>
+                                                handleDetails(
+                                                  candidate?.more_details || ""
+                                                )
+                                              }
+                                              className="text-base text-blue-700 underline cursor-pointer font-normal"
+                                            >
                                               More Details
                                             </div>
                                             <div className="flex justify-center pt-3 gap-4 items-center">
@@ -1081,6 +1096,29 @@ const FreeVotarBallot = () => {
                           </button>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </Modal>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence mode="wait">
+              {showDetails && (
+                <Modal
+                  key="modal"
+                  handleClose={() => setShowDetails(false)}
+                  classname="overflow-y-scroll h-[20vh] max-w-[400px] ballot-modal  rounded bg-white"
+                >
+                  <div className="rounded h-full p-6">
+                    <h1 className="text-lg font-medium">
+                      Candidate More Details
+                    </h1>
+                    <div className="whitespace-pre-wrap mt-4">
+                      {!selectedDetails && (
+                        <p>No details available for this candidate.</p>
+                      )}
+
+                      {selectedDetails}
                     </div>
                   </div>
                 </Modal>
