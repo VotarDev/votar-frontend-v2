@@ -595,6 +595,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                           <textarea
                             placeholder="Candidate Details"
                             value={candidate.more_details}
+                            maxLength={250}
                             disabled={!isEditable}
                             className="w-full h-36 rounded border border-stone-900 outline-none p-4"
                             onChange={(e) =>
@@ -606,6 +607,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
                               )
                             }
                           />
+                          <div className="text-right text-sm text-stone-500 mt-1">
+                            {candidate.more_details?.length || 0}/250
+                          </div>
                           <div className="flex gap-2 items-center">
                             <input
                               type="file"
