@@ -358,6 +358,7 @@ function Body({ positions, setPositions, electionId }: any) {
                       <textarea
                         placeholder="Candidate Details"
                         value={candidate.more_details}
+                        maxLength={250}
                         className="w-full h-36 rounded border border-stone-900 outline-none p-4"
                         onChange={(e) =>
                           handleInputChange(
@@ -368,6 +369,10 @@ function Body({ positions, setPositions, electionId }: any) {
                           )
                         }
                       />
+                      <div className="text-right text-sm text-stone-500 mt-1">
+                        {candidate.more_details?.length || 0}/250
+                      </div>
+
                       {/** Handling media uploads */}
                       <div className="flex gap-2 items-center">
                         <input
