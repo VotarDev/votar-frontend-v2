@@ -668,14 +668,30 @@ const FreeVotarBallot = () => {
           )}
 
           <div className="px-4">
-            <div className="mt-5 flex justify-end mr-10">
-              <button
-                onClick={handleLogout}
-                className="bg-blue-700 p-4 text-white rounded-md"
-              >
-                Logout
-              </button>
+            <div className="">
+              <div className="mt-5 flex justify-end mr-4 md:mr-10">
+                <button
+                  onClick={handleLogout}
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 md:px-8 md:py-4 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                  Logout
+                </button>
+              </div>
             </div>
+
             {isFetchCandidate ? (
               <div className="mt-10 text-center">Fetching candidates...</div>
             ) : (
@@ -687,6 +703,23 @@ const FreeVotarBallot = () => {
                       ? voterProfile.userData?.name
                       : session?.user?.name}
                   </h1>
+                  {election && (
+                    <div className="flex justify-center">
+                      <div className="mt-10  bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg px-6 py-4 mb-6 max-w-md w-full">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-600">
+                            Price per Vote
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-blue-700">
+                              ₦{election?.price_per_vote}
+                            </span>
+                            <span className="text-sm text-gray-500">/vote</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 {isVoteSuccessful ? (
                   <div className="bg-white p-8 rounded-lg shadow-lg text-center">

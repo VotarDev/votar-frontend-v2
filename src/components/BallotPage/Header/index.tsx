@@ -31,32 +31,44 @@ const Header = ({
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
-          className={`w-full h-[40vh] flex justify-center items-center relative text-center text-white px-4 ${
+          className={`w-full min-h-[45vh] md:min-h-[50vh] lg:h-[55vh] flex justify-center items-center relative text-center text-white px-4 sm:px-6 lg:px-8 ${
             !electionDetails?.elect_background_img ? "bg-ballot-header" : ""
           }`}
         >
-          <div className="absolute w-full h-full bg-[rgba(0,0,0,0.6)] top-0 bottom-0 z-0"></div>
-          <div className="z-[5] flex flex-col gap-2">
-            <div className="flex justify-center">
+          {/* Overlay with gradient */}
+          <div className="absolute w-full h-full bg-gradient-to-b from-black/70 via-black/60 to-black/70 top-0 bottom-0 z-0"></div>
+
+          {/* Content */}
+          <div className="z-[5] flex flex-col gap-4 md:gap-6 max-w-5xl mx-auto py-8 md:py-12">
+            <div className="flex justify-center mb-2 md:mb-4">
+              <div className="relative group">
+                <img
+                  src={electionDetails?.association_logo}
+                  alt="logo"
+                  className="rounded-full w-20 h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-cover border-4 border-white/20 shadow-2xl transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 rounded-full bg-white/10 blur-xl -z-10"></div>
+              </div>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight px-2">
+              {electionDetails?.name_of_election}
+            </h1>
+
+            <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed text-white/90 px-4">
+              {electionDetails?.description}
+            </p>
+          </div>
+
+          {/* Watermark */}
+          <div className="absolute right-4 top-4 md:right-6 md:top-6 lg:right-10 lg:top-10 z-10">
+            <div className="bg-white/10 backdrop-blur-sm rounded-full p-2 md:p-3 shadow-lg">
               <img
-                src={electionDetails?.association_logo}
+                src={watermark.src}
                 alt="logo"
-                className="rounded-full w-20 h-20"
+                className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain opacity-90"
               />
             </div>
-            <div className="lg:text-3xl text-base font-semibold">
-              {electionDetails?.name_of_election}
-            </div>
-            <div className="max-w-[35rem] mx-auto lg:text-base text-xs leading-5">
-              {electionDetails?.description}
-            </div>
-          </div>
-          <div className="absolute lg:right-10 lg:top-10 top-2 right-2">
-            <img
-              src={watermark.src}
-              alt="logo"
-              className="lg:w-14 lg:h-14 h-10 w-10 object-contain"
-            />
           </div>
         </div>
 
@@ -75,60 +87,117 @@ const Header = ({
 
   if (electionDetails?.type === "Votar Pro" || !votarPlan)
     return (
-      <div className="mb-10">
-        <div className=" relative lg:mt-0 max-w-[1600px] mx-auto lg:h-[300px] h-auto px-4 lg:px-0">
-          <div className="absolute top-0 left-0 right-0 w-full -z-10 lg:block">
+      <div className="mb-10 md:mb-16 lg:mb-20">
+        <div className="relative max-w-[1600px] mx-auto lg:h-[320px] h-auto px-4 sm:px-6 lg:px-8 pb-8 lg:pb-0">
+          {/* SVG Background */}
+          <div className="absolute top-0 left-0 right-0 w-full -z-10 lg:block overflow-hidden">
             <div className="relative">
               <svg
                 viewBox="0 0 1111 294"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 className="max-w-full w-screen h-auto object-cover"
+                preserveAspectRatio="xMidYMid slice"
               >
+                <defs>
+                  <linearGradient
+                    id="gradient1"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor={electionDetails?.secondary_color}
+                      stopOpacity="0.9"
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor={electionDetails?.secondary_color}
+                      stopOpacity="1"
+                    />
+                  </linearGradient>
+                  <linearGradient
+                    id="gradient2"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop
+                      offset="0%"
+                      stopColor={electionDetails?.primary_color}
+                      stopOpacity="0.95"
+                    />
+                    <stop
+                      offset="100%"
+                      stopColor={electionDetails?.primary_color}
+                      stopOpacity="1"
+                    />
+                  </linearGradient>
+                </defs>
                 <path
                   d="M223.063 253.106C118.294 327.151 -31.2577 284.047 -92.9374 253.24L-163.078 -78.7301L1071.92 -79.2535L1110.46 3.73015C977.63 -60.2136 645.496 24.0084 503.991 83.9872C366.019 150.446 262.27 225.397 223.063 253.106Z"
-                  fill={`${electionDetails?.secondary_color}`}
+                  fill="url(#gradient1)"
                 />
                 <path
                   d="M218.063 241.106C113.294 315.151 -36.2577 272.047 -97.9374 241.24L-168.078 -90.7301L1066.92 -91.2535L1105.46 -8.26985C972.63 -72.2136 640.496 12.0084 498.991 71.9872C361.019 138.446 257.27 213.397 218.063 241.106Z"
-                  fill={`${electionDetails?.primary_color}`}
+                  fill="url(#gradient2)"
                 />
               </svg>
             </div>
-            <div className="absolute bottom-0 lg:left-20 left-0">
+
+            {/* Vote Hand Illustration */}
+            <div className="absolute bottom-0 left-4 sm:left-8 lg:left-20 hidden sm:block">
               <img
                 src="/assets/images/vote-hand.svg"
                 alt="vote"
-                className="w-full object-cover md:h-40 h-20 "
+                className="w-full object-cover h-16 sm:h-24 md:h-32 lg:h-40 opacity-90"
               />
             </div>
           </div>
 
-          <div className="flex justify-center items-center top-[100px] lg:absolute static left-[55%] lg:translate-x-[-55%] lg:max-w-[50%] mx-auto w-full">
-            <div className="text-center">
-              <div className="flex justify-center mt-10 lg:mt-0">
-                <img
-                  src={electionDetails?.association_logo}
-                  alt="logo"
-                  className="lg:w-32 lg:h-32 object-cover w-[100px] h-[100px] rounded-full"
-                />
+          {/* Main Content */}
+          <div className="flex justify-center items-center lg:absolute lg:top-[100px] static lg:left-[55%] lg:translate-x-[-55%] lg:max-w-[55%] mx-auto w-full pt-12 lg:pt-0">
+            <div className="text-center space-y-4 md:space-y-6">
+              {/* Logo */}
+              <div className="flex justify-center">
+                <div className="relative group">
+                  <img
+                    src={electionDetails?.association_logo}
+                    alt="logo"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-cover rounded-full shadow-2xl border-4 border-white transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/20 to-transparent blur-xl -z-10"></div>
+                </div>
               </div>
-              <div className="lg:text-[25px] font-semibold mt-3 text-2xl uppercase">
+
+              {/* Election Name */}
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide text-gray-900 leading-tight px-2">
                 {electionDetails?.name_of_election}
-              </div>
-              <div className="lg:text-lg text-[#1E1E1E] leading-[30px] text-base mt-2">
+              </h1>
+
+              {/* Description */}
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto px-4">
                 {electionDetails?.description}
-              </div>
+              </p>
             </div>
           </div>
-          <div className="absolute lg:right-10 lg:top-1/2 top-2 right-2 lg:-translate-y-1/2">
-            <img
-              src={watermark.src}
-              alt="logo"
-              className="lg:w-14 lg:h-14 h-10 w-10 object-contain"
-            />
-            <div className="-mt-1">
-              <code className="text-[11px] ">Encrypted</code>
+
+          {/* Watermark Badge */}
+          <div className="absolute right-4 top-4 sm:right-6 sm:top-6 lg:right-10 lg:top-1/2 lg:-translate-y-1/2 z-10">
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-2 md:p-3 border border-gray-200/50">
+              <img
+                src={watermark.src}
+                alt="logo"
+                className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 object-contain"
+              />
+              <div className="text-center mt-1">
+                <code className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold text-gray-600 tracking-wide">
+                  ENCRYPTED
+                </code>
+              </div>
             </div>
           </div>
         </div>
