@@ -186,18 +186,19 @@ const Header = ({
           </div>
 
           {/* Watermark Badge */}
-          <div className="absolute right-4 top-4 sm:right-6 sm:top-6 lg:right-10 lg:top-1/2 lg:-translate-y-1/2 z-10">
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-lg p-2 md:p-3 border border-gray-200/50">
+
+          <div className="absolute right-4 top-4 md:right-6 md:top-6 lg:right-10 lg:top-10 z-10">
+            <div className="bg-white/10 backdrop-blur-sm rounded-full p-2 md:p-3 shadow-lg">
               <img
                 src={watermark.src}
                 alt="logo"
-                className="w-8 h-8 md:w-10 md:h-10 lg:w-14 lg:h-14 object-contain"
+                className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain opacity-90"
               />
-              <div className="text-center mt-1">
-                <code className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold text-gray-600 tracking-wide">
-                  ENCRYPTED
-                </code>
-              </div>
+            </div>
+            <div className="text-center mt-1">
+              <code className="text-[9px] sm:text-[10px] lg:text-[11px] font-semibold text-gray-600 tracking-wide">
+                ENCRYPTED
+              </code>
             </div>
           </div>
         </div>

@@ -667,8 +667,8 @@ const FreeVotarBallot = () => {
             </div>
           )}
 
-          <div className="px-4">
-            <div className="">
+          <div className="px-4 relative">
+            <div className="absolute right-0 -top-full">
               <div className="mt-5 flex justify-end mr-4 md:mr-10">
                 <button
                   onClick={handleLogout}
