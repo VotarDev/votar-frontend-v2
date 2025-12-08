@@ -12,10 +12,18 @@ import { FaCaretDown } from "react-icons/fa";
 import calendar from "../../../public/assets/icons/calendar-2.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import toast from "react-hot-toast";
-import { formatDateToISO, formatTimeToHHMM } from "@/utils/util";
+import { formatDateToISO } from "@/utils/util";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 import { PiArrowLeft } from "react-icons/pi";
+
+const formatTimeToHHMM = (dateString: string | undefined) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
 
 const DetailsPage = ({
   electionId,
@@ -96,30 +104,44 @@ const DetailsPage = ({
           setAuthToken(tokenLocal);
         }
       }
+
       setIsFetchElection(true);
+
       try {
         if (electionId) {
-          const electionData = { election_id: electionId };
-          const { data } = await getElectionById(electionData);
+          const { data } = await getElectionById({ election_id: electionId });
 
           if (data) {
-            setElection(data.data);
-            dispatch({ type: "SET_ELECTION", value: data.data });
-            const { start_date } = data.data;
-            const combinedDateTime = new Date(start_date);
-            if (!isNaN(combinedDateTime.getTime())) {
-              setTargetDateTime(combinedDateTime);
-            } else {
-              console.error("Invalid start_date format:", start_date);
-            }
+            const electionData = data.data;
+            setElection(electionData);
+            dispatch({ type: "SET_ELECTION", value: electionData });
+
+            // Set editable datetime for countdown
+            const start = new Date(electionData.start_date);
+            setTargetDateTime(start);
+
+            // ✅ Dispatch the times to the main state
+            dispatch({
+              type: "SET_FIELD",
+              field: "start_time",
+              value: formatTimeToHHMM(electionData.start_date),
+            });
+
+            dispatch({
+              type: "SET_FIELD",
+              field: "end_time",
+              value: formatTimeToHHMM(electionData.end_date),
+            });
+
             setIsFetchElection(false);
           }
         }
-      } catch (e: any) {
+      } catch (e) {
         setIsFetchElection(false);
         console.log(e);
       }
     };
+
     getElection();
   }, [electionId]);
 
@@ -521,11 +543,8 @@ const DetailsPage = ({
                     type="time"
                     name="start_time"
                     className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-                    id="time"
+                    value={state.start_time}
                     onChange={handleChange}
-                    value={
-                      state.start_time || formatTimeToHHMM(election?.start_time)
-                    }
                   />
                 </div>
                 <div className="flex flex-col gap-1 w-full lg:w-auto">
@@ -534,10 +553,7 @@ const DetailsPage = ({
                     type="time"
                     name="end_time"
                     className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-                    id="time"
-                    value={
-                      state.end_time || formatTimeToHHMM(election?.end_time)
-                    }
+                    value={state.end_time}
                     onChange={handleChange}
                   />
                 </div>
