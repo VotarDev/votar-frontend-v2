@@ -3,7 +3,7 @@ import DashboardLayout from "@/src/components/DashboardLayout";
 import Details from "@/src/components/CreateElection/Steps/Details";
 import Ballot from "@/src/components/CreateElection/Steps/Ballot";
 import VotersPage from "@/src/components/CreateElection/Steps/VotersPage";
-import Review from "@/src/components/CreateElection/Steps/Review";
+
 import Pay from "@/src/components/CreateElection/Steps/Pay";
 import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElection";
 import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
@@ -207,15 +207,16 @@ const Create = () => {
     try {
       switch (steps[currentStep - 1]) {
         case "Details":
-          if (token) {
-            setAuthToken(token);
-          }
-          const { data } = await createElection(detailsFormData, USER_ID);
-          if (data) {
-            toast.success(data.status);
-            localStorage.setItem("ElectionId", data.data.election_id);
-          }
-          newStep++;
+          console.log(startDateData, endDateData);
+          // if (token) {
+          //   setAuthToken(token);
+          // }
+          // const { data } = await createElection(detailsFormData, USER_ID);
+          // if (data) {
+          //   toast.success(data.status);
+          //   localStorage.setItem("ElectionId", data.data.election_id);
+          // }
+          // newStep++;
           break;
         case "Ballot":
           if (token) {
