@@ -9,9 +9,11 @@ import MiniDashboard from "../../VotePage/MiniDashboard";
 const Header = ({
   electionDetails,
   getVoterCredit,
+  isVoteSuccessful,
 }: {
   electionDetails: Election | null;
   getVoterCredit?: () => void;
+  isVoteSuccessful?: boolean;
 }) => {
   const router = useRouter();
 
@@ -75,12 +77,13 @@ const Header = ({
         <div>
           {router.pathname.split("/")[1].includes("cast-votes") ||
             router.pathname.split("/")[1].includes("preview-election") ||
-            (router.pathname.split("/")[1].includes("freevotar") && (
-              <MiniDashboard
-                election={electionDetails}
-                getVotarCredit={getVoterCredit}
-              />
-            ))}
+            (router.pathname.split("/")[1].includes("freevotar") &&
+              !isVoteSuccessful && (
+                <MiniDashboard
+                  election={electionDetails}
+                  getVotarCredit={getVoterCredit}
+                />
+              ))}
         </div>
       </div>
     );
