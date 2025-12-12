@@ -207,16 +207,15 @@ const Create = () => {
     try {
       switch (steps[currentStep - 1]) {
         case "Details":
-          console.log(startDateData, endDateData);
-          // if (token) {
-          //   setAuthToken(token);
-          // }
-          // const { data } = await createElection(detailsFormData, USER_ID);
-          // if (data) {
-          //   toast.success(data.status);
-          //   localStorage.setItem("ElectionId", data.data.election_id);
-          // }
-          // newStep++;
+          if (token) {
+            setAuthToken(token);
+          }
+          const { data } = await createElection(detailsFormData, USER_ID);
+          if (data) {
+            toast.success(data.status);
+            localStorage.setItem("ElectionId", data.data.election_id);
+          }
+          newStep++;
           break;
         case "Ballot":
           if (token) {
