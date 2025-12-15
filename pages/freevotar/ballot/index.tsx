@@ -670,7 +670,7 @@ const FreeVotarBallot = () => {
           )}
 
           <div className="px-4 relative">
-            <div className="absolute right-0 -top-full">
+            <div className="">
               <div className="mt-5 flex justify-end mr-4 md:mr-10">
                 <button
                   onClick={handleLogout}
@@ -755,8 +755,6 @@ const FreeVotarBallot = () => {
                       </div>
                     </div>
 
-                    {/* EVERYTHING ELSE BELOW — placed normally around the center */}
-
                     <div className=" bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
                       {/* Feedback Section */}
                       <div className="mb-10 ">
@@ -772,7 +770,7 @@ const FreeVotarBallot = () => {
                     </div>
 
                     {/* Social Media Section */}
-                    <div className="bg-gradient-to-r md:absolute right-0 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10">
+                    <div className=" bg-gradient-to-r md:absolute right-0 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
                       <div className="text-center">
                         <h3 className="text-2xl font-bold mb-4">
                           Know more about us &
@@ -783,7 +781,8 @@ const FreeVotarBallot = () => {
 
                         <div className="flex justify-center items-center gap-4 flex-wrap">
                           <a
-                            href="#"
+                            href="https://api.whatsapp.com/send?phone=2348144092733&text=Good%20day%20Votar%20How%20can%20i%20enroll?"
+                            target="_blank"
                             className="w-7 h-7 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg"
                           >
                             <svg
@@ -797,7 +796,8 @@ const FreeVotarBallot = () => {
 
                           {/* Instagram */}
                           <a
-                            href="#"
+                            href="https://www.instagram.com/votarhq?igsh=MWZydTF3MHJ1aDJiNg%3D%3D&utm_source=qr"
+                            target="_blank"
                             className="w-7 h-7 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg"
                           >
                             <svg
@@ -811,7 +811,8 @@ const FreeVotarBallot = () => {
 
                           {/* Facebook */}
                           <a
-                            href="#"
+                            href="https://www.facebook.com/profile.php?id=61553214208461&mibextid=LQQJ4d"
+                            target="_blank"
                             className="w-7 h-7 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg"
                           >
                             <svg
@@ -825,7 +826,8 @@ const FreeVotarBallot = () => {
 
                           {/* X (Twitter) */}
                           <a
-                            href="#"
+                            href="https://x.com/votarhq?s=21"
+                            target="_blank"
                             className="w-7 h-7 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg"
                           >
                             <svg
