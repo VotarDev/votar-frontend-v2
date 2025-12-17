@@ -540,7 +540,7 @@ const Ballot = () => {
                     </div>
 
                     {/* Social Media Section */}
-                    <div className=" bg-gradient-to-r md:absolute right-10 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
+                    <div className="vibrate bg-gradient-to-r md:absolute right-10 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
                       <div className="text-center">
                         <h3 className="text-2xl font-bold mb-4">
                           Know more about us &
