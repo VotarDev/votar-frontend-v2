@@ -611,7 +611,8 @@ const Ballot = () => {
 
                           {/* TikTok */}
                           <a
-                            href="#"
+                            href="https://www.tiktok.com/@votarhq?_r=1&_t=ZS-92J1VqVoCe7"
+                            target="_blank"
                             className="w-7 h-7 bg-white rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-300 shadow-lg"
                           >
                             <svg
