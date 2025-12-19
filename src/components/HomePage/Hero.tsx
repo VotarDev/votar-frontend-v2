@@ -37,8 +37,11 @@ const Hero = () => {
               <br /> Enter the Votar experience for free
             </p> */}
             <p className="max-w-[506px] lg:text-xl text-base mt-3 lg:mb-7 mb-5 leading-[40px]">
-              We bring trust to your choice visualization processes Enjoy the
-              Votar experience!…
+              Making elections and choice visualization simple, convenient,
+              trusted, and reliable for you! Whoever you are or wherever you
+              are.
+              <br />
+              Enjoy the Votar experience!...
             </p>
           </div>
           <div className="flex justify-center lg:block">
