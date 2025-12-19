@@ -27,7 +27,17 @@ const Hero = () => {
               className="font-bold lg:text-5xl text-[20px] lg:leading-[4.5rem] leading-[44px] "
             /> */}
             <h1 className="font-bold lg:text-5xl text-[28px] lg:leading-[4.5rem] leading-[36px] ">
-              Better Visibility For You...
+              <Typed
+                strings={[
+                  "Better Visibility For You...",
+                  "Your Voice Matters...",
+                  "Trusted By Many...",
+                ]}
+                typeSpeed={70}
+                backSpeed={80}
+                loop
+                showCursor={true}
+              />
             </h1>
           </div>
           <div className="max-w-[506px] lg:text-xl text-base  mt-3 lg:mb-7 mb-5">
