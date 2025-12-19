@@ -39,7 +39,7 @@ const OurTeam = () => {
               <h3>Anthony Okon</h3>
             </div>
             <div className="text-sm">
-              <p>(Founding Partner & CEO)</p>
+              <p>(Founder & CEO)</p>
             </div>
           </div>
         </div>
@@ -57,7 +57,7 @@ const OurTeam = () => {
               <h3>Dare Omotayo</h3>
             </div>
             <div className="text-sm">
-              <p>(Founding Partner & Engineer)</p>
+              <p>(Co-Founder & Engineer)</p>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ const OurTeam = () => {
               <h3>Tobi Faniran</h3>
             </div>
             <div className="text-sm">
-              <p>(Founding Partner & Engineer)</p>
+              <p>(Co-Founder & Engineer)</p>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ const OurTeam = () => {
               <h3>Irene Okon</h3>
             </div>
             <div className="text-sm">
-              <p>(Legal)</p>
+              <p>(Legal & Human Resource)</p>
             </div>
           </div>
         </div>
@@ -111,7 +111,7 @@ const OurTeam = () => {
               <h3>Israel Oladejo</h3>
             </div>
             <div className="text-sm">
-              <p>(Branding and Design)</p>
+              <p>(Branding, Design & Marketing)</p>
             </div>
           </div>
         </div>
