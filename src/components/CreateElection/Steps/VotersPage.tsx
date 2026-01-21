@@ -35,7 +35,7 @@ const VotersPage = () => {
   const [electionId, setElectionId] = useState<string | null>("");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -389,10 +389,10 @@ const VotersPage = () => {
               onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
               className="border rounded px-2 py-1"
             >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
               <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+              <option value={500}>500</option>
             </select>
           </div>
         </div>
