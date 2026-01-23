@@ -227,8 +227,8 @@ export const monitorIndividualSubgroup = (id: string) => {
   return httpService.get(monitorIndividualSubGroupUrl, { params: { id } });
 };
 
-export const voterVerificationLink = (t: string) => {
-  return httpService.get(voterVerificationLinkUrl, { params: { t } });
+export const voterVerificationLink = (t: string, date: string) => {
+  return httpService.get(voterVerificationLinkUrl, { params: { t, date } });
 };
 
 export const monitorBarChart = (id: string) => {

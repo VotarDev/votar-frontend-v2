@@ -15,11 +15,17 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
   const [errorMesssage, setErrorMessage] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
+  const now = new Date();
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const bodyData = { election_id: electionId, access_id: accessCode };
+      const bodyData = {
+        election_id: electionId,
+        access_id: accessCode,
+        date: now.toISOString(),
+      };
       const { data } = await voterLogin(bodyData);
       const cookie = new Cookies();
       cookie.set(voterLoginCookieName, data.data.data.token, { path: "/" });
@@ -38,20 +44,16 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
         localStorage.setItem("voterProfile", JSON.stringify(voterData));
       }
     } catch (error: any) {
-      console.log(error);
       const message =
         (error.response &&
           error.response.data &&
           error.response.data.message) ||
         error.message ||
         error.toString();
-      console.log(error);
-      // toast.error(error.response.data.message || error.message);
+
+      toast.error(error.response.data.message || error.message);
       setErrorMessage(message);
 
-      console.log(
-        message.includes("Please, you can only vote once. Thank you")
-      );
       setIsLoading(false);
     }
   };

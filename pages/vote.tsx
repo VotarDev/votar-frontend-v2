@@ -20,6 +20,7 @@ const Vote = () => {
   const { t } = router.query;
   const [isLoading, setisLoading] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
+  const now = new Date();
 
   const [electionId, setElectionId] = useState("");
   const onFormSubmit = (e: React.FormEvent) => {
@@ -33,13 +34,16 @@ const Vote = () => {
       setisLoading(true);
       const verifyVoter = async () => {
         try {
-          const { data } = await voterVerificationLink(t as string);
+          const { data } = await voterVerificationLink(
+            t as string,
+            now.toISOString()
+          );
           const cookie = new Cookies();
           if (data) {
             cookie.set(voterLoginCookieName, data.data.data.token, {
               path: "/",
             });
-            console.log(data.data.data);
+
             router.push(`/ballot`);
             setisLoading(false);
 
@@ -55,7 +59,7 @@ const Vote = () => {
               loading: false,
               isVerified: true,
             };
-            console.log(voterData);
+
             toast.success("Login Successful");
             dispatch(login(voterData));
             localStorage.setItem("voterProfile", JSON.stringify(voterData));
