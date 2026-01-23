@@ -66,6 +66,7 @@ const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
 const adminPublishElectionUrl = "/admin/publish";
+const adminTopUpUrl = "/admin/top-up";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -174,10 +175,11 @@ export const getVoters = (
   id: string,
   data: any,
   page: string,
-  limit: string
+  limit: string,
+  search?: string
 ) => {
   return httpService.post(getVoterUrl + `/${id}`, data, {
-    params: { page, limit },
+    params: { page, limit, search },
   });
 };
 
@@ -367,12 +369,22 @@ export const getVotarPageByElection = (email: string, type: string) => {
   });
 };
 
-export const adminGetAllUsers = (page: string, limit: string) => {
-  return httpService.get(adminGetAllUsersUrl, { params: { page, limit } });
+export const adminGetAllUsers = (
+  filter?: string,
+  page?: string,
+  limit?: string,
+  search?: string
+) => {
+  return httpService.get(adminGetAllUsersUrl, {
+    params: { filter, page, limit, search },
+  });
 };
 
 export const adminPublishElection = (data: any) => {
   return httpService.post(adminPublishElectionUrl, data);
 };
 
+export const adminTopUp = (data: any) => {
+  return httpService.post(adminTopUpUrl, data);
+};
 /** ADMIN */

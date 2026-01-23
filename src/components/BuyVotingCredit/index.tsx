@@ -90,6 +90,26 @@ const BuyVotingCredit = ({
     setVotarCredit(numericValue);
   };
 
+  const handleProceedToPayment = () => {
+    if (votarCredit > 0) {
+      const returnUrl = window.location.pathname + window.location.search;
+      localStorage.setItem("payment_amount", votarCredit.toString());
+      localStorage.setItem("payment_return_url", returnUrl);
+      localStorage.setItem("election_id", election.election_id);
+
+      window.location.href = "/payment/select-method";
+    }
+  };
+
+  const handlePaymentComplete = () => {
+    const returnUrl = localStorage.getItem("payment_return_url") || "/";
+    localStorage.removeItem("payment_amount");
+    localStorage.removeItem("payment_return_url");
+    localStorage.removeItem("election_id");
+
+    window.location.href = `${returnUrl}?payment=success`;
+  };
+
   return (
     <div className="bg-white rounded-lg pt-[64px] pb-[83px] px-4 lg:px-10">
       <div className="text-blue-700 lg:text-2xl text-base font-semibold">
@@ -113,12 +133,6 @@ const BuyVotingCredit = ({
             <br /> Credits
           </div>
           <div>
-            {/* <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span>
-            <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              3
-            </span> */}
             <div className="flex justify-end gap-2 text-3xl">
               {votarCredits === null && (
                 <>
@@ -148,12 +162,6 @@ const BuyVotingCredit = ({
             <br /> Credit
           </div>
           <div className="flex gap-2">
-            {/* <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span>
-            <span className="w-10 h-10 flex justify-center items-center bg-blue-700 text-zinc-100 rounded">
-              0
-            </span> */}
             <input
               type="text"
               value={votarCredit}
@@ -188,13 +196,11 @@ const BuyVotingCredit = ({
       </div>
       <div className="flex justify-center mt-5">
         <button
-          disabled={isPurchasing}
-          onClick={handlePurchaseVotarCredit}
+          disabled={votarCredit <= 0}
+          onClick={handleProceedToPayment}
           className="h-14 bg-blue-700 rounded-lg outline-none px-10 flex justify-center items-center py-7 lg:text-2xl text-base text-zinc-100"
         >
-          {isPurchasing
-            ? "Processing..."
-            : ` Make Payment Of NGN ${votarCredit.toLocaleString()} Votar Credits`}
+          Make Payment Of NGN {votarCredit.toLocaleString()} Votar Credits
         </button>
       </div>
       <div className=" flex items-center justify-center lg:text-[18px] text-sm text-center p-2 mt-7">

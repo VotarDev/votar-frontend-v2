@@ -28,7 +28,7 @@ const ElectionTables = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalElections, setTotalElections] = useState(0);
-  const [limit] = useState<any>(30);
+  const [limit] = useState<any>(100);
   const pathname = usePathname();
 
   const options = ["Date", "Election", "Time", "Status"];
@@ -191,7 +191,7 @@ const ElectionTables = () => {
         </div>
       </div>
       <div className="w-full mt-5">
-        <TableContainer sx={{ maxHeight: "80%" }} className="table-scroll">
+        <TableContainer sx={{ maxHeight: "100%" }} className="table-scroll">
           <Table
             sx={{
               minWidth: 700,

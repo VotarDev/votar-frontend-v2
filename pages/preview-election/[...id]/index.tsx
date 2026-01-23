@@ -237,8 +237,6 @@ const PreviewVote = () => {
 
   const closeModal = () => setShowModal(false);
 
-  console.log(candidates);
-
   if (isLoading) {
     return (
       <div className="my-10 text-center">

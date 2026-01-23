@@ -71,7 +71,7 @@ const UserSection = () => {
   // Calculate total based on filter
   const getDisplayTotal = () => {
     if (filteredOption === "All") {
-      return totalCreators + totalVoters;
+      return totalUsers;
     } else if (filteredOption === "Election Creator") {
       return totalCreators;
     } else if (filteredOption === "Voter") {
@@ -94,36 +94,36 @@ const UserSection = () => {
 
     try {
       const { data } = await adminGetAllUsers(
+        "",
         page.toString(),
         limit.toString()
       );
 
       if (data) {
-        const creatorsTotal = data.data.electionCreators.total || 0;
-        const votersTotal = data.data.voters.total || 0;
+        const creatorsTotal = data.data.electionCreators.length || 0;
+        const votersTotal = data.data.voters.length || 0;
+        const totalUsers = data.data.pagination.total || 0;
 
         setTotalCreators(creatorsTotal);
         setTotalVoters(votersTotal);
-        setTotalUsers(creatorsTotal + votersTotal);
+        setTotalUsers(totalUsers);
 
         const mergedDataArray: MergedData[] = [];
 
         // Add creators based on filter
         if (filter === "All" || filter === "Election Creator") {
-          data.data.electionCreators.electionCreators.forEach(
-            (creator: any) => {
-              mergedDataArray.push({
-                name: creator.userName,
-                email: creator.email,
-                category: "Election Creator",
-              });
-            }
-          );
+          data.data.electionCreators.forEach((creator: any) => {
+            mergedDataArray.push({
+              name: creator.userName,
+              email: creator.email,
+              category: "Election Creator",
+            });
+          });
         }
 
         // Add voters based on filter
         if (filter === "All" || filter === "Voter") {
-          data.data.voters.voters.forEach((voter: any) => {
+          data.data.voters.forEach((voter: any) => {
             const existingCreatorIndex = mergedDataArray.findIndex(
               (user) => user.email === voter.email
             );
@@ -174,11 +174,9 @@ const UserSection = () => {
 
   if (isFetchUsers)
     return (
-      <AdminLayout>
-        <div className="text-center mt-10">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
-        </div>
-      </AdminLayout>
+      <div className="text-center ">
+        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      </div>
     );
 
   return (
