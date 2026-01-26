@@ -15,7 +15,6 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
   const [errorMesssage, setErrorMessage] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const now = new Date();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,7 +23,6 @@ const ElectionId = ({ electionId }: { electionId: string }) => {
       const bodyData = {
         election_id: electionId,
         access_id: accessCode,
-        date: now.toISOString(),
       };
       const { data } = await voterLogin(bodyData);
       const cookie = new Cookies();

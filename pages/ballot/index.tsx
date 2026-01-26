@@ -2,8 +2,6 @@ import React, { useEffect, useState, useContext } from "react";
 import leftline from "../../public/assets/images/left-line.svg";
 import rightline from "../../public/assets/images/right-line.svg";
 import { Details, ElectionDetails } from "@/utils/types";
-
-import avatar from "../../public/assets/images/avatar-placeholder.png";
 import checked from "../../public/assets/icons/checked.svg";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
@@ -30,8 +28,6 @@ import { enterVotes } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
-import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
-import { getServerSession } from "next-auth";
 import { useSession, signOut } from "next-auth/react";
 import { Check, MessageSquare } from "lucide-react";
 
@@ -79,17 +75,12 @@ const Ballot = () => {
   const [abstentions, setAbstentions] = useState({} as any);
   const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const users = useCurrentUser();
-  const user = useUser();
+
   const [showModal, setShowModal] = useState(false);
-  const [showGoogleAuth, setShowGoogleAuth] = useState(true);
+
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
 
-  //   const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
-  //     Details[]
-  //   >([]);
-  const [colors, setColors] = useState<string[]>([]);
   const cols = [
     "#b138b3",
     "#00ff00",
@@ -98,6 +89,8 @@ const Ballot = () => {
     "#93241F",
     "#406b83",
   ];
+
+  const now = new Date();
 
   useEffect(() => {
     setIsClient(true);
@@ -272,6 +265,7 @@ const Ballot = () => {
       try {
         const electionData = {
           election_id: voterProfile.userData.election_id,
+          date: now.toISOString(),
         };
 
         const { data } = await getBallotCandidate(electionData);
