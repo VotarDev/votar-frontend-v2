@@ -125,15 +125,12 @@ const ResponseTable = () => {
     getElectionsData();
   }, []);
 
-  console.log(electionID);
   const getVoterResponses = async () => {
     setIsFetchResponse(true);
     try {
       if (electionID) {
         const bodyData = { election_id: electionID };
         const { data } = await getVoterResponse(USER_ID, bodyData);
-
-        console.log(data);
 
         if (data.data) {
           const fetchedResponses = data.data.voter_response;
@@ -153,7 +150,7 @@ const ResponseTable = () => {
               isExported: exportedIds.includes(String(item.id)),
             };
           });
-          console.log(updatedData);
+
           setVotarResponses(updatedData);
           setIsFetchResponse(false);
         }

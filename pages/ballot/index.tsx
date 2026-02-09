@@ -488,35 +488,26 @@ const Ballot = () => {
                   </h1>
                 </div>
                 {isVoteSuccessful ? (
-                  <div className="relative w-full bg-white p-8">
+                  <div className="relative w-full bg-white p-8 min-h-[600px] flex flex-col items-center justify-center">
                     {/* CENTERED SUCCESS MESSAGE */}
-                    <div className="md:absolute md:top-10 md:left-1/2 md:-translate-x-1/2 ">
-                      <div className="bg-white md:p-8 rounded-lg text-center md:max-w-xl mx-auto">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6 transform hover:scale-110 transition-transform duration-300">
-                          <Check
-                            className="w-14 h-14 text-white"
-                            strokeWidth={3}
-                          />
+                    <div className="relative inline-block mb-10 transform hover:scale-105 transition-transform duration-500">
+                      <div className="flex flex-col items-center justify-center top-0">
+                        <div className="pt-0 md:pt-0 text-center px-12">
+                          <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
+                            Certified Voter
+                          </p>
+                          <h2 className="text-xl md:text-3xl font-black text-[#22C55E] leading-tight uppercase break-words max-w-[200px] md:max-w-[400px]">
+                            {voterProfile.userData?.name ||
+                              session?.user?.name ||
+                              "Voter"}
+                          </h2>
                         </div>
-                        <h1 className="text-4xl font-bold text-green-600 mb-4">
-                          Success!
-                        </h1>
-                        <p className="text-xl mb-1">
-                          Your vote has been successfully submitted.
-                        </p>
-                        <p className="text-lg mb-6">
-                          Thank you for participating in the election.
-                        </p>
                       </div>
-                      {/* Go Home Button */}
-                      <div className="text-center mb-10">
-                        <button
-                          onClick={handleGoHome}
-                          className="px-12 py-4 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        >
-                          Go to Home
-                        </button>
-                      </div>
+                      <img
+                        src="/assets/images/customizable-image.jpeg"
+                        alt="Success Ribbon"
+                        className="w-[350px] md:w-[500px] h-auto"
+                      />
                     </div>
 
                     <div className=" bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
