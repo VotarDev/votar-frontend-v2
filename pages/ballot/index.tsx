@@ -489,7 +489,6 @@ const Ballot = () => {
                 </div>
                 {isVoteSuccessful ? (
                   <div className="relative w-full bg-white p-8 min-h-[600px] flex flex-col items-center justify-center">
-                    {/* CENTERED SUCCESS MESSAGE */}
                     <div className="relative inline-block mb-10 transform hover:scale-105 transition-transform duration-500">
                       <div className="flex flex-col items-center justify-center top-0">
                         <div className="pt-0 md:pt-0 text-center px-12">
