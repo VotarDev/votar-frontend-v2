@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import leftline from "../../public/assets/images/left-line.svg";
 import rightline from "../../public/assets/images/right-line.svg";
 import { Details, ElectionDetails } from "@/utils/types";
 import checked from "../../public/assets/icons/checked.svg";
 import { AnimatePresence } from "framer-motion";
 import Modal from "@/src/components/Modal";
+import { toPng } from "html-to-image";
 
 import { PiWarningCircleFill } from "react-icons/pi";
 import { RootState, AppDispatch } from "@/redux/store";
@@ -29,7 +30,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
-import { Check, MessageSquare } from "lucide-react";
+import { Check, MessageSquare, Download } from "lucide-react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -77,6 +78,7 @@ const Ballot = () => {
   const [isClient, setIsClient] = useState(false);
 
   const [showModal, setShowModal] = useState(false);
+  const badgeRef = useRef(null);
 
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const { data: session, status } = useSession();
@@ -90,7 +92,7 @@ const Ballot = () => {
     "#406b83",
   ];
 
-  const now = new Date();
+  const now = new Date().getTime();
 
   useEffect(() => {
     setIsClient(true);
@@ -105,8 +107,6 @@ const Ballot = () => {
       setCandidateId(id);
     }
   }, [router.query.candidate]);
-
-  console.log(session);
 
   useEffect(() => {
     const registerVotar = async () => {
@@ -265,7 +265,7 @@ const Ballot = () => {
       try {
         const electionData = {
           election_id: voterProfile.userData.election_id,
-          date: now.toISOString(),
+          date: now,
         };
 
         const { data } = await getBallotCandidate(electionData);
@@ -273,7 +273,6 @@ const Ballot = () => {
         if (data) {
           setCandidates(data.data);
         }
-        console.log(data.data);
       } catch (error: any) {
         setElectionEnded(error?.response?.data?.message);
         console.error("Error fetching candidates:", error);
@@ -398,6 +397,21 @@ const Ballot = () => {
     setAllPositionsSelected(isAllPositionsSelected);
   }, [selectedCandidates, abstentions, combinedData]);
 
+  const downloadBadge = () => {
+    if (badgeRef.current === null) return;
+
+    toPng(badgeRef.current, { cacheBust: true })
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = "my-votar-badge.png";
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error("oops, something went wrong!", err);
+      });
+  };
+
   if (election?.published === false) {
     return (
       <>
@@ -489,7 +503,10 @@ const Ballot = () => {
                 </div>
                 {isVoteSuccessful ? (
                   <div className="relative w-full bg-white p-8 min-h-[600px] flex flex-col items-center justify-center">
-                    <div className="relative inline-block mb-10 transform hover:scale-105 transition-transform duration-500">
+                    <div
+                      ref={badgeRef}
+                      className="relative inline-block mb-10 transform hover:scale-105 transition-transform duration-500 bg-white p-4"
+                    >
                       <div className="flex flex-col items-center justify-center top-0">
                         <div className="pt-0 md:pt-0 text-center px-12">
                           <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
@@ -509,16 +526,25 @@ const Ballot = () => {
                       />
                     </div>
 
-                    <div className=" bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
-                      {/* Feedback Section */}
-                      <div className="mb-10 ">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <div className="bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
+                      <div className="mb-10 flex flex-col gap-4">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                           <MessageSquare className="w-6 h-6 text-blue-600" />
-                          We love to hear from our users
+                          Actions
                         </h2>
+
+                        {/* NEW DOWNLOAD BUTTON */}
+                        <button
+                          onClick={downloadBadge}
+                          className="w-full md:w-auto px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-2"
+                        >
+                          <Download className="w-5 h-5" />
+                          Download My Badge
+                        </button>
+
                         <button className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-2">
                           <MessageSquare className="w-5 h-5" />
-                          Click to give us your feedback
+                          Give us feedback
                         </button>
                       </div>
                     </div>
