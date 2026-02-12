@@ -94,8 +94,9 @@ const FreeVotarBallot = () => {
   >([]);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [selectedDetails, setSelecteDetails] = useState<string | null>(null);
-
   const { data: session, status } = useSession();
+
+  const now = new Date();
 
   const cols = [
     "#b138b3",
@@ -130,6 +131,7 @@ const FreeVotarBallot = () => {
         email: session?.user?.email,
         image: session?.user?.image,
         election_id: candidateId,
+        date: now.toISOString(),
       };
 
       const { data } = await registerVoter(userData);

@@ -92,7 +92,7 @@ const Ballot = () => {
     "#406b83",
   ];
 
-  const now = new Date().getTime();
+  const now = new Date();
 
   useEffect(() => {
     setIsClient(true);
@@ -265,7 +265,7 @@ const Ballot = () => {
       try {
         const electionData = {
           election_id: voterProfile.userData.election_id,
-          date: now,
+          date: now.toISOString(),
         };
 
         const { data } = await getBallotCandidate(electionData);
