@@ -97,6 +97,9 @@ const FreeVotarBallot = () => {
   const { data: session, status } = useSession();
 
   const now = new Date();
+  const formattedDate = now.toLocaleString("en-US", {
+    timeZone: "Africa/Lagos",
+  });
 
   const cols = [
     "#b138b3",
@@ -131,7 +134,7 @@ const FreeVotarBallot = () => {
         email: session?.user?.email,
         image: session?.user?.image,
         election_id: candidateId,
-        date: now.toISOString(),
+        date: formattedDate,
       };
 
       const { data } = await registerVoter(userData);

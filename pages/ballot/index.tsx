@@ -93,6 +93,9 @@ const Ballot = () => {
   ];
 
   const now = new Date();
+  const formattedDate = now.toLocaleString("en-US", {
+    timeZone: "Africa/Lagos",
+  });
 
   useEffect(() => {
     setIsClient(true);
@@ -118,7 +121,6 @@ const Ballot = () => {
           election_id: candidateId,
         };
         const { data } = await registerVoter(userData);
-        console.log(data);
       } catch (error) {
         console.log(error);
       }
@@ -265,7 +267,7 @@ const Ballot = () => {
       try {
         const electionData = {
           election_id: voterProfile.userData.election_id,
-          date: now.toISOString(),
+          date: formattedDate,
         };
 
         const { data } = await getBallotCandidate(electionData);
