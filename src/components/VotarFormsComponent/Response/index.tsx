@@ -135,19 +135,12 @@ const ResponseTable = () => {
         if (data.data) {
           const fetchedResponses = data.data.voter_response;
 
-          let exportedIds: string[] = [];
-
-          if (typeof window !== "undefined") {
-            exportedIds = JSON.parse(
-              localStorage.getItem(`exportedIds_${electionID}`) || "[]"
-            );
-          }
-
-          const updatedData = fetchedResponses.map((item: VoterResponse) => {
+          const updatedData = fetchedResponses.map((item: any) => {
             return {
               ...item,
               isDuplicate: false,
-              isExported: exportedIds.includes(String(item.id)),
+
+              isExported: item.exported || false,
             };
           });
 
@@ -311,22 +304,16 @@ const ResponseTable = () => {
       "email",
     ]).filter((item) => !item.isExported);
 
+    if (uniqueItems.length === 0) {
+      toast.error("No new voters to export");
+      return;
+    }
+
     setIsExporting(true);
     const token = cookies.get("user-token");
     if (token) {
       setAuthToken(token);
     }
-
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else if (typeof window !== "undefined") {
-    //   const tokenLocal = localStorage.getItem("token");
-    //   if (tokenLocal) {
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
-
-    if (electionID) localStorage.setItem("ElectionId", electionID);
 
     const responseData: ResponseData = {
       voters: uniqueItems,
@@ -339,31 +326,7 @@ const ResponseTable = () => {
         setIsExporting(false);
         toast.success("Responses exported successfully");
 
-        let exportedIds: string[] = [];
-
-        if (typeof window !== "undefined") {
-          exportedIds = JSON.parse(
-            localStorage.getItem(`exportedIds_${electionID}`) || "[]"
-          );
-        }
-
-        const newExportedIds = [
-          ...exportedIds,
-          ...uniqueItems.map((item) => item.id),
-        ];
-
-        localStorage.setItem(
-          `exportedIds_${electionID}`,
-          JSON.stringify(Array.from(new Set(newExportedIds)))
-        );
-
-        const updatedResponses = votarResponses.map((item) =>
-          uniqueItems.some((exported) => exported.id === item.id)
-            ? { ...item, isExported: true }
-            : item
-        );
-
-        setVotarResponses(updatedResponses);
+        getVoterResponses();
       }
     } catch (error: any) {
       const message =
@@ -372,7 +335,7 @@ const ResponseTable = () => {
           error.response.data.message) ||
         error.message ||
         error.toString();
-      toast.error(error.response.data.message || error.message);
+      toast.error(message);
       console.log(error);
       setIsExporting(false);
     }

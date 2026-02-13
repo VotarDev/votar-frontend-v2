@@ -528,7 +528,7 @@ const Ballot = () => {
                       />
                     </div>
 
-                    <div className="bg-white rounded-2xl w-full md:p-12 mb-8 md:absolute left-0">
+                    <div className="bg-white rounded-2xl w-full lg:w-auto md:p-12 mb-8 md:absolute left-0">
                       <div className="mb-10 flex flex-col gap-4">
                         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                           <MessageSquare className="w-6 h-6 text-blue-600" />
