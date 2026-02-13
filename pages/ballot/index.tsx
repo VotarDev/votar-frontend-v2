@@ -503,18 +503,18 @@ const Ballot = () => {
                       : session?.user?.name}
                   </h1>
                 </div>
-                {isVoteSuccessful ? (
-                  <div className="relative w-full bg-white p-8 min-h-[600px] flex flex-col items-center justify-center">
+                {!isVoteSuccessful ? (
+                  <div className="relative w-full bg-white lg:p-8 p-4 min-h-[600px] flex flex-col items-center justify-center">
                     <div
                       ref={badgeRef}
-                      className="relative inline-block mb-10 transform hover:scale-105 transition-transform duration-500 bg-white p-4"
+                      className="relative inline-block lg:mb-10 transform lg:hover:scale-105 transition-transform duration-500 bg-white p-4"
                     >
                       <div className="flex flex-col items-center justify-center top-0">
-                        <div className="pt-0 md:pt-0 text-center px-12">
+                        <div className="pt-0 md:pt-0 text-center lg:px-12">
                           <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
                             Certified Voter
                           </p>
-                          <h2 className="text-xl md:text-3xl font-black text-[#22C55E] leading-tight uppercase break-words max-w-[200px] md:max-w-[400px]">
+                          <h2 className="text-xl md:text-3xl font-black text-[#22C55E] leading-tight uppercase break-words max-w-[300px] md:max-w-[400px]">
                             {voterProfile.userData?.name ||
                               session?.user?.name ||
                               "Voter"}
@@ -528,7 +528,7 @@ const Ballot = () => {
                       />
                     </div>
 
-                    <div className="bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
+                    <div className="bg-white rounded-2xl w-full md:p-12 mb-8 md:absolute left-0">
                       <div className="mb-10 flex flex-col gap-4">
                         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                           <MessageSquare className="w-6 h-6 text-blue-600" />
