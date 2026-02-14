@@ -336,7 +336,7 @@ const ResponseTable = () => {
         error.message ||
         error.toString();
       toast.error(message);
-      console.log(error);
+
       setIsExporting(false);
     }
   };

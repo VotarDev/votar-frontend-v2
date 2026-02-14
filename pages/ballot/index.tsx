@@ -503,7 +503,7 @@ const Ballot = () => {
                       : session?.user?.name}
                   </h1>
                 </div>
-                {!isVoteSuccessful ? (
+                {isVoteSuccessful ? (
                   <div className="relative w-full bg-white lg:p-8 p-4 min-h-[600px] flex flex-col items-center justify-center">
                     <div
                       ref={badgeRef}
