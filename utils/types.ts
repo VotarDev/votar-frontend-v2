@@ -210,3 +210,35 @@ export type DetailFormAction =
   | { type: "DECREMENT_PRICE_PER_VOTE"; value: number }
   | { type: "INCREMENT_FREE_VOTE"; value: number }
   | { type: "DECREMENT_FREE_VOTE"; value: number };
+
+export type BallotData = {
+  allow_abstain: boolean;
+  author_id: string;
+  candidates: FreeVotarCandidate[];
+  name_of_position: string;
+  show_pictures: boolean;
+  _id: string;
+  __v: number;
+};
+
+export type FreeVotarCandidate = {
+  candidate_name: string;
+  candidate_nickname: string;
+  candidate_picture: string;
+  more_details?: string;
+  media: string;
+  vote: number;
+  _id: string;
+};
+
+export type SelectedCandidates = {
+  position: string;
+  candidates?: FreeVotarCandidate[];
+  abstain?: boolean;
+};
+
+export type FreeVoteDetail = {
+  position: string;
+  free_votes: number;
+  _id: string;
+};

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import leftline from "../../../public/assets/images/left-line.svg";
 import rightline from "../../../public/assets/images/right-line.svg";
 import { ElectionDetails } from "@/utils/types";
@@ -35,7 +35,8 @@ import {
   loadVotarCreditFromStorage,
   setVotarCredit,
 } from "@/redux/features/votarCredit/votarCreditSlice";
-import { Check, MessageSquare, UserPlus } from "lucide-react";
+import { Check, Download, MessageSquare, UserPlus } from "lucide-react";
+import { toPng } from "html-to-image";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -97,6 +98,7 @@ const FreeVotarBallot = () => {
   const { data: session, status } = useSession();
 
   const now = new Date();
+  const badgeRef = useRef(null);
   const formattedDate = now.toLocaleString("en-US", {
     timeZone: "Africa/Lagos",
   });
@@ -616,6 +618,21 @@ const FreeVotarBallot = () => {
     setSelecteDetails(details);
   };
 
+  const downloadBadge = () => {
+    if (badgeRef.current === null) return;
+
+    toPng(badgeRef.current, { cacheBust: true })
+      .then((dataUrl) => {
+        const link = document.createElement("a");
+        link.download = "my-votar-badge.png";
+        link.href = dataUrl;
+        link.click();
+      })
+      .catch((err) => {
+        console.error("oops, something went wrong!", err);
+      });
+  };
+
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
       <AnimatePresence mode="wait">
@@ -729,53 +746,55 @@ const FreeVotarBallot = () => {
                   )}
                 </div>
                 {isVoteSuccessful ? (
-                  <div className="relative w-full bg-white p-8">
-                    {/* CENTERED SUCCESS MESSAGE */}
-                    <div className="md:absolute md:top-10 md:left-1/2 md:-translate-x-1/2 ">
-                      <div className="bg-white md:p-8 rounded-lg text-center md:max-w-xl mx-auto">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full mb-6 transform hover:scale-110 transition-transform duration-300">
-                          <Check
-                            className="w-14 h-14 text-white"
-                            strokeWidth={3}
-                          />
+                  <div className="relative w-full bg-white lg:p-8 p-4 min-h-[600px] flex flex-col items-center justify-center">
+                    <div
+                      ref={badgeRef}
+                      className="relative inline-block lg:mb-10 transform lg:hover:scale-105 transition-transform duration-500 bg-white p-4"
+                    >
+                      <div className="flex flex-col items-center justify-center top-0">
+                        <div className="pt-0 md:pt-0 text-center lg:px-12">
+                          <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-1">
+                            Certified Voter
+                          </p>
+                          <h2 className="text-xl md:text-3xl font-black text-[#22C55E] leading-tight uppercase break-words max-w-[300px] md:max-w-[400px]">
+                            {voterProfile.userData?.name ||
+                              session?.user?.name ||
+                              "Voter"}
+                          </h2>
                         </div>
-                        <h1 className="text-4xl font-bold text-green-600 mb-4">
-                          Success!
-                        </h1>
-                        <p className="text-xl mb-1">
-                          Your vote has been successfully submitted.
-                        </p>
-                        <p className="text-lg mb-6">
-                          Thank you for participating in the election.
-                        </p>
                       </div>
-                      {/* Go Home Button */}
-                      <div className="text-center mb-10">
-                        <button
-                          onClick={handleGoHome}
-                          className="px-12 py-4 bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                        >
-                          Go to Home
-                        </button>
-                      </div>
+                      <img
+                        src="/assets/images/customizable-image.jpeg"
+                        alt="Success Ribbon"
+                        className="w-[350px] md:w-[500px] h-auto"
+                      />
                     </div>
 
-                    <div className=" bg-white rounded-2xl p-8 md:p-12 mb-8 md:absolute left-0">
-                      {/* Feedback Section */}
-                      <div className="mb-10 ">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <div className="bg-white rounded-2xl w-full lg:w-auto md:p-12 mb-8 md:absolute left-0">
+                      <div className="mb-10 flex flex-col gap-4">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                           <MessageSquare className="w-6 h-6 text-blue-600" />
-                          We love to hear from our users
+                          Actions
                         </h2>
+
+                        {/* NEW DOWNLOAD BUTTON */}
+                        <button
+                          onClick={downloadBadge}
+                          className="w-full md:w-auto px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-2"
+                        >
+                          <Download className="w-5 h-5" />
+                          Download My Badge
+                        </button>
+
                         <button className="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center gap-2">
                           <MessageSquare className="w-5 h-5" />
-                          Click to give us your feedback
+                          Give us feedback
                         </button>
                       </div>
                     </div>
 
                     {/* Social Media Section */}
-                    <div className="vibrate bg-gradient-to-r md:absolute right-0 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
+                    <div className="vibrate bg-gradient-to-r md:absolute right-10 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
                       <div className="text-center">
                         <h3 className="text-2xl font-bold mb-4">
                           Know more about us &
