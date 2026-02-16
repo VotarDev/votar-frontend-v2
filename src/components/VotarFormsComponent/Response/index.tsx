@@ -296,7 +296,12 @@ const ResponseTable = () => {
   };
 
   const exportResponseToElection = async (): Promise<void> => {
-    const uniqueItems: VoterResponse[] = filterDuplicates(votarResponses, [
+    const votersToProcess =
+      selectedRows.length > 0
+        ? selectedRows
+        : votarResponses.filter((item) => !item.isExported);
+
+    const uniqueItems: VoterResponse[] = filterDuplicates(votersToProcess, [
       "id",
       "name",
       "subgroup",
@@ -305,7 +310,11 @@ const ResponseTable = () => {
     ]).filter((item) => !item.isExported);
 
     if (uniqueItems.length === 0) {
-      toast.error("No new voters to export");
+      toast.error(
+        selectedRows.length > 0
+          ? "Selected voters are already exported"
+          : "No new voters to export"
+      );
       return;
     }
 
@@ -324,19 +333,18 @@ const ResponseTable = () => {
       const { data } = await exportVoters(responseData, USER_ID);
       if (data) {
         setIsExporting(false);
-        toast.success("Responses exported successfully");
+        toast.success(
+          `${uniqueItems.length} Response(s) exported successfully`
+        );
+
+        setSelectedRows([]);
 
         getVoterResponses();
       }
     } catch (error: any) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
+        error.response?.data?.message || error.message || "Export failed";
       toast.error(message);
-
       setIsExporting(false);
     }
   };
@@ -367,8 +375,10 @@ const ResponseTable = () => {
               onClick={exportResponseToElection}
               className="w-56 h-16 flex justify-center items-center p-4 text-blue-700 rounded-lg text-center bg-white text-lg border border-blue-700"
             >
-              {" "}
-              Export To Election
+              {selectedRows.length > 0
+                ? `Export Selected (${selectedRows.length})`
+                : "Export All To Election"}
+
               {isExporting && (
                 <CircularProgress
                   size={20}
