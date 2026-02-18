@@ -189,7 +189,6 @@ const ResponseTable = () => {
           if (e.target?.result) {
             const binaryStr = e.target?.result;
             const workBook = XLSX.read(binaryStr, { type: "binary" });
-
             const workSheetName = workBook.SheetNames[0];
             const workSheet = workBook.Sheets[workSheetName];
 
@@ -200,66 +199,49 @@ const ResponseTable = () => {
             });
 
             const newUserData = csvData
-              .map(
-                ([id, name, subgroup, phoneNumber, email]: [
-                  string | number,
-                  string,
-                  string,
-                  string | number,
-                  string
-                ]) => {
-                  return {
-                    id: typeof id === "string" ? id : String(id),
-                    name,
-                    subgroup,
-                    phoneNumber:
-                      typeof phoneNumber === "number"
-                        ? phoneNumber.toString()
-                        : phoneNumber,
-                    email,
-                  };
-                }
-              )
+              .map(([id, name, subgroup, phoneNumber, email]: any) => ({
+                id: String(id),
+                name,
+                subgroup,
+                phoneNumber: String(phoneNumber),
+                email,
+              }))
               .filter(
                 (newUser: any) =>
                   newUser.id &&
                   newUser.name &&
-                  !votarResponses.some(
-                    (existingUser) => existingUser.id === newUser.id
-                  )
+                  !votarResponses.some((existing) => existing.id === newUser.id)
               );
 
+            if (newUserData.length === 0) {
+              toast.error("No new unique voters found in file");
+              setIsImporting(false);
+              return;
+            }
+
+            const bodyData = {
+              electionId: electionID,
+              voters: newUserData,
+            };
+
+            const res = await importFromCsv(USER_ID, bodyData);
+
             const combinedData = [...votarResponses, ...newUserData];
-            setVotarResponses(combinedData);
 
             const seen: Record<string, boolean> = {};
             const updatedData = combinedData.map((item) => {
               const key = `${item.name}_${item.phoneNumber}_${item.email}`;
-
               if (seen[key]) {
-                return { ...item, isDuplicate: true } as VoterResponse;
+                return { ...item, isDuplicate: true };
               } else {
                 seen[key] = true;
-                return { ...item, isDuplicate: false } as VoterResponse;
+                return { ...item, isDuplicate: false };
               }
             });
 
-            const bodyData = {
-              electionId: electionID,
-              voters: filterDuplicates(updatedData, [
-                "id",
-                "name",
-                "subgroup",
-                "phoneNumber",
-                "email",
-              ]),
-            };
-
-            const res = await importFromCsv(USER_ID, bodyData);
-            setIsImporting(false);
-            console.log(res);
-            toast.success("Imported File Successfully");
             setVotarResponses(updatedData);
+            setIsImporting(false);
+            toast.success("Imported New Voters Successfully");
           }
           handleCloseImportElection();
         };
@@ -268,6 +250,7 @@ const ResponseTable = () => {
       }
     } catch (e: any) {
       setIsImporting(false);
+      toast.error("Import failed");
       console.log(e);
     }
   };

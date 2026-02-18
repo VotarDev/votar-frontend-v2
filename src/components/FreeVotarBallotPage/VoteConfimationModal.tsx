@@ -24,6 +24,7 @@ const VoteConfirmationModal: React.FC<VoteConfirmationModalProps> = ({
   onClose,
   onConfirm,
 }) => {
+  console.log("Selected Candidates in Modal:", selectedCandidates);
   return (
     <AnimatePresence mode="wait">
       {showModal && (

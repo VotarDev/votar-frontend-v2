@@ -35,7 +35,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({
         />
       </div>
 
-      <div className="bg-white rounded-2xl w-full lg:w-auto md:p-12 mb-8 md:absolute left-0">
+      <div className="bg-white rounded-2xl w-full xl:w-auto md:p-12 mb-8 xl:absolute left-0">
         <div className="mb-10 flex flex-col gap-4">
           <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
             <MessageSquare className="w-6 h-6 text-blue-600" />
@@ -59,7 +59,7 @@ const SuccessScreen: React.FC<SuccessScreenProps> = ({
       </div>
 
       {/* Social Media Section */}
-      <div className="vibrate bg-gradient-to-r md:absolute right-10 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 mt-10 transform transition-transform duration-300 ease-out hover:scale-105">
+      <div className="vibrate bg-gradient-to-r xl:absolute right-10 from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-8 text-white mb-8 xl:mt-10 mt-0 transform transition-transform duration-300 ease-out hover:scale-105 w-full xl:w-auto">
         <div className="text-center">
           <h3 className="text-2xl font-bold mb-4">Know more about us &</h3>
           <p className="text-lg mb-6">
