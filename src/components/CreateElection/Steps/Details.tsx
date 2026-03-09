@@ -10,7 +10,6 @@ import Select, {
 import { FaCaretDown } from "react-icons/fa";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import calendar from "../../../../public/assets/icons/calendar-2.svg";
-import moment from "moment";
 import { useSelector } from "react-redux";
 import { OptionTypes } from "@/utils/types";
 import { set } from "lodash";
@@ -205,6 +204,42 @@ const Details = ({
     setChecked(event.target.checked);
   };
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
+
+  const formatDateTimeToUTC = (date: string, time: string): string => {
+    if (!date || !time) return "";
+
+    const [hours, minutes] = time.split(":").map(Number);
+
+    const dateTime = new Date(date);
+    dateTime.setHours(hours, minutes, 0, 0);
+
+    const utcDateTime = new Date(dateTime.getTime() - 1 * 60 * 60 * 1000);
+
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const month = months[utcDateTime.getMonth()];
+    const day = utcDateTime.getDate();
+    const year = utcDateTime.getFullYear();
+    const utcHours = utcDateTime.getHours().toString().padStart(2, "0");
+    const utcMinutes = utcDateTime.getMinutes().toString().padStart(2, "0");
+
+    return `${month} ${day}, ${year} ${utcHours}:${utcMinutes}`;
+  };
+
+  console.log(startDate);
 
   return (
     <div className="lg:my-[60px] my-10 ">
@@ -422,11 +457,13 @@ const Details = ({
                 name="time"
                 className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
                 id="time"
-                onChange={(e) =>
-                  setStartTime(
-                    moment(e.target.value, "HH:mm:ss").format("HH:mm:ss")
-                  )
-                }
+                onChange={(e) => {
+                  const formattedDateTime = formatDateTimeToUTC(
+                    startDate,
+                    e.target.value
+                  );
+                  setStartTime(formattedDateTime);
+                }}
               />
             </div>
             <div className="flex flex-col gap-1 w-full lg:w-auto">
@@ -436,11 +473,13 @@ const Details = ({
                 name="time"
                 className="lg:w-[348px] h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
                 id="time"
-                onChange={(e) =>
-                  setEndTime(
-                    moment(e.target.value, "HH:mm:ss").format("HH:mm:ss")
-                  )
-                }
+                onChange={(e) => {
+                  const formattedDateTime = formatDateTimeToUTC(
+                    endDate,
+                    e.target.value
+                  );
+                  setEndTime(formattedDateTime);
+                }}
               />
             </div>
           </div>

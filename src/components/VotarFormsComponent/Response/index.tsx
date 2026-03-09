@@ -63,8 +63,8 @@ const ResponseTable = () => {
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -84,7 +84,7 @@ const ResponseTable = () => {
     setSelectedRows((prevSelectedRows) =>
       prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
         ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
-        : [...prevSelectedRows, row]
+        : [...prevSelectedRows, row],
     );
   };
 
@@ -132,14 +132,16 @@ const ResponseTable = () => {
         const bodyData = { election_id: electionID };
         const { data } = await getVoterResponse(USER_ID, bodyData);
 
-        if (data.data) {
+        if (data && data.data) {
           const fetchedResponses = data.data.voter_response;
+
+          const seen: Record<string, boolean> = {};
 
           const updatedData = fetchedResponses.map((item: any) => {
             return {
               ...item,
-              isDuplicate: false,
 
+              isDuplicate: item.duplicate || false,
               isExported: item.exported || false,
             };
           });
@@ -149,7 +151,7 @@ const ResponseTable = () => {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching responses:", error);
       setIsFetchResponse(false);
     }
   };
@@ -173,7 +175,7 @@ const ResponseTable = () => {
   };
 
   const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     event.preventDefault();
     const token = cookies.get("user-token");
@@ -198,20 +200,15 @@ const ResponseTable = () => {
               defval: "",
             });
 
-            const newUserData = csvData
-              .map(([id, name, subgroup, phoneNumber, email]: any) => ({
-                id: String(id),
-                name,
+            const newUserData = csvData.map(
+              ([id, name, subgroup, phoneNumber, email]: any) => ({
+                id: String(id).trim(),
+                name: String(name).trim(),
                 subgroup,
-                phoneNumber: String(phoneNumber),
-                email,
-              }))
-              .filter(
-                (newUser: any) =>
-                  newUser.id &&
-                  newUser.name &&
-                  !votarResponses.some((existing) => existing.id === newUser.id)
-              );
+                phoneNumber: String(phoneNumber).trim(),
+                email: String(email).trim(),
+              }),
+            );
 
             if (newUserData.length === 0) {
               toast.error("No new unique voters found in file");
@@ -224,24 +221,21 @@ const ResponseTable = () => {
               voters: newUserData,
             };
 
-            const res = await importFromCsv(USER_ID, bodyData);
+            await importFromCsv(USER_ID, bodyData);
 
             const combinedData = [...votarResponses, ...newUserData];
+            const seen = new Set();
 
-            const seen: Record<string, boolean> = {};
-            const updatedData = combinedData.map((item) => {
-              const key = `${item.name}_${item.phoneNumber}_${item.email}`;
-              if (seen[key]) {
-                return { ...item, isDuplicate: true };
-              } else {
-                seen[key] = true;
-                return { ...item, isDuplicate: false };
-              }
+            const flaggedData = combinedData.map((item) => {
+              const key = `${item.id}_${item.email}`;
+              const isDuplicate = seen.has(key);
+              seen.add(key);
+              return { ...item, isDuplicate };
             });
 
-            setVotarResponses(updatedData);
+            setVotarResponses(flaggedData);
             setIsImporting(false);
-            toast.success("Imported New Voters Successfully");
+            toast.success("Imported All Voters (Duplicates Flagged)");
           }
           handleCloseImportElection();
         };
@@ -264,7 +258,7 @@ const ResponseTable = () => {
 
   const filterDuplicates = (
     array: VoterResponse[],
-    keys: (keyof VoterResponse)[]
+    keys: (keyof VoterResponse)[],
   ): VoterResponse[] => {
     const seen = new Set<string>();
     return array.filter((item) => {
@@ -296,7 +290,7 @@ const ResponseTable = () => {
       toast.error(
         selectedRows.length > 0
           ? "Selected voters are already exported"
-          : "No new voters to export"
+          : "No new voters to export",
       );
       return;
     }
@@ -317,7 +311,7 @@ const ResponseTable = () => {
       if (data) {
         setIsExporting(false);
         toast.success(
-          `${uniqueItems.length} Response(s) exported successfully`
+          `${uniqueItems.length} Response(s) exported successfully`,
         );
 
         setSelectedRows([]);
@@ -429,7 +423,7 @@ const ResponseTable = () => {
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer"
                           checked={selectedRows.some(
-                            (selectedRow) => selectedRow.id === row.id
+                            (selectedRow) => selectedRow.id === row.id,
                           )}
                           onChange={() => handleCheckboxChange(row)}
                         />

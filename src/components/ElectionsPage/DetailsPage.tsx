@@ -120,7 +120,7 @@ const DetailsPage = ({
             const start = new Date(electionData.start_date);
             setTargetDateTime(start);
 
-            // ✅ Dispatch the times to the main state
+            // Dispatch the times to the main state
             dispatch({
               type: "SET_FIELD",
               field: "start_time",

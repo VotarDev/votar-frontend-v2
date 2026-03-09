@@ -167,8 +167,8 @@ const Create = () => {
     if (secondaryColor)
       detailsFormData.append("secondary_color", secondaryColor?.value);
 
-    detailsFormData.append("start_date", startDateData);
-    detailsFormData.append("end_date", endDateData);
+    detailsFormData.append("start_date", startTime);
+    detailsFormData.append("end_date", endTIme);
     detailsFormData.append("type", votarPlan);
     detailsFormData.append("price_per_vote", pricePerVote.toString());
     detailsFormData.append("free_votes", numberofFreeVote.toString());
