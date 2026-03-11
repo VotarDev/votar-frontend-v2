@@ -91,7 +91,7 @@ const ResponseTable = () => {
   const flagDuplicate = () => {
     const seen: Record<string, boolean> = {};
     const updatedData = votarResponses.map((item) => {
-      const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+      const key = `${item.id}_${item.name}_${item.phoneNumber}_${item.email}`;
 
       if (seen[key]) {
         return { ...item, isDuplicate: true } as VoterResponse;
@@ -134,8 +134,6 @@ const ResponseTable = () => {
 
         if (data && data.data) {
           const fetchedResponses = data.data.voter_response;
-
-          const seen: Record<string, boolean> = {};
 
           const updatedData = fetchedResponses.map((item: any) => {
             return {
@@ -227,7 +225,7 @@ const ResponseTable = () => {
             const seen = new Set();
 
             const flaggedData = combinedData.map((item) => {
-              const key = `${item.id}_${item.email}`;
+              const key = `${item.id}_${item.name}_${item.phoneNumber}_${item.email}`;
               const isDuplicate = seen.has(key);
               seen.add(key);
               return { ...item, isDuplicate };
@@ -256,35 +254,13 @@ const ResponseTable = () => {
     XSLX.writeFile(newWorkbook, "users.xlsx");
   };
 
-  const filterDuplicates = (
-    array: VoterResponse[],
-    keys: (keyof VoterResponse)[],
-  ): VoterResponse[] => {
-    const seen = new Set<string>();
-    return array.filter((item) => {
-      const key = keys.map((k) => item[k]).join("_");
-      if (seen.has(key)) {
-        return false;
-      } else {
-        seen.add(key);
-        return true;
-      }
-    });
-  };
-
   const exportResponseToElection = async (): Promise<void> => {
     const votersToProcess =
-      selectedRows.length > 0
-        ? selectedRows
-        : votarResponses.filter((item) => !item.isExported);
+      selectedRows.length > 0 ? selectedRows : votarResponses;
 
-    const uniqueItems: VoterResponse[] = filterDuplicates(votersToProcess, [
-      "id",
-      "name",
-      "subgroup",
-      "phoneNumber",
-      "email",
-    ]).filter((item) => !item.isExported);
+    const uniqueItems: VoterResponse[] = votersToProcess.filter(
+      (item) => !item.isExported && !item.isDuplicate,
+    );
 
     if (uniqueItems.length === 0) {
       toast.error(
@@ -410,9 +386,7 @@ const ResponseTable = () => {
                   <TableRow
                     key={index}
                     className={`${
-                      row.isDuplicate
-                        ? "opacity-30 bg-red-600 pointer-events-none"
-                        : ""
+                      row.isDuplicate ? "opacity-100 bg-red-600" : ""
                     } ${
                       row.isExported ? "opacity-40 pointer-events-none" : ""
                     }`}
@@ -422,6 +396,7 @@ const ResponseTable = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer"
+                          disabled={row.isDuplicate}
                           checked={selectedRows.some(
                             (selectedRow) => selectedRow.id === row.id,
                           )}
