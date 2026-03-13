@@ -50,7 +50,6 @@ const Details = ({
   const [monetizeElection, setMonetizeElection] = useState(false);
 
   //crop
-
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
@@ -62,7 +61,7 @@ const Details = ({
     (croppedArea: any, croppedAreaPixels: any) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
-    []
+    [],
   );
 
   const handleCropSave = async () => {
@@ -72,7 +71,7 @@ const Details = ({
       const croppedImage = await getCroppedImg(
         imageSrc,
         croppedAreaPixels,
-        rotation
+        rotation,
       );
 
       if (!croppedImage) {
@@ -115,7 +114,7 @@ const Details = ({
   };
 
   const handleBackgroundImageUpload = (
-    e: React.ChangeEvent<HTMLInputElement>
+    e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -144,17 +143,50 @@ const Details = ({
     return <span style={indicatorSeparatorStyle} {...innerProps} />;
   };
 
-  const primaryColors: OptionTypes[] = [
-    { value: "red", label: "Red" },
-    { value: "yellow", label: "Yellow" },
-    { value: "blue", label: "Blue" },
+  const colorOptions: OptionTypes[] = [
+    { value: "#EF4444", label: "Red" },
+    { value: "#F97316", label: "Orange" },
+    { value: "#F59E0B", label: "Amber" },
+    { value: "#EAB308", label: "Yellow" },
+    { value: "#84CC16", label: "Lime" },
+    { value: "#22C55E", label: "Green" },
+    { value: "#10B981", label: "Emerald" },
+    { value: "#14B8A6", label: "Teal" },
+    { value: "#06B6D4", label: "Cyan" },
+    { value: "#0EA5E9", label: "Sky Blue" },
+    { value: "#3B82F6", label: "Blue" },
+    { value: "#6366F1", label: "Indigo" },
+    { value: "#8B5CF6", label: "Violet" },
+    { value: "#A855F7", label: "Purple" },
+    { value: "#D946EF", label: "Fuchsia" },
+    { value: "#EC4899", label: "Pink" },
+    { value: "#F43F5E", label: "Rose" },
+    { value: "#1E3A5F", label: "Navy" },
+    { value: "#064E3B", label: "Forest Green" },
+    { value: "#7C2D12", label: "Brown" },
+    { value: "#1E1E1E", label: "Black" },
+    { value: "#FFFFFF", label: "White" },
+    { value: "#64748B", label: "Slate" },
+    { value: "#9CA3AF", label: "Gray" },
+    { value: "#FDE68A", label: "Pale Yellow" },
+    { value: "#FECACA", label: "Light Pink" },
+    { value: "#BBF7D0", label: "Mint" },
+    { value: "#BAE6FD", label: "Light Blue" },
+    { value: "#DDD6FE", label: "Lavender" },
   ];
 
-  const secondaryColors: OptionTypes[] = [
-    { value: "orange", label: "Orange" },
-    { value: "green", label: "Green" },
-    { value: "violet", label: "Violet" },
-  ];
+  const primaryColors = colorOptions;
+  const secondaryColors = colorOptions;
+
+  const formatColorOption = (option: any) => (
+    <div className="flex items-center gap-2">
+      <span
+        className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+        style={{ backgroundColor: option.value }}
+      />
+      <span>{option.label}</span>
+    </div>
+  );
 
   const indicatorSeparatorStyle = {
     display: "none",
@@ -361,6 +393,7 @@ const Details = ({
                   onChange={setPrimaryColor}
                   options={primaryColors}
                   placeholder=""
+                  formatOptionLabel={formatColorOption}
                   components={{ DropdownIndicator, IndicatorSeparator }}
                   className="lg:w-[348px] h-[48px] w-full"
                   styles={customStyles}
@@ -382,6 +415,7 @@ const Details = ({
                   onChange={setSecondaryColor}
                   options={secondaryColors}
                   placeholder=""
+                  formatOptionLabel={formatColorOption}
                   components={{ DropdownIndicator, IndicatorSeparator }}
                   className="lg:w-[348px] h-[48px] w-full"
                   styles={customStyles}
@@ -460,7 +494,7 @@ const Details = ({
                 onChange={(e) => {
                   const formattedDateTime = formatDateTimeToUTC(
                     startDate,
-                    e.target.value
+                    e.target.value,
                   );
                   setStartTime(formattedDateTime);
                 }}
@@ -476,7 +510,7 @@ const Details = ({
                 onChange={(e) => {
                   const formattedDateTime = formatDateTimeToUTC(
                     endDate,
-                    e.target.value
+                    e.target.value,
                   );
                   setEndTime(formattedDateTime);
                 }}
