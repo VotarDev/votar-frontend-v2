@@ -221,17 +221,7 @@ const ResponseTable = () => {
 
             await importFromCsv(USER_ID, bodyData);
 
-            const combinedData = [...votarResponses, ...newUserData];
-            const seen = new Set();
-
-            const flaggedData = combinedData.map((item) => {
-              const key = `${item.id}_${item.name}_${item.phoneNumber}_${item.email}`;
-              const isDuplicate = seen.has(key);
-              seen.add(key);
-              return { ...item, isDuplicate };
-            });
-
-            setVotarResponses(flaggedData);
+            await getVoterResponses();
             setIsImporting(false);
             toast.success("Imported All Voters (Duplicates Flagged)");
           }
