@@ -151,25 +151,6 @@ const Hero = () => {
           </div>
         </Marquee>
       </div>
-
-      {/* <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
-        <Image
-          src={testimony.src}
-          alt="testimonies"
-          width={60}
-          height={60}
-          className="w-[60px] h-[60px] lg:w-[100px] lg:h-[100px]"
-        />
-        <div>
-          <p className="mb-4 lg:text-xl text-sm">
-            “I never believed E- voting could be this convinient and reliable”
-          </p>
-
-          <p className="text-[#444] lg:text-base text-xs">
-            Britt K. - Digital Payments Hub Product Manager
-          </p>
-        </div>
-      </div> */}
     </div>
   );
 };
