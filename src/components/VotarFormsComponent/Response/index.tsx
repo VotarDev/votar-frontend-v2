@@ -135,13 +135,22 @@ const ResponseTable = () => {
         if (data && data.data) {
           const fetchedResponses = data.data.voter_response;
 
-          const updatedData = fetchedResponses.map((item: any) => {
-            return {
-              ...item,
+          // First pass: map backend flags
+          const mapped = fetchedResponses.map((item: any) => ({
+            ...item,
+            isDuplicate: item.duplicate || false,
+            isExported: item.exported || false,
+          }));
 
-              isDuplicate: item.duplicate || false,
-              isExported: item.exported || false,
-            };
+          // Second pass: client-side duplicate detection as safety net
+          const seen = new Set<string>();
+          const updatedData = mapped.map((item: VoterResponse) => {
+            const key = `${item.id}_${String(item.name).toLowerCase().trim()}_${String(item.phoneNumber).trim()}_${String(item.email).toLowerCase().trim()}`;
+            if (seen.has(key)) {
+              return { ...item, isDuplicate: true };
+            }
+            seen.add(key);
+            return item;
           });
 
           setVotarResponses(updatedData);
@@ -386,7 +395,7 @@ const ResponseTable = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer"
-                          disabled={row.isDuplicate}
+                          disabled={row.isDuplicate || row.isExported}
                           checked={selectedRows.some(
                             (selectedRow) => selectedRow.id === row.id,
                           )}
