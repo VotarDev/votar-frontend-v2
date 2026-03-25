@@ -160,17 +160,40 @@ const DetailsPage = ({
     }
   }, [targetDateTime]);
 
-  const primaryColors: OptionTypes[] = [
-    { value: "red", label: "Red" },
-    { value: "yellow", label: "Yellow" },
-    { value: "blue", label: "Blue" },
+  const colorOptions: OptionTypes[] = [
+    { value: "#EF4444", label: "Red" },
+    { value: "#F97316", label: "Orange" },
+    { value: "#F59E0B", label: "Amber" },
+    { value: "#EAB308", label: "Yellow" },
+    { value: "#84CC16", label: "Lime" },
+    { value: "#22C55E", label: "Green" },
+    { value: "#10B981", label: "Emerald" },
+    { value: "#14B8A6", label: "Teal" },
+    { value: "#06B6D4", label: "Cyan" },
+    { value: "#0EA5E9", label: "Sky Blue" },
+    { value: "#3B82F6", label: "Blue" },
+    { value: "#6366F1", label: "Indigo" },
+    { value: "#8B5CF6", label: "Violet" },
+    { value: "#A855F7", label: "Purple" },
+    { value: "#D946EF", label: "Fuchsia" },
+    { value: "#EC4899", label: "Pink" },
+    { value: "#F43F5E", label: "Rose" },
+    { value: "#1E3A5F", label: "Navy" },
+    { value: "#064E3B", label: "Forest Green" },
+    { value: "#7C2D12", label: "Brown" },
+    { value: "#1E1E1E", label: "Black" },
+    { value: "#FFFFFF", label: "White" },
+    { value: "#64748B", label: "Slate" },
+    { value: "#9CA3AF", label: "Gray" },
+    { value: "#FDE68A", label: "Pale Yellow" },
+    { value: "#FECACA", label: "Light Pink" },
+    { value: "#BBF7D0", label: "Mint" },
+    { value: "#BAE6FD", label: "Light Blue" },
+    { value: "#DDD6FE", label: "Lavender" },
   ];
 
-  const secondaryColors: OptionTypes[] = [
-    { value: "orange", label: "Orange" },
-    { value: "green", label: "Green" },
-    { value: "violet", label: "Violet" },
-  ];
+  const primaryColors = colorOptions;
+  const secondaryColors = colorOptions;
 
   const handleCandidateNo = (e: any) => {
     e.preventDefault();
@@ -419,7 +442,15 @@ const DetailsPage = ({
                           setPrimaryColorToggle(!primaryColorToggle)
                         }
                       >
-                        {primaryColor ?? election?.primary_color}
+                        <span className="flex items-center gap-2">
+                          {(primaryColor ?? election?.primary_color) && (
+                            <span
+                              className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+                              style={{ backgroundColor: primaryColor ?? election?.primary_color }}
+                            />
+                          )}
+                          {colorOptions.find(c => c.value === (primaryColor ?? election?.primary_color))?.label ?? (primaryColor ?? election?.primary_color)}
+                        </span>
                         <span
                           className={`text-2xl ${
                             primaryColorToggle
@@ -431,10 +462,10 @@ const DetailsPage = ({
                         </span>
                       </div>
                       {primaryColorToggle && (
-                        <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize">
+                        <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize overflow-y-auto max-h-48">
                           {primaryColors.map((color, index) => (
                             <div
-                              className="p-3 cursor-pointer hover:bg-[#ccc]"
+                              className="p-3 cursor-pointer hover:bg-[#f0f0f0] flex items-center gap-2"
                               key={index}
                               onClick={() => {
                                 setPrimaryColor(color.value);
@@ -445,7 +476,11 @@ const DetailsPage = ({
                                 setPrimaryColorToggle(false);
                               }}
                             >
-                              {color.value}
+                              <span
+                                className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+                                style={{ backgroundColor: color.value }}
+                              />
+                              {color.label}
                             </div>
                           ))}
                         </div>
@@ -461,7 +496,15 @@ const DetailsPage = ({
                           setSecondaryColorToggle(!secondaryColorToggle)
                         }
                       >
-                        {secondaryColor ?? election?.secondary_color}
+                        <span className="flex items-center gap-2">
+                          {(secondaryColor ?? election?.secondary_color) && (
+                            <span
+                              className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+                              style={{ backgroundColor: secondaryColor ?? election?.secondary_color }}
+                            />
+                          )}
+                          {colorOptions.find(c => c.value === (secondaryColor ?? election?.secondary_color))?.label ?? (secondaryColor ?? election?.secondary_color)}
+                        </span>
                         <span
                           className={`text-2xl ${
                             secondaryColorToggle
@@ -473,10 +516,10 @@ const DetailsPage = ({
                         </span>
                       </div>
                       {secondaryColorToggle && (
-                        <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize">
+                        <div className="absolute bg-white w-full rounded mt-1 shadow-md z-10 capitalize overflow-y-auto max-h-48">
                           {secondaryColors.map((color, index) => (
                             <div
-                              className="p-3 cursor-pointer hover:bg-[#ccc]"
+                              className="p-3 cursor-pointer hover:bg-[#f0f0f0] flex items-center gap-2"
                               key={index}
                               onClick={() => {
                                 setSecondaryColor(color.value);
@@ -484,11 +527,14 @@ const DetailsPage = ({
                                   type: "SET_SECONDARY_COLOR",
                                   value: color.value,
                                 });
-
                                 setSecondaryColorToggle(false);
                               }}
                             >
-                              {color.value}
+                              <span
+                                className="w-5 h-5 rounded-full border border-gray-300 flex-shrink-0"
+                                style={{ backgroundColor: color.value }}
+                              />
+                              {color.label}
                             </div>
                           ))}
                         </div>

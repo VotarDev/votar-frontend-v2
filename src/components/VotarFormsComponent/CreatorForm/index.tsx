@@ -55,8 +55,8 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   const finishEditing = (newContent: string) => {
     setSubGroup((prevItems) =>
       prevItems.map((item) =>
-        item.id === editingItemId ? { ...item, option: newContent } : item
-      )
+        item.id === editingItemId ? { ...item, option: newContent } : item,
+      ),
     );
     setEditingItemId(null);
   };
@@ -64,8 +64,8 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
   //   const editItem = (itemId: number, newContent: string) => {
   //     setSubGroup((prevItems) =>
@@ -120,8 +120,8 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
           setIsLoading(false);
         }
       }
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message);
       setIsLoading(false);
     }
   };
