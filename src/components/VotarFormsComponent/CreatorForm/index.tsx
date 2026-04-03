@@ -116,7 +116,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
         if (data) {
           toast.success("Form created succesfully");
           setFormLink(data.data.votar_form_link);
-          console.log(data);
+
           setIsLoading(false);
         }
       }

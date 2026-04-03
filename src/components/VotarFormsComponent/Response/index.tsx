@@ -277,7 +277,7 @@ const ResponseTable = () => {
     }
 
     const responseData: ResponseData = {
-      voters: uniqueItems,
+      voters: votersToProcess,
       election_id: electionID,
     };
 

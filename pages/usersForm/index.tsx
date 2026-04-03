@@ -33,11 +33,13 @@ const UsersForm = () => {
     email: "",
   });
 
+  console.log(token);
+
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
   useEffect(() => {
     const getElection = async () => {
@@ -91,16 +93,10 @@ const UsersForm = () => {
         const { data } = await getForms(USER_ID);
 
         if (data) {
-          console.log(
-            data.data[data.data.length - 1].subgroup.map((item: any) => {
-              return { value: item, label: item };
-            })
-          );
-          console.log(data);
           setOptions(
             data.data[data.data.length - 1].subgroup.map((item: any) => {
               return { value: item, label: item };
-            })
+            }),
           );
         }
       } catch (error) {
