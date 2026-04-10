@@ -2,7 +2,12 @@ import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import ElectionHeader from "@/src/components/VotarFormsComponent/ElectionHeader";
 import InputSelect from "@/src/components/InputSelect";
 import { IoIosArrowRoundForward } from "react-icons/io";
-import { getElectionById, getForms } from "@/utils/api";
+import {
+  getElectionById,
+  getForms,
+  getUserForm,
+  getVoterResponse,
+} from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { useRouter } from "next/router";
@@ -12,6 +17,7 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import Header from "@/src/components/BallotPage/Header";
 import Cookies from "universal-cookie";
+import { el } from "date-fns/locale";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);
@@ -90,11 +96,11 @@ const UsersForm = () => {
         setAuthToken(token);
       }
       try {
-        const { data } = await getForms(USER_ID);
+        const { data } = await getUserForm(electionID as string);
 
-        if (data) {
+        if (data?.data?.subgroup) {
           setOptions(
-            data.data[data.data.length - 1].subgroup.map((item: any) => {
+            data.data.subgroup.map((item: any) => {
               return { value: item, label: item };
             }),
           );
@@ -103,8 +109,10 @@ const UsersForm = () => {
         console.log(error);
       }
     };
-    getForm();
-  }, []);
+    if (electionID) {
+      getForm();
+    }
+  }, [electionID]);
 
   useEffect(() => {
     setIsClient(true);
