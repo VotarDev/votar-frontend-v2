@@ -19,7 +19,6 @@ const votarResponseUrl = "/voter/addVoter-response";
 const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
 const getUserResponseUrl = "/user/voter-response";
-const getUserFormUrl = "/user/addVoter_response";
 
 const updateElectionUrl = "/user/update-election";
 const sendVoterCredUrl = "/user/send-votersCred";
@@ -157,7 +156,7 @@ export const getVoterResponse = (id: string, data: any) => {
 };
 
 export const getUserForm = (id: string) => {
-  return httpService.get(getResponseUrl + `/${id}`);
+  return httpService.get(getResponseUrl, { params: { id } });
 };
 
 export const updateElection = (data: any, id: string) => {
