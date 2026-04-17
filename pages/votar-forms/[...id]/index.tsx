@@ -38,7 +38,7 @@ const CreateForm = () => {
       setElectionName(idType[0]);
       setElectionID(idType[1]);
     } else {
-      console.log("ID is undefined");
+      return;
     }
   }, [id, electionID]);
 

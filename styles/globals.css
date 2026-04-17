@@ -240,6 +240,20 @@
       transform: translateX(-2px);
     }
   }
+
+  @keyframes vibration {
+    0%,
+    100% {
+      transform: translate(0);
+    }
+    50% {
+      transform: translate(1px, -1px);
+    }
+  }
+
+  .vibrate {
+    animation: vibration 0.3s linear infinite;
+  }
 }
 
 .toggle {

@@ -27,7 +27,17 @@ const Hero = () => {
               className="font-bold lg:text-5xl text-[20px] lg:leading-[4.5rem] leading-[44px] "
             /> */}
             <h1 className="font-bold lg:text-5xl text-[28px] lg:leading-[4.5rem] leading-[36px] ">
-              Better Visibility For You...
+              <Typed
+                strings={[
+                  "Better Visibility For You...",
+                  "Your Voice Matters...",
+                  "Trusted By Many...",
+                ]}
+                typeSpeed={70}
+                backSpeed={80}
+                loop
+                showCursor={true}
+              />
             </h1>
           </div>
           <div className="max-w-[506px] lg:text-xl text-base  mt-3 lg:mb-7 mb-5">
@@ -37,8 +47,11 @@ const Hero = () => {
               <br /> Enter the Votar experience for free
             </p> */}
             <p className="max-w-[506px] lg:text-xl text-base mt-3 lg:mb-7 mb-5 leading-[40px]">
-              We bring trust to your choice visualization processes Enjoy the
-              Votar experience!…
+              Making elections and choice visualization simple, convenient,
+              trusted, and reliable for you! Whoever you are or wherever you
+              are.
+              <br />
+              Enjoy the Votar experience!...
             </p>
           </div>
           <div className="flex justify-center lg:block">
@@ -138,25 +151,6 @@ const Hero = () => {
           </div>
         </Marquee>
       </div>
-
-      {/* <div className="flex items-center   gap-3 max-w-[450px] mx-auto lg:mx-0  mt-7">
-        <Image
-          src={testimony.src}
-          alt="testimonies"
-          width={60}
-          height={60}
-          className="w-[60px] h-[60px] lg:w-[100px] lg:h-[100px]"
-        />
-        <div>
-          <p className="mb-4 lg:text-xl text-sm">
-            “I never believed E- voting could be this convinient and reliable”
-          </p>
-
-          <p className="text-[#444] lg:text-base text-xs">
-            Britt K. - Digital Payments Hub Product Manager
-          </p>
-        </div>
-      </div> */}
     </div>
   );
 };

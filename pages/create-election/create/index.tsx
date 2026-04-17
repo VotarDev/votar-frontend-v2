@@ -167,8 +167,8 @@ const Create = () => {
     if (secondaryColor)
       detailsFormData.append("secondary_color", secondaryColor?.value);
 
-    detailsFormData.append("start_date", startDateData);
-    detailsFormData.append("end_date", endDateData);
+    detailsFormData.append("start_date", startTime);
+    detailsFormData.append("end_date", endTIme);
     detailsFormData.append("type", votarPlan);
     detailsFormData.append("price_per_vote", pricePerVote.toString());
     detailsFormData.append("free_votes", numberofFreeVote.toString());
@@ -207,16 +207,15 @@ const Create = () => {
     try {
       switch (steps[currentStep - 1]) {
         case "Details":
-          console.log(startDateData, endDateData);
-          // if (token) {
-          //   setAuthToken(token);
-          // }
-          // const { data } = await createElection(detailsFormData, USER_ID);
-          // if (data) {
-          //   toast.success(data.status);
-          //   localStorage.setItem("ElectionId", data.data.election_id);
-          // }
-          // newStep++;
+          if (token) {
+            setAuthToken(token);
+          }
+          const { data } = await createElection(detailsFormData, USER_ID);
+          if (data) {
+            toast.success(data.status);
+            localStorage.setItem("ElectionId", data.data.election_id);
+          }
+          newStep++;
           break;
         case "Ballot":
           if (token) {

@@ -63,8 +63,8 @@ const ResponseTable = () => {
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -84,14 +84,14 @@ const ResponseTable = () => {
     setSelectedRows((prevSelectedRows) =>
       prevSelectedRows.some((selectedRow) => selectedRow.id === row.id)
         ? prevSelectedRows.filter((selectedRow) => selectedRow.id !== row.id)
-        : [...prevSelectedRows, row]
+        : [...prevSelectedRows, row],
     );
   };
 
   const flagDuplicate = () => {
     const seen: Record<string, boolean> = {};
     const updatedData = votarResponses.map((item) => {
-      const key = `${item.name}_${item.phoneNumber}_${item.email}`;
+      const key = `${item.id}_${item.name}_${item.phoneNumber}_${item.email}`;
 
       if (seen[key]) {
         return { ...item, isDuplicate: true } as VoterResponse;
@@ -133,33 +133,33 @@ const ResponseTable = () => {
         const bodyData = { election_id: electionID };
         const { data } = await getVoterResponse(USER_ID, bodyData);
 
-        console.log(data);
-
-        if (data.data) {
+        if (data && data.data) {
           const fetchedResponses = data.data.voter_response;
 
-          let exportedIds: string[] = [];
+          // First pass: map backend flags
+          const mapped = fetchedResponses.map((item: any) => ({
+            ...item,
+            isDuplicate: item.duplicate || false,
+            isExported: item.exported || false,
+          }));
 
-          if (typeof window !== "undefined") {
-            exportedIds = JSON.parse(
-              localStorage.getItem(`exportedIds_${electionID}`) || "[]"
-            );
-          }
-
-          const updatedData = fetchedResponses.map((item: VoterResponse) => {
-            return {
-              ...item,
-              isDuplicate: false,
-              isExported: exportedIds.includes(String(item.id)),
-            };
+          // Second pass: client-side duplicate detection as safety net
+          const seen = new Set<string>();
+          const updatedData = mapped.map((item: VoterResponse) => {
+            const key = `${item.id}_${String(item.name).toLowerCase().trim()}_${String(item.phoneNumber).trim()}_${String(item.email).toLowerCase().trim()}`;
+            if (seen.has(key)) {
+              return { ...item, isDuplicate: true };
+            }
+            seen.add(key);
+            return item;
           });
-          console.log(updatedData);
+
           setVotarResponses(updatedData);
           setIsFetchResponse(false);
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching responses:", error);
       setIsFetchResponse(false);
     }
   };
@@ -183,7 +183,7 @@ const ResponseTable = () => {
   };
 
   const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     event.preventDefault();
     const token = cookies.get("user-token");
@@ -199,7 +199,6 @@ const ResponseTable = () => {
           if (e.target?.result) {
             const binaryStr = e.target?.result;
             const workBook = XLSX.read(binaryStr, { type: "binary" });
-
             const workSheetName = workBook.SheetNames[0];
             const workSheet = workBook.Sheets[workSheetName];
 
@@ -209,67 +208,32 @@ const ResponseTable = () => {
               defval: "",
             });
 
-            const newUserData = csvData
-              .map(
-                ([id, name, subgroup, phoneNumber, email]: [
-                  string | number,
-                  string,
-                  string,
-                  string | number,
-                  string
-                ]) => {
-                  return {
-                    id: typeof id === "string" ? id : String(id),
-                    name,
-                    subgroup,
-                    phoneNumber:
-                      typeof phoneNumber === "number"
-                        ? phoneNumber.toString()
-                        : phoneNumber,
-                    email,
-                  };
-                }
-              )
-              .filter(
-                (newUser: any) =>
-                  newUser.id &&
-                  newUser.name &&
-                  !votarResponses.some(
-                    (existingUser) => existingUser.id === newUser.id
-                  )
-              );
+            const newUserData = csvData.map(
+              ([id, name, subgroup, phoneNumber, email]: any) => ({
+                id: String(id).trim(),
+                name: String(name).trim(),
+                subgroup,
+                phoneNumber: String(phoneNumber).trim(),
+                email: String(email).trim(),
+              }),
+            );
 
-            const combinedData = [...votarResponses, ...newUserData];
-            setVotarResponses(combinedData);
-
-            const seen: Record<string, boolean> = {};
-            const updatedData = combinedData.map((item) => {
-              const key = `${item.name}_${item.phoneNumber}_${item.email}`;
-
-              if (seen[key]) {
-                return { ...item, isDuplicate: true } as VoterResponse;
-              } else {
-                seen[key] = true;
-                return { ...item, isDuplicate: false } as VoterResponse;
-              }
-            });
+            if (newUserData.length === 0) {
+              toast.error("No new unique voters found in file");
+              setIsImporting(false);
+              return;
+            }
 
             const bodyData = {
               electionId: electionID,
-              voters: filterDuplicates(updatedData, [
-                "id",
-                "name",
-                "subgroup",
-                "phoneNumber",
-                "email",
-              ]),
+              voters: newUserData,
             };
 
-            const res = await importFromCsv(USER_ID, bodyData);
+            await importFromCsv(USER_ID, bodyData);
+
+            await getVoterResponses();
             setIsImporting(false);
-            console.log(res);
-            toast.success("Imported File Successfully");
-            setVotarResponses(updatedData);
+            toast.success("Imported All Voters (Duplicates Flagged)");
           }
           handleCloseImportElection();
         };
@@ -278,6 +242,7 @@ const ResponseTable = () => {
       }
     } catch (e: any) {
       setIsImporting(false);
+      toast.error("Import failed");
       console.log(e);
     }
   };
@@ -289,30 +254,22 @@ const ResponseTable = () => {
     XSLX.writeFile(newWorkbook, "users.xlsx");
   };
 
-  const filterDuplicates = (
-    array: VoterResponse[],
-    keys: (keyof VoterResponse)[]
-  ): VoterResponse[] => {
-    const seen = new Set<string>();
-    return array.filter((item) => {
-      const key = keys.map((k) => item[k]).join("_");
-      if (seen.has(key)) {
-        return false;
-      } else {
-        seen.add(key);
-        return true;
-      }
-    });
-  };
-
   const exportResponseToElection = async (): Promise<void> => {
-    const uniqueItems: VoterResponse[] = filterDuplicates(votarResponses, [
-      "id",
-      "name",
-      "subgroup",
-      "phoneNumber",
-      "email",
-    ]).filter((item) => !item.isExported);
+    const votersToProcess =
+      selectedRows.length > 0 ? selectedRows : votarResponses;
+
+    const uniqueItems: VoterResponse[] = votersToProcess.filter(
+      (item) => !item.isExported && !item.isDuplicate,
+    );
+
+    if (uniqueItems.length === 0) {
+      toast.error(
+        selectedRows.length > 0
+          ? "Selected voters are already exported"
+          : "No new voters to export",
+      );
+      return;
+    }
 
     setIsExporting(true);
     const token = cookies.get("user-token");
@@ -320,19 +277,8 @@ const ResponseTable = () => {
       setAuthToken(token);
     }
 
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else if (typeof window !== "undefined") {
-    //   const tokenLocal = localStorage.getItem("token");
-    //   if (tokenLocal) {
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
-
-    if (electionID) localStorage.setItem("ElectionId", electionID);
-
     const responseData: ResponseData = {
-      voters: uniqueItems,
+      voters: votersToProcess,
       election_id: electionID,
     };
 
@@ -340,43 +286,18 @@ const ResponseTable = () => {
       const { data } = await exportVoters(responseData, USER_ID);
       if (data) {
         setIsExporting(false);
-        toast.success("Responses exported successfully");
-
-        let exportedIds: string[] = [];
-
-        if (typeof window !== "undefined") {
-          exportedIds = JSON.parse(
-            localStorage.getItem(`exportedIds_${electionID}`) || "[]"
-          );
-        }
-
-        const newExportedIds = [
-          ...exportedIds,
-          ...uniqueItems.map((item) => item.id),
-        ];
-
-        localStorage.setItem(
-          `exportedIds_${electionID}`,
-          JSON.stringify(Array.from(new Set(newExportedIds)))
+        toast.success(
+          `${uniqueItems.length} Response(s) exported successfully`,
         );
 
-        const updatedResponses = votarResponses.map((item) =>
-          uniqueItems.some((exported) => exported.id === item.id)
-            ? { ...item, isExported: true }
-            : item
-        );
+        setSelectedRows([]);
 
-        setVotarResponses(updatedResponses);
+        getVoterResponses();
       }
     } catch (error: any) {
       const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      toast.error(error.response.data.message || error.message);
-      console.log(error);
+        error.response?.data?.message || error.message || "Export failed";
+      toast.error(message);
       setIsExporting(false);
     }
   };
@@ -407,8 +328,10 @@ const ResponseTable = () => {
               onClick={exportResponseToElection}
               className="w-56 h-16 flex justify-center items-center p-4 text-blue-700 rounded-lg text-center bg-white text-lg border border-blue-700"
             >
-              {" "}
-              Export To Election
+              {selectedRows.length > 0
+                ? `Export Selected (${selectedRows.length})`
+                : "Export All To Election"}
+
               {isExporting && (
                 <CircularProgress
                   size={20}
@@ -463,9 +386,7 @@ const ResponseTable = () => {
                   <TableRow
                     key={index}
                     className={`${
-                      row.isDuplicate
-                        ? "opacity-30 bg-red-600 pointer-events-none"
-                        : ""
+                      row.isDuplicate ? "opacity-100 bg-red-600" : ""
                     } ${
                       row.isExported ? "opacity-40 pointer-events-none" : ""
                     }`}
@@ -475,8 +396,9 @@ const ResponseTable = () => {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer"
+                          disabled={row.isDuplicate || row.isExported}
                           checked={selectedRows.some(
-                            (selectedRow) => selectedRow.id === row.id
+                            (selectedRow) => selectedRow.id === row.id,
                           )}
                           onChange={() => handleCheckboxChange(row)}
                         />

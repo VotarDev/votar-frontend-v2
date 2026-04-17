@@ -15,7 +15,7 @@ const getElectionIdUrl = "/user/get-electionById";
 const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
 const getFormsUrl = "/user/get-allForms";
-const votarResponseUrl = "/voter/voter-response";
+const votarResponseUrl = "/voter/addVoter-response";
 const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
 const getUserResponseUrl = "/user/voter-response";
@@ -155,6 +155,10 @@ export const getVoterResponse = (id: string, data: any) => {
   return httpService.post(getResponseUrl + `/${id}`, data);
 };
 
+export const getUserForm = (id: string) => {
+  return httpService.get(getResponseUrl, { params: { id } });
+};
+
 export const updateElection = (data: any, id: string) => {
   return httpService.put(updateElectionUrl + `/${id}`, data);
 };
@@ -176,7 +180,7 @@ export const getVoters = (
   data: any,
   page: string,
   limit: string,
-  search?: string
+  search?: string,
 ) => {
   return httpService.post(getVoterUrl + `/${id}`, data, {
     params: { page, limit, search },
@@ -227,8 +231,8 @@ export const monitorIndividualSubgroup = (id: string) => {
   return httpService.get(monitorIndividualSubGroupUrl, { params: { id } });
 };
 
-export const voterVerificationLink = (t: string) => {
-  return httpService.get(voterVerificationLinkUrl, { params: { t } });
+export const voterVerificationLink = (t: string, date: string) => {
+  return httpService.get(voterVerificationLinkUrl, { params: { t, date } });
 };
 
 export const monitorBarChart = (id: string) => {
@@ -275,14 +279,14 @@ export const deleteCandidate = (data: {
 
 export const deletePosition = (
   data: { election_id: string; name_of_position: string },
-  id: string
+  id: string,
 ) => {
   return httpService.delete(deletePositionUrl + `/${id}`, { data: data });
 };
 
 export const deleteElection = (
   electionId: string,
-  data: { election_id: string }
+  data: { election_id: string },
 ) => {
   return httpService.delete(deleteElectionUrl + `/${electionId}`, {
     data: data,
@@ -344,7 +348,7 @@ export const getAdminVotarPage = (type?: string) => {
 export const getAdminVotarElection = (
   type: string,
   page: string,
-  limit: string
+  limit: string,
 ) => {
   return httpService.get(adminVotarPageUrl, {
     params: {
@@ -373,7 +377,7 @@ export const adminGetAllUsers = (
   filter?: string,
   page?: string,
   limit?: string,
-  search?: string
+  search?: string,
 ) => {
   return httpService.get(adminGetAllUsersUrl, {
     params: { filter, page, limit, search },
