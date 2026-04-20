@@ -14,7 +14,7 @@ import ExportModal from "./ExportModal";
 import ImportModal from "./ImportModal";
 import XSLX from "sheetjs-style";
 import * as XLSX from "xlsx";
-import { getElections } from "@/utils/api";
+import { getElections, getVoterResponse2 } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { getVoterResponse, getForms, getUserResponse } from "@/utils/api";
 import { useRouter } from "next/router";
@@ -130,7 +130,7 @@ const ResponseTable = () => {
     try {
       if (electionID) {
         const bodyData = { election_id: electionID };
-        const { data } = await getVoterResponse(USER_ID, bodyData);
+        const { data } = await getVoterResponse2(electionID);
 
         if (data && data.data) {
           const fetchedResponses = data.data.voter_response;
