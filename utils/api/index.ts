@@ -155,6 +155,10 @@ export const getVoterResponse = (id: string, data: any) => {
   return httpService.post(getResponseUrl + `/${id}`, data);
 };
 
+export const getVoterResponse2 = (id: string) => {
+  return httpService.get(getResponseUrl, { params: { id } });
+};
+
 export const getUserForm = (id: string) => {
   return httpService.get(getResponseUrl, { params: { id } });
 };
