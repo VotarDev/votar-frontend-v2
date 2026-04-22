@@ -143,6 +143,10 @@ export const getUserResponse = (data: any, id: string) => {
   return httpService.post(getUserResponseUrl + `/${id}`, data);
 };
 
+export const toggleForm = (data: any) => {
+  return httpService.patch(getUserResponseUrl, data);
+};
+
 export const getForms = (id: string) => {
   return httpService.get(getFormsUrl + `/${id}`);
 };

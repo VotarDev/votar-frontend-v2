@@ -9,7 +9,7 @@ import Modal from "@/src/components/Modal";
 import EditModal from "./EditModal";
 import { toast } from "react-hot-toast";
 import { useCurrentUser, useUser } from "@/utils/hooks";
-import { createVotarForms } from "@/utils/api";
+import { createVotarForms, toggleForm } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import Cookies from "universal-cookie";
@@ -25,6 +25,8 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   const [formLink, setFormLink] = useState("");
   const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formActive, setFormActive] = useState(true);
+  const [isToggling, setIsToggling] = useState(false);
   const [newItemContent, setNewItemContent] = useState<string>("Add option");
   const [editingItemId, setEditingItemId] = useState<number | null>(null);
   const [electionID, setElectionID] = useState("");
@@ -126,6 +128,22 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
     }
   };
 
+  const handleToggleForm = async () => {
+    const newStatus = !formActive;
+    setIsToggling(true);
+    try {
+      const token = cookies.get("user-token");
+      if (token) setAuthToken(token);
+      await toggleForm({ electionId, status: newStatus });
+      setFormActive(newStatus);
+      toast.success(`Form is now ${newStatus ? "active" : "inactive"}`);
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message ?? "Failed to update form status");
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   const copyLink = () => {
     navigator.clipboard.writeText(formLink ?? "");
     toast.success("Link copied to clipboard");
@@ -140,7 +158,22 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
         <span className="font-bold">INSTRUCTION:</span> Please Fill in your
         Details Correctly
       </div>
-      <div className="flex justify-end pt-10">
+      <div className="flex justify-between items-center pt-10">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-zinc-700">
+            Form {formActive ? "Active" : "Inactive"}
+          </span>
+          <button
+            type="button"
+            onClick={handleToggleForm}
+            disabled={isToggling}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${formActive ? "bg-blue-700" : "bg-zinc-300"}`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${formActive ? "translate-x-6" : "translate-x-1"}`}
+            />
+          </button>
+        </div>
         <button
           className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
           onClick={handleViewResponse}
