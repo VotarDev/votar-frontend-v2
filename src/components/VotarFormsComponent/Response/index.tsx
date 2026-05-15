@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import Table from "@mui/material/Table";
 import { styled } from "@mui/material/styles";
 import TableBody from "@mui/material/TableBody";
@@ -6,6 +6,7 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { ElectionDetails, TableRowTypes, VoterResponse } from "@/utils/types";
 import ExportToExcel from "../../ExportToExcel";
 import { AnimatePresence } from "framer-motion";
@@ -53,6 +54,8 @@ const ResponseTable = () => {
   const [isFetchResponse, setIsFetchResponse] = useState<boolean>(false);
   const [isImporting, setIsImporting] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const users = useCurrentUser();
   const user = useUser();
   const router = useRouter();
@@ -306,6 +309,34 @@ const ResponseTable = () => {
   const handleOpenImportElection = () => setToggleImportElection(true);
   const handleCloseImportElection = () => setToggleImportElection(false);
 
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return votarResponses;
+    return votarResponses.filter(
+      (r) =>
+        r.name?.toLowerCase().includes(q) ||
+        r.email?.toLowerCase().includes(q) ||
+        r.phoneNumber?.toLowerCase().includes(q) ||
+        r.id?.toLowerCase().includes(q) ||
+        r.subgroup?.toLowerCase().includes(q),
+    );
+  }, [searchQuery, votarResponses]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: filteredRows.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: () => 57,
+    overscan: 10,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+  const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
+  const paddingBottom =
+    virtualItems.length > 0
+      ? totalSize - virtualItems[virtualItems.length - 1].end
+      : 0;
+
   return (
     <div className="mt-[80px] max-w-[1500px] mx-auto">
       <h1 className="underline text-blue-700 text-2xl text-center pb-10">
@@ -357,7 +388,24 @@ const ResponseTable = () => {
         </div>
       ) : (
         <div className="mt-10">
-          <TableContainer sx={{ maxHeight: 700 }} className="table-scroll pb-8">
+          <div className="mb-4 flex items-center justify-between gap-4">
+            <input
+              type="text"
+              placeholder="Search by name, email, phone, ID or sub-group..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full max-w-md border border-gray-300 rounded-md h-11 px-4 outline-none text-sm focus:border-blue-600"
+            />
+            <p className="text-sm text-gray-500 whitespace-nowrap">
+              {filteredRows.length.toLocaleString()} of{" "}
+              {votarResponses.length.toLocaleString()} records
+            </p>
+          </div>
+          <TableContainer
+            ref={scrollContainerRef}
+            sx={{ maxHeight: 700 }}
+            className="table-scroll pb-8"
+          >
             <Table
               sx={{
                 minWidth: 700,
@@ -367,70 +415,71 @@ const ResponseTable = () => {
             >
               <TableHead>
                 <TableRow>
-                  {headers.map((header, key) => {
-                    return (
-                      <StyledTableCell
-                        key={key}
-                        className=" border border-[#F5F5F5]"
-                        align="center"
-                      >
-                        {header}
-                      </StyledTableCell>
-                    );
-                  })}
+                  {headers.map((header, key) => (
+                    <StyledTableCell
+                      key={key}
+                      className="border border-[#F5F5F5]"
+                      align="center"
+                    >
+                      {header}
+                    </StyledTableCell>
+                  ))}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {votarResponses?.map((row, index) => (
-                  <TableRow
-                    key={index}
-                    className={`${
-                      row.isDuplicate ? "opacity-100 bg-red-600" : ""
-                    } ${
-                      row.isExported ? "opacity-40 pointer-events-none" : ""
-                    }`}
-                  >
-                    <StyledTableCell align="center">
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer"
-                          disabled={row.isDuplicate || row.isExported}
-                          checked={selectedRows.some(
-                            (selectedRow) => selectedRow.id === row.id,
-                          )}
-                          onChange={() => handleCheckboxChange(row)}
-                        />
-                      </div>
-                    </StyledTableCell>
-
-                    <StyledTableCell align="center">
-                      {index < 9 ? `0${index + 1}` : index + 1}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.id}</StyledTableCell>
-                    <StyledTableCell align="center">{row.name}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.subgroup}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.phoneNumber}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.email}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">
-                      <DeleteDialog
-                        selectedVoter={row.name}
-                        electionId={electionID}
-                        row={row}
-                        id={index}
-                        getUpdatedList={() => getVoterResponses()}
-                        voters={votarResponses}
-                        setVoters={setVotarResponses}
-                      />
-                    </StyledTableCell>
+                {paddingTop > 0 && (
+                  <TableRow style={{ height: paddingTop }}>
+                    <TableCell colSpan={8} style={{ padding: 0, border: 0 }} />
                   </TableRow>
-                ))}
+                )}
+                {virtualItems.map((virtualRow) => {
+                  const row = filteredRows[virtualRow.index];
+                  const index = virtualRow.index;
+                  return (
+                    <TableRow
+                      key={row.id ?? index}
+                      className={`${row.isDuplicate ? "opacity-100 bg-red-600" : ""} ${row.isExported ? "opacity-40 pointer-events-none" : ""}`}
+                    >
+                      <StyledTableCell align="center">
+                        <div className="flex items-center justify-center">
+                          <input
+                            type="checkbox"
+                            className="w-4 h-4 cursor-pointer"
+                            disabled={row.isDuplicate || row.isExported}
+                            checked={selectedRows.some(
+                              (selectedRow) => selectedRow.id === row.id,
+                            )}
+                            onChange={() => handleCheckboxChange(row)}
+                          />
+                        </div>
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {index < 9 ? `0${index + 1}` : index + 1}
+                      </StyledTableCell>
+                      <StyledTableCell align="center">{row.id}</StyledTableCell>
+                      <StyledTableCell align="center">{row.name}</StyledTableCell>
+                      <StyledTableCell align="center">{row.subgroup}</StyledTableCell>
+                      <StyledTableCell align="center">{row.phoneNumber}</StyledTableCell>
+                      <StyledTableCell align="center">{row.email}</StyledTableCell>
+                      <StyledTableCell align="center">
+                        <DeleteDialog
+                          selectedVoter={row.name}
+                          electionId={electionID}
+                          row={row}
+                          id={index}
+                          getUpdatedList={() => getVoterResponses()}
+                          voters={votarResponses}
+                          setVoters={setVotarResponses}
+                        />
+                      </StyledTableCell>
+                    </TableRow>
+                  );
+                })}
+                {paddingBottom > 0 && (
+                  <TableRow style={{ height: paddingBottom }}>
+                    <TableCell colSpan={8} style={{ padding: 0, border: 0 }} />
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>
