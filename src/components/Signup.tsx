@@ -268,8 +268,18 @@ const SignupComponent = () => {
                   }}
                 />
               }
-              label="
-              Accept privacy policy"
+              label={
+                <span className="text-sm text-[#454545]">
+                  I accept the{" "}
+                  <Link
+                    href="/privacy-policy"
+                    target="_blank"
+                    className="text-[#015CE9] underline hover:opacity-80"
+                  >
+                    Privacy Policy
+                  </Link>
+                </span>
+              }
             />
           </FormGroup>
         </div>

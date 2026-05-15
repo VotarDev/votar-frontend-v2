@@ -6,6 +6,8 @@ import { forgotPasswordRequest } from "@/utils/api";
 import { set } from "lodash";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import logo from "../../../public/assets/logos/logo_white-1.png";
 
 const ForgotPasswordComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,14 +48,10 @@ const ForgotPasswordComponent = () => {
   return (
     <div className="max-w-[1700px] mx-auto">
       <div>
-        <div className="relative w-full h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-purple-100 to-yellow-100 z-0"></div>
-
-          <div className="relative z-10 flex items-center pl-[100px] h-full">
-            <h1 className="text-4xl font-semibold text-black">
-              Forgot password
-            </h1>
-          </div>
+        <div className="w-full h-[140px] bg-blue-700 flex items-center px-10 lg:px-24 gap-6">
+          <Image src={logo} width={160} alt="Votar logo" />
+          <div className="w-px h-10 bg-white/30" />
+          <h1 className="text-2xl font-semibold text-white">Forgot Password</h1>
         </div>
       </div>
       {steps === 1 && (
