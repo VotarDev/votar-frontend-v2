@@ -87,7 +87,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
 
   useEffect(() => {
     if (Array.isArray(idType)) {
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     } else {
       console.log("ID is undefined");
     }

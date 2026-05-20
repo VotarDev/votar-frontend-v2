@@ -31,7 +31,7 @@ const MonitorAnElectionDetails = () => {
   useEffect(() => {
     if (idType) {
       setElectionName(idType[0]);
-      setElectionId(idType[1]);
+      setElectionId(idType[idType.length - 1]);
     }
   }, [id]);
 
