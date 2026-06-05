@@ -329,6 +329,11 @@ function Body({ positions, setPositions, electionId }: any) {
                         handleImageUpload(e, positionIndex, candidateIndex)
                       }
                     />
+                    {position.show_pictures && (
+                      <p className="text-xs text-stone-400 mt-1 text-center">
+                        Max 2 MB
+                      </p>
+                    )}
                   </div>
                   {/** Handling candidate image uploads */}
                   <div className="flex-1 flex flex-col gap-10 w-full">
@@ -439,6 +444,9 @@ function Body({ positions, setPositions, electionId }: any) {
                                   <FaCloudUploadAlt />
                                 </span>
                               </span>
+                              <p className="text-xs text-stone-400 mt-1">
+                                Max 10 MB
+                              </p>
                             </label>
                           )}
                           <input

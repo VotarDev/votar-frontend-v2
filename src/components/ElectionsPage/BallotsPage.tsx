@@ -562,6 +562,11 @@ const BallotsPage = ({ position, setPosition }: any) => {
                             handleImageUpload(e, positionIndex, candidateIndex)
                           }
                         />
+                        {position.show_pictures && (
+                          <p className="text-xs text-stone-400 mt-1 text-center">
+                            Max 2 MB
+                          </p>
+                        )}
                       </div>
                       <div className="flex-1 flex flex-col gap-10 w-full">
                         <div className="flex gap-8 lg:flex-row flex-col text-sm lg:text-base">
@@ -698,6 +703,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                       <FaCloudUploadAlt />
                                     </span>
                                   </span>
+                                  <p className="text-xs text-stone-400 mt-1">
+                                    Max 10 MB
+                                  </p>
                                 </label>
                               )}
                               <input
