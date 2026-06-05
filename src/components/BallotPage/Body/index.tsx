@@ -6,6 +6,7 @@ import placeholder from "../../../../public/assets/images/Placeholder.png";
 import { FaCloudUploadAlt } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Position } from "@/utils/types";
+import toast from "react-hot-toast";
 
 function Body({ positions, setPositions, electionId }: any) {
   const handleAddPosition = () => {
@@ -77,14 +78,22 @@ function Body({ positions, setPositions, electionId }: any) {
     setPositions(updatedPosition);
   };
 
+  const IMAGE_SIZE_LIMIT = 2 * 1024 * 1024; // 2 MB
+  const MEDIA_SIZE_LIMIT = 10 * 1024 * 1024; // 10 MB
+
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     positionIndex: number,
     candidateIndex: number
   ) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
 
     if (file) {
+      if (file.size > IMAGE_SIZE_LIMIT) {
+        toast.error("Image must be 2 MB or smaller.");
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
         const updatedPositions = [...positions];
@@ -97,7 +106,7 @@ function Body({ positions, setPositions, electionId }: any) {
 
         setPositions(updatedPositions);
       };
-      reader.readAsDataURL(file); // Convert the file to Base64 for localStorage
+      reader.readAsDataURL(file);
     }
   };
 
@@ -107,7 +116,13 @@ function Body({ positions, setPositions, electionId }: any) {
     candidateIndex: number
   ) => {
     const { files } = e.target;
+    e.target.value = "";
+
     if (files && files[0]) {
+      if (files[0].size > MEDIA_SIZE_LIMIT) {
+        toast.error("Media file must be 10 MB or smaller.");
+        return;
+      }
       const updatedPositions = [...positions];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
