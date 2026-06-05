@@ -168,14 +168,22 @@ const BallotsPage = ({ position, setPosition }: any) => {
     });
   };
 
+  const IMAGE_SIZE_LIMIT = 2 * 1024 * 1024; // 2 MB
+  const MEDIA_SIZE_LIMIT = 10 * 1024 * 1024; // 10 MB
+
   const handleImageUpload = (
     e: any,
     positionIndex: any,
     candidateIndex: any
   ) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
 
     if (file) {
+      if (file.size > IMAGE_SIZE_LIMIT) {
+        toast.error("Image must be 2 MB or smaller.");
+        return;
+      }
       const updatedPositions = [...position];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
@@ -220,7 +228,13 @@ const BallotsPage = ({ position, setPosition }: any) => {
     candidateIndex: number
   ) => {
     const { files } = e.target;
+    e.target.value = "";
+
     if (files && files[0]) {
+      if (files[0].size > MEDIA_SIZE_LIMIT) {
+        toast.error("Media file must be 10 MB or smaller.");
+        return;
+      }
       const updatedPositions = [...position];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
