@@ -144,7 +144,7 @@ const PaymentPlan = () => {
                 </p>
               </div>
               <div>
-                <p className="lg:text-3xl text-2xl font-bold">&#8358;35,000</p>
+                <p className="lg:text-3xl text-2xl font-bold">&#8358;45,000</p>
                 <p className="text-sm mt-1">
                   Covers all elections in a faculty or larger group for 1 year
                 </p>
