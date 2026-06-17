@@ -8,10 +8,10 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { votarProAcessRequest } from "@/utils/util";
 import { getVotarPageByElection } from "@/utils/api";
 import Cookies from "universal-cookie";
 import SwitchButton from "@/src/components/Admin/AdminProfile/SwitchButton";
+import SmsSwitchButton from "@/src/components/Admin/AdminProfile/SmsSwitchButton";
 import setAuthToken from "@/utils/setAuthToken";
 import { CircularProgress } from "@mui/material";
 import { v4 } from "uuid";
@@ -65,19 +65,37 @@ const UserElections = () => {
     "Number of Voters",
     "Status",
     "Amount",
+    "Send SMS",
     "Publish",
   ];
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 15,
       fontWeight: "bold",
+      padding: "14px 16px",
+      whiteSpace: "nowrap",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
+      fontSize: 14,
+      fontWeight: 500,
       border: "none",
+      padding: "12px 16px",
+      color: "#1e293b",
+    },
+  }));
+
+  const StyledTableRow = styled(TableRow)(() => ({
+    "&:nth-of-type(odd)": {
+      backgroundColor: "#f8faff",
+    },
+    "&:nth-of-type(even)": {
+      backgroundColor: "#ffffff",
+    },
+    "&:hover": {
+      backgroundColor: "#eef4ff",
+      transition: "background-color 0.15s ease",
     },
   }));
 
@@ -129,49 +147,59 @@ const UserElections = () => {
                   </TableHead>
                   <TableBody>
                     {electionDetails.length === 0 && (
-                      <TableRow>
-                        <StyledTableCell colSpan={7} align="center">
-                          No election found
+                      <StyledTableRow>
+                        <StyledTableCell colSpan={8} align="center">
+                          <span className="text-slate-400 text-sm">No elections found</span>
                         </StyledTableCell>
-                      </TableRow>
+                      </StyledTableRow>
                     )}
                     {electionDetails &&
                       electionDetails.length > 0 &&
                       electionDetails.map((row: any, index: number) => (
-                        <TableRow key={v4()}>
+                        <StyledTableRow key={v4()}>
                           <StyledTableCell align="center">
-                            {index < 9 ? `0${index + 1}` : index + 1}
+                            <span className="text-slate-500 text-xs font-semibold">
+                              {index < 9 ? `0${index + 1}` : index + 1}
+                            </span>
                           </StyledTableCell>
-                          <StyledTableCell
-                            align="center"
-                            className="cursor-pointer hover:shadow-md duration-150"
-                            onClick={() =>
-                              handleEmailClick(row.id, row.nameOfElection)
-                            }
-                          >
-                            {row.nameOfElection}
+                          <StyledTableCell align="left">
+                            <span
+                              className="cursor-pointer text-[#015ce9] hover:underline font-semibold"
+                              onClick={() =>
+                                handleEmailClick(row.id, row.nameOfElection)
+                              }
+                            >
+                              {row.nameOfElection}
+                            </span>
                           </StyledTableCell>
-
                           <StyledTableCell align="center">
-                            {row.date}
-                            <br />
-                            {row.start_time} - {row.close_time}
+                            <div className="flex flex-col items-center gap-0.5">
+                              <span className="font-medium">{row.date}</span>
+                              <span className="text-xs text-slate-400">
+                                {row.start_time} – {row.close_time}
+                              </span>
+                            </div>
                           </StyledTableCell>
                           <StyledTableCell align="center">
                             {row.numberOfVoters.toLocaleString()}
                           </StyledTableCell>
                           <StyledTableCell align="center">
                             <span
-                              className={`${
+                              className={`inline-block px-3 py-1 rounded-full text-xs font-semibold capitalize whitespace-nowrap ${
                                 row.status === "Pending"
-                                  ? "text-[#E88749]"
-                                  : "text-green-400"
-                              } capitalize`}
+                                  ? "bg-orange-50 text-orange-500 border border-orange-200"
+                                  : "bg-green-50 text-green-600 border border-green-200"
+                              }`}
                             >
                               {row.status}
                             </span>
                           </StyledTableCell>
-                          <StyledTableCell align="center">#</StyledTableCell>
+                          <StyledTableCell align="center">
+                            <span className="text-slate-400">—</span>
+                          </StyledTableCell>
+                          <StyledTableCell align="center">
+                            <SmsSwitchButton row={row} />
+                          </StyledTableCell>
                           <StyledTableCell align="center">
                             <SwitchButton
                               id={index}
@@ -179,7 +207,7 @@ const UserElections = () => {
                               userMail={userMail}
                             />
                           </StyledTableCell>
-                        </TableRow>
+                        </StyledTableRow>
                       ))}
                   </TableBody>
                 </Table>
