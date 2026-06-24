@@ -205,6 +205,7 @@ const UserElections = () => {
                               id={index}
                               row={row}
                               userMail={userMail}
+                              initialStatus={row.published}
                             />
                           </StyledTableCell>
                         </StyledTableRow>

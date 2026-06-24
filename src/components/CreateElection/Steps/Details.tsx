@@ -300,54 +300,11 @@ const Details = ({
               onChange={(e) => setDescription(e.target.value)}
             ></textarea>
           </div>
-          <div className="mt-[40px] flex items-center lg:text-xl text-base font-normal w-full flex-wrap gap-2">
-            <div className="mr-2">
-              <label htmlFor="image">
-                Upload Association Logo for Election:
-              </label>
-            </div>
-            <div>
-              <input
-                name="image"
-                type="file"
-                accept=".png, .svg, .jpg, .jpeg,"
-                className="hidden"
-                id="file-input"
-                onChange={(e) =>
-                  handleImageUpload(e, setImage, setSelectedImgUrl, setLogo)
-                }
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="file-input"
-                className="p-2 border bg-[#015CE9] rounded-lg text-white mr-1 cursor-pointer"
-              >
-                Choose File:
-              </label>
-            </div>
-
-            <div>
-              {selectedImgUrl && (
-                <div className="">
-                  <img
-                    src={selectedImgUrl}
-                    alt="logo"
-                    className="lg:w-[90px] lg:h-[90px] object-contain w-14 h-14 "
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          {votarPlan === "Free Votar" && (
-            <div
-              className={`${
-                backgroundImage ? "lg:mt-0 mt-3" : "mt-[40px]"
-              } flex items-center lg:text-xl text-base font-normal flex-wrap gap-2`}
-            >
+          <div className="mt-[40px] flex flex-col gap-2">
+            <div className="flex items-center lg:text-xl text-base font-normal w-full flex-wrap gap-2">
               <div className="mr-2">
                 <label htmlFor="image">
-                  Upload Background Image for Election:
+                  Upload Association Logo for Election:
                 </label>
               </div>
               <div>
@@ -356,31 +313,81 @@ const Details = ({
                   type="file"
                   accept=".png, .svg, .jpg, .jpeg,"
                   className="hidden"
-                  id="file-input2"
-                  onChange={handleBackgroundImageUpload}
+                  id="file-input"
+                  onChange={(e) =>
+                    handleImageUpload(e, setImage, setSelectedImgUrl, setLogo)
+                  }
                 />
               </div>
-
               <div>
                 <label
-                  htmlFor="file-input2"
+                  htmlFor="file-input"
                   className="p-2 border bg-[#015CE9] rounded-lg text-white mr-1 cursor-pointer"
                 >
                   Choose File:
                 </label>
               </div>
-
               <div>
-                {backgroundUrl && (
-                  <div>
+                {selectedImgUrl && (
+                  <div className="">
                     <img
-                      src={backgroundUrl}
+                      src={selectedImgUrl}
                       alt="logo"
-                      className="lg:w-[100px] lg:h-[100px] object-contain w-14 h-14"
+                      className="lg:w-[90px] lg:h-[90px] object-contain w-14 h-14 "
                     />
                   </div>
                 )}
               </div>
+            </div>
+            <p className="text-xs text-slate-400 font-normal">
+              Max file size: 1MB &nbsp;|&nbsp; Accepted formats: PNG, SVG, JPG, JPEG
+            </p>
+          </div>
+          {votarPlan === "Free Votar" && (
+            <div
+              className={`${
+                backgroundImage ? "lg:mt-0 mt-3" : "mt-[40px]"
+              } flex flex-col gap-2`}
+            >
+              <div className="flex items-center lg:text-xl text-base font-normal flex-wrap gap-2">
+                <div className="mr-2">
+                  <label htmlFor="image">
+                    Upload Background Image for Election:
+                  </label>
+                </div>
+                <div>
+                  <input
+                    name="image"
+                    type="file"
+                    accept=".png, .svg, .jpg, .jpeg,"
+                    className="hidden"
+                    id="file-input2"
+                    onChange={handleBackgroundImageUpload}
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="file-input2"
+                    className="p-2 border bg-[#015CE9] rounded-lg text-white mr-1 cursor-pointer"
+                  >
+                    Choose File:
+                  </label>
+                </div>
+                <div>
+                  {backgroundUrl && (
+                    <div>
+                      <img
+                        src={backgroundUrl}
+                        alt="logo"
+                        className="lg:w-[100px] lg:h-[100px] object-contain w-14 h-14"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p className="text-xs text-slate-400 font-normal">
+                Max file size: 100KB &nbsp;|&nbsp; Accepted formats: PNG, SVG, JPG, JPEG
+              </p>
             </div>
           )}
 

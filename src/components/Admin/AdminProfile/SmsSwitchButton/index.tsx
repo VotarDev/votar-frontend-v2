@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+import { adminToggleSms } from "@/utils/api";
+import Cookies from "universal-cookie";
+import setAuthToken from "@/utils/setAuthToken";
 
 interface SmsSwitchButtonProps {
   row?: any;
@@ -7,15 +10,20 @@ interface SmsSwitchButtonProps {
 
 const SmsSwitchButton = ({ row }: SmsSwitchButtonProps) => {
   const [smsEnabled, setSmsEnabled] = useState<boolean>(
-    row?.sms_enabled ?? false
+    Array.isArray(row?.notification_options)
+      ? row.notification_options.includes("sms")
+      : false
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const newStatus = event.target.checked;
     setIsUpdating(true);
+    const cookies = new Cookies();
+    const token = cookies.get("admin-token");
+    if (token) setAuthToken(token);
     try {
-      // TODO: wire up to /admin/send-sms endpoint when available
+      await adminToggleSms({ election_id: row?.election_id, state: newStatus });
       setSmsEnabled(newStatus);
       toast.success(`SMS ${newStatus ? "enabled" : "disabled"} successfully`);
     } catch (error) {

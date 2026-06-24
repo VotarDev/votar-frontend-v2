@@ -66,6 +66,7 @@ const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
 const adminPublishElectionUrl = "/admin/publish";
+const adminToggleSmsUrl = "/admin/toggle-sms";
 const adminTopUpUrl = "/admin/top-up";
 
 export const signup = (data: any) => {
@@ -394,6 +395,10 @@ export const adminGetAllUsers = (
 
 export const adminPublishElection = (data: any) => {
   return httpService.post(adminPublishElectionUrl, data);
+};
+
+export const adminToggleSms = (data: { election_id: string; state: boolean }) => {
+  return httpService.post(adminToggleSmsUrl, data);
 };
 
 export const adminTopUp = (data: any) => {

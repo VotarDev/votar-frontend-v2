@@ -24,7 +24,7 @@ import { useRouter } from "next/router";
 import Cookies from "universal-cookie";
 
 const VotersPage = () => {
-  const [preference, setPreference] = useState("");
+  const [preference, setPreference] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
@@ -55,8 +55,17 @@ const VotersPage = () => {
     ? users?.id
     : user?.user?.id;
 
-  const handlePreference = (e: ChangeEvent<HTMLInputElement>) => {
-    setPreference(e.target.value);
+  const handlePreference = (value: string) => {
+    if (!election.published) return;
+
+    if (value === "sms" && !election.notification_options?.includes("sms")) {
+      toast.error("Admin has not yet granted permission for this feature");
+      return;
+    }
+
+    setPreference((prev) =>
+      prev.includes(value) ? prev.filter((p) => p !== value) : [...prev, value]
+    );
   };
 
   const handleTextArea = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -267,8 +276,9 @@ const VotersPage = () => {
                     control={
                       <Checkbox
                         value="email"
-                        checked={preference === "email"}
-                        onChange={handlePreference}
+                        checked={preference.includes("email")}
+                        onChange={() => handlePreference("email")}
+                        disabled={!election.published}
                         inputProps={{ "aria-label": "controlled" }}
                         disableRipple
                         sx={{
@@ -289,8 +299,9 @@ const VotersPage = () => {
                     control={
                       <Checkbox
                         value="sms"
-                        checked={preference === "sms"}
-                        onChange={handlePreference}
+                        checked={preference.includes("sms")}
+                        onChange={() => handlePreference("sms")}
+                        disabled={!election.published}
                         inputProps={{ "aria-label": "controlled" }}
                         disableRipple
                         sx={{
