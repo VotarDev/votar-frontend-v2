@@ -180,6 +180,12 @@ const VotersPage = () => {
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (preference.length === 0) {
+      toast.error("Please select at least one notification option (Email or SMS) before sending.");
+      return;
+    }
+
     setIsSending(true);
     const token = cookies.get("user-token");
     if (token) {

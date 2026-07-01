@@ -8,7 +8,7 @@ import Select, {
   StylesConfig,
 } from "react-select";
 import { FaCaretDown } from "react-icons/fa";
-import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+import { AiOutlineMinus, AiOutlinePlus, AiOutlineInfoCircle } from "react-icons/ai";
 import calendar from "../../../../public/assets/icons/calendar-2.svg";
 import { useSelector } from "react-redux";
 import { OptionTypes } from "@/utils/types";
@@ -290,6 +290,10 @@ const Details = ({
               onChange={(e) => setElection(e.target.value)}
               value={election}
             />
+            <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
+              <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+              This is the official title of your election. It will be displayed prominently on the ballot page that voters see.
+            </p>
           </div>
           <div className="flex flex-col gap-1 mt-[40px]">
             <label htmlFor="otherDetails">Other Details For Election</label>
@@ -299,6 +303,10 @@ const Details = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             ></textarea>
+            <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
+              <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+              Provide any additional context about this election — e.g. purpose, rules, or instructions for voters.
+            </p>
           </div>
           <div className="mt-[40px] flex flex-col gap-2">
             <div className="flex items-center lg:text-xl text-base font-normal w-full flex-wrap gap-2">
@@ -339,7 +347,11 @@ const Details = ({
                 )}
               </div>
             </div>
-            <p className="text-xs text-slate-400 font-normal">
+            <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+              <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+              Your association&apos;s logo will appear on the ballot page. Use a clear image with a transparent background for best results.
+            </p>
+            <p className="text-xs text-slate-400 font-normal pl-4">
               Max file size: 1MB &nbsp;|&nbsp; Accepted formats: PNG, SVG, JPG, JPEG
             </p>
           </div>
@@ -385,7 +397,11 @@ const Details = ({
                   )}
                 </div>
               </div>
-              <p className="text-xs text-slate-400 font-normal">
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                This image will be displayed as the background on your election page. Keep it simple so it doesn&apos;t distract from the ballot content.
+              </p>
+              <p className="text-xs text-slate-400 font-normal pl-4">
                 Max file size: 100KB &nbsp;|&nbsp; Accepted formats: PNG, SVG, JPG, JPEG
               </p>
             </div>
@@ -395,6 +411,10 @@ const Details = ({
             <div className="mt-[44px] flex gap-10 lg:flex-row flex-col">
               <div className="flex flex-col gap-1 w-full lg:w-auto">
                 <div>Choose Primary Background Color</div>
+                <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mb-1">
+                  <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                  The dominant color of your election page background.
+                </p>
                 <Select
                   defaultValue={primaryColor}
                   onChange={setPrimaryColor}
@@ -417,6 +437,10 @@ const Details = ({
               </div>
               <div className="flex flex-col gap-1 w-full lg:w-auto">
                 <div>Choose Secondary Background Color</div>
+                <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mb-1">
+                  <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                  An accent color that complements the primary color on your election page.
+                </p>
                 <Select
                   defaultValue={secondaryColor}
                   onChange={setSecondaryColor}
@@ -443,6 +467,10 @@ const Details = ({
           <div className="mt-[34px] flex gap-10 lg:flex-row flex-col">
             <div className=" flex flex-col gap-1 w-full lg:w-auto">
               <label htmlFor="date">Choose start date</label>
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                The date voting opens and voters can begin casting their votes.
+              </p>
               <div className="relative">
                 <input
                   type="date"
@@ -465,6 +493,10 @@ const Details = ({
             </div>
             <div className="flex flex-col gap-1 w-full lg:w-auto">
               <label htmlFor="date">Choose end date</label>
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                The date voting closes. No votes will be accepted after this date.
+              </p>
               <div className="relative">
                 <input
                   type="date"
@@ -493,6 +525,10 @@ const Details = ({
           <div className="mt-[34px] flex gap-10 flex-col lg:flex-row">
             <div className="flex flex-col gap-1 w-full lg:w-auto">
               <label htmlFor="time">Input start time</label>
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                The exact time voting begins on the start date.
+              </p>
               <input
                 type="time"
                 name="time"
@@ -509,6 +545,10 @@ const Details = ({
             </div>
             <div className="flex flex-col gap-1 w-full lg:w-auto">
               <label htmlFor="time">Input end time</label>
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                The exact time voting closes on the end date.
+              </p>
               <input
                 type="time"
                 name="time"
@@ -525,9 +565,15 @@ const Details = ({
             </div>
           </div>
 
-          <div className="mt-[34px] flex lg:gap-10 items-center flex-wrap gap-4">
-            <div className="lg:text-xl text-base font-normal">
-              Max Number of Candidates to be Selected Per Position
+          <div className="mt-[34px] flex lg:gap-10 items-start flex-wrap gap-4">
+            <div>
+              <div className="lg:text-xl text-base font-normal">
+                Max Number of Candidates to be Selected Per Position
+              </div>
+              <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
+                <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                How many candidates a voter is allowed to select for each position on the ballot.
+              </p>
             </div>
             <div className="flex items-center gap-4 text-2xl">
               <div
@@ -556,9 +602,15 @@ const Details = ({
 
           {votarPlan === "Free Votar" && (
             <div>
-              <div className="mt-[34px] flex lg:gap-10 items-center flex-wrap gap-4">
-                <div className="lg:text-xl text-base font-normal">
-                  Number of Free Votes
+              <div className="mt-[34px] flex lg:gap-10 items-start flex-wrap gap-4">
+                <div>
+                  <div className="lg:text-xl text-base font-normal">
+                    Number of Free Votes
+                  </div>
+                  <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
+                    <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                    The total number of votes available at no cost. Once this limit is reached, additional votes may require payment.
+                  </p>
                 </div>
                 <div className="flex items-center gap-4 text-2xl">
                   <div
@@ -584,20 +636,32 @@ const Details = ({
                   </div>
                 </div>
               </div>
-              <div className=" flex items-center gap-4 mt-[34px]">
-                <h2 className="lg:text-xl text-base font-bold">
-                  Monetize Election
-                </h2>
-                <input
-                  type="checkbox"
-                  name="monetize"
-                  onChange={() => setMonetizeElection(!monetizeElection)}
-                />
+              <div className="flex flex-col gap-1 mt-[34px]">
+                <div className="flex items-center gap-4">
+                  <h2 className="lg:text-xl text-base font-bold">
+                    Monetize Election
+                  </h2>
+                  <input
+                    type="checkbox"
+                    name="monetize"
+                    onChange={() => setMonetizeElection(!monetizeElection)}
+                  />
+                </div>
+                <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                  <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                  Enable this to charge voters a fee per vote. You can set the price below once enabled.
+                </p>
               </div>
               {monetizeElection && (
-                <div className="mt-5 flex  items-center flex-wrap gap-4 lg:gap-10">
-                  <div className="lg:text-xl text-base font-normal ">
-                    Price per Vote
+                <div className="mt-5 flex items-start flex-wrap gap-4 lg:gap-10">
+                  <div>
+                    <div className="lg:text-xl text-base font-normal">
+                      Price per Vote
+                    </div>
+                    <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
+                      <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                      The amount (in your local currency) charged to a voter for each vote they cast.
+                    </p>
                   </div>
                   <div className="flex items-center gap-4 text-2xl">
                     <div
