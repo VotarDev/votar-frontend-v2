@@ -3,6 +3,7 @@ import { electionPlans } from "@/utils/util";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { selected_plan } from "@/redux/features/votarPlan/votarPlanSlice";
+import { FaYoutube } from "react-icons/fa";
 
 const ElectionPlan = () => {
   const router = useRouter();
@@ -30,9 +31,18 @@ const ElectionPlan = () => {
               </div>
             </div>
             <div className="px-6 flex-1">
-              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+              <p className="text-sm text-gray-600 leading-relaxed mb-4">
                 {plans.desc}
               </p>
+              <a
+                href={plans.youtubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-[#FF0000] hover:underline mb-2"
+              >
+                <FaYoutube className="text-base" />
+                Watch how it works
+              </a>
             </div>
             <div className="p-6 pt-0">
               <button

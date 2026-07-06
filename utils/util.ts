@@ -275,18 +275,21 @@ export const electionPlans = [
     plan: "Free Votar",
     desc: "Create an Election for free Raise funds for your event, make her Election participants pay to get more voting power to vote their preffered Candidates and increase their chances of emerging as the winner OR Let your voters cast their votes for free without having to pay",
     btnText: "Lets go vote",
+    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   },
   {
     id: uuidv4(),
     plan: "Votar Pro",
     desc: "Create an Election that has all the Privacy and security features you would need to make your election free, fair and credible Here, a Voter can vote for the preffered candidate Once and once only.",
     btnText: "Lets go vote",
+    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   },
   {
     id: uuidv4(),
     plan: "Votar Meeting",
     desc: "Create an Election for free Raise funds for your event, make her Election participants pay to get more voting power to vote their preffered Candidates and increase their chances of emerging as the winner OR Let your voters cast their votes for free without having to pay",
     btnText: "Lets go vote",
+    youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
   },
 ];
 
