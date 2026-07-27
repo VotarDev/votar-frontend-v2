@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import leftline from "../../../../public/assets/images/left-line.svg";
 import rightline from "../../../../public/assets/images/right-line.svg";
 import { Checkbox, FormControlLabel } from "@mui/material";
@@ -8,7 +8,7 @@ import { MdDelete } from "react-icons/md";
 import { Position } from "@/utils/types";
 import toast from "react-hot-toast";
 
-function Body({ positions, setPositions, electionId }: any) {
+function Body({ positions, setPositions, electionId, isEditable = true }: any) {
   const handleAddPosition = () => {
     let election_id;
     if (typeof window !== "undefined") {
@@ -180,7 +180,7 @@ function Body({ positions, setPositions, electionId }: any) {
             key={positionIndex}
             className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4 relative"
           >
-            {positionIndex > 0 && (
+            {positionIndex > 0 && isEditable && (
               <div className="absolute -right-1 -top-4 text-3xl">
                 <button
                   onClick={() => deletePosition(positionIndex)}
@@ -213,7 +213,8 @@ function Body({ positions, setPositions, electionId }: any) {
                   type="text"
                   placeholder="Position Name"
                   value={position.name_of_position}
-                  className="lg:w-96 w-full h-12 rounded border border-stone-900 outline-none p-4"
+                  disabled={!isEditable}
+                  className="lg:w-96 w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
                   onChange={(e) =>
                     handleInputChange(e, positionIndex, "name_of_position")
                   }
@@ -226,6 +227,7 @@ function Body({ positions, setPositions, electionId }: any) {
                       <Checkbox
                         checked={position.show_pictures}
                         disableRipple
+                        disabled={!isEditable}
                         onChange={(e) => handleShowPicture(e, positionIndex)}
                         inputProps={{ "aria-label": "controlled" }}
                         sx={{
@@ -252,6 +254,7 @@ function Body({ positions, setPositions, electionId }: any) {
                         checked={position.allow_abstain}
                         onChange={(e) => handleAllowAbstain(e, positionIndex)}
                         disableRipple
+                        disabled={!isEditable}
                         inputProps={{ "aria-label": "controlled" }}
                         sx={{
                           color: "#848484",
@@ -271,6 +274,7 @@ function Body({ positions, setPositions, electionId }: any) {
 
             {position.candidates.map((candidate, candidateIndex) => (
               <div key={candidateIndex} className="w-full relative">
+                {isEditable && (
                 <div className="absolute right-0 top-5 text-red-500 text-3xl">
                   <button
                     onClick={() =>
@@ -284,6 +288,7 @@ function Body({ positions, setPositions, electionId }: any) {
                     <span className="text-sm">Delete candidate</span>
                   </button>
                 </div>
+                )}
                 <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
                   {candidate.candidate_name
                     ? candidate.candidate_name
@@ -324,6 +329,7 @@ function Body({ positions, setPositions, electionId }: any) {
                       type="file"
                       id={`image-upload-${positionIndex}-${candidateIndex}`}
                       accept="image/*"
+                      disabled={!isEditable}
                       style={{ display: "none" }}
                       onChange={(e) =>
                         handleImageUpload(e, positionIndex, candidateIndex)
@@ -344,7 +350,8 @@ function Body({ positions, setPositions, electionId }: any) {
                           type="text"
                           placeholder="Candidate Name"
                           value={candidate.candidate_name}
-                          className="w-full h-12 rounded border border-stone-900 outline-none p-4"
+                          disabled={!isEditable}
+                          className="w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
                           onChange={(e) =>
                             handleInputChange(
                               e,
@@ -361,7 +368,8 @@ function Body({ positions, setPositions, electionId }: any) {
                           type="text"
                           placeholder="Candidate NickName"
                           value={candidate.candidate_nickname}
-                          className="w-full h-12 rounded border border-stone-900 outline-none p-4"
+                          disabled={!isEditable}
+                          className="w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
                           onChange={(e) =>
                             handleInputChange(
                               e,
@@ -379,7 +387,8 @@ function Body({ positions, setPositions, electionId }: any) {
                         placeholder="Candidate Details"
                         value={candidate.more_details}
                         maxLength={250}
-                        className="w-full h-36 rounded border border-stone-900 outline-none p-4"
+                        disabled={!isEditable}
+                        className="w-full h-36 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
                         onChange={(e) =>
                           handleInputChange(
                             e,
@@ -398,6 +407,7 @@ function Body({ positions, setPositions, electionId }: any) {
                         <input
                           type="application"
                           accept="image/*,video/*,.pdf,.doc,.docx"
+                          disabled={!isEditable}
                           onChange={(e) =>
                             handleMediaUpload(e, positionIndex, candidateIndex)
                           }
@@ -453,6 +463,7 @@ function Body({ positions, setPositions, electionId }: any) {
                             type="file"
                             id={`media-upload-${positionIndex}-${candidateIndex}`}
                             accept="image/*,video/*,.pdf,.doc,.docx" // Accepts common media and document formats
+                            disabled={!isEditable}
                             onChange={(e) =>
                               handleMediaUpload(
                                 e,
@@ -467,7 +478,8 @@ function Body({ positions, setPositions, electionId }: any) {
                         {candidate.media.docs && (
                           <div>
                             <button
-                              className="text-xl border-none outline-none bg-transparent"
+                              disabled={!isEditable}
+                              className="text-xl border-none outline-none bg-transparent disabled:opacity-40 disabled:cursor-not-allowed"
                               onClick={(e) =>
                                 handleDeleteMedia(
                                   e,
@@ -491,7 +503,8 @@ function Body({ positions, setPositions, electionId }: any) {
             <div className="flex justify-center">
               <button
                 type="button"
-                className="mt-12 lg:text-xl text-base font-semibold text-blue-700 w-48 h-12 flex items-center justify-center gap-2.5 rounded-lg outline-none border-2 border-blue-700"
+                disabled={!isEditable}
+                className="mt-12 lg:text-xl text-base font-semibold text-blue-700 w-48 h-12 flex items-center justify-center gap-2.5 rounded-lg outline-none border-2 border-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
                 onClick={() => handleAddCandidate(positionIndex)}
               >
                 <span>Add Candidate</span>
@@ -503,8 +516,9 @@ function Body({ positions, setPositions, electionId }: any) {
         <div className="flex justify-center">
           <button
             type="button"
+            disabled={!isEditable}
             onClick={handleAddPosition}
-            className="w-44 h-12 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg"
+            className="w-44 h-12 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <span>+</span>
             <span>Add Position</span>

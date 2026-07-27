@@ -17,6 +17,8 @@ const Ballot = ({ positions, setPositions }: any) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [electionId, setElectionId] = useState<string | null>("");
   const [error, setError] = useState("");
+  const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
+  const [isEditable, setIsEditable] = useState(true);
   const textRef = useRef<HTMLElement | null>(null);
 
   let USER_ID = users?.data?.data
@@ -44,6 +46,15 @@ const Ballot = ({ positions, setPositions }: any) => {
           const { data } = await getElectionById(electionData);
           if (data) {
             setElection(data.data);
+
+            const { end_date } = data.data;
+            const combinedDateTime = new Date(end_date);
+            if (!isNaN(combinedDateTime.getTime())) {
+              setTargetDateTime(combinedDateTime);
+            } else {
+              console.error("Invalid end_date format:", end_date);
+            }
+
             setPositions([
               {
                 name_of_position: "",
@@ -63,6 +74,19 @@ const Ballot = ({ positions, setPositions }: any) => {
     };
     getElection();
   }, []);
+
+  useEffect(() => {
+    if (targetDateTime) {
+      const updateEditableState = () => {
+        const now = new Date();
+        setIsEditable(now < targetDateTime);
+      };
+
+      updateEditableState();
+      const interval = setInterval(updateEditableState, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [targetDateTime]);
 
   if (isLoading) {
     return (
@@ -149,6 +173,7 @@ const Ballot = ({ positions, setPositions }: any) => {
         positions={positions}
         electionDetails={election}
         electionId={election?.election_id}
+        isEditable={isEditable}
       />
     </div>
   );
