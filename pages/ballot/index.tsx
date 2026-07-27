@@ -30,7 +30,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
-import { Check, MessageSquare, Download } from "lucide-react";
+import { Check, MessageSquare, Download, Clock, CalendarX } from "lucide-react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -77,6 +77,7 @@ const Ballot = () => {
   const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  const [electionStatus, setElectionStatus] = useState<"not_started" | "active" | "ended" | null>(null);
   const [showModal, setShowModal] = useState(false);
   const badgeRef = useRef(null);
 
@@ -253,6 +254,28 @@ const Ballot = () => {
   }, [voterProfile.userData]);
 
   useEffect(() => {
+    if (!election) return;
+
+    const start = new Date((election as any).start_date);
+    const end = new Date((election as any).end_date);
+
+    const updateStatus = () => {
+      const now = new Date();
+      if (!isNaN(start.getTime()) && now < start) {
+        setElectionStatus("not_started");
+      } else if (!isNaN(end.getTime()) && now > end) {
+        setElectionStatus("ended");
+      } else {
+        setElectionStatus("active");
+      }
+    };
+
+    updateStatus();
+    const interval = setInterval(updateStatus, 1000);
+    return () => clearInterval(interval);
+  }, [election]);
+
+  useEffect(() => {
     const getCandidatesData = async () => {
       setIsFetchCandidate(true);
       const cookie = new Cookies();
@@ -414,33 +437,23 @@ const Ballot = () => {
       });
   };
 
+  const logoutBtn = (
+    <button
+      onClick={handleLogout}
+      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 md:px-8 md:py-4 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
+    >
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+      Logout
+    </button>
+  );
+
   if (election?.published === false) {
     return (
       <>
-        <div>
-          <Header electionDetails={election} />
-        </div>
-        <div className="mt-5 flex justify-end mr-4 md:mr-10">
-          <button
-            onClick={handleLogout}
-            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 md:px-8 md:py-4 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
-            Logout
-          </button>
-        </div>
+        <div><Header electionDetails={election} /></div>
+        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
         <div className="text-center mt-5">
           <h1 className="text-4xl font-bold capitalize">
             Welcome, {voterProfile.userData?.name}
@@ -448,6 +461,80 @@ const Ballot = () => {
         </div>
         <div className="text-center pt-5">
           You do not have Access to this election
+        </div>
+      </>
+    );
+  }
+
+  if (election && electionStatus === "not_started") {
+    return (
+      <>
+        <div><Header electionDetails={election} /></div>
+        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
+        <div className="text-center mt-5">
+          <h1 className="md:text-4xl text-2xl font-bold capitalize">
+            Welcome, {voterProfile.userData?.name}
+          </h1>
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+          <div className="bg-white border border-blue-100 rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+            <div className="flex justify-center mb-5">
+              <div className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+                <Clock className="w-10 h-10 text-[#015CE9]" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">
+              Election Has Not Started Yet
+            </h2>
+            <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+              This election is not open for voting yet. Please come back when it begins.
+            </p>
+            <div className="bg-blue-50 rounded-xl p-4">
+              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1 font-semibold">
+                Starts on
+              </p>
+              <p className="text-[#015CE9] font-bold text-base">
+                {(election as any).start_date}
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (election && electionStatus === "ended") {
+    return (
+      <>
+        <div><Header electionDetails={election} /></div>
+        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
+        <div className="text-center mt-5">
+          <h1 className="md:text-4xl text-2xl font-bold capitalize">
+            Welcome, {voterProfile.userData?.name}
+          </h1>
+        </div>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+          <div className="bg-white border border-red-100 rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+            <div className="flex justify-center mb-5">
+              <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+                <CalendarX className="w-10 h-10 text-red-500" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">
+              Election Has Ended
+            </h2>
+            <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+              The voting period for this election is now closed. Thank you for your participation.
+            </p>
+            <div className="bg-red-50 rounded-xl p-4">
+              <p className="text-xs text-slate-400 uppercase tracking-widest mb-1 font-semibold">
+                Ended on
+              </p>
+              <p className="text-red-500 font-bold text-base">
+                {(election as any).end_date}
+              </p>
+            </div>
+          </div>
         </div>
       </>
     );
@@ -471,25 +558,7 @@ const Ballot = () => {
 
           <div>
             <div className="mt-5 flex justify-end mr-4 md:mr-10">
-              <button
-                onClick={handleLogout}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 md:px-8 md:py-4 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-                Logout
-              </button>
+              {logoutBtn}
             </div>
             {isFetchCandidate ? (
               <div className="mt-10 text-center">Fetching candidates...</div>
