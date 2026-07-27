@@ -47,12 +47,12 @@ const Ballot = ({ positions, setPositions }: any) => {
           if (data) {
             setElection(data.data);
 
-            const { end_date } = data.data;
-            const combinedDateTime = new Date(end_date);
+            const { start_date } = data.data;
+            const combinedDateTime = new Date(start_date);
             if (!isNaN(combinedDateTime.getTime())) {
               setTargetDateTime(combinedDateTime);
             } else {
-              console.error("Invalid end_date format:", end_date);
+              console.error("Invalid start_date format:", start_date);
             }
 
             setPositions([
