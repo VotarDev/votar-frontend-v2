@@ -11,15 +11,18 @@ import { useRouter } from "next/router";
 import { getAdminVotarPage } from "@/utils/api";
 import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Pagination, Stack } from "@mui/material";
 import { usePathname } from "next/navigation";
+
+const LIMIT = 50;
 
 const VotarProTable = () => {
   const headers = ["S/N", "Emails", "No. of Elections"];
-  const [users, setUsers] = useState<any>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
   const [types, setTypes] = useState("");
 
   const [isFetchUsers, setIsFetchUsers] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
@@ -58,7 +61,7 @@ const VotarProTable = () => {
             : Array.isArray(data.data)
             ? data.data
             : [];
-          setUsers(electionsArray);
+          setAllUsers(electionsArray);
 
           setIsFetchUsers(false);
         }
@@ -69,6 +72,24 @@ const VotarProTable = () => {
     };
     getVotarProPower();
   }, []);
+
+  const totalPages = Math.ceil(allUsers.length / LIMIT);
+  const pagedUsers = allUsers.slice(
+    (currentPage - 1) * LIMIT,
+    currentPage * LIMIT
+  );
+
+  const handlePageChange = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setCurrentPage(value);
+  };
+
+  const getSerialNumber = (index: number) => {
+    const serialNumber = (currentPage - 1) * LIMIT + index + 1;
+    return serialNumber <= 9 ? `0${serialNumber}` : serialNumber.toString();
+  };
 
   if (isFetchUsers)
     return (
@@ -105,12 +126,12 @@ const VotarProTable = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users &&
-              users.length > 0 &&
-              users.map((row: any, index: number) => (
-                <TableRow key={row.id}>
+            {pagedUsers &&
+              pagedUsers.length > 0 &&
+              pagedUsers.map((row: any, index: number) => (
+                <TableRow key={row.election_id ?? index}>
                   <StyledTableCell align="center">
-                    {index <= 9 ? `0${index + 1}` : index + 1}
+                    {getSerialNumber(index)}
                   </StyledTableCell>
                   <StyledTableCell
                     align="center"
@@ -127,6 +148,40 @@ const VotarProTable = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {allUsers.length > 0 && (
+        <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+          <Pagination
+            count={Math.max(totalPages, 1)}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+            sx={{
+              "& .MuiPaginationItem-root": {
+                color: "#015CE9",
+                "&.Mui-selected": {
+                  backgroundColor: "#015CE9",
+                  color: "white",
+                  "&:hover": {
+                    backgroundColor: "#0146c7",
+                  },
+                },
+                "&:hover": {
+                  backgroundColor: "#e3f2fd",
+                },
+              },
+            }}
+          />
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * LIMIT + 1} to{" "}
+            {Math.min(currentPage * LIMIT, allUsers.length)} of{" "}
+            {allUsers.length} entries
+          </div>
+        </Stack>
+      )}
     </div>
   );
 };

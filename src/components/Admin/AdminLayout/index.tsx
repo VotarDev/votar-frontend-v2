@@ -25,7 +25,7 @@ const AdminLayout = ({ children }: any) => {
       <div>
         <AdminHeader />
       </div>
-      <div className="ml-14 px-4 lg:ml-0 lg:px-0 ">{children}</div>
+      <div className="px-4 lg:px-0">{children}</div>
     </div>
   );
 };

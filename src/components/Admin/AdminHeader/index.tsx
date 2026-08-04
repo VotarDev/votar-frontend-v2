@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import logo from "../../../../public/assets/logos/admin-logo.svg";
 import { GoHome } from "react-icons/go";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
+import { RxHamburgerMenu, RxCross2 } from "react-icons/rx";
 import { usePathname } from "next/navigation";
 import {
   PiUser,
@@ -18,16 +18,77 @@ import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { removeAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
 import Cookies from "universal-cookie";
+import { AnimatePresence, motion } from "framer-motion";
 
 const AdminHeader = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+
   const isLinkActive = (link: string) => {
     // Check if the current route contains the link
     return router.pathname.includes(link);
   };
+
+  const navItems = [
+    { href: "/admin", label: "Home", icon: <GoHome />, match: () => pathname === "/admin" },
+    {
+      href: "/admin/profile",
+      label: "Admin Profile",
+      icon: <PiUser />,
+      match: () => pathname === "/admin/profile",
+    },
+    {
+      href: "/admin/free-pro-meeting/pro",
+      label: "Free Pro Meeting",
+      icon: <LiaCheckSquare />,
+      match: () => isLinkActive("/admin/free-pro-meeting"),
+    },
+    {
+      href: "/admin/elections",
+      label: "Elections",
+      icon: <PiArchiveTray />,
+      match: () => pathname === "/admin/elections",
+    },
+    {
+      href: "/admin/referals",
+      label: "Referals",
+      icon: <RiUserVoiceLine />,
+      match: () => pathname === "/admin/referals",
+    },
+    {
+      href: "/admin/blogs-and-faqs",
+      label: "Blogs & FAQ's",
+      icon: <PiNewspaper />,
+      match: () => pathname === "/admin/blogs-and-faqs",
+    },
+    {
+      href: "/admin/users",
+      label: "Users",
+      icon: <PiUsersThree />,
+      match: () => pathname === "/admin/users",
+    },
+    {
+      href: "/admin/coupon",
+      label: "Coupons",
+      icon: <RiCoupon2Line />,
+      match: () => pathname === "/admin/coupon",
+    },
+  ];
+
+  const closeDrawer = () => setIsOpen(false);
+
+  useEffect(() => {
+    closeDrawer();
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   const logoutHandler = () => {
     // Logout
@@ -36,144 +97,101 @@ const AdminHeader = () => {
     cookies.remove("admin-token", { path: "/" });
     router.push("/admin/login");
   };
+
   return (
-    <section className="relative overflow-auto lg:h-28 h-auto">
-      <div
-        className={`fixed lg:w-full lg:left-0 lg:right-0 shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] bg-white z-[999] flex lg:justify-between justify-normal gap-2 lg:gap-0 lg:flex-row flex-col items-center lg:px-[60px] lg:h-28 h-full duration-150 sidebar-scroll ${
-          isOpen ? "w-40" : "w-14"
-        } top-0 bottom-0`}
-      >
-        <div
-          className="absolute top-14 -right-5 w-10 h-10 flex items-center justify-center bg-white shadow rounded-full lg:hidden"
-          onClick={() => setIsOpen(!isOpen)}
+    <section className="relative h-16 lg:h-28">
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white shadow-[0px_4px_39px_0px_rgba(0,0,0,0.08)] z-[999] flex items-center justify-between px-4">
+        <img src={logo.src} alt="" className="h-9 w-auto" />
+        <button
+          type="button"
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="text-2xl text-[#015CE9] p-2 -mr-2"
         >
-          <span>{isOpen ? <BsArrowLeft /> : <BsArrowRight />}</span>
+          {isOpen ? <RxCross2 /> : <RxHamburgerMenu />}
+        </button>
+      </div>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {isOpen && (
+          <React.Fragment>
+            <motion.div
+              className="lg:hidden fixed inset-0 bg-black z-[998]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={closeDrawer}
+            />
+            <motion.div
+              className="lg:hidden fixed top-0 bottom-0 left-0 w-72 max-w-[80%] bg-white z-[999] shadow-lg flex flex-col overflow-y-auto"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            >
+              <div className="flex items-center justify-between px-4 h-16 border-b border-[#F5F5F5] shrink-0">
+                <img src={logo.src} alt="" className="h-9 w-auto" />
+                <button
+                  type="button"
+                  aria-label="Close menu"
+                  onClick={closeDrawer}
+                  className="text-2xl text-[#015CE9] p-2 -mr-2"
+                >
+                  <RxCross2 />
+                </button>
+              </div>
+              <ul className="flex flex-col gap-1 p-3 text-base font-semibold">
+                {navItems.map((item) => (
+                  <Link href={item.href} key={item.href}>
+                    <li
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+                        item.match() ? "bg-[#015CE9]/10 text-[#015CE9]" : "text-gray-700"
+                      }`}
+                    >
+                      <span className="text-xl">{item.icon}</span>
+                      {item.label}
+                    </li>
+                  </Link>
+                ))}
+              </ul>
+              <div
+                onClick={logoutHandler}
+                className="mt-auto flex items-center gap-3 px-7 py-4 border-t border-[#F5F5F5] cursor-pointer font-semibold shrink-0"
+              >
+                <img src={logout.src} alt="" className="w-5 h-5" />
+                Logout
+              </div>
+            </motion.div>
+          </React.Fragment>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop bar */}
+      <div className="hidden lg:flex fixed top-0 left-0 right-0 w-full h-28 shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] bg-white z-[999] justify-between items-center px-[60px]">
+        <div>
+          <img src={logo.src} alt="" />
         </div>
         <div>
-          <img
-            src={logo.src}
-            alt=""
-            className="w-20 h-20 lg:w-auto lg:h-auto"
-          />
-        </div>
-        <div>
-          <ul className="flex items-center lg:gap-8 gap-5 lg:text-base text-sm font-semibold lg:flex-row flex-col">
-            <Link href="/admin">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <GoHome />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>Home</span>
-              </li>
-            </Link>
-            <Link href="/admin/profile">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/profile" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <PiUser />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  Admin Profile
-                </span>
-              </li>
-            </Link>
-            <Link href="/admin/free-pro-meeting/pro">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  isLinkActive("/admin/free-pro-meeting")
-                    ? "text-[#015CE9]"
-                    : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <LiaCheckSquare />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  Free Pro Meeting
-                </span>
-              </li>
-            </Link>
-            <Link href="/admin/elections">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/elections" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <PiArchiveTray />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  {" "}
-                  Elections
-                </span>
-              </li>
-            </Link>
-            <Link href="/admin/referals">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/referals" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <RiUserVoiceLine />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  Referals
-                </span>
-              </li>
-            </Link>
-            <Link href="/admin/blogs-and-faqs">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/blogs-and-faqs" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <PiNewspaper />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  Blogs & FAQ&apos;s
-                </span>
-              </li>
-            </Link>
-            <Link href="/admin/users">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/users" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <PiUsersThree />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>Users</span>
-              </li>
-            </Link>
-            <Link href="/admin/coupon">
-              <li
-                className={`flex flex-col items-center justify-center gap-1 ${
-                  pathname === "/admin/coupon" ? "text-[#015CE9]" : ""
-                }`}
-              >
-                <span className="text-2xl">
-                  <RiCoupon2Line />
-                </span>
-                <span className={`${!isOpen && "hidden lg:block"}`}>
-                  Coupons
-                </span>
-              </li>
-            </Link>
+          <ul className="flex items-center gap-8 text-base font-semibold">
+            {navItems.map((item) => (
+              <Link href={item.href} key={item.href}>
+                <li
+                  className={`flex flex-col items-center justify-center gap-1 ${
+                    item.match() ? "text-[#015CE9]" : ""
+                  }`}
+                >
+                  <span className="text-2xl">{item.icon}</span>
+                  <span>{item.label}</span>
+                </li>
+              </Link>
+            ))}
           </ul>
         </div>
         <div
           onClick={logoutHandler}
-          className="cursor-pointer flex flex-col items-center justify-center gap-1 font-semibold lg:text-base text-sm lg:mt-0 mt-5"
+          className="cursor-pointer flex flex-col items-center justify-center gap-1 font-semibold text-base"
         >
           <span>
             <img src={logout.src} alt="logout" />
