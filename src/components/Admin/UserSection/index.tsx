@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../AdminLayout";
-import { BsCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
+import { BsCaretDownFill, BsFillCaretUpFill, BsCheck2 } from "react-icons/bs";
 
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
@@ -12,7 +12,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Pagination, Stack } from "@mui/material";
-import { users } from "@/utils/util";
 import { drop } from "@/utils/util";
 import Cookies from "universal-cookie";
 import { adminGetAllUsers } from "@/utils/api";
@@ -26,6 +25,43 @@ interface MergedData {
   email: string;
   category: string;
 }
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#015ce9",
+    color: theme.palette.common.white,
+    fontSize: 15,
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 15,
+    fontWeight: 500,
+    borderBottom: "1px solid #F1F5F9",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)({
+  "&:hover": {
+    backgroundColor: "#F8FAFC",
+  },
+});
+
+const paginationSx = {
+  "& .MuiPaginationItem-root": {
+    color: "#015CE9",
+    "&.Mui-selected": {
+      backgroundColor: "#015CE9",
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#0146c7",
+      },
+    },
+    "&:hover": {
+      backgroundColor: "#e3f2fd",
+    },
+  },
+};
 
 const UserSection = () => {
   const [isDropDown, setIsDropdown] = useState(false);
@@ -41,25 +77,6 @@ const UserSection = () => {
   const options = ["All", "Election Creator", "Voter"];
 
   const headers = ["S/N", "Name", "Email", "Category"];
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 18,
-      fontWeight: "bold",
-      padding: "12px 8px",
-      whiteSpace: "nowrap",
-      textAlign: "center",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
-      border: "none",
-      padding: "16px",
-      verticalAlign: "middle",
-    },
-  }));
 
   const filteredOptionHandler = (opt: string) => {
     setFilteredOption(opt);
@@ -174,137 +191,183 @@ const UserSection = () => {
 
   if (isFetchUsers)
     return (
-      <div className="text-center ">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
-      </div>
+      <AdminLayout>
+        <div className="py-10 text-center">
+          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+        </div>
+      </AdminLayout>
     );
 
   return (
     <AdminLayout>
-      <div className="p-10">
-        <div className="flex justify-end items-center gap-5 ">
-          <div className="relative max-w-[260px] ">
-            <div
-              className="flex items-center cursor-pointer text-xl font-semibold"
+      <div className="max-w-[1300px] mx-auto py-8 lg:py-[60px]">
+        <div className="text-xl lg:text-2xl font-bold">Users</div>
+
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="relative w-fit">
+            <button
+              type="button"
               onClick={() => setIsDropdown((dropdown) => !dropdown)}
+              className={`flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors ${
+                isDropDown
+                  ? "border-[#015CE9] text-[#015CE9]"
+                  : "border-gray-200 text-gray-700 hover:border-[#015CE9] hover:text-[#015CE9]"
+              }`}
             >
-              Sort By
-              <span className="pl-1">
+              <span>
+                Sort By: <span className="text-[#015CE9]">{filteredOption}</span>
+              </span>
+              <span className="text-xs">
                 {isDropDown ? <BsFillCaretUpFill /> : <BsCaretDownFill />}
               </span>
-              <span className="px-1">:</span>
-              {filteredOption}
-            </div>
-            <AnimatePresence mode="wait">
+            </button>
+
+            <AnimatePresence>
               {isDropDown && (
-                <motion.div
-                  className="absolute top-full right-14 w-40 py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
-                  variants={drop}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                >
-                  <div className="flex flex-col gap-2 [&>*]:cursor-pointer">
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setIsDropdown(false)}
+                  />
+                  <motion.div
+                    className="absolute top-full left-0 mt-2 w-52 rounded-lg border border-gray-100 bg-white py-2 shadow-lg z-20"
+                    variants={drop}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
                     {options.map((opt, index) => (
                       <div
                         key={index}
                         onClick={() => filteredOptionHandler(opt)}
-                        className={`hover:bg-[#dadada] px-4 py-2 ${
-                          filteredOption == opt ? " bg-[#dadada]" : ""
+                        className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                          filteredOption === opt
+                            ? "bg-[#015CE9]/10 font-semibold text-[#015CE9]"
+                            : "text-gray-600 hover:bg-gray-50"
                         }`}
                       >
                         {opt}
+                        {filteredOption === opt && <BsCheck2 className="text-base" />}
                       </div>
                     ))}
-                  </div>
-                </motion.div>
+                  </motion.div>
+                </>
               )}
             </AnimatePresence>
           </div>
-          <div className="text-xl font-semibold">
-            Number of users : {displayTotal}
+          <div className="w-fit rounded-lg bg-[#015CE9]/10 px-4 py-2.5 text-sm font-semibold text-[#015CE9]">
+            {displayTotal} {displayTotal === 1 ? "user" : "users"}
           </div>
         </div>
-        <div className="w-full mt-5">
-          <TableContainer sx={{ maxHeight: "80%" }} className="table-scroll">
-            <Table
-              sx={{
-                minWidth: 700,
-                borderCollapse: "separate",
-                borderSpacing: "0",
-              }}
-              stickyHeader
-              aria-label="sticky table"
+
+        {usersData.length === 0 ? (
+          <div className="py-10 text-center text-gray-400">No users found</div>
+        ) : (
+          <div className="w-full mt-5">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-3 sm:hidden">
+              {usersData.map((row) => (
+                <div
+                  key={uuidv4()}
+                  className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-gray-800">
+                        {row.name}
+                      </div>
+                      <div className="truncate text-xs text-gray-500">
+                        {row.email}
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-[#015CE9]/10 px-2.5 py-1 text-xs font-semibold capitalize text-[#015CE9]">
+                      {row.category}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop table */}
+            <TableContainer
+              sx={{ maxHeight: "80%", display: { xs: "none", sm: "block" } }}
+              className="table-scroll"
             >
-              <TableHead>
-                <TableRow className="text-white font-bold">
-                  {headers.map((header, key) => {
-                    return (
-                      <StyledTableCell
-                        key={key}
-                        className=" border border-[#F5F5F5]"
-                        align="center"
-                      >
+              <Table
+                sx={{
+                  minWidth: 700,
+                  borderCollapse: "separate",
+                  borderSpacing: "0",
+                }}
+                stickyHeader
+                aria-label="users table"
+              >
+                <TableHead>
+                  <TableRow>
+                    {headers.map((header, key) => (
+                      <StyledTableCell key={key} align="center">
                         {header}
                       </StyledTableCell>
-                    );
-                  })}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {usersData.map((row, index) => (
-                  <TableRow key={uuidv4()}>
-                    <StyledTableCell align="center">
-                      {getSerialNumber(index)}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.name}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.email}
-                    </StyledTableCell>
-                    <StyledTableCell align="center" className="capitalize">
-                      {row.category}
-                    </StyledTableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {usersData.map((row, index) => (
+                    <StyledTableRow key={uuidv4()}>
+                      <StyledTableCell align="center">
+                        {getSerialNumber(index)}
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {row.name}
+                      </StyledTableCell>
+                      <StyledTableCell align="center">
+                        {row.email}
+                      </StyledTableCell>
+                      <StyledTableCell align="center" className="capitalize">
+                        {row.category}
+                      </StyledTableCell>
+                    </StyledTableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-                showFirstButton
-                showLastButton
-                sx={{
-                  "& .MuiPaginationItem-root": {
-                    color: "#015CE9",
-                    "&.Mui-selected": {
-                      backgroundColor: "#015CE9",
-                      color: "white",
-                      "&:hover": {
-                        backgroundColor: "#0146c7",
-                      },
-                    },
-                    "&:hover": {
-                      backgroundColor: "#e3f2fd",
-                    },
-                  },
-                }}
-              />
-              <div className="text-sm text-gray-600">
-                Showing {(currentPage - 1) * limit + 1} to{" "}
-                {Math.min(currentPage * limit, displayTotal)} of {displayTotal}{" "}
-                users
-              </div>
-            </Stack>
-          )}
-        </div>
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+                {/* Compact pagination for mobile */}
+                <Pagination
+                  className="sm:hidden"
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="small"
+                  siblingCount={0}
+                  boundaryCount={1}
+                  sx={paginationSx}
+                />
+                {/* Full pagination for larger screens */}
+                <Pagination
+                  className="hidden sm:flex"
+                  count={totalPages}
+                  page={currentPage}
+                  onChange={handlePageChange}
+                  color="primary"
+                  size="large"
+                  showFirstButton
+                  showLastButton
+                  sx={paginationSx}
+                />
+                <div className="text-sm text-gray-600">
+                  Showing {(currentPage - 1) * limit + 1} to{" "}
+                  {Math.min(currentPage * limit, displayTotal)} of{" "}
+                  {displayTotal} users
+                </div>
+              </Stack>
+            )}
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

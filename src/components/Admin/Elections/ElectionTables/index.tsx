@@ -11,7 +11,6 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { Pagination, Stack } from "@mui/material";
-import { electionsAdmin } from "@/utils/util";
 import SwitchButton from "../../AdminProfile/SwitchButton";
 import { drop } from "@/utils/util";
 import { getAdminVotarElection, getAdminVotarPage } from "@/utils/api";
@@ -19,6 +18,51 @@ import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
 import { usePathname } from "next/navigation";
 import { CircularProgress } from "@mui/material";
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#015ce9",
+    color: theme.palette.common.white,
+    fontSize: 14,
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 13,
+    fontWeight: 500,
+    borderBottom: "1px solid #F1F5F9",
+    verticalAlign: "middle",
+    maxWidth: "150px",
+    wordWrap: "break-word",
+    lineHeight: "1.4",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)({
+  "&:hover": {
+    backgroundColor: "#F8FAFC",
+  },
+  "&.highlighted": {
+    backgroundColor: "#fef9c3",
+    transition: "background-color 0.3s ease",
+  },
+});
+
+const paginationSx = {
+  "& .MuiPaginationItem-root": {
+    color: "#015CE9",
+    "&.Mui-selected": {
+      backgroundColor: "#015CE9",
+      color: "white",
+      "&:hover": {
+        backgroundColor: "#0146c7",
+      },
+    },
+    "&:hover": {
+      backgroundColor: "#e3f2fd",
+    },
+  },
+};
 
 const ElectionTables = () => {
   const [isDropDown, setIsDropdown] = useState(false);
@@ -43,35 +87,6 @@ const ElectionTables = () => {
     "Publish",
     "Created by",
   ];
-
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 14,
-      fontWeight: "bold",
-      padding: "12px 8px",
-      whiteSpace: "nowrap",
-      textAlign: "center",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 13,
-      fontWeight: 500,
-      border: "none",
-      padding: "16px",
-      verticalAlign: "middle",
-      maxWidth: "150px",
-      wordWrap: "break-word",
-      lineHeight: "1.4",
-    },
-  }));
-
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    "&.highlighted": {
-      backgroundColor: "#fef9c3",
-      transition: "background-color 0.3s ease",
-    },
-  }));
 
   const getVotarProPower = async (page: any = currentPage) => {
     setIsFetchUsers(true);
@@ -140,17 +155,17 @@ const ElectionTables = () => {
 
   if (isFetchUsers)
     return (
-      <div className="text-center">
+      <div className="py-10 text-center">
         <CircularProgress size={30} style={{ color: "#015CE9" }} />
       </div>
     );
 
   return (
     <div className="pb-4">
-      <div className="flex justify-end items-center gap-5">
-        <div className="relative max-w-[260px] ">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-fit">
           <div
-            className="flex items-center cursor-pointer text-xl font-semibold"
+            className="flex items-center cursor-pointer text-base sm:text-xl font-semibold"
             onClick={() => setIsDropdown((dropdown) => !dropdown)}
           >
             Sort Elections By
@@ -163,7 +178,7 @@ const ElectionTables = () => {
           <AnimatePresence mode="wait">
             {isDropDown && (
               <motion.div
-                className="absolute top-full right-14 w-40 py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
+                className="absolute top-full left-0 sm:right-14 sm:left-auto w-40 py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
                 variants={drop}
                 initial="hidden"
                 animate="visible"
@@ -186,41 +201,96 @@ const ElectionTables = () => {
             )}
           </AnimatePresence>
         </div>
-        <div className="text-xl font-semibold">
+        <div className="text-base sm:text-xl font-semibold">
           Election Number : {totalElections}
         </div>
       </div>
-      <div className="w-full mt-5">
-        <TableContainer sx={{ maxHeight: "100%" }} className="table-scroll">
-          <Table
-            sx={{
-              minWidth: 700,
-              borderCollapse: "separate",
-              borderSpacing: "0",
-            }}
-            stickyHeader
-            aria-label="sticky table"
+
+      {users.length === 0 ? (
+        <div className="py-10 text-center text-gray-400">No elections found</div>
+      ) : (
+        <div className="w-full mt-5">
+          {/* Mobile card list */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {users.map((row, index) => (
+              <div
+                key={row.election_id}
+                className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-xs font-medium text-gray-400">
+                      #{getSerialNumber(index)}
+                    </div>
+                    <div className="truncate text-sm font-semibold text-gray-800">
+                      {row.name_of_election}
+                    </div>
+                  </div>
+                  {row.hasOwnProperty("published") && (
+                    <div className="shrink-0">
+                      <SwitchButton
+                        id={row.election_id}
+                        row={row}
+                        userMail={row.author_email}
+                        initialStatus={row.published}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-2 text-xs text-gray-500">
+                  <div>{row.start_date}</div>
+                  <div>{row.end_date}</div>
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                  <span
+                    className={`rounded-full px-2.5 py-1 font-semibold capitalize ${
+                      row.payment_status === "Paid"
+                        ? "bg-green-50 text-green-600"
+                        : "bg-orange-50 text-[#E88749]"
+                    }`}
+                  >
+                    {row.payment_status || "Pending"}
+                  </span>
+                  <span className="rounded-full bg-[#015CE9]/10 px-2.5 py-1 font-semibold text-[#015CE9]">
+                    {row.number_of_election || 0} voters
+                  </span>
+                </div>
+
+                <div className="mt-3 truncate text-xs text-gray-400">
+                  {row.author_email || row.createdBy || "-"}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <TableContainer
+            sx={{ maxHeight: "100%", display: { xs: "none", sm: "block" } }}
+            className="table-scroll"
           >
-            <TableHead>
-              <StyledTableRow className="text-white font-bold">
-                {headers.map((header, key) => {
-                  return (
-                    <StyledTableCell
-                      key={key}
-                      className=" border border-[#F5F5F5]"
-                      align="center"
-                    >
+            <Table
+              sx={{
+                minWidth: 700,
+                borderCollapse: "separate",
+                borderSpacing: "0",
+              }}
+              stickyHeader
+              aria-label="elections table"
+            >
+              <TableHead>
+                <TableRow>
+                  {headers.map((header, key) => (
+                    <StyledTableCell key={key} align="center">
                       {header}
                     </StyledTableCell>
-                  );
-                })}
-              </StyledTableRow>
-            </TableHead>
-            <TableBody>
-              {users &&
-                users.length > 0 &&
-                users.map((row, index) => (
-                  <TableRow key={row.election_id}>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {users.map((row, index) => (
+                  <StyledTableRow key={row.election_id}>
                     <StyledTableCell align="center">
                       {getSerialNumber(index)}
                     </StyledTableCell>
@@ -260,47 +330,48 @@ const ElectionTables = () => {
                     <StyledTableCell align="center">
                       {row.author_email || row.createdBy || "-"}
                     </StyledTableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-              size="large"
-              showFirstButton
-              showLastButton
-              sx={{
-                "& .MuiPaginationItem-root": {
-                  color: "#015CE9",
-                  "&.Mui-selected": {
-                    backgroundColor: "#015CE9",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#0146c7",
-                    },
-                  },
-                  "&:hover": {
-                    backgroundColor: "#e3f2fd",
-                  },
-                },
-              }}
-            />
-            <div className="text-sm text-gray-600">
-              Showing {(currentPage - 1) * limit + 1} to{" "}
-              {Math.min(currentPage * limit, totalElections)} of{" "}
-              {totalElections} elections
-            </div>
-          </Stack>
-        )}
-      </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+          {/* Compact pagination for mobile */}
+          <Pagination
+            className="sm:hidden"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="small"
+            siblingCount={0}
+            boundaryCount={1}
+            sx={paginationSx}
+          />
+          {/* Full pagination for larger screens */}
+          <Pagination
+            className="hidden sm:flex"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+            sx={paginationSx}
+          />
+          <div className="text-sm text-gray-600">
+            Showing {(currentPage - 1) * limit + 1} to{" "}
+            {Math.min(currentPage * limit, totalElections)} of{" "}
+            {totalElections} elections
+          </div>
+        </Stack>
+      )}
     </div>
   );
 };
