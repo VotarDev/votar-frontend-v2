@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BsCaretDownFill, BsFillCaretUpFill } from "react-icons/bs";
+import { BsCaretDownFill, BsFillCaretUpFill, BsCheck2 } from "react-icons/bs";
 
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
@@ -164,45 +164,58 @@ const ElectionTables = () => {
     <div className="pb-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative w-fit">
-          <div
-            className="flex items-center cursor-pointer text-base sm:text-xl font-semibold"
+          <button
+            type="button"
             onClick={() => setIsDropdown((dropdown) => !dropdown)}
+            className={`flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors ${
+              isDropDown
+                ? "border-[#015CE9] text-[#015CE9]"
+                : "border-gray-200 text-gray-700 hover:border-[#015CE9] hover:text-[#015CE9]"
+            }`}
           >
-            Sort Elections By
-            <span className="pl-1">
+            <span>
+              Sort Elections By: <span className="text-[#015CE9]">{filteredOption}</span>
+            </span>
+            <span className="text-xs">
               {isDropDown ? <BsFillCaretUpFill /> : <BsCaretDownFill />}
             </span>
-            <span className="px-1">:</span>
-            {filteredOption}
-          </div>
-          <AnimatePresence mode="wait">
+          </button>
+
+          <AnimatePresence>
             {isDropDown && (
-              <motion.div
-                className="absolute top-full left-0 sm:right-14 sm:left-auto w-40 py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
-                variants={drop}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <div className="flex flex-col gap-2 [&>*]:cursor-pointer">
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setIsDropdown(false)}
+                />
+                <motion.div
+                  className="absolute top-full left-0 mt-2 w-52 rounded-lg border border-gray-100 bg-white py-2 shadow-lg z-20"
+                  variants={drop}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                >
                   {options.map((opt, index) => (
                     <div
                       key={index}
                       onClick={() => filteredOptionHandler(opt)}
-                      className={`hover:bg-[#dadada] px-4 py-2 ${
-                        filteredOption == opt ? " bg-[#dadada]" : ""
+                      className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                        filteredOption === opt
+                          ? "bg-[#015CE9]/10 font-semibold text-[#015CE9]"
+                          : "text-gray-600 hover:bg-gray-50"
                       }`}
                     >
                       {opt}
+                      {filteredOption === opt && <BsCheck2 className="text-base" />}
                     </div>
                   ))}
-                </div>
-              </motion.div>
+                </motion.div>
+              </>
             )}
           </AnimatePresence>
         </div>
-        <div className="text-base sm:text-xl font-semibold">
-          Election Number : {totalElections}
+        <div className="w-fit rounded-lg bg-[#015CE9]/10 px-4 py-2.5 text-sm font-semibold text-[#015CE9]">
+          {totalElections} {totalElections === 1 ? "election" : "elections"}
         </div>
       </div>
 
