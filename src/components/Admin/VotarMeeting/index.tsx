@@ -1,121 +1,35 @@
 import React from "react";
 import { activitiesContent } from "@/utils/util";
-import Table from "@mui/material/Table";
-import { styled } from "@mui/material/styles";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import ActivityTable, { ActivityRow } from "../ActivityTable";
 
 const VotarMeeting = () => {
   const votarMeeting = activitiesContent.filter(
     (items) => items.type === "Votar Meeting"
   );
-  const headers = [
-    "Name",
-    "Type",
-    "Date and Time",
-    "Quantity",
-    "Amount",
-    "Status",
-  ];
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 14,
-      fontWeight: "bold",
-      padding: "12px 8px",
-      whiteSpace: "nowrap",
-      textAlign: "center",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 13,
-      fontWeight: 500,
-      border: "none",
-      padding: "16px",
 
-      verticalAlign: "middle",
-      maxWidth: "150px",
-      wordWrap: "break-word",
-      lineHeight: "1.4",
+  const rows: ActivityRow[] = votarMeeting.map((row) => ({
+    key: row.id,
+    name: row.name,
+    type: row.type,
+    dateTime: (
+      <>
+        {row.date}
+        <br />
+        {row.time}
+      </>
+    ),
+    quantity: row.quantity.toLocaleString(),
+    amount: `NGN ${row.amount.toLocaleString()}`,
+    status: {
+      label: row.status,
+      className:
+        row.status === "pending"
+          ? "bg-orange-50 text-[#E88749]"
+          : "bg-green-50 text-green-500",
     },
   }));
 
-  const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    "&.highlighted": {
-      backgroundColor: "#fef9c3",
-      transition: "background-color 0.3s ease",
-    },
-  }));
-
-  return (
-    <div>
-      <TableContainer sx={{ maxHeight: 440 }} className="table-scroll">
-        <Table
-          sx={{
-            minWidth: 650,
-
-            borderCollapse: "separate",
-            borderSpacing: "0",
-          }}
-          stickyHeader
-          aria-label="sticky table"
-        >
-          <TableHead>
-            <StyledTableRow className="text-white font-bold">
-              {headers.map((header, key) => {
-                return (
-                  <StyledTableCell
-                    key={key}
-                    className=" border border-[#F5F5F5]"
-                  >
-                    {header}
-                  </StyledTableCell>
-                );
-              })}
-            </StyledTableRow>
-          </TableHead>
-          <TableBody>
-            {votarMeeting.length === 0 && (
-              <div className="p-4 text-base text-red-600">No votar Meeting</div>
-            )}
-            {votarMeeting.map((row, index) => (
-              <TableRow key={row.id}>
-                <StyledTableCell>{row.name}</StyledTableCell>
-                <StyledTableCell style={{ textAlign: "center" }}>
-                  {row.type}
-                </StyledTableCell>
-                <StyledTableCell style={{ textAlign: "center" }}>
-                  {row.date}
-                  <br />
-                  {row.time}
-                </StyledTableCell>
-                <StyledTableCell style={{ textAlign: "center" }}>
-                  {row.quantity.toLocaleString()}
-                </StyledTableCell>
-                <StyledTableCell style={{ textAlign: "center" }}>
-                  NGN {row.amount.toLocaleString()}
-                </StyledTableCell>
-                <StyledTableCell style={{ textAlign: "center" }}>
-                  <span
-                    className={`${
-                      row.status === "pending"
-                        ? "text-[#E88749]"
-                        : "text-green-400"
-                    } capitalize`}
-                  >
-                    {row.status}
-                  </span>
-                </StyledTableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
-  );
+  return <ActivityTable rows={rows} emptyMessage="No Votar Meeting activity yet" />;
 };
 
 export default VotarMeeting;

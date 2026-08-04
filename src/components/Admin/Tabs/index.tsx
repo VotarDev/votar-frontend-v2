@@ -7,7 +7,25 @@ import VotarMeeting from "../VotarMeeting";
 import setAuthToken from "@/utils/setAuthToken";
 import { getAdminVotarPage, getAllElectionsAdmin } from "@/utils/api";
 import Cookies from "universal-cookie";
-import { CircularProgress, Pagination } from "@mui/material";
+import { CircularProgress, Pagination, Stack } from "@mui/material";
+
+const tabs = [
+  { id: 1, label: "Activities" },
+  { id: 2, label: "Votar Credits" },
+  { id: 3, label: "Free Votar" },
+  { id: 4, label: "Votar Pro" },
+  { id: 5, label: "Votar Meetings" },
+];
+
+const paginationSx = {
+  "& .MuiPaginationItem-root": {
+    color: "#015CE9",
+  },
+  "& .Mui-selected": {
+    backgroundColor: "#015CE9 !important",
+    color: "white",
+  },
+};
 
 const Tabs = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -74,14 +92,6 @@ const Tabs = () => {
     setCurrentPage(page);
   };
 
-  const handleRowsPerPageChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newRowsPerPage = parseInt(event.target.value);
-    setRowsPerPage(newRowsPerPage);
-    setCurrentPage(1);
-  };
-
   const freeVotarElections = elections.filter(
     (election: any) => election.type === "Free Votar"
   );
@@ -99,61 +109,21 @@ const Tabs = () => {
 
   return (
     <div className="bg-white my-8 shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] lg:p-10 p-4">
-      <div className=" bg-neutral-100 rounded-lg px-4 py-2 max-w-[709px] ">
-        <div className="flex lg:flex-row flex-col gap-4 lg:gap-0 relative z-10 justify-center items-center py-2.5 text-center font-semibold overflow-x-auto">
-          <div
-            className="absolute bg-blue-700 w-[calc(100%/5)] h-[70%] left-0 duration-150 -z-10 rounded hidden lg:block"
-            style={{
-              left: `calc((100%/5) * ${activeTab - 1})`,
-            }}
-          ></div>
-          <div
-            className="absolute bg-blue-700 w-full h-[calc(100%/5)] left-0 duration-150 -z-10 rounded lg:hidden block top-0"
-            style={{
-              top: `calc((100%/5) * ${activeTab - 1})`,
-            }}
-          ></div>
-          <div
-            className={`cursor-pointer p-2 w-full   ${
-              activeTab === 1 ? "text-neutral-100 " : "text-neutral-400"
+      <div className="flex w-full gap-1.5 overflow-x-auto rounded-lg bg-zinc-100 p-1.5 sm:w-fit sm:flex-wrap">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => handleTabClick(tab.id)}
+            className={`shrink-0 whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-semibold transition-colors ${
+              activeTab === tab.id
+                ? "bg-[#015CE9] text-white shadow"
+                : "text-gray-500 hover:text-gray-700"
             }`}
-            onClick={() => handleTabClick(1)}
           >
-            Activities
-          </div>
-          <div
-            className={`cursor-pointer p-2  w-full ${
-              activeTab === 2 ? "text-neutral-100 " : "text-neutral-400"
-            }`}
-            onClick={() => handleTabClick(2)}
-          >
-            Votar Credits
-          </div>
-          <div
-            className={`cursor-pointer p-2  w-full ${
-              activeTab === 3 ? "text-neutral-100 " : "text-neutral-400"
-            }`}
-            onClick={() => handleTabClick(3)}
-          >
-            Free Votar
-          </div>
-          <div
-            className={`cursor-pointer p-2  w-full ${
-              activeTab === 4 ? "text-neutral-100 " : "text-neutral-400"
-            }`}
-            onClick={() => handleTabClick(4)}
-          >
-            Votar Pro
-          </div>
-          <div
-            className={`cursor-pointer p-2  w-full ${
-              activeTab === 5 ? "text-neutral-100 " : "text-neutral-400"
-            }`}
-            onClick={() => handleTabClick(5)}
-          >
-            Votar Meetings
-          </div>
-        </div>
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <div className="mt-4 lg:p-4 p-0 relative">
@@ -171,39 +141,38 @@ const Tabs = () => {
       </div>
 
       {elections && elections.length > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={handleRowsPerPageChange}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
-            >
-              <option value={50}>50</option>
-            </select>
-          </div>
+        <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+          <div className="text-sm text-gray-600">{rowsPerPage} rows per page</div>
 
           {totalPages > 1 && (
-            <Pagination
-              count={totalPages}
-              page={currentPage}
-              onChange={handlePageChange}
-              color="primary"
-              size="medium"
-              showFirstButton
-              showLastButton
-              sx={{
-                "& .MuiPaginationItem-root": {
-                  color: "#015CE9",
-                },
-                "& .Mui-selected": {
-                  backgroundColor: "#015CE9 !important",
-                  color: "white",
-                },
-              }}
-            />
+            <>
+              {/* Compact pagination for mobile */}
+              <Pagination
+                className="sm:hidden"
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="small"
+                siblingCount={0}
+                boundaryCount={1}
+                sx={paginationSx}
+              />
+              {/* Full pagination for larger screens */}
+              <Pagination
+                className="hidden sm:flex"
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="medium"
+                showFirstButton
+                showLastButton
+                sx={paginationSx}
+              />
+            </>
           )}
-        </div>
+        </Stack>
       )}
     </div>
   );
