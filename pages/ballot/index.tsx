@@ -30,7 +30,7 @@ import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
-import { Check, MessageSquare, Download, Clock, CalendarX } from "lucide-react";
+import { Check, MessageSquare, Download, Clock, CalendarX, X } from "lucide-react";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -449,16 +449,22 @@ const Ballot = () => {
     </button>
   );
 
+  const renderGreetingHeader = (greeting: string, name?: string) => (
+    <div className="relative mt-5 px-4 md:px-10">
+      <div className="mb-4 flex justify-center sm:absolute sm:right-4 sm:top-1/2 sm:mb-0 sm:-translate-y-1/2 md:right-6">
+        {logoutBtn}
+      </div>
+      <h1 className="text-center text-2xl font-bold capitalize md:text-4xl">
+        {greeting}, {name}
+      </h1>
+    </div>
+  );
+
   if (election?.published === false) {
     return (
       <>
         <div><Header electionDetails={election} /></div>
-        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
-        <div className="text-center mt-5">
-          <h1 className="text-4xl font-bold capitalize">
-            Welcome, {voterProfile.userData?.name}
-          </h1>
-        </div>
+        {renderGreetingHeader("Welcome", voterProfile.userData?.name)}
         <div className="text-center pt-5">
           You do not have Access to this election
         </div>
@@ -470,12 +476,7 @@ const Ballot = () => {
     return (
       <>
         <div><Header electionDetails={election} /></div>
-        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
-        <div className="text-center mt-5">
-          <h1 className="md:text-4xl text-2xl font-bold capitalize">
-            Welcome, {voterProfile.userData?.name}
-          </h1>
-        </div>
+        {renderGreetingHeader("Welcome", voterProfile.userData?.name)}
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
           <div className="bg-white border border-blue-100 rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
             <div className="flex justify-center mb-5">
@@ -507,12 +508,7 @@ const Ballot = () => {
     return (
       <>
         <div><Header electionDetails={election} /></div>
-        <div className="mt-5 flex justify-end mr-4 md:mr-10">{logoutBtn}</div>
-        <div className="text-center mt-5">
-          <h1 className="md:text-4xl text-2xl font-bold capitalize">
-            Welcome, {voterProfile.userData?.name}
-          </h1>
-        </div>
+        {renderGreetingHeader("Welcome", voterProfile.userData?.name)}
         <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
           <div className="bg-white border border-red-100 rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
             <div className="flex justify-center mb-5">
@@ -557,21 +553,19 @@ const Ballot = () => {
           )}
 
           <div>
-            <div className="mt-5 flex justify-end mr-4 md:mr-10">
-              {logoutBtn}
-            </div>
             {isFetchCandidate ? (
-              <div className="mt-10 text-center">Fetching candidates...</div>
+              <>
+                <div className="mt-5 flex justify-end mr-4 md:mr-10">
+                  {logoutBtn}
+                </div>
+                <div className="mt-10 text-center">Fetching candidates...</div>
+              </>
             ) : (
               <div>
-                <div className="text-center mt-5">
-                  <h1 className="md:text-4xl text-2xl font-bold capitalize">
-                    {!isVoteSuccessful ? "Welcome," : "Congratulations,"}{" "}
-                    {voterProfile.userData?.name
-                      ? voterProfile.userData?.name
-                      : session?.user?.name}
-                  </h1>
-                </div>
+                {renderGreetingHeader(
+                  !isVoteSuccessful ? "Welcome" : "Congratulations",
+                  voterProfile.userData?.name || session?.user?.name
+                )}
                 {isVoteSuccessful ? (
                   <div className="relative w-full bg-white lg:p-8 p-4 min-h-[600px] flex flex-col items-center justify-center">
                     <div
@@ -593,11 +587,11 @@ const Ballot = () => {
                       <img
                         src="/assets/images/customizable-image.jpeg"
                         alt="Success Ribbon"
-                        className="w-[350px] md:w-[500px] h-auto"
+                        className="w-full max-w-[350px] md:max-w-[500px] h-auto"
                       />
                     </div>
 
-                    <div className="bg-white rounded-2xl w-full lg:w-auto md:p-12 mb-8 md:absolute left-0">
+                    <div className="bg-white rounded-2xl w-full lg:w-auto p-4 md:p-12 mb-8 md:absolute left-0">
                       <div className="mb-10 flex flex-col gap-4">
                         <h2 className="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
                           <MessageSquare className="w-6 h-6 text-blue-600" />
@@ -723,7 +717,7 @@ const Ballot = () => {
                             return (
                               <div
                                 key={index}
-                                className="bg-slate-50 mt-20 mb-14 p-10"
+                                className="bg-slate-50 mt-10 mb-8 lg:mt-20 lg:mb-14 p-4 lg:p-10 rounded-r-lg"
                                 style={{
                                   ...(isClient && {
                                     borderLeft: `4px solid ${randomColor}`,
@@ -747,12 +741,12 @@ const Ballot = () => {
                                     />
                                   </div>
                                 </div>
-                                <div className="flex justify-center flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
+                                <div className="flex justify-center flex-wrap gap-6 lg:gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
                                   {preview.candidates.map(
                                     (candidate: any, candidateIndex: any) => (
                                       <div
                                         key={candidateIndex}
-                                        className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
+                                        className={`w-full max-w-[280px] lg:w-[calc(25%-40px)] lg:max-w-none mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-lg lg:text-xl font-semibold p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md cursor-pointer relative ${
                                           isCandidateActive(
                                             preview.name_of_position,
                                             candidate
@@ -776,11 +770,11 @@ const Ballot = () => {
                                           </div>
                                         )}
 
-                                        <div>
+                                        <div className="w-full">
                                           <div className="mb-3">
                                             <img
                                               src={candidate.candidate_picture}
-                                              className="w-[269px] h-[269px] object-cover rounded"
+                                              className="w-full h-auto aspect-square object-cover rounded-lg"
                                               alt={`Image for ${candidate.candidate_name}`}
                                             />
                                           </div>
@@ -853,64 +847,81 @@ const Ballot = () => {
                 <Modal
                   key="modal"
                   handleClose={closeModal}
-                  classname="overflow-y-scroll h-[80vh] ballot-modal bg-white"
+                  classname="ballot-modal h-[80vh]"
                 >
-                  <div className="rounded h-full">
-                    <div className="text-center py-8 pb-5 max-w-[40rem] mx-auto ">
-                      Hello{" "}
-                      <span className="capitalize font-semibold">
-                        {voterProfile.userData.name}
-                      </span>
-                      , the candidates you voted for in the different positions
-                      are hightlighted below. Kindly, look through to confirm
-                      they are your final choices. if they are, click on the{" "}
-                      <span>&apos;Confirm Votes&apos;</span> to submit your
-                      votes. If you would like to change your candidates
-                      selection in any position, click on{" "}
-                      <span>&apos;Go back&apos;</span> to go to your secret
-                      ballot page and reselect your prefered candidate.
+                  <div className="flex h-full w-[92%] sm:w-full max-w-[600px] flex-col rounded-2xl bg-white overflow-hidden">
+                    {/* Header */}
+                    <div className="flex shrink-0 items-start justify-between gap-4 border-b border-gray-100 px-4 py-5 sm:px-8">
+                      <div>
+                        <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                          Review Your Votes
+                        </h2>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Hello{" "}
+                          <span className="font-semibold capitalize text-slate-700">
+                            {voterProfile.userData.name}
+                          </span>
+                          , the candidates you voted for in the different
+                          positions are hightlighted below. Kindly, look
+                          through to confirm they are your final choices. if
+                          they are, click on the{" "}
+                          <span className="font-semibold text-slate-700">
+                            &apos;Confirm Votes&apos;
+                          </span>{" "}
+                          to submit your votes. If you would like to change
+                          your candidates selection in any position, click on{" "}
+                          <span className="font-semibold text-slate-700">
+                            &apos;Go back&apos;
+                          </span>{" "}
+                          to go to your secret ballot page and reselect your
+                          prefered candidate.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={closeModal}
+                        aria-label="Close"
+                        className="shrink-0 rounded-full p-2 text-slate-400 transition-colors hover:bg-gray-100 hover:text-slate-600"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
                     </div>
-                    <div>
+
+                    {/* Scrollable body */}
+                    <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
                       {selectedCandidates.map((selectedCandidate, index) => (
-                        <div key={index}>
-                          <div className="text-center text-slate-900 lg:text-xl text-base font-semibold flex items-center justify-center gap-2 uppercase">
-                            <div>
-                              <img
-                                src={leftline.src}
-                                alt="line"
-                                className="w-40"
-                              />
+                        <div key={index} className="mb-8 last:mb-0">
+                          <div className="mb-4 flex items-center gap-3">
+                            <div className="h-px flex-1 bg-gray-200" />
+                            <div className="text-center text-sm font-semibold uppercase tracking-wide text-slate-700 sm:text-base">
+                              {selectedCandidate.position}
                             </div>
-                            <div>{selectedCandidate.position}</div>
-                            <div>
-                              <img
-                                src={rightline.src}
-                                alt="line"
-                                className="w-40"
-                              />
-                            </div>
+                            <div className="h-px flex-1 bg-gray-200" />
                           </div>
 
                           {selectedCandidate.abstain ? (
-                            <div className="text-center text-red-500 font-semibold py-2">
+                            <div className="rounded-lg bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
                               You have abstained from voting for this position.
                             </div>
                           ) : (
-                            <div className="flex justify-center gap-3">
+                            <div className="flex flex-wrap justify-center gap-4">
                               {selectedCandidate.candidates?.map(
                                 (candidate: any, candidateIndex: any) => (
-                                  <div key={candidateIndex} className="pb-3">
-                                    <div className="flex justify-center py-2">
-                                      <img
-                                        src={candidate.candidate_picture}
-                                        alt="candidate"
-                                        className="w-20 h-20 object-cover rounded-full"
-                                      />
-                                    </div>
-                                    <div className="font-semibold">
+                                  <div
+                                    key={candidateIndex}
+                                    className="flex w-28 flex-col items-center rounded-xl border border-gray-100 bg-gray-50 px-3 py-3"
+                                  >
+                                    <img
+                                      src={candidate.candidate_picture}
+                                      alt="candidate"
+                                      className="h-16 w-16 rounded-full border-2 border-white object-cover shadow"
+                                    />
+                                    <div className="mt-2 text-center text-sm font-semibold capitalize text-slate-800">
                                       {candidate.candidate_name}
                                     </div>
-                                    <div>({candidate.candidate_nickname})</div>
+                                    <div className="text-center text-xs text-slate-500">
+                                      ({candidate.candidate_nickname})
+                                    </div>
                                   </div>
                                 )
                               )}
@@ -919,42 +930,36 @@ const Ballot = () => {
                         </div>
                       ))}
 
-                      <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
-                        <div className="text-[#ECAE0D] text-xl">
+                      <div className="mt-2 flex items-start gap-2 rounded-lg bg-[#FFBC11] bg-opacity-20 px-4 py-3 text-left">
+                        <div className="mt-0.5 shrink-0 text-xl text-[#ECAE0D]">
                           <PiWarningCircleFill />
                         </div>
-                        <div className="text-[#826008]">
+                        <div className="text-sm text-[#826008]">
                           Please ensure that you have selected your preffered
                           candidate in each position as votes cannot be
                           submitted again after the first Submission
                         </div>
                       </div>
-                      <div className="flex justify-center p-5 items-center gap-5">
-                        <div>
-                          <button
-                            onClick={closeModal}
-                            className="flex justify-center items-center outline-none border border-blue-700 text-blue-700 font-semibold capitalize w-40 h-12 rounded-lg"
-                          >
-                            Go back
-                          </button>
-                        </div>
-                        <div>
-                          <button
-                            onClick={enterVotesHandler}
-                            disabled={isCastVote}
-                            className="flex justify-center items-center outline-none border-none bg-blue-700 text-slate-100 font-semibold capitalize w-40 h-12 rounded-lg"
-                          >
-                            Confirm Votes
-                            {isCastVote && (
-                              <CircularProgress
-                                className="ml-3"
-                                size={18}
-                                style={{ color: "inherit" }}
-                              />
-                            )}
-                          </button>
-                        </div>
-                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-gray-100 px-4 py-4 sm:flex-row sm:justify-center sm:px-8">
+                      <button
+                        onClick={closeModal}
+                        className="flex h-12 w-full items-center justify-center rounded-lg border border-blue-700 font-semibold capitalize text-blue-700 outline-none sm:w-40"
+                      >
+                        Go back
+                      </button>
+                      <button
+                        onClick={enterVotesHandler}
+                        disabled={isCastVote}
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-lg border-none bg-blue-700 font-semibold capitalize text-slate-100 outline-none disabled:opacity-70 sm:w-40"
+                      >
+                        Confirm Votes
+                        {isCastVote && (
+                          <CircularProgress size={18} style={{ color: "inherit" }} />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </Modal>
