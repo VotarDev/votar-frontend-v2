@@ -44,12 +44,12 @@ const UserRow = memo(function UserRow({
   };
 
   return (
-    <TableRow key={key}>
+    <TableRow key={key} sx={{ "&:hover": { backgroundColor: "#F8FAFC" } }}>
       <StyledTableCell align="center">
         {serialNumber <= 9 ? `0${serialNumber}` : serialNumber}
       </StyledTableCell>
 
-      <StyledTableCell align="center">{row.email}</StyledTableCell>
+      <StyledTableCell align="left">{row.email}</StyledTableCell>
       <StyledTableCell align="center">{row.votar_credit}</StyledTableCell>
 
       <StyledTableCell align="center">

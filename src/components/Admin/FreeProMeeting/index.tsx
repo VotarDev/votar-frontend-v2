@@ -9,9 +9,11 @@ const FreeProMeeting = () => {
   return (
     <AdminLayout>
       <div className="bg-white">
-        <div className="py-[60px] max-w-[1300px] mx-auto ">
-          <div className="flex justify-between items-center">
-            <div className="text-2xl font-bold">Free Votar Voting Power</div>
+        <div className="py-8 lg:py-[60px] max-w-[1300px] mx-auto">
+          <div className="flex flex-col gap-5">
+            <div className="text-xl lg:text-2xl font-bold">
+              Free Votar Voting Power
+            </div>
             <Navigations />
           </div>
 
