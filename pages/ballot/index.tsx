@@ -140,8 +140,13 @@ const Ballot = () => {
 
   const handleSelectCandidate = (position: string, candidate: Candidate) => {
     setSelectedCandidates((prevState: any) => {
+      const positionData = combinedData.find(
+        (item: any) => item.name_of_position === position
+      );
       const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED =
-        election?.max_number_candidate || 1;
+        positionData?.max_number_candidate ||
+        election?.max_number_candidate ||
+        1;
       const existingIndex = prevState.findIndex(
         (sc: any) => sc.position === position
       );
@@ -377,27 +382,44 @@ const Ballot = () => {
     );
   };
 
-  const combinedData = candidates.reduce((acc: any, curr: any) => {
-    const existingPosition = acc.find(
-      (item: any) => item.name_of_position === curr.name_of_position
+  const voterSubgroup = voterProfile.userData?.subgroup;
+
+  // A position is visible/votable by this voter unless it has a specific
+  // voting criteria (subgroup restriction) set that doesn't match the
+  // voter's own subgroup. "All" (or no restriction) means everyone can see it.
+  const isPositionEligible = (votingCriteria: string | undefined) => {
+    if (!votingCriteria || votingCriteria === "All") return true;
+    return (
+      typeof voterSubgroup === "string" &&
+      voterSubgroup.trim().toLowerCase() === votingCriteria.trim().toLowerCase()
     );
+  };
 
-    if (existingPosition) {
-      existingPosition.candidates.push(...curr.candidates);
-    } else {
-      acc.push({
-        allow_abstain: curr.allow_abstain,
-        author_id: curr.author_id,
-        candidates: [...curr.candidates],
-        name_of_position: curr.name_of_position,
-        show_pictures: curr.show_pictures,
-        _id: curr._id,
-        __v: curr.__v,
-      });
-    }
+  const combinedData = candidates
+    .reduce((acc: any, curr: any) => {
+      const existingPosition = acc.find(
+        (item: any) => item.name_of_position === curr.name_of_position
+      );
 
-    return acc;
-  }, []);
+      if (existingPosition) {
+        existingPosition.candidates.push(...curr.candidates);
+      } else {
+        acc.push({
+          allow_abstain: curr.allow_abstain,
+          author_id: curr.author_id,
+          candidates: [...curr.candidates],
+          name_of_position: curr.name_of_position,
+          show_pictures: curr.show_pictures,
+          _id: curr._id,
+          __v: curr.__v,
+          voting_criteria: curr.voting_criteria,
+          max_number_candidate: curr.max_number_candidate,
+        });
+      }
+
+      return acc;
+    }, [])
+    .filter((item: any) => isPositionEligible(item.voting_criteria));
 
   useEffect(() => {
     const allPositions = combinedData.map((item: any) => item.name_of_position);

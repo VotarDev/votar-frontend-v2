@@ -653,11 +653,14 @@ const DetailsPage = ({
               <div className="mt-[34px] flex lg:gap-10 items-start flex-wrap gap-4">
                 <div>
                   <div className="lg:text-xl text-base font-normal">
-                    Max Number of Candidates to be Selected Per Position
+                    Default Max Number of Candidates to be Selected Per Position
                   </div>
                   <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
                     <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
-                    How many candidates a voter is allowed to select for each position on the ballot.
+                    How many candidates a voter is allowed to select for each
+                    position on the ballot. This default is used unless
+                    overridden per position via the Max. no. of candidates
+                    dropdown on the Ballot step&apos;s voting criteria.
                   </p>
                 </div>
                 <div className="flex items-center gap-4 text-2xl">
@@ -686,6 +689,32 @@ const DetailsPage = ({
                     <AiOutlinePlus />
                   </button>
                 </div>
+              </div>
+
+              <div className="mt-[34px] flex flex-col gap-1">
+                <div className="flex items-center gap-4">
+                  <h2 className="lg:text-xl text-base font-bold">
+                    Voting Criteria
+                  </h2>
+                  <input
+                    type="checkbox"
+                    name="votingCriteria"
+                    disabled={!isEditable}
+                    checked={!!state.voting_criteria_enabled}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_VOTING_CRITERIA_ENABLED",
+                        value: e.target.checked,
+                      })
+                    }
+                  />
+                </div>
+                <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+                  <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+                  Enable this to restrict individual positions on the Ballot
+                  step to a specific voter subgroup. When off, every position
+                  is visible to all subgroups.
+                </p>
               </div>
               {/* <div className="mt-5">
                 <button

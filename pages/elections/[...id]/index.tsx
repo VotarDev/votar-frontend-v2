@@ -45,6 +45,7 @@ const initState: DetailFormState = {
   max_number_candidate: 0,
   price_per_vote: 0,
   free_votes: 0,
+  voting_criteria_enabled: false,
 };
 
 const ElectionDetail = () => {
@@ -160,6 +161,8 @@ const ElectionDetail = () => {
         return { ...state, secondary_color: action.value };
       case "SET_CANDIDATE_NO":
         return { ...state, max_number_candidate: action.value };
+      case "SET_VOTING_CRITERIA_ENABLED":
+        return { ...state, voting_criteria_enabled: action.value };
       case "SET_ELECTION":
         return {
           ...state,
@@ -175,6 +178,7 @@ const ElectionDetail = () => {
           max_number_candidate: action.value.max_number_candidate,
           price_per_vote: action.value.price_per_vote,
           free_votes: action.value.free_votes,
+          voting_criteria_enabled: !!action.value.voting_criteria_enabled,
         };
       case "INCREMENT_PRICE_PER_VOTE":
         return {
@@ -249,6 +253,10 @@ const ElectionDetail = () => {
     formData.append(
       "max_number_candidate",
       state.max_number_candidate.toString()
+    );
+    formData.append(
+      "voting_criteria_enabled",
+      String(!!state.voting_criteria_enabled)
     );
     if (state.image) {
       formData.append("election-image", state.image);
@@ -380,7 +388,12 @@ const ElectionDetail = () => {
             />
           )}
           {steps[currentStep] === "Ballot" && (
-            <BallotsPage position={position} setPosition={setPosition} />
+            <BallotsPage
+              position={position}
+              setPosition={setPosition}
+              votingCriteriaEnabled={state.voting_criteria_enabled}
+              defaultMaxNumberCandidate={state.max_number_candidate}
+            />
           )}
           {steps[currentStep] === "Voters Page" && <VoterPage />}
           {steps[currentStep] === "Pay" && <PayPage />}

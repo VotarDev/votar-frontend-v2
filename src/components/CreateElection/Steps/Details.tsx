@@ -44,6 +44,8 @@ const Details = ({
   setBackgroundImageFile,
   numberofFreeVote,
   setNumberofFreeVote,
+  votingCriteriaEnabled,
+  setVotingCriteriaEnabled,
 }: any) => {
   const [selectedImgUrl, setSelectedImgUrl] = useState(null);
   const [backgroundUrl, setbackgroundUrl] = useState<string | null>(null);
@@ -230,10 +232,10 @@ const Details = ({
     }
   };
 
-  const [checked, setChecked] = useState(false);
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(event.target.checked);
+  const handleVotingCriteriaChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setVotingCriteriaEnabled(event.target.checked);
   };
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
@@ -568,11 +570,14 @@ const Details = ({
           <div className="mt-[34px] flex lg:gap-10 items-start flex-wrap gap-4">
             <div>
               <div className="lg:text-xl text-base font-normal">
-                Max Number of Candidates to be Selected Per Position
+                Default Max Number of Candidates to be Selected Per Position
               </div>
               <p className="flex items-center gap-1 text-xs text-slate-500 font-normal mt-1">
                 <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
-                How many candidates a voter is allowed to select for each position on the ballot.
+                How many candidates a voter is allowed to select for each
+                position on the ballot. This default is used unless overridden
+                per position via the Max. no. of candidates dropdown on the
+                Ballot step&apos;s voting criteria.
               </p>
             </div>
             <div className="flex items-center gap-4 text-2xl">
@@ -598,6 +603,26 @@ const Details = ({
                 <AiOutlinePlus />
               </div>
             </div>
+          </div>
+
+          <div className="mt-[34px] flex flex-col gap-1">
+            <div className="flex items-center gap-4">
+              <h2 className="lg:text-xl text-base font-bold">
+                Voting Criteria
+              </h2>
+              <input
+                type="checkbox"
+                name="votingCriteria"
+                checked={!!votingCriteriaEnabled}
+                onChange={handleVotingCriteriaChange}
+              />
+            </div>
+            <p className="flex items-center gap-1 text-xs text-slate-500 font-normal">
+              <AiOutlineInfoCircle className="shrink-0 text-[#015CE9]" />
+              Enable this to restrict individual positions on the Ballot step
+              to a specific voter subgroup. When off, every position is
+              visible to all subgroups.
+            </p>
           </div>
 
           {votarPlan === "Free Votar" && (

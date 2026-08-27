@@ -1,12 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { deleteCandidate, deletePosition, getElectionById } from "@/utils/api";
+import {
+  deleteCandidate,
+  deletePosition,
+  getElectionById,
+  getVoters,
+} from "@/utils/api";
 import { Checkbox, CircularProgress, FormControlLabel } from "@mui/material";
 import Header from "../BallotPage/Header";
 import { useRouter } from "next/router";
 import { getCandidates } from "@/utils/api";
-import { FaCloudUploadAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCaretDown } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import leftline from "../../../public/assets/images/left-line.svg";
 import placeholder from "../../../public/assets/images/Placeholder.png";
@@ -21,8 +26,61 @@ import { AnimatePresence } from "framer-motion";
 import DeletePositionDialog from "./DeletePositionModal";
 import DeleteCandidateDialog from "./DeleteCandidateModal";
 import Cookies from "universal-cookie";
+import CreatableSelect from "react-select/creatable";
+import { components, type StylesConfig } from "react-select";
 
-const BallotsPage = ({ position, setPosition }: any) => {
+const ALL_SUBGROUPS_OPTION = "All";
+const MAX_CANDIDATE_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1);
+
+const votingCriteriaSelectStyles: StylesConfig<any, false> = {
+  control: (provided, state) => ({
+    ...provided,
+    minHeight: 48,
+    border: "1px solid #1c1917",
+    borderRadius: 4,
+    boxShadow: "none",
+    "&:hover": { border: "1px solid #1c1917" },
+  }),
+  valueContainer: (provided) => ({ ...provided, padding: "0 14px" }),
+  input: (provided) => ({ ...provided, margin: 0, padding: 0 }),
+  indicatorSeparator: () => ({ display: "none" }),
+  placeholder: (provided) => ({ ...provided, color: "#78716c" }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#1c1917",
+    fontWeight: 500,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 20,
+    border: "1px solid #1c1917",
+    borderRadius: 4,
+    boxShadow: "none",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "#1c1917"
+      : state.isFocused
+        ? "#f5f5f4"
+        : "white",
+    color: state.isSelected ? "white" : "#1c1917",
+    cursor: "pointer",
+  }),
+};
+
+const VotingCriteriaDropdownIndicator = (props: any) => (
+  <components.DropdownIndicator {...props}>
+    <FaCaretDown className="text-base text-stone-900" />
+  </components.DropdownIndicator>
+);
+
+const BallotsPage = ({
+  position,
+  setPosition,
+  votingCriteriaEnabled = false,
+  defaultMaxNumberCandidate,
+}: any) => {
   const users = useCurrentUser();
   const router = useRouter();
   const user = useUser();
@@ -36,6 +94,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const [isDeletePositionLoading, setIsDeletePositionLoading] = useState(false);
   const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
   const [isEditable, setIsEditable] = useState(true);
+  const [voterSubgroups, setVoterSubgroups] = useState<string[]>([]);
   const cookies = new Cookies();
 
   const { id } = router.query;
@@ -54,6 +113,36 @@ const BallotsPage = ({ position, setPosition }: any) => {
     : users?.id
       ? users?.id
       : user?.user?.id;
+
+  useEffect(() => {
+    const getVoterSubgroups = async () => {
+      if (!electionID || !USER_ID) return;
+      try {
+        const { data } = await getVoters(
+          USER_ID,
+          { election_id: electionID },
+          "1",
+          "500"
+        );
+        const votersArray = Array.isArray(data?.data?.voters)
+          ? data.data.voters
+          : Array.isArray(data?.data)
+          ? data.data
+          : [];
+        const subgroups = Array.from(
+          new Set(
+            votersArray
+              .map((voter: any) => voter.subgroup)
+              .filter((sg: string | undefined) => !!sg?.trim())
+          )
+        ) as string[];
+        setVoterSubgroups(subgroups);
+      } catch (e) {
+        console.log("Error fetching voter subgroups:", e);
+      }
+    };
+    getVoterSubgroups();
+  }, [electionID, USER_ID]);
 
   useEffect(() => {
     const getElection = async () => {
@@ -220,9 +309,42 @@ const BallotsPage = ({ position, setPosition }: any) => {
         election_id: electionID,
         __v: 0,
         author_id: USER_ID,
+        voting_criteria: ALL_SUBGROUPS_OPTION,
+        max_number_candidate: null,
       },
     ]);
   };
+
+  const handleVotingCriteriaChange = (value: string, positionIndex: number) => {
+    setPosition((prevPositions: any) => {
+      const updatedPositions = [...prevPositions];
+      updatedPositions[positionIndex].voting_criteria =
+        value.trim() || ALL_SUBGROUPS_OPTION;
+      return updatedPositions;
+    });
+  };
+
+  const handleMaxCandidateChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    positionIndex: number,
+  ) => {
+    const value = e.target.value ? Number(e.target.value) : null;
+    setPosition((prevPositions: any) => {
+      const updatedPositions = [...prevPositions];
+      updatedPositions[positionIndex].max_number_candidate = value;
+      return updatedPositions;
+    });
+  };
+
+  const subgroupOptions = Array.from(
+    new Set([
+      ALL_SUBGROUPS_OPTION,
+      ...voterSubgroups,
+      ...position
+        .map((p: any) => p.voting_criteria)
+        .filter((sg: string | undefined): sg is string => !!sg),
+    ]),
+  ).map((sg) => ({ label: sg, value: sg }));
   const handleMediaUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     positionIndex: number,
@@ -409,6 +531,82 @@ const BallotsPage = ({ position, setPosition }: any) => {
                   />
                 </div>
               </div>
+
+              {votingCriteriaEnabled && (
+                <div className="rounded-lg border border-stone-200 bg-white p-4 lg:p-6 mt-6">
+                  <div className="text-sm font-semibold text-stone-900 mb-4">
+                    Voting Criteria
+                  </div>
+                  <div className="flex lg:gap-10 gap-4 items-start lg:flex-row flex-col">
+                    <div className="flex flex-col gap-1 w-full lg:w-72 text-sm lg:text-base">
+                      <label htmlFor={`voting-criteria-${positionIndex}`}>
+                        Subgroup allowed to vote
+                      </label>
+                      <CreatableSelect
+                        inputId={`voting-criteria-${positionIndex}`}
+                        isDisabled={!isEditable}
+                        value={{
+                          label:
+                            position.voting_criteria || ALL_SUBGROUPS_OPTION,
+                          value:
+                            position.voting_criteria || ALL_SUBGROUPS_OPTION,
+                        }}
+                        options={subgroupOptions}
+                        onChange={(option: any) =>
+                          handleVotingCriteriaChange(
+                            option?.value || ALL_SUBGROUPS_OPTION,
+                            positionIndex,
+                          )
+                        }
+                        onCreateOption={(inputValue: string) =>
+                          handleVotingCriteriaChange(inputValue, positionIndex)
+                        }
+                        formatCreateLabel={(inputValue: string) =>
+                          `Use new subgroup "${inputValue}"`
+                        }
+                        placeholder="All"
+                        classNamePrefix="voting-criteria-select"
+                        styles={votingCriteriaSelectStyles}
+                        components={{
+                          DropdownIndicator: VotingCriteriaDropdownIndicator,
+                          IndicatorSeparator: () => null,
+                        }}
+                      />
+                      <p className="text-xs text-stone-400">
+                        Only &quot;{position.voting_criteria || ALL_SUBGROUPS_OPTION}
+                        &quot; voters can view and vote on this position.
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1 w-full lg:w-48 text-sm lg:text-base">
+                      <label htmlFor={`max-candidates-${positionIndex}`}>
+                        Max. no. of candidates
+                      </label>
+                      <select
+                        id={`max-candidates-${positionIndex}`}
+                        disabled={!isEditable}
+                        value={position.max_number_candidate ?? ""}
+                        onChange={(e) =>
+                          handleMaxCandidateChange(e, positionIndex)
+                        }
+                        className="h-12 rounded border border-stone-900 outline-none p-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        <option value="">
+                          Use default ({defaultMaxNumberCandidate ?? 1})
+                        </option>
+                        {MAX_CANDIDATE_OPTIONS.map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-xs text-stone-400">
+                        Overrides the election&apos;s default for this
+                        position only.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex lg:gap-10 gap-0 lg:mt-10 mt-5 items-center lg:flex-row flex-col">
                 <div className="flex flex-col gap-2 w-full lg:w-auto text-sm lg:text-base">

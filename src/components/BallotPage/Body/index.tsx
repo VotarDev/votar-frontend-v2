@@ -3,12 +3,67 @@ import leftline from "../../../../public/assets/images/left-line.svg";
 import rightline from "../../../../public/assets/images/right-line.svg";
 import { Checkbox, FormControlLabel } from "@mui/material";
 import placeholder from "../../../../public/assets/images/Placeholder.png";
-import { FaCloudUploadAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaCaretDown } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import { Position } from "@/utils/types";
 import toast from "react-hot-toast";
+import CreatableSelect from "react-select/creatable";
+import { components, type StylesConfig } from "react-select";
 
-function Body({ positions, setPositions, electionId, isEditable = true }: any) {
+const ALL_SUBGROUPS_OPTION = "All";
+const MAX_CANDIDATE_OPTIONS = Array.from({ length: 10 }, (_, i) => i + 1);
+
+const votingCriteriaSelectStyles: StylesConfig<any, false> = {
+  control: (provided, state) => ({
+    ...provided,
+    minHeight: 48,
+    border: "1px solid #1c1917",
+    borderRadius: 4,
+    boxShadow: "none",
+    "&:hover": { border: "1px solid #1c1917" },
+  }),
+  valueContainer: (provided) => ({ ...provided, padding: "0 14px" }),
+  input: (provided) => ({ ...provided, margin: 0, padding: 0 }),
+  indicatorSeparator: () => ({ display: "none" }),
+  placeholder: (provided) => ({ ...provided, color: "#78716c" }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#1c1917",
+    fontWeight: 500,
+  }),
+  menu: (provided) => ({
+    ...provided,
+    zIndex: 20,
+    border: "1px solid #1c1917",
+    borderRadius: 4,
+    boxShadow: "none",
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "#1c1917"
+      : state.isFocused
+        ? "#f5f5f4"
+        : "white",
+    color: state.isSelected ? "white" : "#1c1917",
+    cursor: "pointer",
+  }),
+};
+
+const VotingCriteriaDropdownIndicator = (props: any) => (
+  <components.DropdownIndicator {...props}>
+    <FaCaretDown className="text-base text-stone-900" />
+  </components.DropdownIndicator>
+);
+
+function Body({
+  positions,
+  setPositions,
+  electionId,
+  isEditable = true,
+  votingCriteriaEnabled = false,
+  defaultMaxNumberCandidate,
+}: any) {
   const handleAddPosition = () => {
     let election_id;
     if (typeof window !== "undefined") {
@@ -23,9 +78,41 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
         allow_abstain: true,
         candidates: [],
         election_id: electionId,
+        voting_criteria: ALL_SUBGROUPS_OPTION,
+        max_number_candidate: null,
       },
     ]);
   };
+
+  const handleVotingCriteriaChange = (
+    value: string,
+    positionIndex: number
+  ) => {
+    const updatedPositions = [...positions];
+    updatedPositions[positionIndex].voting_criteria =
+      value.trim() || ALL_SUBGROUPS_OPTION;
+    setPositions(updatedPositions);
+  };
+
+  const handleMaxCandidateChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+    positionIndex: number
+  ) => {
+    const updatedPositions = [...positions];
+    updatedPositions[positionIndex].max_number_candidate = e.target.value
+      ? Number(e.target.value)
+      : null;
+    setPositions(updatedPositions);
+  };
+
+  const subgroupOptions = Array.from(
+    new Set([
+      ALL_SUBGROUPS_OPTION,
+      ...positions
+        .map((p: Position) => p.voting_criteria)
+        .filter((sg: string | undefined): sg is string => !!sg),
+    ])
+  ).map((sg) => ({ label: sg, value: sg }));
 
   const handleAddCandidate = (positionIndex: number) => {
     const updatedPositions = [...positions];
@@ -205,6 +292,80 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                 />
               </div>
             </div>
+
+            {votingCriteriaEnabled && (
+              <div className="rounded-lg border border-stone-200 bg-white p-4 lg:p-6 mt-6">
+                <div className="text-sm font-semibold text-stone-900 mb-4">
+                  Voting Criteria
+                </div>
+                <div className="flex lg:gap-10 gap-4 items-start lg:flex-row flex-col">
+                  <div className="flex flex-col gap-1 w-full lg:w-72 text-sm lg:text-base">
+                    <label htmlFor={`voting-criteria-${positionIndex}`}>
+                      Subgroup allowed to vote
+                    </label>
+                    <CreatableSelect
+                      inputId={`voting-criteria-${positionIndex}`}
+                      isDisabled={!isEditable}
+                      value={{
+                        label: position.voting_criteria || ALL_SUBGROUPS_OPTION,
+                        value: position.voting_criteria || ALL_SUBGROUPS_OPTION,
+                      }}
+                      options={subgroupOptions}
+                      onChange={(option: any) =>
+                        handleVotingCriteriaChange(
+                          option?.value || ALL_SUBGROUPS_OPTION,
+                          positionIndex
+                        )
+                      }
+                      onCreateOption={(inputValue: string) =>
+                        handleVotingCriteriaChange(inputValue, positionIndex)
+                      }
+                      formatCreateLabel={(inputValue: string) =>
+                        `Use new subgroup "${inputValue}"`
+                      }
+                      placeholder="All"
+                      classNamePrefix="voting-criteria-select"
+                      styles={votingCriteriaSelectStyles}
+                      components={{
+                        DropdownIndicator: VotingCriteriaDropdownIndicator,
+                        IndicatorSeparator: () => null,
+                      }}
+                    />
+                    <p className="text-xs text-stone-400">
+                      Only &quot;{position.voting_criteria || ALL_SUBGROUPS_OPTION}
+                      &quot; voters can view and vote on this position.
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1 w-full lg:w-48 text-sm lg:text-base">
+                    <label htmlFor={`max-candidates-${positionIndex}`}>
+                      Max. no. of candidates
+                    </label>
+                    <select
+                      id={`max-candidates-${positionIndex}`}
+                      disabled={!isEditable}
+                      value={position.max_number_candidate ?? ""}
+                      onChange={(e) =>
+                        handleMaxCandidateChange(e, positionIndex)
+                      }
+                      className="h-12 rounded border border-stone-900 outline-none p-3 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        Use default ({defaultMaxNumberCandidate ?? 1})
+                      </option>
+                      {MAX_CANDIDATE_OPTIONS.map((n) => (
+                        <option key={n} value={n}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-stone-400">
+                      Overrides the election&apos;s default for this position
+                      only.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex lg:gap-10 gap-0 lg:mt-10 mt-5 items-center lg:flex-row flex-col">
               <div className="flex flex-col gap-2 w-full lg:w-auto text-sm lg:text-base">

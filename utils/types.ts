@@ -44,6 +44,12 @@ export interface Position {
   allow_abstain: boolean;
   candidates: Candidate[];
   election_id: string | undefined | null;
+  // Voting criteria: which voter subgroup can view/vote on this position.
+  // "All" (the default) means every subgroup can view and vote.
+  voting_criteria?: string;
+  // Per-position override of the election's default max-candidates-to-select.
+  // Undefined/null means "use the election's default".
+  max_number_candidate?: number | null;
 }
 
 export interface StyledTabsProps {
@@ -124,6 +130,9 @@ export type Election = {
   type: string;
   _id: string;
   __v: number;
+  // Master toggle: when true, positions on the ballot step can each be
+  // restricted to a specific voter subgroup via their own voting criteria.
+  voting_criteria_enabled?: boolean;
 };
 
 export type ElectionDetails = {
@@ -152,6 +161,7 @@ export type ElectionDetails = {
   free_votes: number;
   __v: number;
   _id: string;
+  voting_criteria_enabled?: boolean;
 };
 
 export type VoterResponse = {
@@ -190,6 +200,7 @@ export type DetailFormState = {
   max_number_candidate: number;
   price_per_vote: number;
   free_votes: number;
+  voting_criteria_enabled: boolean;
 };
 
 export type DetailFormAction =
@@ -203,6 +214,7 @@ export type DetailFormAction =
   | { type: "SET_PRIMARY_COLOR"; value: string }
   | { type: "SET_SECONDARY_COLOR"; value: string }
   | { type: "SET_CANDIDATE_NO"; value: number }
+  | { type: "SET_VOTING_CRITERIA_ENABLED"; value: boolean }
   | { type: "SET_ELECTION"; value: ElectionDetails }
   | { type: "INCREMENT_CANDIDATE_NO"; value: number }
   | { type: "DECREMENT_CANDIDATE_NO"; value: number }
@@ -219,6 +231,8 @@ export type BallotData = {
   show_pictures: boolean;
   _id: string;
   __v: number;
+  voting_criteria?: string;
+  max_number_candidate?: number | null;
 };
 
 export type FreeVotarCandidate = {

@@ -55,6 +55,7 @@ const Create = () => {
   const [endTIme, setEndTime] = useState("");
   const [logo, setLogo] = useState(null);
   const [numberofCandidate, setNumberofCandidate] = useState(0);
+  const [votingCriteriaEnabled, setVotingCriteriaEnabled] = useState(false);
   const [numberofFreeVote, setNumberofFreeVote] = useState(1);
   const [pricePerVote, setPricePerVote] = useState(0);
   const [description, setDescription] = useState("");
@@ -122,6 +123,8 @@ const Create = () => {
             setEndTime={setEndTime}
             candidateNo={numberofCandidate}
             setCandidateNo={setNumberofCandidate}
+            votingCriteriaEnabled={votingCriteriaEnabled}
+            setVotingCriteriaEnabled={setVotingCriteriaEnabled}
             description={description}
             setDescription={setDescription}
             setLogo={setLogo}
@@ -133,7 +136,14 @@ const Create = () => {
           />
         );
       case "Ballot":
-        return <Ballot setPositions={setPositions} positions={positions} />;
+        return (
+          <Ballot
+            setPositions={setPositions}
+            positions={positions}
+            votingCriteriaEnabled={votingCriteriaEnabled}
+            defaultMaxNumberCandidate={numberofCandidate}
+          />
+        );
       case "Voters Page":
         return <VotersPage />;
       case "Pay":
@@ -177,6 +187,10 @@ const Create = () => {
     if (backgroundImageFile)
       detailsFormData.append("background-image", backgroundImageFile);
     detailsFormData.append("maxNumberCandidates", numberofCandidate.toString());
+    detailsFormData.append(
+      "voting_criteria_enabled",
+      votingCriteriaEnabled.toString()
+    );
 
     const ballotFormData = new FormData();
     ballotFormData.append("candidates", JSON.stringify(positions));

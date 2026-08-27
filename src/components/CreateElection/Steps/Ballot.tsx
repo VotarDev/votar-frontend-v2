@@ -10,7 +10,12 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { IoCopy } from "react-icons/io5";
 
-const Ballot = ({ positions, setPositions }: any) => {
+const Ballot = ({
+  positions,
+  setPositions,
+  votingCriteriaEnabled,
+  defaultMaxNumberCandidate,
+}: any) => {
   const users = useCurrentUser();
   const user = useUser();
   const [election, setElection] = useState<any>([]);
@@ -174,6 +179,8 @@ const Ballot = ({ positions, setPositions }: any) => {
         electionDetails={election}
         electionId={election?.election_id}
         isEditable={isEditable}
+        votingCriteriaEnabled={votingCriteriaEnabled}
+        defaultMaxNumberCandidate={defaultMaxNumberCandidate}
       />
     </div>
   );
