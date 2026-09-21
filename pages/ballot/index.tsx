@@ -31,6 +31,13 @@ import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
 import { Check, MessageSquare, Download, Clock, CalendarX, X } from "lucide-react";
+import {
+  parseElectionDate,
+  getElectionStatus,
+  formatInViewerTimeZone,
+  getViewerTimeZone,
+  type ElectionStatus,
+} from "@/utils/electionTime";
 
 type BallotData = {
   allow_abstain: boolean;
@@ -77,7 +84,11 @@ const Ballot = () => {
   const [allPositionsSelected, setAllPositionsSelected] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  const [electionStatus, setElectionStatus] = useState<"not_started" | "active" | "ended" | null>(null);
+  const [electionStatus, setElectionStatus] = useState<ElectionStatus | null>(null);
+  const electionStatusRef = useRef<ElectionStatus | null>(null);
+  // Bumped when the voting window opens while the voter is waiting on this page,
+  // so the candidates are fetched again instead of showing the early rejection.
+  const [candidatesRefetchKey, setCandidatesRefetchKey] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const badgeRef = useRef(null);
 
@@ -261,17 +272,20 @@ const Ballot = () => {
   useEffect(() => {
     if (!election) return;
 
-    const start = new Date((election as any).start_date);
-    const end = new Date((election as any).end_date);
+    // Read the stored times as absolute instants (not in this voter's browser
+    // timezone), so voters in every country get the same open/close moment.
+    const start = parseElectionDate((election as any).start_date);
+    const end = parseElectionDate((election as any).end_date);
 
     const updateStatus = () => {
-      const now = new Date();
-      if (!isNaN(start.getTime()) && now < start) {
-        setElectionStatus("not_started");
-      } else if (!isNaN(end.getTime()) && now > end) {
-        setElectionStatus("ended");
-      } else {
-        setElectionStatus("active");
+      const previous = electionStatusRef.current;
+      const next = getElectionStatus(start, end);
+      electionStatusRef.current = next;
+      setElectionStatus(next);
+
+      // The window opened while the voter was waiting on this page.
+      if (previous === "not_started" && next === "active") {
+        setCandidatesRefetchKey((key) => key + 1);
       }
     };
 
@@ -283,6 +297,7 @@ const Ballot = () => {
   useEffect(() => {
     const getCandidatesData = async () => {
       setIsFetchCandidate(true);
+      setElectionEnded(null);
       const cookie = new Cookies();
       const token = cookie.get(voterLoginCookieName);
 
@@ -312,7 +327,7 @@ const Ballot = () => {
     };
 
     getCandidatesData();
-  }, [voterProfile.userData]);
+  }, [voterProfile.userData, candidatesRefetchKey]);
 
   const enterVotesHandler = async () => {
     setIsCastVote(true);
@@ -459,6 +474,13 @@ const Ballot = () => {
       });
   };
 
+  // Election times shown in the voter's own timezone (falls back to the raw
+  // text if the stored value can't be read).
+  const formatElectionTime = (value: unknown) => {
+    const instant = parseElectionDate(value);
+    return instant ? formatInViewerTimeZone(instant) : String(value ?? "");
+  };
+
   const logoutBtn = (
     <button
       onClick={handleLogout}
@@ -517,7 +539,10 @@ const Ballot = () => {
                 Starts on
               </p>
               <p className="text-[#015CE9] font-bold text-base">
-                {(election as any).start_date}
+                {formatElectionTime((election as any).start_date)}
+              </p>
+              <p className="text-xs text-slate-400 mt-2">
+                Shown in your local time ({getViewerTimeZone()})
               </p>
             </div>
           </div>
@@ -549,7 +574,10 @@ const Ballot = () => {
                 Ended on
               </p>
               <p className="text-red-500 font-bold text-base">
-                {(election as any).end_date}
+                {formatElectionTime((election as any).end_date)}
+              </p>
+              <p className="text-xs text-slate-400 mt-2">
+                Shown in your local time ({getViewerTimeZone()})
               </p>
             </div>
           </div>
