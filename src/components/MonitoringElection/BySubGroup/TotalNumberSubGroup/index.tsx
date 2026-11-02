@@ -10,7 +10,7 @@ import setAuthToken from "@/utils/setAuthToken";
 import { sub } from "date-fns";
 import { set } from "lodash";
 import { CircularProgress } from "@mui/material";
-import { tr } from "date-fns/locale";
+import tr from "date-fns/locale/tr/index.js";
 
 const TotalNumberSubGroup = ({ electionId }: { electionId: string }) => {
   const [subGroup, setSubGroup] = useState<any>(null);

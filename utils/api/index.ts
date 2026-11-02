@@ -51,10 +51,10 @@ const getImagesUrl = "/getImages";
 const addCardUrl = "/user/card_details/add";
 const getCardsUrl = "/user/card_details";
 const createWalletUrl = "/user/wallet";
-const createCreditUrl = "/user/add_credit";
 const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
-const purchaseVotarCreditUrl = "/user/purchase_voterCredit";
+const initializeVotarCreditPurchaseUrl = "/user/purchase_voterCredit/initialize";
+const verifyVotarCreditPurchaseUrl = "/user/purchase_voterCredit/verify";
 const voteCandidateFreeVote = "/voter/free_vote";
 const editVotersUrl = "/user/edit_voter";
 
@@ -67,6 +67,8 @@ const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
 const adminPublishElectionUrl = "/admin/publish";
 const adminTopUpUrl = "/admin/top-up";
+const adminProfileUrl = "/admin/profile";
+const sudoAdminUrl = "/admin/sudo-admin";
 
 export const signup = (data: any) => {
   return httpService.post(signupurl, data, {
@@ -320,10 +322,6 @@ export const createWallet = (id: string) => {
   return httpService.post(createWalletUrl + `/${id}`);
 };
 
-export const createCredit = (data: any, id: string) => {
-  return httpService.post(createCreditUrl + `/${id}`, data);
-};
-
 export const getCredit = (id: string) => {
   return httpService.get(getCreditUrl + `/${id}`);
 };
@@ -332,8 +330,12 @@ export const registerVoter = (data: any) => {
   return httpService.post(registerVoterUrl, data);
 };
 
-export const purchaseVotarCredit = (data: any) => {
-  return httpService.post(purchaseVotarCreditUrl, data);
+export const initializeVotarCreditPurchase = (data: { amount: number; callback_url: string }) => {
+  return httpService.post(initializeVotarCreditPurchaseUrl, data);
+};
+
+export const verifyVotarCreditPurchase = (reference: string) => {
+  return httpService.post(verifyVotarCreditPurchaseUrl, { reference });
 };
 
 export const editVoter = (data: any) => {
@@ -362,6 +364,31 @@ export const getAdminVotarElection = (
 export const adminLogin = (data: { username: string; password: string }) => {
   return httpService.post(adminLoginUrl, data);
 };
+
+export const getAdminProfile = () => httpService.get(adminProfileUrl);
+
+export const getManagedAdmins = (adminId: string) =>
+  httpService.get(`${sudoAdminUrl}/get-admins/${adminId}`);
+
+export const createManagedAdmin = (
+  adminId: string,
+  data: { username: string; password: string; hasAccess: boolean },
+) => httpService.post(`${sudoAdminUrl}/create-admin/${adminId}`, data);
+
+export const updateManagedAdmin = (
+  adminId: string,
+  data: { adminId: string; username?: string; password?: string },
+) => httpService.put(`${sudoAdminUrl}/update-admin/${adminId}`, data);
+
+export const updateManagedAdminAccess = (
+  adminId: string,
+  data: { adminId: string; hasAccess: boolean },
+) => httpService.put(`${sudoAdminUrl}/modify-access/${adminId}`, data);
+
+export const deleteManagedAdmin = (adminId: string, targetAdminId: string) =>
+  httpService.post(`${sudoAdminUrl}/delete-admin/${adminId}`, {
+    adminId: targetAdminId,
+  });
 
 export const getAllElectionsAdmin = (page: string, limit: string) => {
   return httpService.get(adminGetAllElectionsUrl, { params: { page, limit } });

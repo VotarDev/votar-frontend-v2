@@ -15,7 +15,7 @@ import { setAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
 import useForm from "@/utils/formValidation/useForm";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
-import { ro } from "date-fns/locale";
+import ro from "date-fns/locale/ro/index.js";
 
 const Login = () => {
   const useOutlinedInputStyles = makeStyles({

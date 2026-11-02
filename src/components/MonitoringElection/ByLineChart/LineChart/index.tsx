@@ -1,7 +1,7 @@
 import React from "react";
 import { Chart } from "chart.js/auto";
 import { Line, Bar } from "react-chartjs-2";
-import { de } from "date-fns/locale";
+import de from "date-fns/locale/de/index.js";
 import "chartjs-adapter-date-fns";
 import { CategoryScale } from "chart.js";
 Chart.register(CategoryScale);

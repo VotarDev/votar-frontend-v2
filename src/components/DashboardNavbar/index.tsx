@@ -10,7 +10,7 @@ import { HiMiniUserGroup } from "react-icons/hi2";
 import { BsFillBoxFill, BsPersonFill } from "react-icons/bs";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BiSolidDashboard } from "react-icons/bi";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { logout } from "@/redux/features/auth/authSlice";
 import { useRouter } from "next/router";
 import logoutIcon from "../../../public/assets/icons/log out.svg";
@@ -18,8 +18,11 @@ import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { getCredit, purchaseVotarCredit } from "@/utils/api";
+import { getCredit } from "@/utils/api";
 import { toast } from "react-hot-toast";
+import Cookies from "universal-cookie";
+import { voterLoginCookieName } from "@/src/__env";
+import setAuthToken from "@/utils/setAuthToken";
 
 const DashboardNavbar = () => {
   const [isOpen, setOpen] = useState(false);
@@ -30,8 +33,6 @@ const DashboardNavbar = () => {
   const [isCreditLoaded, setIsCreditLoaded] = useState(false);
   const [credit, setCredit] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const userProfile = useSelector((state: any) => state.userProfile);
-  const [isCreditAdded, setIsCreditAdded] = useState(false);
   const [values, setValues] = useState(0);
   const users = useCurrentUser();
   const user = useUser();
@@ -61,32 +62,19 @@ const DashboardNavbar = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setIsCreditAdded(true);
-
-    const bodyData = {
-      email: userProfile.user.data.email,
-      amount: values,
-    };
-    try {
-      const { data } = await purchaseVotarCredit(bodyData);
-      if (data) {
-        toast.success("Credit Added Successfully");
-        fetchCredit();
-        closeModal();
-      }
-    } catch (error: any) {
-      console.log(error);
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      toast.error(message);
-    } finally {
-      setIsCreditAdded(false);
+    const amount = Number(values);
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+      toast.error("Enter a valid credit amount");
+      return;
     }
+    const cookie = new Cookies();
+    const token = cookie.get("user-token") || cookie.get(voterLoginCookieName);
+    if (token) setAuthToken(token);
+    localStorage.setItem("payment_amount", String(amount));
+    localStorage.setItem("payment_return_url", window.location.pathname + window.location.search);
+    localStorage.setItem("payment_auth_context", "user");
+    closeModal();
+    router.push("/payment/select-method");
   };
 
   const fetchCredit = useCallback(async () => {
@@ -385,14 +373,7 @@ const DashboardNavbar = () => {
                     <div className="mt-5">
                       <button
                         className="w-full h-12 outline-none flex items-center gap-2 justify-center bg-blue-700 text-white rounded"
-                        disabled={isCreditAdded}
                       >
-                        {isCreditAdded && (
-                          <CircularProgress
-                            size={20}
-                            style={{ color: "#ffffff" }}
-                          />
-                        )}
                         Add
                       </button>
                     </div>

@@ -17,7 +17,7 @@ import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import Header from "@/src/components/BallotPage/Header";
 import Cookies from "universal-cookie";
-import { el } from "date-fns/locale";
+import el from "date-fns/locale/el/index.js";
 
 const UsersForm = () => {
   const [options, setOptions] = useState<string[]>([]);

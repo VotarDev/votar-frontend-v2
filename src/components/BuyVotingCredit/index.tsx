@@ -2,12 +2,7 @@ import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import check from "../../../public/assets/icons/vote.svg";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { PiWarningCircleFill } from "react-icons/pi";
-import { purchaseVotarCredit } from "@/utils/api";
 import Cookies from "universal-cookie";
-import { voterLoginCookieName } from "@/src/__env";
-import setAuthToken from "@/utils/setAuthToken";
-import { useSession, signOut } from "next-auth/react";
-import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useRouter } from "next/router";
@@ -22,8 +17,6 @@ const BuyVotingCredit = ({
   getVotarCredit?: () => void;
 }) => {
   const [votarCredit, setVotarCredit] = useState(0);
-  const { data: session, status } = useSession();
-  const [isPurchasing, setIsPurchasing] = useState(false);
   const [votarCredits, setVotarCredits] = useState<any>(null);
   const credit = useSelector((state: RootState) => state.votarCredit.credit);
   const { pathname } = useRouter();
@@ -38,7 +31,6 @@ const BuyVotingCredit = ({
 
   useEffect(() => {
     if (getVotarCredit && pathname.includes("ballot")) {
-      console.log("getVotarCredit");
       getVotarCredit();
     }
   }, []);
@@ -50,32 +42,6 @@ const BuyVotingCredit = ({
     } else {
       let credit = Number(votarCredit);
       setVotarCredit((credit -= 1));
-    }
-  };
-
-  const handlePurchaseVotarCredit = async () => {
-    setIsPurchasing(true);
-    const cookie = new Cookies();
-    const token = cookie.get(voterLoginCookieName);
-    try {
-      if (token) {
-        setAuthToken(token);
-      }
-      const bodyData = {
-        email: session?.user?.email,
-        amount: votarCredit,
-        election_id: election?.election_id,
-      };
-      const { data } = await purchaseVotarCredit(bodyData);
-      if (data) {
-        console.log(data.data.votar_credits);
-        toast.success("Votar Credit Purchased Successfully");
-        getVotarCredit && getVotarCredit();
-        setShowModal(false);
-        cookie.set("votar-credits", data.data.votar_credits, { path: "/" });
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -96,18 +62,10 @@ const BuyVotingCredit = ({
       localStorage.setItem("payment_amount", votarCredit.toString());
       localStorage.setItem("payment_return_url", returnUrl);
       localStorage.setItem("election_id", election.election_id);
+      localStorage.setItem("payment_auth_context", "voter");
 
       window.location.href = "/payment/select-method";
     }
-  };
-
-  const handlePaymentComplete = () => {
-    const returnUrl = localStorage.getItem("payment_return_url") || "/";
-    localStorage.removeItem("payment_amount");
-    localStorage.removeItem("payment_return_url");
-    localStorage.removeItem("election_id");
-
-    window.location.href = `${returnUrl}?payment=success`;
   };
 
   return (

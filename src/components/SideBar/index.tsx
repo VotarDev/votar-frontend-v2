@@ -32,7 +32,7 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { CircularProgress, Tooltip } from "@mui/material";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import Cookies from "universal-cookie";
-import { createCredit, getCredit, purchaseVotarCredit } from "@/utils/api";
+import { getCredit } from "@/utils/api";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 
@@ -59,7 +59,6 @@ const SideBar = ({
   const user = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [isCreditAdded, setIsCreditAdded] = useState(false);
   const [isCreditLoaded, setIsCreditLoaded] = useState(false);
   const [values, setValues] = useState(0);
   const [credits, setCredits] = useState(0);
@@ -127,37 +126,16 @@ const SideBar = ({
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setIsCreditAdded(true);
-
-    const token = cookies.get("user-token");
-    const bodyData = {
-      email: userProfile.user.data.email,
-      amount: values,
-    };
-
-    try {
-      if (token) {
-        setAuthToken(token);
-      }
-      const { data } = await purchaseVotarCredit(bodyData);
-      if (data) {
-        toast.success("Credit Added Successfully");
-
-        await fetchCredit();
-        closeModal();
-      }
-    } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-
-      toast.error(message);
-    } finally {
-      setIsCreditAdded(false);
+    const amount = Number(values);
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+      toast.error("Enter a valid credit amount");
+      return;
     }
+    localStorage.setItem("payment_amount", String(amount));
+    localStorage.setItem("payment_return_url", window.location.pathname + window.location.search);
+    localStorage.setItem("payment_auth_context", "user");
+    closeModal();
+    router.push("/payment/select-method");
   };
   useEffect(() => {
     if (USER_ID && !isLoaded) {
@@ -506,14 +484,7 @@ const SideBar = ({
                     <div className="mt-5">
                       <button
                         className="w-full h-12 outline-none flex items-center gap-2 justify-center bg-blue-700 text-white rounded"
-                        disabled={isCreditAdded}
                       >
-                        {isCreditAdded && (
-                          <CircularProgress
-                            size={20}
-                            style={{ color: "#ffffff" }}
-                          />
-                        )}
                         Add
                       </button>
                     </div>

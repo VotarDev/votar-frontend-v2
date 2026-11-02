@@ -138,6 +138,23 @@ const ElectionTables = () => {
     return serialNumber <= 9 ? `0${serialNumber}` : serialNumber.toString();
   };
 
+  const sortedUsers = [...users].sort((a, b) => {
+    if (filteredOption === "Election") {
+      return String(a.name_of_election || "").localeCompare(
+        String(b.name_of_election || "")
+      );
+    }
+    if (filteredOption === "Status") {
+      return String(a.payment_status || "").localeCompare(
+        String(b.payment_status || "")
+      );
+    }
+    if (filteredOption === "Time") {
+      return Number(a.start_time || 0) - Number(b.start_time || 0);
+    }
+    return new Date(b.start_date).getTime() - new Date(a.start_date).getTime();
+  });
+
   if (isFetchUsers)
     return (
       <div className="text-center">
@@ -217,9 +234,8 @@ const ElectionTables = () => {
               </StyledTableRow>
             </TableHead>
             <TableBody>
-              {users &&
-                users.length > 0 &&
-                users.map((row, index) => (
+              {sortedUsers.length > 0 &&
+                sortedUsers.map((row, index) => (
                   <TableRow key={row.election_id}>
                     <StyledTableCell align="center">
                       {getSerialNumber(index)}
