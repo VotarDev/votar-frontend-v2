@@ -1,7 +1,7 @@
 import httpService from "../axios";
 
-const signupurl = "/auth/signup";
-const signinurl = "/auth/login";
+const signupurl = "/user/signup";
+const signinurl = "/user/login";
 const googleUrl = "/auth/google";
 const mediumUrl =
   "https://api.rss2json.com/v1/api.json?rss_url=https://medium.com/feed/@votarhq";
