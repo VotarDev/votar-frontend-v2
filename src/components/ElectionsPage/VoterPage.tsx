@@ -172,7 +172,18 @@ const VoterPage = () => {
               ? data.data
               : [];
 
-            setResponses(votersArray);
+            // The API doesn't guarantee a stable order, so the same page can
+            // come back reshuffled between requests. Sort by ID here so the
+            // table shows the same order every time you land on a page.
+            const sortedVotersArray = [...votersArray].sort(
+              (a: VoterResponse, b: VoterResponse) =>
+                String(a.id ?? "").localeCompare(String(b.id ?? ""), undefined, {
+                  numeric: true,
+                  sensitivity: "base",
+                })
+            );
+
+            setResponses(sortedVotersArray);
 
             if (data.data) {
               const currentPageFromBackend = data.data.page || pageToFetch;

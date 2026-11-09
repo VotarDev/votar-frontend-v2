@@ -118,7 +118,7 @@ const ResetPassword = () => {
       </div>
       <div className="flex justify-center flex-col lg:my-0 my-8 lg:py-0 w-full mx-auto lg:max-w-[500px] px-4">
         <div>
-          <h1 className="text-2xl capitalize">Hello, {user || "*"}!</h1>
+          <h1 className="text-xl sm:text-2xl capitalize break-words">Hello, {user || "*"}!</h1>
           <p className="pt-3">
             Please set up your new credentials in order to log in.
             <br />
@@ -126,7 +126,7 @@ const ResetPassword = () => {
           </p>
         </div>
 
-        <ul className="list-disc pt-3">
+        <ul className="list-disc pl-5 pt-3">
           <li>Have at least 8 characters</li>
           <li>Have upper and lowercase letters, and at least one number</li>
           <li>Not contain any of your personal information</li>
