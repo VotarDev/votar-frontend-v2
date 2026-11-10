@@ -80,29 +80,25 @@ const DashboardLayout = ({ children }: any) => {
   return (
     <>
       {isClient && (
-        <div className="overflow-auto" {...SCROLL_CONTAINER_PROPS}>
-          <div className="flex ">
-            <div className="relative lg:block hidden ">
-              <SideBar opener={opener} setOpener={setOpener} />
+        // Sidebar | header + content. Only <main> scrolls, so there's one
+        // scrollbar and the header stays in place.
+        <div className="flex h-screen overflow-hidden bg-white">
+          <div className="hidden lg:flex">
+            <SideBar opener={opener} setOpener={setOpener} />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="hidden lg:block">
+              <Header opener={opener} />
             </div>
-            <div
-              className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0"
+            <div className="lg:hidden">
+              <DashboardNavbar />
+            </div>
+            <main
+              className="relative flex-1 overflow-y-auto p-4 lg:p-6"
               {...SCROLL_CONTAINER_PROPS}
             >
-              <div className="lg:block hidden">
-                <Header opener={opener} />
-              </div>
-              <div className="lg:hidden">
-                <DashboardNavbar />
-              </div>
-
-              <div
-                className="lg:mt-20 m-0 lg:p-6 w-full overflow-auto p-4"
-                {...SCROLL_CONTAINER_PROPS}
-              >
-                {children}
-              </div>
-            </div>
+              {children}
+            </main>
           </div>
         </div>
       )}

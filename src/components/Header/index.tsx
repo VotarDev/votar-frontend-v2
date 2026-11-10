@@ -1,51 +1,51 @@
 import React from "react";
-import { signOut, useSession } from "next-auth/react";
+import { Bell, MessageSquareText, Search } from "lucide-react";
 import { useUser } from "@/utils/hooks";
 
-import { BiMessageSquareDetail } from "react-icons/bi";
-import { IoNotificationsOutline } from "react-icons/io5";
-import { CiSearch } from "react-icons/ci";
-
-const Header = ({ opener }: { opener?: boolean }) => {
+/** Desktop top bar: greeting, search and quick icons. Sits above the page content. */
+const Header = (_props: { opener?: boolean }) => {
   const user = useUser();
-  const { data } = useSession();
+  const profile = user?.user?.data;
+  const firstName: string = profile?.userName?.split(" ")[0] || "";
+
   return (
-    <div
-      className={`fixed left-0 right-0 -z-1  bg-white w-full flex h-[75px] border-b border-[#8E8E8E] items-center ${
-        opener ? "lg:pl-[370px]" : "lg:pl-[120px]"
-      } px-4 justify-between flex-wrap`}
-    >
-      <div className="lg:text-2xl font-semibold text-base capitalize">
-        Welcome,{" "}
-        <span>
-          {user?.user?.data?.userName && user.user.data.userName.split(" ")[0]}{" "}
-          {/* {data && data?.user?.name?.split(" ")[0]} */}
-        </span>
+    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-white px-6">
+      <div className="min-w-0">
+        <p className="truncate text-lg font-semibold capitalize text-foreground">
+          Welcome{firstName ? `, ${firstName}` : ""}
+        </p>
       </div>
-      <div className="flex items-center gap-4">
-        <div className="relative xl:flex items-center hidden">
+      <div className="flex items-center gap-2">
+        {/* Not wired up yet: kept as before. */}
+        <div className="relative hidden xl:block">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
           <input
             type="text"
             name="search"
             placeholder="Search..."
-            className="lg:w-[429px] h-[44px] w-full py-3 pl-12 pr-5 outline-none bg-[#FDFDFD] shadow-sm border rounded-lg"
+            aria-label="Search"
+            className="h-10 w-80 rounded-lg border border-input bg-slate-50 pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:bg-white focus:ring-2 focus:ring-ring/20"
           />
-          <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xl">
-            <CiSearch />
-          </span>
         </div>
-        <div className="lg:p-3 p-2 border border-[rgba(0, 0, 0, 0.10)] rounded-xl bg-[#fdfdfd] flex items-center justify-center lg:text-xl text-base cursor-pointer">
-          <span>
-            <BiMessageSquareDetail />
-          </span>
-        </div>
-        <div className="lg:p-3 p-2 border border-[rgba(0, 0, 0, 0.10)] rounded-xl bg-[#fdfdfd] flex items-center justify-center font-bold lg:text-xl text-base cursor-pointer">
-          <span>
-            <IoNotificationsOutline />
-          </span>
-        </div>
+        <button
+          type="button"
+          aria-label="Messages"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <MessageSquareText className="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          aria-label="Notifications"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Bell className="h-5 w-5" />
+        </button>
       </div>
-    </div>
+    </header>
   );
 };
 

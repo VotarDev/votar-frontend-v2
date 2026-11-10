@@ -14,7 +14,11 @@ import ActionBar from "@/src/components/shared/ActionBar";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
-import { ELECTION_DRAFT_KEYS, getElectionDraft } from "@/utils/electionDraft";
+import {
+  ELECTION_DRAFT_KEYS,
+  clearElectionDraft,
+  getElectionDraft,
+} from "@/utils/electionDraft";
 import { scrollToTop } from "@/utils/scrollToTop";
 import {
   DETAILS_FIELD_ORDER,
@@ -270,7 +274,6 @@ const Create = () => {
 
     const votersData = {};
     const reviewData = {};
-    const monitorElectionData = {};
 
     if (users?.data) {
       setAuthToken(users.data.data.cookie);
@@ -321,9 +324,13 @@ const Create = () => {
           newStep++;
           break;
         case "Monitor Election":
-          await createFreeElection(monitorElectionData);
-          newStep++;
-          break;
+          // Nothing to save on the last step: the election is set up, so
+          // forget the draft and go to the elections list.
+          setIsLoading(false);
+          setHasUnsavedChanges(false);
+          clearElectionDraft();
+          router.push("/elections");
+          return;
         default:
       }
       setIsLoading(false);
@@ -410,8 +417,8 @@ const Create = () => {
     <ProtectedRoutes>
       <DashboardLayout>
         {/* `relative` keeps the form's visually hidden inputs (file uploads,
-            the switch) inside the scrolling area; without it they stretch the
-            outer layout column and add a second, empty scroll. */}
+            the switch) positioned within the page, so they can't stretch the
+            layout and add an empty scroll. */}
         <div className="relative mx-auto w-full max-w-6xl pt-2">
           <PageHeader
             title="Create an election"
@@ -453,7 +460,7 @@ const Create = () => {
               >
                 {isLoading && <Loader2 className="animate-spin" />}
                 {isLastStep
-                  ? "Save"
+                  ? "Finish"
                   : steps[activeStep - 1] === "Pay"
                   ? "Continue"
                   : "Save and continue"}

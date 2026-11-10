@@ -7,7 +7,7 @@ const isScrollable = (node: HTMLElement) => {
 
 /**
  * The dashboard content column: the nearest ancestor that actually scrolls,
- * or, when the page is too short to scroll, the full-height scrollable one.
+ * or, when the page is too short to scroll, the nearest scrollable one.
  */
 const findScrollContainer = (el: HTMLElement | null): HTMLElement | null => {
   const ancestors: HTMLElement[] = [];
@@ -16,7 +16,7 @@ const findScrollContainer = (el: HTMLElement | null): HTMLElement | null => {
   }
   return (
     ancestors.find((node) => node.scrollHeight > node.clientHeight) ??
-    ancestors.find((node) => node.clientHeight >= window.innerHeight - 2) ??
+    ancestors[0] ??
     null
   );
 };

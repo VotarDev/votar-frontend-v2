@@ -142,7 +142,6 @@ const TimePicker = ({
         <button
           id={id}
           type="button"
-          aria-invalid={invalid || undefined}
           className={cn(
             "flex h-11 w-full items-center gap-2 rounded-md border border-input bg-background px-3 text-left text-sm transition-colors hover:border-slate-300 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20",
             open && "border-primary ring-2 ring-ring/20",
