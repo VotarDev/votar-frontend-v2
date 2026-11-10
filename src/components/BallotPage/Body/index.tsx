@@ -45,10 +45,13 @@ const CandidatePhoto = ({
   candidate: any;
   disabled: boolean;
 }) => {
+  const picture = candidate.candidate_picture;
+  // A saved photo comes back from the API as a URL; a new one is a file.
+  const savedUrl = typeof picture === "string" ? picture : null;
   const objectUrl = useObjectUrl(
-    candidate.candidate_picture_base64 ? null : candidate.candidate_picture,
+    candidate.candidate_picture_base64 || savedUrl ? null : picture,
   );
-  const src = candidate.candidate_picture_base64 || objectUrl;
+  const src = candidate.candidate_picture_base64 || savedUrl || objectUrl;
   return (
     <div className="flex shrink-0 flex-col items-center gap-1.5">
       <label
@@ -93,8 +96,22 @@ const MediaAttachment = ({
   disabled: boolean;
   onRemove: (e: React.MouseEvent) => void;
 }) => {
-  const { type, docs } = candidate.media;
-  const url = useObjectUrl(type === "image" || type === "video" ? docs : null);
+  // A saved attachment comes back from the API as a URL string.
+  const savedUrl: string | null =
+    typeof candidate.media === "string" ? candidate.media : null;
+  const type = savedUrl
+    ? /\.(png|jpe?g|gif|webp|svg)(\?|$)/i.test(savedUrl)
+      ? "image"
+      : /\.(mp4|webm|mov)(\?|$)/i.test(savedUrl)
+        ? "video"
+        : "file"
+    : candidate.media?.type;
+  const objectUrl = useObjectUrl(
+    !savedUrl && (type === "image" || type === "video")
+      ? candidate.media?.docs
+      : null,
+  );
+  const url = savedUrl || objectUrl;
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border p-2 pr-3">
       <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground">
@@ -107,7 +124,11 @@ const MediaAttachment = ({
         )}
       </div>
       <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-        {candidate.docsname || "Attached file"}
+        {candidate.docsname ||
+          (savedUrl
+            ? decodeURIComponent(savedUrl.split("?")[0].split("/").pop() || "")
+            : "") ||
+          "Attached file"}
       </span>
       <Button
         type="button"
@@ -124,33 +145,75 @@ const MediaAttachment = ({
   );
 };
 
-function Body({ positions, setPositions, electionId, isEditable = true }: any) {
+interface BodyProps {
+  positions: Position[];
+  setPositions: (positions: Position[]) => void;
+  electionId?: string;
+  isEditable?: boolean;
+  // Options for the edit-election ballot, whose data is shaped a little
+  // differently. The create flow uses the defaults.
+  /** A new, empty position. */
+  newPosition?: () => any;
+  /** A new, empty candidate. */
+  newCandidate?: () => any;
+  /** Keep a base64 copy of new photos (the create flow's preview uses it). */
+  storePictureBase64?: boolean;
+  /** What a removed attachment becomes (by default its file is cleared). */
+  clearedMedia?: unknown;
+  /** Replace the local removal, e.g. to delete through the API. */
+  onDeletePosition?: (positionIndex: number) => void;
+  onDeleteCandidate?: (positionIndex: number, candidateIndex: number) => void;
+}
+
+const hasMedia = (candidate: any) =>
+  typeof candidate.media === "string"
+    ? !!candidate.media
+    : !!candidate.media?.docs;
+
+function Body({
+  positions,
+  setPositions,
+  electionId,
+  isEditable = true,
+  newPosition,
+  newCandidate,
+  storePictureBase64 = true,
+  clearedMedia,
+  onDeletePosition,
+  onDeleteCandidate,
+}: BodyProps) {
   const handleAddPosition = () => {
     setPositions([
       ...positions,
-      {
-        name_of_position: "",
-        show_pictures: true,
-        allow_abstain: true,
-        candidates: [],
-        election_id: electionId,
-      },
+      newPosition
+        ? newPosition()
+        : {
+            name_of_position: "",
+            show_pictures: true,
+            allow_abstain: true,
+            candidates: [],
+            election_id: electionId,
+          },
     ]);
   };
 
   const handleAddCandidate = (positionIndex: number) => {
     const updatedPositions = [...positions];
-    updatedPositions[positionIndex].candidates.push({
-      candidate_name: "",
-      candidate_nickname: "",
-      more_details: "",
-      candidate_picture: null,
-      candidate_picture_base64: null,
-      filename: "",
-      docsname: "",
-      media: { type: "file", docs: null },
-      votes: 0,
-    });
+    updatedPositions[positionIndex].candidates.push(
+      newCandidate
+        ? newCandidate()
+        : {
+            candidate_name: "",
+            candidate_nickname: "",
+            more_details: "",
+            candidate_picture: null,
+            candidate_picture_base64: null,
+            filename: "",
+            docsname: "",
+            media: { type: "file", docs: null },
+            votes: 0,
+          },
+    );
     setPositions(updatedPositions);
   };
 
@@ -194,6 +257,15 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
     if (file) {
       if (file.size > IMAGE_SIZE_LIMIT) {
         toast.error("Image must be 2 MB or smaller.");
+        return;
+      }
+      if (!storePictureBase64) {
+        const updatedPositions = [...positions];
+        const candidate: any =
+          updatedPositions[positionIndex].candidates[candidateIndex];
+        candidate.candidate_picture = file;
+        candidate.filename = file.name;
+        setPositions(updatedPositions);
         return;
       }
       const reader = new FileReader();
@@ -253,13 +325,18 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
       updatedPositions[positionIndex].candidates[candidateIndex];
 
     if (candidate) {
-      candidate.media.docs = null;
+      if (clearedMedia !== undefined) {
+        (candidate as any).media = clearedMedia;
+      } else {
+        (candidate.media as any).docs = null;
+      }
     }
 
     setPositions(updatedPositions);
   };
 
   const deletePosition = (index: number) => {
+    if (onDeletePosition) return onDeletePosition(index);
     if (positions.length > 1) {
       const newPositions = positions.filter((_: any, i: any) => i !== index);
       setPositions(newPositions);
@@ -267,6 +344,8 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
   };
 
   const deleteCandidate = (positionIndex: number, candidateIndex: number) => {
+    if (onDeleteCandidate)
+      return onDeleteCandidate(positionIndex, candidateIndex);
     const newPositions = [...positions];
 
     newPositions[positionIndex].candidates = newPositions[
@@ -325,7 +404,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                     <Input
                       id={positionInputId}
                       placeholder="e.g. President"
-                      value={position.name_of_position}
+                      value={position.name_of_position ?? ""}
                       disabled={!isEditable}
                       onChange={(e) =>
                         handleInputChange(e, positionIndex, "name_of_position")
@@ -432,7 +511,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                               <Input
                                 id={`candidate-name-${base}`}
                                 placeholder="Full name"
-                                value={candidate.candidate_name}
+                                value={candidate.candidate_name ?? ""}
                                 disabled={!isEditable}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -452,7 +531,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                               <Input
                                 id={`candidate-nickname-${base}`}
                                 placeholder="What voters know them as"
-                                value={candidate.candidate_nickname}
+                                value={candidate.candidate_nickname ?? ""}
                                 disabled={!isEditable}
                                 onChange={(e) =>
                                   handleInputChange(
@@ -474,7 +553,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                             <Textarea
                               id={`candidate-details-${base}`}
                               placeholder="A short bio or manifesto"
-                              value={candidate.more_details}
+                              value={candidate.more_details ?? ""}
                               maxLength={DETAILS_MAX_LENGTH}
                               disabled={!isEditable}
                               className="min-h-[96px]"
@@ -508,7 +587,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
                                 )
                               }
                             />
-                            {candidate.media.docs ? (
+                            {hasMedia(candidate) ? (
                               <MediaAttachment
                                 candidate={candidate}
                                 disabled={!isEditable}
