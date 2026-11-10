@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "react-hot-toast";
 import Select, { type StylesConfig } from "react-select";
 import { useSelector } from "react-redux";
@@ -202,6 +203,10 @@ const Details = ({
   errors = {},
 }: any) => {
   const fieldErrors: DetailsErrors = errors;
+
+  // document.body only exists in the browser.
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
   // The times as picked ("HH:mm"); the API value is recomputed from these
   // whenever the date or the time changes.
   const [startClock, setStartClock] = useState(() =>
@@ -622,52 +627,61 @@ const Details = ({
         </FormSection>
       </form>
 
-      <AnimatePresence>
-        {showCropModal && (
-          <Modal key="modal" handleClose={() => setShowCropModal(false)}>
-            <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-              <h2 className="text-lg font-semibold text-foreground">
-                Crop your background
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Drag to position the image. It will be shown at 16:9.
-              </p>
-              <div className="relative mt-4 h-[220px] w-full overflow-hidden rounded-md bg-slate-900">
-                <Cropper
-                  image={imageSrc || undefined}
-                  crop={crop}
-                  zoom={zoom}
-                  aspect={16 / 9}
-                  onCropChange={setCrop}
-                  onZoomChange={setZoom}
-                  onCropComplete={onCropComplete}
-                />
-              </div>
-              <label className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
-                Zoom
-                <input
-                  type="range"
-                  min={1}
-                  max={3}
-                  step={0.05}
-                  value={zoom}
-                  onChange={(e) => setZoom(Number(e.target.value))}
-                  className="flex-1 accent-[#015CE9]"
-                />
-              </label>
-              <div className="mt-5 flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowCropModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleCropSave}>Save</Button>
-              </div>
-            </div>
-          </Modal>
+      {/* Rendered on <body> so the dialog and its backdrop cover the whole
+          screen, including the fixed step bar, whatever the page layout. */}
+      {isMounted &&
+        createPortal(
+          <div className="relative z-[900]">
+            <AnimatePresence>
+              {showCropModal && (
+                <Modal key="modal" handleClose={() => setShowCropModal(false)}>
+                  <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
+                    <h2 className="text-lg font-semibold text-foreground">
+                      Crop your background
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Drag to position the image. It will be shown at 16:9.
+                    </p>
+                    <div className="relative mt-4 h-[220px] w-full overflow-hidden rounded-md bg-slate-900">
+                      <Cropper
+                        image={imageSrc || undefined}
+                        crop={crop}
+                        zoom={zoom}
+                        aspect={16 / 9}
+                        objectFit="cover"
+                        onCropChange={setCrop}
+                        onZoomChange={setZoom}
+                        onCropComplete={onCropComplete}
+                      />
+                    </div>
+                    <label className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
+                      Zoom
+                      <input
+                        type="range"
+                        min={1}
+                        max={3}
+                        step={0.05}
+                        value={zoom}
+                        onChange={(e) => setZoom(Number(e.target.value))}
+                        className="flex-1 accent-[#015CE9]"
+                      />
+                    </label>
+                    <div className="mt-5 flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowCropModal(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCropSave}>Save</Button>
+                    </div>
+                  </div>
+                </Modal>
+              )}
+            </AnimatePresence>
+          </div>,
+          document.body,
         )}
-      </AnimatePresence>
     </div>
   );
 };
