@@ -15,6 +15,10 @@ interface TimePickerProps {
   placeholder?: string;
   /** Show the field as having an error. */
   invalid?: boolean;
+  /** Only times after this "HH:mm" can be picked (e.g. an end time on the start day). */
+  after?: string;
+  /** Only times before this "HH:mm" can be picked. */
+  before?: string;
 }
 
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 1); // 1..12
@@ -37,18 +41,47 @@ const fromParts = (hour: number, minute: number, period: "AM" | "PM") => {
   return `${pad(hours24)}:${pad(minute)}`;
 };
 
-/** Hour, minute and AM/PM columns; any minute can be chosen. */
+// Minutes since midnight, for comparing times.
+const toMinutes = (time: string) => {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+};
+const fromMinutes = (total: number) =>
+  `${pad(Math.floor(total / 60))}:${pad(total % 60)}`;
+
+/**
+ * Hour, minute and AM/PM columns; any minute can be chosen, optionally only
+ * within `after`/`before` (times outside are greyed out).
+ */
 const TimePicker = ({
   id,
   value,
   onChange,
   placeholder = "Pick a time",
   invalid,
+  after,
+  before,
 }: TimePickerProps) => {
   const [open, setOpen] = useState(false);
   const parts = toParts(value);
   const current = parts ?? { hour: 9, minute: 0, period: "AM" as const };
   const listRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  const afterMinutes = after ? toMinutes(after) : -1;
+  const beforeMinutes = before ? toMinutes(before) : 24 * 60;
+  // Whether any minute in [from, to] is allowed.
+  const anyAllowed = (from: number, to: number) =>
+    to > afterMinutes && from < beforeMinutes;
+
+  // Picking an hour or AM/PM can land on a disallowed minute; move it to the
+  // nearest allowed one instead.
+  const select = (time: string) => {
+    let total = toMinutes(time);
+    if (total <= afterMinutes) total = afterMinutes + 1;
+    if (total >= beforeMinutes) total = beforeMinutes - 1;
+    if (total <= afterMinutes || total >= beforeMinutes) return;
+    onChange(fromMinutes(total));
+  };
 
   // Bring the selected values into view when the picker opens.
   useEffect(() => {
@@ -65,7 +98,12 @@ const TimePicker = ({
 
   const column = (
     key: string,
-    items: Array<{ label: string; selected: boolean; onSelect: () => void }>,
+    items: Array<{
+      label: string;
+      selected: boolean;
+      disabled?: boolean;
+      onSelect: () => void;
+    }>,
   ) => (
     <div
       ref={(el) => {
@@ -81,10 +119,12 @@ const TimePicker = ({
           type="button"
           role="option"
           aria-selected={item.selected}
+          aria-disabled={item.disabled || undefined}
           data-selected={item.selected}
+          disabled={item.disabled}
           onClick={item.onSelect}
           className={cn(
-            "h-9 w-12 shrink-0 rounded-md text-sm transition-colors",
+            "h-9 w-12 shrink-0 rounded-md text-sm transition-colors disabled:cursor-not-allowed disabled:text-slate-300 disabled:opacity-100 disabled:hover:bg-transparent",
             item.selected
               ? "bg-primary font-semibold text-primary-foreground"
               : "text-foreground hover:bg-muted",
@@ -124,30 +164,44 @@ const TimePicker = ({
         <div className="flex divide-x divide-border">
           {column(
             "Hour",
-            HOURS.map((hour) => ({
-              label: String(hour),
-              selected: parts?.hour === hour,
-              onSelect: () =>
-                onChange(fromParts(hour, current.minute, current.period)),
-            })),
+            HOURS.map((hour) => {
+              const start = toMinutes(fromParts(hour, 0, current.period));
+              return {
+                label: String(hour),
+                selected: parts?.hour === hour,
+                disabled: !anyAllowed(start, start + 59),
+                onSelect: () =>
+                  select(fromParts(hour, current.minute, current.period)),
+              };
+            }),
           )}
           {column(
             "Minute",
-            MINUTES.map((minute) => ({
-              label: pad(minute),
-              selected: parts?.minute === minute,
-              onSelect: () =>
-                onChange(fromParts(current.hour, minute, current.period)),
-            })),
+            MINUTES.map((minute) => {
+              const total = toMinutes(
+                fromParts(current.hour, minute, current.period),
+              );
+              return {
+                label: pad(minute),
+                selected: parts?.minute === minute,
+                disabled: !anyAllowed(total, total),
+                onSelect: () =>
+                  select(fromParts(current.hour, minute, current.period)),
+              };
+            }),
           )}
           {column(
             "AM or PM",
-            (["AM", "PM"] as const).map((period) => ({
-              label: period,
-              selected: parts?.period === period,
-              onSelect: () =>
-                onChange(fromParts(current.hour, current.minute, period)),
-            })),
+            (["AM", "PM"] as const).map((period) => {
+              const start = period === "AM" ? 0 : 12 * 60;
+              return {
+                label: period,
+                selected: parts?.period === period,
+                disabled: !anyAllowed(start, start + 12 * 60 - 1),
+                onSelect: () =>
+                  select(fromParts(current.hour, current.minute, period)),
+              };
+            }),
           )}
         </div>
         <div className="mt-2 flex justify-end border-t border-border pt-2">

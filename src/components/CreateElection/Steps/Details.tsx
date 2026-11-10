@@ -362,6 +362,14 @@ const Details = ({
   const startDay = parseDateValue(startDate);
   const endDay = parseDateValue(endDate);
 
+  // On a same-day election, the end time has to be after the start time.
+  const isSameDay = !!startDate && startDate === endDate;
+  const timeOrderError =
+    isSameDay && startClock && endClock && endClock <= startClock
+      ? "Voting must close after it opens."
+      : undefined;
+  const endTimeError = fieldErrors.endTime || timeOrderError;
+
   return (
     <div className="mt-6 space-y-6">
       <form
@@ -515,6 +523,7 @@ const Details = ({
               <TimePicker
                 id="startTime"
                 invalid={!!fieldErrors.startTime}
+                before={isSameDay && endClock ? endClock : undefined}
                 value={startClock}
                 onChange={handleStartClockChange}
                 placeholder="Select start time"
@@ -540,12 +549,13 @@ const Details = ({
               label="End time"
               htmlFor="endTime"
               required
-              error={fieldErrors.endTime}
+              error={endTimeError}
               info="The exact time voting closes on the end date."
             >
               <TimePicker
                 id="endTime"
-                invalid={!!fieldErrors.endTime}
+                invalid={!!endTimeError}
+                after={isSameDay && startClock ? startClock : undefined}
                 value={endClock}
                 onChange={handleEndClockChange}
                 placeholder="Select end time"
