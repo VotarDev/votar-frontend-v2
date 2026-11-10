@@ -1,6 +1,6 @@
 import { baseApi } from "./baseApi";
-import { getElectionsUrl } from "@/utils/api";
-import type { Election } from "@/utils/types";
+import { getElectionIdUrl, getElectionsUrl } from "@/utils/api";
+import type { Election, ElectionDetails } from "@/utils/types";
 
 interface GetElectionsResponse {
   // The API has returned both shapes; existing screens accept either.
@@ -20,7 +20,17 @@ export const electionsApi = baseApi.injectEndpoints({
       },
       providesTags: ["Elections"],
     }),
+    /** One election by its election_id. Same request as `getElectionById` in utils/api. */
+    getElectionById: build.query<ElectionDetails, string>({
+      query: (electionId) => ({
+        url: getElectionIdUrl,
+        method: "POST",
+        data: { election_id: electionId },
+      }),
+      transformResponse: (response: { data: ElectionDetails }) => response.data,
+      providesTags: ["Elections"],
+    }),
   }),
 });
 
-export const { useGetElectionsQuery } = electionsApi;
+export const { useGetElectionsQuery, useGetElectionByIdQuery } = electionsApi;

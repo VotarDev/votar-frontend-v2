@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import DashboardLayout from "@/src/components/DashboardLayout";
 import Details from "@/src/components/CreateElection/Steps/Details";
 import Ballot from "@/src/components/CreateElection/Steps/Ballot";
@@ -6,9 +6,14 @@ import VotersPage from "@/src/components/CreateElection/Steps/VotersPage";
 
 import Pay from "@/src/components/CreateElection/Steps/Pay";
 import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElection";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useRouter } from "next/router";
 import StepHeader from "@/src/components/CreateElection/StepHeader";
+import { getElectionSteps } from "@/src/components/CreateElection/steps";
+import PageHeader from "@/src/components/shared/PageHeader";
+import { Button } from "@/src/components/ui/button";
+import { Badge } from "@/src/components/ui/badge";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { ELECTION_DRAFT_KEYS, getElectionDraft } from "@/utils/electionDraft";
 import {
   createFreeElection,
   createElection,
@@ -16,7 +21,6 @@ import {
 } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress } from "@mui/material";
 import { toast } from "react-hot-toast";
 import { OptionTypes, Position } from "@/utils/types";
 import { formatDate } from "@/utils/util";
@@ -26,19 +30,21 @@ import Cookies from "universal-cookie";
 
 const Create = () => {
   let step = 1;
+  let furthest = 1;
   let election_id;
   if (typeof window !== "undefined") {
-    const electionStep = localStorage.getItem("electionSteps");
-
-    if (electionStep !== null) {
-      step = parseInt(electionStep, 10);
-    } else {
-      step = 1;
-    }
+    const draft = getElectionDraft();
+    step = draft.step;
+    furthest = draft.furthestStep;
   }
 
   const cookies = new Cookies();
   const [currentStep, setCurrentStep] = useState(step);
+  // The furthest step reached, so users can move back and forward between
+  // steps they've already been through without going past unsaved ones.
+  const [furthestStep, setFurthestStep] = useState(furthest);
+  // Set when the user changes anything on the current step; cleared after a save.
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [electionName, setElectionName] = useState("");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [backgroundImage, setBackgroundImage] = useState(null);
@@ -76,17 +82,10 @@ const Create = () => {
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
-  const getSteps = (plan: string) => {
-    if (plan === "Free Votar") {
-      return ["Details", "Ballot", "Pay", "Monitor Election"];
-    }
-    return ["Details", "Ballot", "Voters Page", "Pay", "Monitor Election"];
-  };
-
-  const steps = getSteps(votarPlan);
+  const steps = getElectionSteps(votarPlan);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -254,60 +253,120 @@ const Create = () => {
       console.log(e);
     }
 
+    if (newStep > currentStep) setHasUnsavedChanges(false);
     newStep > 0 && newStep <= steps.length && setCurrentStep(newStep);
   };
 
   const handleBackButton = () => {
     let newStep = currentStep;
     newStep--;
-    if (newStep <= 0) router.back();
+    // On the first step, leave the page. (Storing step 0 here used to leave a
+    // blank page on the next visit.)
+    if (newStep <= 0) {
+      router.back();
+      return;
+    }
 
     currentStep > 0 && currentStep <= steps.length && setCurrentStep(newStep);
   };
 
+  const goToStep = (stepNumber: number) => {
+    if (stepNumber >= 1 && stepNumber <= furthestStep)
+      setCurrentStep(stepNumber);
+  };
+
+  // A saved step from another plan can be past the end of this plan's steps.
+  useEffect(() => {
+    if (currentStep > steps.length) setCurrentStep(steps.length);
+  }, [currentStep, steps.length]);
+
   useEffect(() => {
     localStorage.setItem("electionSteps", JSON.stringify(currentStep));
+    setFurthestStep((prev) => Math.max(prev, currentStep));
   }, [currentStep]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      ELECTION_DRAFT_KEYS.furthestStep,
+      JSON.stringify(furthestStep),
+    );
+  }, [furthestStep]);
+
+  // Ballot changes (adding positions or candidates) aren't always typed input.
+  const positionsLoaded = useRef(false);
+  useEffect(() => {
+    if (!positionsLoaded.current) {
+      positionsLoaded.current = positions.length > 0;
+      return;
+    }
+    setHasUnsavedChanges(true);
+  }, [positions]);
+
+  const activeStep = Math.min(currentStep, steps.length);
+  const isLastStep = activeStep === steps.length;
+  // Details and Ballot keep their input in memory until "Save and continue";
+  // the other steps save through their own buttons.
+  const holdsUnsavedInput = ["Details", "Ballot"].includes(
+    steps[activeStep - 1],
+  );
+
+  // Warn before a refresh or closing the tab would discard unsaved input.
+  useEffect(() => {
+    if (!hasUnsavedChanges || !holdsUnsavedInput) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [hasUnsavedChanges, holdsUnsavedInput]);
 
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <div className="w-full lg:px-3 px-0">
-          <div>
+        <div className="mx-auto w-full max-w-6xl pt-2">
+          <PageHeader
+            title="Create an election"
+            description="Set up your election step by step. Each step is saved when you continue."
+            actions={
+              votarPlan ? <Badge variant="secondary">{votarPlan}</Badge> : null
+            }
+          />
+          <div className="mt-6 rounded-lg border border-border bg-surface p-4 shadow-sm lg:px-6">
             <StepHeader
               steps={steps}
-              currentStep={currentStep}
-              setCurrentStep={setCurrentStep}
+              currentStep={activeStep}
+              furthestStep={furthestStep}
+              onStepChange={goToStep}
             />
           </div>
-          <div>{displaySteps(currentStep)}</div>
-          <div>
-            <div className="flex gap-4 justify-end smm:flex-row flex-col">
-              <div>
-                <button
-                  onClick={() => handleBackButton()}
-                  className="flex items-center gap-2 p-[10px] border border-[#015CE9] rounded-lg text-[#015CE9] lg:text-[18px] text-base h-[52px]"
-                >
-                  {" "}
-                  <span>
-                    <BsArrowLeft />
-                  </span>
-                  Go back
-                </button>
-              </div>
-              <div>
-                <button
-                  onClick={() => handleClick("next")}
-                  className="flex items-center gap-2 p-[10px] bg-[#015CE9] rounded-lg text-[#f3f3f3] lg:text-[18px] text-base h-[52px]"
-                  disabled={isLoading}
-                >
-                  {isLoading && <CircularProgress color="inherit" size={20} />}
-                  Save Changes to Proceed
-                  <span>
-                    <BsArrowRight />
-                  </span>
-                </button>
-              </div>
+          <div
+            onInputCapture={() => setHasUnsavedChanges(true)}
+            onChangeCapture={() => setHasUnsavedChanges(true)}
+          >
+            {displaySteps(activeStep)}
+          </div>
+          <div className="sticky bottom-0 z-10 -mx-4 mt-8 border-t border-border bg-surface px-4 py-3 lg:-mx-6 lg:px-6">
+            <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+              <Button
+                variant="outline"
+                onClick={handleBackButton}
+                className="h-11"
+              >
+                <ArrowLeft /> Back
+              </Button>
+              <span className="hidden text-sm text-muted-foreground smm:block">
+                Step {activeStep} of {steps.length}
+              </span>
+              <Button
+                onClick={() => handleClick("next")}
+                disabled={isLoading}
+                className="h-11 min-w-[150px]"
+              >
+                {isLoading && <Loader2 className="animate-spin" />}
+                {isLastStep ? "Save" : "Save and continue"}
+                {!isLoading && !isLastStep && <ArrowRight />}
+              </Button>
             </div>
           </div>
         </div>
