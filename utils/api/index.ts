@@ -16,7 +16,7 @@ const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
 const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/addVoter-response";
-const getElectionsUrl = "user/get-elections";
+export const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
 const getUserResponseUrl = "/user/voter-response";
 
@@ -51,7 +51,7 @@ const getImagesUrl = "/getImages";
 const addCardUrl = "/user/card_details/add";
 const getCardsUrl = "/user/card_details";
 const createWalletUrl = "/user/wallet";
-const getCreditUrl = "/user/get_credit";
+export const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
 const initializeVotarCreditPurchaseUrl = "/user/purchase_voterCredit/initialize";
 const verifyVotarCreditPurchaseUrl = "/user/purchase_voterCredit/verify";

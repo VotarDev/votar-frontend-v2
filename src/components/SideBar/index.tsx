@@ -4,7 +4,6 @@ import React, {
   useState,
   useEffect,
   useCallback,
-  useRef,
   use,
 } from "react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
@@ -32,17 +31,13 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { CircularProgress, Tooltip } from "@mui/material";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import Cookies from "universal-cookie";
-import { getCredit } from "@/utils/api";
+import { useGetCreditQuery } from "@/redux/api/creditApi";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
 
 import { toast } from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
 import { AppDispatch } from "@/redux/store";
-import {
-  setCredit,
-  setCreditLoaded,
-} from "@/redux/features/creditSlice/creditSlice";
 
 const SideBar = ({
   opener,
@@ -64,15 +59,20 @@ const SideBar = ({
   const [credits, setCredits] = useState(0);
   const cookies = new Cookies();
   const userProfile = useSelector((state: any) => state.userProfile);
-  const { credit, isLoaded } = useSelector((state: any) => state.credit);
 
-  const hasInitiallyFetched = useRef(false);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
     ? users?.id
     : user?.user?.id;
+
+  // Shared with the mobile navbar through the RTK Query cache: one request,
+  // refreshed every 30 seconds and whenever the sidebar mounts.
+  const { data: credit = 0, isLoading: isCreditLoading } = useGetCreditQuery(
+    USER_ID,
+    { skip: !USER_ID, pollingInterval: 30000, refetchOnMountOrArgChange: true }
+  );
 
   useEffect(() => {
     return () => {};
@@ -99,31 +99,6 @@ const SideBar = ({
     setValues(parseInt(e.target.value));
   };
 
-  const fetchCredit = async (
-    userId?: string,
-    showSpinner: boolean = true
-  ): Promise<void> => {
-    const currentUserId = userId || USER_ID;
-    if (!currentUserId) return;
-
-    if (showSpinner) {
-      dispatch(setCreditLoaded(false));
-    }
-
-    try {
-      const { data } = await getCredit(currentUserId);
-      if (data) {
-        dispatch(setCredit(data.data.votar_credits));
-      }
-    } catch (error: any) {
-      console.log(error);
-    } finally {
-      if (showSpinner) {
-        dispatch(setCreditLoaded(true));
-      }
-    }
-  };
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const amount = Number(values);
@@ -137,35 +112,6 @@ const SideBar = ({
     closeModal();
     router.push("/payment/select-method");
   };
-  useEffect(() => {
-    if (USER_ID && !isLoaded) {
-      fetchCredit(USER_ID, true);
-    }
-  }, [USER_ID]);
-
-  useEffect(() => {
-    if (USER_ID && isLoaded) {
-      const interval = setInterval(() => {
-        fetchCredit(USER_ID, false);
-      }, 30000);
-
-      return () => clearInterval(interval);
-    }
-  }, [USER_ID, isLoaded]);
-
-  const refreshCredits = () => {
-    if (USER_ID) {
-      fetchCredit(USER_ID, false);
-    }
-  };
-
-  useEffect(() => {
-    if (!hasInitiallyFetched.current) {
-      hasInitiallyFetched.current = true;
-      refreshCredits();
-    }
-  }, [USER_ID]);
-
   return (
     <div
       className={`h-screen flex flex-col  border-r border-[#8E8E8E] overflow-y-auto sidebar-scroll duration-300 fixed bg-white top-0 left-0 z-10 lg:relative ${
@@ -246,7 +192,7 @@ const SideBar = ({
               <div className="z-20">
                 <div className="text-xs">VotarCredits</div>
                 <div className="text-[40px]">
-                  {!isLoaded ? (
+                  {!USER_ID || isCreditLoading ? (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
                   ) : (
                     <>{credit || 0}</>

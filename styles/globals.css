@@ -6,6 +6,33 @@
   transition: height 500ms;
 }
 
+/* shadcn/ui design tokens, used through the colours in tailwind.config.js.
+   Only variables are defined here: no element styles, so existing screens are unaffected. */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --surface: 0 0% 100%;
+    --surface-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    /* Votar blue, #015CE9 */
+    --primary: 217 99% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 100% 97%;
+    --secondary-foreground: 217 99% 36%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 217 99% 46%;
+  }
+}
+
 @layer base {
   * {
     margin: 0;

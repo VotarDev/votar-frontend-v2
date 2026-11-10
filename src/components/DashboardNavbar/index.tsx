@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Hamburger from "hamburger-react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import Link from "next/link";
@@ -18,7 +18,7 @@ import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { AnimatePresence } from "framer-motion";
 import Modal from "../Modal";
-import { getCredit } from "@/utils/api";
+import { useGetCreditQuery } from "@/redux/api/creditApi";
 import { toast } from "react-hot-toast";
 import Cookies from "universal-cookie";
 import { voterLoginCookieName } from "@/src/__env";
@@ -31,8 +31,6 @@ const DashboardNavbar = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const [isCreditLoaded, setIsCreditLoaded] = useState(false);
-  const [credit, setCredit] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [values, setValues] = useState(0);
   const users = useCurrentUser();
@@ -78,25 +76,10 @@ const DashboardNavbar = () => {
     router.push("/payment/select-method");
   };
 
-  const fetchCredit = useCallback(async () => {
-    setIsCreditLoaded(true);
-    try {
-      const { data } = await getCredit(USER_ID);
-      if (data) {
-        setCredit(data.data.votar_credits);
-        setIsCreditLoaded(false);
-        console.log(data);
-      }
-    } catch (error: any) {
-      console.log(error);
-    } finally {
-      setIsCreditLoaded(false);
-    }
-  }, [USER_ID]);
-
-  useEffect(() => {
-    fetchCredit();
-  }, [fetchCredit]);
+  const { data: credit = 0, isLoading: isCreditLoading } = useGetCreditQuery(
+    USER_ID,
+    { skip: !USER_ID, pollingInterval: 30000, refetchOnMountOrArgChange: true }
+  );
 
   // While the menu is open, stop the page behind it from scrolling. The dashboard
   // content scrolls inside a container div, not the body, so lock every scrollable ancestor.
@@ -189,7 +172,7 @@ const DashboardNavbar = () => {
               <div className="z-20">
                 <div className="text-xs">VotarCredits</div>
                 <div className="text-[40px]">
-                  {isCreditLoaded ? (
+                  {isCreditLoading ? (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
                   ) : (
                     <>{credit}</>
