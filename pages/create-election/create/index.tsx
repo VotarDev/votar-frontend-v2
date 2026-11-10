@@ -270,7 +270,6 @@ const Create = () => {
 
     const votersData = {};
     const reviewData = {};
-    const payData = {};
     const monitorElectionData = {};
 
     if (users?.data) {
@@ -317,7 +316,8 @@ const Create = () => {
           newStep++;
           break;
         case "Pay":
-          await createFreeElection(payData);
+          // Information only (payment is arranged with the team), so there's
+          // nothing to save: just move on.
           newStep++;
           break;
         case "Monitor Election":
@@ -452,7 +452,11 @@ const Create = () => {
                 className="h-11 min-w-[150px]"
               >
                 {isLoading && <Loader2 className="animate-spin" />}
-                {isLastStep ? "Save" : "Save and continue"}
+                {isLastStep
+                  ? "Save"
+                  : steps[activeStep - 1] === "Pay"
+                  ? "Continue"
+                  : "Save and continue"}
                 {!isLoading && !isLastStep && <ArrowRight />}
               </Button>
             </div>
