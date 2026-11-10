@@ -49,7 +49,7 @@ const AddCreditsDialog = ({ open, onClose }: AddCreditsDialogProps) => {
 
   // On <body> so the dialog covers the whole screen, above the layout.
   return createPortal(
-    <div className="relative z-[900]">
+    <div className="relative z-[1010]">
       <AnimatePresence mode="wait">
         {open && (
           <Modal key="add-credits" handleClose={onClose}>

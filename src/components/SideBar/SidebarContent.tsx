@@ -31,6 +31,7 @@ import {
 } from "@/src/components/ui/tooltip";
 import { cn } from "@/utils/cn";
 import AddCreditsDialog from "./AddCreditsDialog";
+import ConfirmDialog from "@/src/components/shared/ConfirmDialog";
 
 interface NavItem {
   label: string;
@@ -101,6 +102,7 @@ const SidebarContent = ({ collapsed = false }: SidebarContentProps) => {
   const user = useUser();
   const userId = useCurrentUserId();
   const [showAddCredits, setShowAddCredits] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
 
   // Shared through the RTK Query cache: one request, refreshed every 30
   // seconds and whenever the sidebar mounts.
@@ -272,7 +274,7 @@ const SidebarContent = ({ collapsed = false }: SidebarContentProps) => {
           <CollapsedTip collapsed={collapsed} label="Log out">
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={() => setShowLogout(true)}
               aria-label="Log out"
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-red-50 hover:text-destructive"
             >
@@ -285,6 +287,16 @@ const SidebarContent = ({ collapsed = false }: SidebarContentProps) => {
       <AddCreditsDialog
         open={showAddCredits}
         onClose={() => setShowAddCredits(false)}
+      />
+      <ConfirmDialog
+        open={showLogout}
+        onClose={() => setShowLogout(false)}
+        onConfirm={handleLogout}
+        icon={LogOut}
+        destructive
+        title="Log out of Votar?"
+        description="You'll need to sign in again to manage your elections."
+        confirmLabel="Log out"
       />
     </TooltipProvider>
   );
