@@ -1,15 +1,7 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { createPortal } from "react-dom";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import Select, { type StylesConfig } from "react-select";
 import { useSelector } from "react-redux";
-import { AnimatePresence } from "framer-motion";
-import Cropper from "react-easy-crop";
-import { OptionTypes } from "@/utils/types";
-import getCroppedImg from "@/utils/cropImage";
-import Modal from "../../Modal";
 import PlanSelector from "../PlanSelector";
-import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Switch } from "@/src/components/ui/switch";
@@ -22,6 +14,8 @@ import DatePicker, {
   parseDateValue,
 } from "@/src/components/shared/form/DatePicker";
 import TimePicker from "@/src/components/shared/form/TimePicker";
+import ColorSelect from "@/src/components/shared/form/ColorSelect";
+import ImageCropDialog from "@/src/components/shared/form/ImageCropDialog";
 import type { DetailsErrors } from "../validation";
 
 const MONTHS = [
@@ -84,71 +78,6 @@ const clockFromFormatted = (formatted?: string): string => {
   ).padStart(2, "0")}`;
 };
 
-const colorOptions: OptionTypes[] = [
-  { value: "#EF4444", label: "Red" },
-  { value: "#F97316", label: "Orange" },
-  { value: "#F59E0B", label: "Amber" },
-  { value: "#EAB308", label: "Yellow" },
-  { value: "#84CC16", label: "Lime" },
-  { value: "#22C55E", label: "Green" },
-  { value: "#10B981", label: "Emerald" },
-  { value: "#14B8A6", label: "Teal" },
-  { value: "#06B6D4", label: "Cyan" },
-  { value: "#0EA5E9", label: "Sky Blue" },
-  { value: "#3B82F6", label: "Blue" },
-  { value: "#6366F1", label: "Indigo" },
-  { value: "#8B5CF6", label: "Violet" },
-  { value: "#A855F7", label: "Purple" },
-  { value: "#D946EF", label: "Fuchsia" },
-  { value: "#EC4899", label: "Pink" },
-  { value: "#F43F5E", label: "Rose" },
-  { value: "#1E3A5F", label: "Navy" },
-  { value: "#064E3B", label: "Forest Green" },
-  { value: "#7C2D12", label: "Brown" },
-  { value: "#1E1E1E", label: "Black" },
-  { value: "#FFFFFF", label: "White" },
-  { value: "#64748B", label: "Slate" },
-  { value: "#9CA3AF", label: "Gray" },
-  { value: "#FDE68A", label: "Pale Yellow" },
-  { value: "#FECACA", label: "Light Pink" },
-  { value: "#BBF7D0", label: "Mint" },
-  { value: "#BAE6FD", label: "Light Blue" },
-  { value: "#DDD6FE", label: "Lavender" },
-];
-
-const formatColorOption = (option: any) => (
-  <div className="flex items-center gap-2">
-    <span
-      className="h-5 w-5 shrink-0 rounded-full border border-gray-300"
-      style={{ backgroundColor: option.value }}
-    />
-    <span>{option.label}</span>
-  </div>
-);
-
-const colorSelectStyles: StylesConfig = {
-  control: (provided, state) => ({
-    ...provided,
-    minHeight: 44,
-    borderRadius: 6,
-    borderColor: state.isFocused ? "#015CE9" : "#e5e7eb",
-    boxShadow: state.isFocused ? "0 0 0 3px rgba(1, 92, 233, 0.15)" : "none",
-    fontSize: 14,
-    "&:hover": { borderColor: state.isFocused ? "#015CE9" : "#cbd5e1" },
-  }),
-  indicatorSeparator: () => ({ display: "none" }),
-  menu: (provided) => ({ ...provided, zIndex: 40, fontSize: 14 }),
-  option: (provided, state) => ({
-    ...provided,
-    backgroundColor: state.isSelected
-      ? "#eff6ff"
-      : state.isFocused
-        ? "#f8fafc"
-        : "white",
-    color: "#0f172a",
-  }),
-};
-
 /** A label + "i" tooltip on the left and a control on the right (stacked on phones). */
 const SettingRow = ({
   label,
@@ -204,9 +133,6 @@ const Details = ({
 }: any) => {
   const fieldErrors: DetailsErrors = errors;
 
-  // document.body only exists in the browser.
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => setIsMounted(true), []);
   // The times as picked ("HH:mm"); the API value is recomputed from these
   // whenever the date or the time changes.
   const [startClock, setStartClock] = useState(() =>
@@ -214,46 +140,16 @@ const Details = ({
   );
   const [endClock, setEndClock] = useState(() => clockFromFormatted(endTime));
 
-  //crop
+  // The background image being cropped; the crop dialog is open while set.
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
-  const [rotation] = useState(0);
 
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
-  const onCropComplete = useCallback(
-    (croppedArea: any, croppedAreaPixels: any) => {
-      setCroppedAreaPixels(croppedAreaPixels);
-    },
-    [],
-  );
-
-  const handleCropSave = async () => {
-    if (!imageSrc || !croppedAreaPixels) return;
-
-    try {
-      const croppedImage = await getCroppedImg(
-        imageSrc,
-        croppedAreaPixels,
-        rotation,
-      );
-
-      if (!croppedImage) {
-        throw new Error("Cropped image is null");
-      }
-
-      const blobUrl = URL.createObjectURL(croppedImage);
-      setBackground(blobUrl);
-      setBackgroundImageFile(croppedImage);
-
-      setShowCropModal(false);
-    } catch (error) {
-      console.error("Error cropping image:", error);
-      toast.error("Failed to crop image. Please try again.");
-    }
+  const handleCropSave = (croppedImage: File) => {
+    const blobUrl = URL.createObjectURL(croppedImage);
+    setBackground(blobUrl);
+    setBackgroundImageFile(croppedImage);
+    setImageSrc(null);
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,9 +187,6 @@ const Details = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         setImageSrc(reader.result as string);
-        setZoom(1);
-        setCrop({ x: 0, y: 0 });
-        setShowCropModal(true);
       };
       reader.readAsDataURL(file);
     }
@@ -464,28 +357,20 @@ const Details = ({
                 label="Primary background colour"
                 info="The dominant color of your election page background."
               >
-                <Select
-                  defaultValue={primaryColor}
+                <ColorSelect
+                  value={primaryColor?.value}
                   onChange={setPrimaryColor}
-                  options={colorOptions}
-                  placeholder="Choose a colour"
-                  formatOptionLabel={formatColorOption}
-                  styles={colorSelectStyles}
-                  aria-label="Primary background colour"
+                  ariaLabel="Primary background colour"
                 />
               </FormField>
               <FormField
                 label="Secondary background colour"
                 info="An accent color that complements the primary color on your election page."
               >
-                <Select
-                  defaultValue={secondaryColor}
+                <ColorSelect
+                  value={secondaryColor?.value}
                   onChange={setSecondaryColor}
-                  options={colorOptions}
-                  placeholder="Choose a colour"
-                  formatOptionLabel={formatColorOption}
-                  styles={colorSelectStyles}
-                  aria-label="Secondary background colour"
+                  ariaLabel="Secondary background colour"
                 />
               </FormField>
             </div>
@@ -637,61 +522,11 @@ const Details = ({
         </FormSection>
       </form>
 
-      {/* Rendered on <body> so the dialog and its backdrop cover the whole
-          screen, including the fixed step bar, whatever the page layout. */}
-      {isMounted &&
-        createPortal(
-          <div className="relative z-[900]">
-            <AnimatePresence>
-              {showCropModal && (
-                <Modal key="modal" handleClose={() => setShowCropModal(false)}>
-                  <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-xl">
-                    <h2 className="text-lg font-semibold text-foreground">
-                      Crop your background
-                    </h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Drag to position the image. It will be shown at 16:9.
-                    </p>
-                    <div className="relative mt-4 h-[220px] w-full overflow-hidden rounded-md bg-slate-900">
-                      <Cropper
-                        image={imageSrc || undefined}
-                        crop={crop}
-                        zoom={zoom}
-                        aspect={16 / 9}
-                        objectFit="cover"
-                        onCropChange={setCrop}
-                        onZoomChange={setZoom}
-                        onCropComplete={onCropComplete}
-                      />
-                    </div>
-                    <label className="mt-4 flex items-center gap-3 text-sm text-muted-foreground">
-                      Zoom
-                      <input
-                        type="range"
-                        min={1}
-                        max={3}
-                        step={0.05}
-                        value={zoom}
-                        onChange={(e) => setZoom(Number(e.target.value))}
-                        className="flex-1 accent-[#015CE9]"
-                      />
-                    </label>
-                    <div className="mt-5 flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowCropModal(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button onClick={handleCropSave}>Save</Button>
-                    </div>
-                  </div>
-                </Modal>
-              )}
-            </AnimatePresence>
-          </div>,
-          document.body,
-        )}
+      <ImageCropDialog
+        imageSrc={imageSrc}
+        onCancel={() => setImageSrc(null)}
+        onSave={handleCropSave}
+      />
     </div>
   );
 };
