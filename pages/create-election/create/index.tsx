@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import StepHeader from "@/src/components/CreateElection/StepHeader";
 import { getElectionSteps } from "@/src/components/CreateElection/steps";
 import PageHeader from "@/src/components/shared/PageHeader";
+import ActionBar from "@/src/components/shared/ActionBar";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
@@ -117,7 +118,9 @@ const Create = () => {
             setDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
+            startTime={startTime}
             setStartTime={setStartTime}
+            endTime={endTIme}
             setEndTime={setEndTime}
             candidateNo={numberofCandidate}
             setCandidateNo={setNumberofCandidate}
@@ -346,7 +349,7 @@ const Create = () => {
           >
             {displaySteps(activeStep)}
           </div>
-          <div className="sticky bottom-0 z-10 -mx-4 mt-8 border-t border-border bg-surface px-4 py-3 lg:-mx-6 lg:px-6">
+          <ActionBar>
             <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
               <Button
                 variant="outline"
@@ -368,7 +371,7 @@ const Create = () => {
                 {!isLoading && !isLastStep && <ArrowRight />}
               </Button>
             </div>
-          </div>
+          </ActionBar>
         </div>
       </DashboardLayout>
     </ProtectedRoutes>
