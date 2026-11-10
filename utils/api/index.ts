@@ -66,6 +66,7 @@ const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
 const adminPublishElectionUrl = "/admin/publish";
+const adminToggleSmsUrl = "/admin/toggle-sms";
 const adminTopUpUrl = "/admin/top-up";
 const adminProfileUrl = "/admin/profile";
 const sudoAdminUrl = "/admin/sudo-admin";
@@ -145,6 +146,10 @@ export const getUserResponse = (data: any, id: string) => {
   return httpService.post(getUserResponseUrl + `/${id}`, data);
 };
 
+export const toggleForm = (data: any) => {
+  return httpService.patch(getUserResponseUrl, data);
+};
+
 export const getForms = (id: string) => {
   return httpService.get(getFormsUrl + `/${id}`);
 };
@@ -155,6 +160,10 @@ export const getElections = (id: string) => {
 
 export const getVoterResponse = (id: string, data: any) => {
   return httpService.post(getResponseUrl + `/${id}`, data);
+};
+
+export const getVoterResponse2 = (id: string) => {
+  return httpService.get(getResponseUrl, { params: { id } });
 };
 
 export const getUserForm = (id: string) => {
@@ -413,6 +422,10 @@ export const adminGetAllUsers = (
 
 export const adminPublishElection = (data: any) => {
   return httpService.post(adminPublishElectionUrl, data);
+};
+
+export const adminToggleSms = (data: { election_id: string; state: boolean }) => {
+  return httpService.post(adminToggleSmsUrl, data);
 };
 
 export const adminTopUp = (data: any) => {

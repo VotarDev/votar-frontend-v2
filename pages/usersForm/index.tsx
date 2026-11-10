@@ -32,6 +32,8 @@ const UsersForm = () => {
   const user = useUser();
   const { token, electionID } = router.query;
   const [isClient, setIsClient] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<any>(null);
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -118,31 +120,28 @@ const UsersForm = () => {
     setIsClient(true);
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const form = e.currentTarget;
-    const formdata = new FormData(form);
-    const data = {
-      id: formdata.get("id"),
-      name: formdata.get("name"),
+  const handleOpenConfirm = () => {
+    setPendingFormData({
+      id: formData.id,
+      name: formData.name,
       subgroup: usersOption?.value,
-      phoneNumber: formdata.get("phone"),
-      email: formdata.get("email"),
-    };
+      phoneNumber: formData.phone,
+      email: formData.email,
+    });
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmModal(false);
+    setIsLoading(true);
     try {
-      const response = await votarResponse(data, token as string);
+      const response = await votarResponse(pendingFormData, token as string);
       if (response.data) {
         setIsLoading(false);
         setSuccess(true);
         toast.success("Details Submitted Successfully");
-        console.log(response.data);
-        setFormData({
-          id: "",
-          name: "",
-          phone: "",
-          email: "",
-        });
+        setFormData({ id: "", name: "", phone: "", email: "" });
+        setPendingFormData(null);
       }
     } catch (error) {
       console.log(error);
@@ -167,6 +166,50 @@ const UsersForm = () => {
 
   return (
     <div>
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-xl shadow-xl p-8 max-w-md w-full mx-4">
+            <h2 className="text-xl font-bold mb-2">Confirm Submission</h2>
+            <p className="text-gray-600 mb-1">Please review your details before submitting:</p>
+            <div className="my-4 space-y-2 text-sm">
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-gray-500">ID</span>
+                <span className="font-medium">{pendingFormData?.id}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-gray-500">Name</span>
+                <span className="font-medium">{pendingFormData?.name}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-gray-500">Sub-Group</span>
+                <span className="font-medium">{pendingFormData?.subgroup ?? "—"}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-gray-500">Phone</span>
+                <span className="font-medium">{pendingFormData?.phoneNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Email</span>
+                <span className="font-medium">{pendingFormData?.email}</span>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 h-11 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={handleConfirmSubmit}
+                className="flex-1 h-11 rounded-lg bg-blue-700 text-white font-medium hover:bg-blue-800"
+              >
+                Confirm & Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isClient && (
         <>
           <Header electionDetails={election} />
@@ -175,10 +218,7 @@ const UsersForm = () => {
               <span className="font-bold">INSTRUCTION:</span> Please Fill in
               your Details Correctly
             </div>
-            <form
-              className="max-w-[1200px] mx-auto py-20"
-              onSubmit={handleSubmit}
-            >
+            <form className="max-w-[1200px] mx-auto py-20">
               <div className="flex flex-col gap-8">
                 <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
                   <label htmlFor="id">ID</label>
@@ -237,6 +277,8 @@ const UsersForm = () => {
               </div>
               <div className="mt-5 flex justify-end gap-3 py-5">
                 <button
+                  type="button"
+                  onClick={handleOpenConfirm}
                   className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
                   disabled={isLoading}
                 >

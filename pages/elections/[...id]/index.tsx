@@ -83,7 +83,7 @@ const ElectionDetail = () => {
 
   useEffect(() => {
     if (Array.isArray(idType)) {
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     }
   }, [id, electionID]);
 

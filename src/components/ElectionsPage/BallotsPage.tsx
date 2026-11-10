@@ -41,17 +41,19 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const { id } = router.query;
   let idType: string | string[] | undefined = id;
 
+  console.log(targetDateTime, "targetDateTime");
+
   useEffect(() => {
     if (Array.isArray(idType)) {
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     }
   }, [id, electionID]);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
     : users?.id
-    ? users?.id
-    : user?.user?.id;
+      ? users?.id
+      : user?.user?.id;
 
   useEffect(() => {
     const getElection = async () => {
@@ -83,7 +85,6 @@ const BallotsPage = ({ position, setPosition }: any) => {
             } else {
               console.error("Invalid start_date format:", start_date);
             }
-            console.log(start_date);
             setIsLoading(false);
           }
         }
@@ -136,7 +137,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
     e: any,
     positionIndex: any,
     key: any,
-    candidateIndex = null
+    candidateIndex = null,
   ) => {
     const { name, value } = e.target;
     setPosition((prevPositions: any) => {
@@ -168,14 +169,22 @@ const BallotsPage = ({ position, setPosition }: any) => {
     });
   };
 
+  const IMAGE_SIZE_LIMIT = 2 * 1024 * 1024; // 2 MB
+  const MEDIA_SIZE_LIMIT = 10 * 1024 * 1024; // 10 MB
+
   const handleImageUpload = (
     e: any,
     positionIndex: any,
-    candidateIndex: any
+    candidateIndex: any,
   ) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
 
     if (file) {
+      if (file.size > IMAGE_SIZE_LIMIT) {
+        toast.error("Image must be 2 MB or smaller.");
+        return;
+      }
       const updatedPositions = [...position];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
@@ -217,10 +226,16 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const handleMediaUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     positionIndex: number,
-    candidateIndex: number
+    candidateIndex: number,
   ) => {
     const { files } = e.target;
+    e.target.value = "";
+
     if (files && files[0]) {
+      if (files[0].size > MEDIA_SIZE_LIMIT) {
+        toast.error("Media file must be 10 MB or smaller.");
+        return;
+      }
       const updatedPositions = [...position];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
@@ -239,7 +254,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const handleDeleteMedia = (
     e: any,
     positionIndex: any,
-    candidateIndex: any
+    candidateIndex: any,
   ) => {
     e.preventDefault();
     setPosition((prevPositions: any) => {
@@ -280,7 +295,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
   const handleDeleteCandidate = async (
     e: any,
     positionName: string,
-    candidateName: string
+    candidateName: string,
   ) => {
     e.preventDefault();
     try {
@@ -365,17 +380,8 @@ const BallotsPage = ({ position, setPosition }: any) => {
               key={positionIndex}
               className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4 relative"
             >
-              {positionIndex > 0 && (
+              {positionIndex > 0 && isEditable && (
                 <div className="absolute -right-1 -top-4 text-3xl">
-                  {/* <button
-                    className="text-red-500"
-                    // onClick={(e) =>
-                    //   handleDeletePosition(e, position.name_of_position)
-                    // }
-                    onClick={(e) => handleOpenPositionModal(e)}
-                  >
-                    <MdDelete />
-                  </button> */}
                   <DeletePositionDialog
                     selectedPosition={position.name_of_position}
                     id={electionID}
@@ -424,6 +430,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                       control={
                         <Checkbox
                           checked={position.show_pictures}
+                          disabled={!isEditable}
                           disableRipple
                           onChange={(e) => handleShowPicture(e, positionIndex)}
                           inputProps={{ "aria-label": "controlled" }}
@@ -448,6 +455,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                       control={
                         <Checkbox
                           checked={position.allow_abstain}
+                          disabled={!isEditable}
                           onChange={(e) => handleAllowAbstain(e, positionIndex)}
                           disableRipple
                           inputProps={{ "aria-label": "controlled" }}
@@ -472,30 +480,17 @@ const BallotsPage = ({ position, setPosition }: any) => {
               {position.candidates.map(
                 (candidate: any, candidateIndex: any) => (
                   <div key={candidateIndex} className="w-full relative">
-                    <div className="absolute right-0 top-5 text-red-500 text-3xl">
-                      {/* <button
-                        className="flex items-center"
-                        onClick={(e) =>
-                          handleDeleteCandidate(
-                            e,
-                            position.name_of_position,
-                            candidate.candidate_name
-                          )
-                        }
-                      >
-                        <span>
-                          <MdDelete />
-                        </span>
-                        <span className="text-sm">Delete candidate</span>
-                      </button> */}
-                      <DeleteCandidateDialog
-                        selectedPosition={position.name_of_position}
-                        selectedCandidate={candidate.candidate_name}
-                        id={electionID}
-                        userId={USER_ID}
-                        getUpdatedList={() => fetchData()}
-                      />
-                    </div>
+                    {isEditable && (
+                      <div className="absolute right-0 top-5 text-red-500 text-3xl">
+                        <DeleteCandidateDialog
+                          selectedPosition={position.name_of_position}
+                          selectedCandidate={candidate.candidate_name}
+                          id={electionID}
+                          userId={USER_ID}
+                          getUpdatedList={() => fetchData()}
+                        />
+                      </div>
+                    )}
                     <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
                       {candidate.candidate_name
                         ? candidate.candidate_name
@@ -529,7 +524,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                     "string"
                                       ? candidate.candidate_picture
                                       : URL.createObjectURL(
-                                          candidate.candidate_picture
+                                          candidate.candidate_picture,
                                         )
                                   }`}
                                   alt={`Image for ${candidate.candidate_name}`}
@@ -543,11 +538,17 @@ const BallotsPage = ({ position, setPosition }: any) => {
                           type="file"
                           id={`image-upload-${positionIndex}-${candidateIndex}`}
                           accept="image/*"
+                          disabled={!isEditable}
                           style={{ display: "none" }}
                           onChange={(e) =>
                             handleImageUpload(e, positionIndex, candidateIndex)
                           }
                         />
+                        {position.show_pictures && (
+                          <p className="text-xs text-stone-400 mt-1 text-center">
+                            Max 2 MB
+                          </p>
+                        )}
                       </div>
                       <div className="flex-1 flex flex-col gap-10 w-full">
                         <div className="flex gap-8 lg:flex-row flex-col text-sm lg:text-base">
@@ -566,7 +567,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                   e,
                                   positionIndex,
                                   "candidate_name",
-                                  candidateIndex
+                                  candidateIndex,
                                 )
                               }
                             />
@@ -584,7 +585,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                   e,
                                   positionIndex,
                                   "candidate_nickname",
-                                  candidateIndex
+                                  candidateIndex,
                                 )
                               }
                             />
@@ -603,7 +604,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                 e,
                                 positionIndex,
                                 "more_details",
-                                candidateIndex
+                                candidateIndex,
                               )
                             }
                           />
@@ -620,7 +621,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                 handleMediaUpload(
                                   e,
                                   positionIndex,
-                                  candidateIndex
+                                  candidateIndex,
                                 )
                               }
                               style={{ display: "none" }}
@@ -646,7 +647,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                       typeof candidate.media === "string"
                                         ? candidate.media
                                         : URL.createObjectURL(
-                                            candidate.media.docs
+                                            candidate.media.docs,
                                           )
                                     }`}
                                     alt={`Image for ${candidate.candidate_name}`}
@@ -662,7 +663,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                         typeof candidate.media === "string"
                                           ? candidate.media
                                           : URL.createObjectURL(
-                                              candidate.media.docs
+                                              candidate.media.docs,
                                             )
                                       }`}
                                     />
@@ -684,6 +685,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                       <FaCloudUploadAlt />
                                     </span>
                                   </span>
+                                  <p className="text-xs text-stone-400 mt-1">
+                                    Max 10 MB
+                                  </p>
                                 </label>
                               )}
                               <input
@@ -695,7 +699,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                   handleMediaUpload(
                                     e,
                                     positionIndex,
-                                    candidateIndex
+                                    candidateIndex,
                                   )
                                 }
                                 style={{ display: "none" }}
@@ -711,7 +715,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
                                     handleDeleteMedia(
                                       e,
                                       positionIndex,
-                                      candidateIndex
+                                      candidateIndex,
                                     )
                                   }
                                 >
@@ -724,12 +728,13 @@ const BallotsPage = ({ position, setPosition }: any) => {
                       </div>
                     </div>
                   </div>
-                )
+                ),
               )}
               <div className="flex justify-center">
                 <button
                   type="button"
-                  className="mt-12 lg:text-xl text-base font-semibold text-blue-700 w-48 h-12 flex items-center justify-center gap-2.5 rounded-lg outline-none border-2 border-blue-700"
+                  disabled={!isEditable}
+                  className="mt-12 lg:text-xl text-base font-semibold text-blue-700 w-48 h-12 flex items-center justify-center gap-2.5 rounded-lg outline-none border-2 border-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
                   onClick={() => handleAddCandidate(positionIndex)}
                 >
                   <span>Add Candidate</span>
@@ -741,8 +746,9 @@ const BallotsPage = ({ position, setPosition }: any) => {
           <div className="flex justify-center">
             <button
               type="button"
+              disabled={!isEditable}
               onClick={handleAddPosition}
-              className="w-44 h-12 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg"
+              className="w-44 h-12 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <span>+</span>
               <span>Add Position</span>

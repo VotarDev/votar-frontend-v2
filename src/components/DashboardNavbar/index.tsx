@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Hamburger from "hamburger-react";
 import logo from "../../../public/assets/logos/dashboard-logo.svg";
 import Link from "next/link";
@@ -26,6 +26,7 @@ import setAuthToken from "@/utils/setAuthToken";
 
 const DashboardNavbar = () => {
   const [isOpen, setOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
@@ -96,9 +97,48 @@ const DashboardNavbar = () => {
   useEffect(() => {
     fetchCredit();
   }, [fetchCredit]);
+
+  // While the menu is open, stop the page behind it from scrolling. The dashboard
+  // content scrolls inside a container div, not the body, so lock every scrollable ancestor.
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const locked: { el: HTMLElement; overflow: string }[] = [];
+    let el = navRef.current?.parentElement ?? null;
+    while (el) {
+      const { overflowY } = getComputedStyle(el);
+      if (
+        el === document.body ||
+        el === document.documentElement ||
+        overflowY === "auto" ||
+        overflowY === "scroll"
+      ) {
+        locked.push({ el, overflow: el.style.overflow });
+        el.style.overflow = "hidden";
+      }
+      el = el.parentElement;
+    }
+
+    const closeOnEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    // The mobile navbar is hidden from lg up, so close the menu if the screen widens.
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = (e: MediaQueryListEvent) => {
+      if (e.matches) setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    desktop.addEventListener("change", closeOnDesktop);
+
+    return () => {
+      locked.forEach(({ el, overflow }) => (el.style.overflow = overflow));
+      window.removeEventListener("keydown", closeOnEscape);
+      desktop.removeEventListener("change", closeOnDesktop);
+    };
+  }, [isOpen]);
   return (
     <>
-      <div className="flex justify-between items-center p-3">
+      <div ref={navRef} className="flex justify-between items-center p-3">
         <div>
           <img src={logo.src} alt="logo" />
         </div>
@@ -107,7 +147,14 @@ const DashboardNavbar = () => {
         </div>
       </div>
       <div
-        className={`fixed top-0 bottom-0 w-72 h-screen overflow-y-auto bg-white z-[999] transition-all duration-150 ease-in-out ${
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 bg-black/50 z-[998] transition-opacity duration-150 ease-in-out ${
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      />
+      <div
+        className={`fixed top-0 bottom-0 w-72 h-screen overflow-y-auto overscroll-contain bg-white z-[999] transition-all duration-150 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >

@@ -122,7 +122,9 @@ const Footer = () => {
         </div>
         <div className="flex items-center lg:gap-[67px] gap-8">
           <div>
-            <p>Privacy Policy</p>
+            <Link href="/privacy-policy">
+              <p>Privacy Policy</p>
+            </Link>
           </div>
           <div>
             <p>Terms and Conditions</p>
