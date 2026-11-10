@@ -1,20 +1,131 @@
-import React from "react";
-import leftline from "../../../../public/assets/images/left-line.svg";
-import rightline from "../../../../public/assets/images/right-line.svg";
-import { Checkbox, FormControlLabel } from "@mui/material";
-import placeholder from "../../../../public/assets/images/Placeholder.png";
-import { FaCloudUploadAlt } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import { Position } from "@/utils/types";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import {
+  FileText,
+  ImagePlus,
+  Paperclip,
+  Plus,
+  Trash2,
+  UserRound,
+  X,
+} from "lucide-react";
+import { Position } from "@/utils/types";
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Textarea } from "@/src/components/ui/textarea";
+import { Switch } from "@/src/components/ui/switch";
+import FormField from "@/src/components/shared/form/FormField";
+
+const IMAGE_SIZE_LIMIT = 2 * 1024 * 1024; // 2 MB
+const MEDIA_SIZE_LIMIT = 10 * 1024 * 1024; // 10 MB
+const DETAILS_MAX_LENGTH = 250;
+
+/** An object URL for a file, released when the file changes or on unmount. */
+const useObjectUrl = (file: Blob | MediaSource | null | undefined) => {
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!file) {
+      setUrl(null);
+      return;
+    }
+    const objectUrl = URL.createObjectURL(file);
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+  return url;
+};
+
+const CandidatePhoto = ({
+  inputId,
+  candidate,
+  disabled,
+}: {
+  inputId: string;
+  candidate: any;
+  disabled: boolean;
+}) => {
+  const objectUrl = useObjectUrl(
+    candidate.candidate_picture_base64 ? null : candidate.candidate_picture,
+  );
+  const src = candidate.candidate_picture_base64 || objectUrl;
+  return (
+    <div className="flex shrink-0 flex-col items-center gap-1.5">
+      <label
+        htmlFor={inputId}
+        className={`group relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed border-border bg-muted/50 transition-colors ${
+          disabled
+            ? "cursor-not-allowed opacity-60"
+            : "cursor-pointer hover:border-primary/50 hover:bg-secondary/40"
+        }`}
+      >
+        {src ? (
+          <>
+            <img
+              src={src}
+              alt={`Photo of ${candidate.candidate_name || "candidate"}`}
+              className="h-full w-full object-cover"
+            />
+            {!disabled && (
+              <span className="absolute inset-x-0 bottom-0 bg-black/55 py-1 text-center text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100">
+                Change photo
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="flex flex-col items-center gap-1 text-muted-foreground">
+            <ImagePlus className="h-6 w-6" aria-hidden="true" />
+            <span className="text-xs font-medium">Add photo</span>
+          </span>
+        )}
+      </label>
+      <span className="text-xs text-muted-foreground">Max 2 MB</span>
+    </div>
+  );
+};
+
+const MediaAttachment = ({
+  candidate,
+  disabled,
+  onRemove,
+}: {
+  candidate: any;
+  disabled: boolean;
+  onRemove: (e: React.MouseEvent) => void;
+}) => {
+  const { type, docs } = candidate.media;
+  const url = useObjectUrl(type === "image" || type === "video" ? docs : null);
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border p-2 pr-3">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted text-muted-foreground">
+        {type === "image" && url ? (
+          <img src={url} alt="" className="h-full w-full object-cover" />
+        ) : type === "video" && url ? (
+          <video src={url} className="h-full w-full object-cover" muted />
+        ) : (
+          <FileText className="h-5 w-5" aria-hidden="true" />
+        )}
+      </div>
+      <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+        {candidate.docsname || "Attached file"}
+      </span>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled={disabled}
+        onClick={onRemove}
+        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+        aria-label="Remove attachment"
+      >
+        <X />
+      </Button>
+    </div>
+  );
+};
 
 function Body({ positions, setPositions, electionId, isEditable = true }: any) {
   const handleAddPosition = () => {
-    let election_id;
-    if (typeof window !== "undefined") {
-      const electionId = localStorage.getItem("ElectionId");
-      election_id = electionId;
-    }
     setPositions([
       ...positions,
       {
@@ -47,7 +158,7 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     positionIndex: number,
     field: keyof Position,
-    candidateIndex?: number
+    candidateIndex?: number,
   ) => {
     const updatedPositions = [...positions];
     if (candidateIndex !== undefined) {
@@ -60,31 +171,22 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
     setPositions(updatedPositions);
   };
 
-  const handleShowPicture = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    positionIndex: number
-  ) => {
+  const handleShowPicture = (checked: boolean, positionIndex: number) => {
     const updatedPosition = [...positions];
-    updatedPosition[positionIndex].show_pictures = event.target.checked;
+    updatedPosition[positionIndex].show_pictures = checked;
     setPositions(updatedPosition);
   };
 
-  const handleAllowAbstain = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    positionIndex: number
-  ) => {
+  const handleAllowAbstain = (checked: boolean, positionIndex: number) => {
     const updatedPosition = [...positions];
-    updatedPosition[positionIndex].allow_abstain = event.target.checked;
+    updatedPosition[positionIndex].allow_abstain = checked;
     setPositions(updatedPosition);
   };
-
-  const IMAGE_SIZE_LIMIT = 2 * 1024 * 1024; // 2 MB
-  const MEDIA_SIZE_LIMIT = 10 * 1024 * 1024; // 10 MB
 
   const handleImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     positionIndex: number,
-    candidateIndex: number
+    candidateIndex: number,
   ) => {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -113,35 +215,36 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
   const handleMediaUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     positionIndex: number,
-    candidateIndex: number
+    candidateIndex: number,
   ) => {
     const { files } = e.target;
+    const file = files?.[0];
     e.target.value = "";
 
-    if (files && files[0]) {
-      if (files[0].size > MEDIA_SIZE_LIMIT) {
+    if (file) {
+      if (file.size > MEDIA_SIZE_LIMIT) {
         toast.error("Media file must be 10 MB or smaller.");
         return;
       }
       const updatedPositions = [...positions];
       const candidate =
         updatedPositions[positionIndex].candidates[candidateIndex];
-      const mediaType = files[0].type.split("/")[0];
+      const mediaType = file.type.split("/")[0];
 
       candidate.media = {
         type: mediaType as "file" | "image" | "video",
-        docs: files[0],
+        docs: file,
       };
-      candidate.docsname = files[0].name;
+      candidate.docsname = file.name;
 
       setPositions(updatedPositions);
     }
   };
 
   const handleDeleteMedia = (
-    e: any,
+    e: React.MouseEvent,
     positionIndex: number,
-    candidateIndex: number
+    candidateIndex: number,
   ) => {
     e.preventDefault();
 
@@ -151,18 +254,18 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
 
     if (candidate) {
       candidate.media.docs = null;
-
-      // return candidate;
     }
 
     setPositions(updatedPositions);
   };
+
   const deletePosition = (index: number) => {
     if (positions.length > 1) {
       const newPositions = positions.filter((_: any, i: any) => i !== index);
       setPositions(newPositions);
     }
   };
+
   const deleteCandidate = (positionIndex: number, candidateIndex: number) => {
     const newPositions = [...positions];
 
@@ -173,359 +276,298 @@ function Body({ positions, setPositions, electionId, isEditable = true }: any) {
   };
 
   return (
-    <section className="mt-12">
-      <form>
-        {positions.map((position: Position, positionIndex: number) => (
-          <div
-            key={positionIndex}
-            className="flex flex-col bg-neutral-100 rounded-lg py-10 lg:px-14 mb-10 px-4 relative"
-          >
-            {positionIndex > 0 && isEditable && (
-              <div className="absolute -right-1 -top-4 text-3xl">
-                <button
-                  onClick={() => deletePosition(positionIndex)}
-                  className="text-red-500"
-                >
-                  <MdDelete />
-                </button>
-              </div>
-            )}
-            <div className="text-center text-slate-900 lg:text-3xl text-base font-semibold flex items-center justify-center gap-2 uppercase">
-              <div>
-                <img src={leftline.src} alt="line" className="w-14 lg:w-full" />
-              </div>
-              {position.name_of_position
-                ? position.name_of_position
-                : `Position ${positionIndex + 1}`}
-              <div>
-                <img
-                  src={rightline.src}
-                  alt="line"
-                  className="w-14 lg:w-full"
-                />
-              </div>
-            </div>
-
-            <div className="flex lg:gap-10 gap-0 lg:mt-10 mt-5 items-center lg:flex-row flex-col">
-              <div className="flex flex-col gap-2 w-full lg:w-auto text-sm lg:text-base">
-                <label htmlFor="positionName">Name of Position</label>
-                <input
-                  type="text"
-                  placeholder="Position Name"
-                  value={position.name_of_position}
-                  disabled={!isEditable}
-                  className="lg:w-96 w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                  onChange={(e) =>
-                    handleInputChange(e, positionIndex, "name_of_position")
-                  }
-                />
-              </div>
-              <div className="flex lg:mt-6 mt-2 lg:gap-2 flex-wrap gap-0">
-                <div>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={position.show_pictures}
-                        disableRipple
-                        disabled={!isEditable}
-                        onChange={(e) => handleShowPicture(e, positionIndex)}
-                        inputProps={{ "aria-label": "controlled" }}
-                        sx={{
-                          color: "#848484",
-
-                          "&.Mui-checked": {
-                            color: "#363636",
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <span style={{ fontSize: "0.85rem" }}>
-                        {" "}
-                        Show Pictures
-                      </span>
-                    }
-                  />
+    <section>
+      {/* Every button here is type="button": a plain button inside a form
+          submits it, which reloaded the page and lost the ballot. */}
+      <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        {positions.map((position: Position, positionIndex: number) => {
+          const positionInputId = `position-name-${positionIndex}`;
+          return (
+            <Card key={positionIndex} className="overflow-hidden">
+              <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/40 px-4 py-3 smm:px-6">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
+                    {positionIndex + 1}
+                  </span>
+                  <h3 className="truncate font-semibold text-foreground">
+                    {position.name_of_position ||
+                      `Position ${positionIndex + 1}`}
+                  </h3>
+                  <span className="hidden shrink-0 text-sm text-muted-foreground ssm:inline">
+                    · {position.candidates.length}{" "}
+                    {position.candidates.length === 1
+                      ? "candidate"
+                      : "candidates"}
+                  </span>
                 </div>
-                <div>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={position.allow_abstain}
-                        onChange={(e) => handleAllowAbstain(e, positionIndex)}
-                        disableRipple
-                        disabled={!isEditable}
-                        inputProps={{ "aria-label": "controlled" }}
-                        sx={{
-                          color: "#848484",
-                          "&.Mui-checked": {
-                            color: "#363636",
-                          },
-                        }}
-                      />
-                    }
-                    label={
-                      <span style={{ fontSize: "0.85rem" }}>Allow Abstain</span>
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {position.candidates.map((candidate, candidateIndex) => (
-              <div key={candidateIndex} className="w-full relative">
-                {isEditable && (
-                <div className="absolute right-0 top-5 text-red-500 text-3xl">
-                  <button
-                    onClick={() =>
-                      deleteCandidate(positionIndex, candidateIndex)
-                    }
-                    className="flex items-center"
+                {positionIndex > 0 && isEditable && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deletePosition(positionIndex)}
+                    className="shrink-0 text-destructive hover:bg-red-50 hover:text-destructive"
                   >
-                    <span>
-                      <MdDelete />
-                    </span>
-                    <span className="text-sm">Delete candidate</span>
-                  </button>
-                </div>
+                    <Trash2 />
+                    <span className="hidden smm:inline">Remove position</span>
+                  </Button>
                 )}
-                <div className="mt-12 text-center lg:text-2xl text-base text-zinc-950 font-semibold capitalize">
-                  {candidate.candidate_name
-                    ? candidate.candidate_name
-                    : `Candidate ${candidateIndex + 1}`}{" "}
-                </div>
-                <div
-                  className={`flex items-center lg:flex-row flex-col ${
-                    position.show_pictures ? "gap-[42px]" : "gap-0"
-                  } lg:mt-10 mt-5 `}
-                >
-                  {/** Handling media uploads */}
-                  <div>
-                    <label
-                      htmlFor={`image-upload-${positionIndex}-${candidateIndex}`}
-                      className="relative cursor-pointer"
-                    >
-                      {position.show_pictures && (
-                        <>
-                          {candidate.candidate_picture === null ? (
-                            <img
-                              src={placeholder.src}
-                              alt="Upload Image"
-                              className="max-w-[256px] w-full h-64 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <img
-                              src={`${URL.createObjectURL(
-                                candidate.candidate_picture
-                              )}`}
-                              alt={`Image for ${candidate.candidate_name}`}
-                              className="max-w-[256px] w-full h-64 rounded-lg object-cover"
-                            />
-                          )}
-                        </>
-                      )}
-                    </label>
-                    <input
-                      type="file"
-                      id={`image-upload-${positionIndex}-${candidateIndex}`}
-                      accept="image/*"
+              </div>
+
+              <div className="space-y-6 p-4 smm:p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                  <FormField
+                    label="Name of position"
+                    htmlFor={positionInputId}
+                    required
+                    className="flex-1"
+                  >
+                    <Input
+                      id={positionInputId}
+                      placeholder="e.g. President"
+                      value={position.name_of_position}
                       disabled={!isEditable}
-                      style={{ display: "none" }}
                       onChange={(e) =>
-                        handleImageUpload(e, positionIndex, candidateIndex)
+                        handleInputChange(e, positionIndex, "name_of_position")
                       }
                     />
-                    {position.show_pictures && (
-                      <p className="text-xs text-stone-400 mt-1 text-center">
-                        Max 2 MB
-                      </p>
-                    )}
-                  </div>
-                  {/** Handling candidate image uploads */}
-                  <div className="flex-1 flex flex-col gap-10 w-full">
-                    <div className="flex gap-8 lg:flex-row flex-col text-sm lg:text-base">
-                      <div className="flex flex-col gap-2 w-full">
-                        <label htmlFor="candidateName">Candidate Name</label>
-                        <input
-                          type="text"
-                          placeholder="Candidate Name"
-                          value={candidate.candidate_name}
-                          disabled={!isEditable}
-                          className="w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                          onChange={(e) =>
-                            handleInputChange(
-                              e,
-                              positionIndex,
-                              "candidate_name" as keyof Position,
-                              candidateIndex
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2 w-full">
-                        <label htmlFor="nickname">Candidate Nickname</label>
-                        <input
-                          type="text"
-                          placeholder="Candidate NickName"
-                          value={candidate.candidate_nickname}
-                          disabled={!isEditable}
-                          className="w-full h-12 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                          onChange={(e) =>
-                            handleInputChange(
-                              e,
-                              positionIndex,
-                              "candidate_nickname" as keyof Position,
-                              candidateIndex
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label htmlFor="detials">More details</label>
-                      <textarea
-                        placeholder="Candidate Details"
-                        value={candidate.more_details}
-                        maxLength={250}
+                  </FormField>
+                  <div className="flex flex-wrap gap-x-6 gap-y-3 md:pb-2.5">
+                    <label className="flex items-center gap-2.5 text-sm text-foreground">
+                      <Switch
+                        checked={position.show_pictures}
                         disabled={!isEditable}
-                        className="w-full h-36 rounded border border-stone-900 outline-none p-4 disabled:opacity-40 disabled:cursor-not-allowed"
-                        onChange={(e) =>
-                          handleInputChange(
-                            e,
-                            positionIndex,
-                            "more_details" as keyof Position,
-                            candidateIndex
-                          )
+                        onCheckedChange={(checked) =>
+                          handleShowPicture(checked, positionIndex)
                         }
                       />
-                      <div className="text-right text-sm text-stone-500 mt-1">
-                        {candidate.more_details?.length || 0}/250
-                      </div>
-
-                      {/** Handling media uploads */}
-                      <div className="flex gap-2 items-center">
-                        <input
-                          type="application"
-                          accept="image/*,video/*,.pdf,.doc,.docx"
-                          disabled={!isEditable}
-                          onChange={(e) =>
-                            handleMediaUpload(e, positionIndex, candidateIndex)
-                          }
-                          style={{ display: "none" }}
-                          multiple
-                        />
-                        <div className="image-upload">
-                          {candidate.media.docs ? (
-                            candidate.media.type === "image" ? (
-                              <img
-                                src={`${URL.createObjectURL(
-                                  candidate.media.docs
-                                )}`}
-                                alt={`Image for ${candidate.candidate_name}`}
-                                className="w-20 h-20 object-contain"
-                              />
-                            ) : candidate.media.type === "video" ? (
-                              <video
-                                controls
-                                className="w-20 h-20 object-contain"
-                              >
-                                <source
-                                  src={`${URL.createObjectURL(
-                                    candidate.media.docs
-                                  )}`}
-
-                                  // type={getMimeTypeFromBase64(
-                                  //   candidate.media.docs
-                                  // )}
-                                />
-                                Your browser does not support the video tag.
-                              </video>
-                            ) : (
-                              <></>
-                            )
-                          ) : (
-                            <label
-                              htmlFor={`media-upload-${positionIndex}-${candidateIndex}`}
-                              className="upload-label"
-                            >
-                              <span className="flex items-center gap-2 cursor-pointer">
-                                Upload Media (Image, Video, PDF, DOC)
-                                <span>
-                                  <FaCloudUploadAlt />
-                                </span>
-                              </span>
-                              <p className="text-xs text-stone-400 mt-1">
-                                Max 10 MB
-                              </p>
-                            </label>
-                          )}
-                          <input
-                            type="file"
-                            id={`media-upload-${positionIndex}-${candidateIndex}`}
-                            accept="image/*,video/*,.pdf,.doc,.docx" // Accepts common media and document formats
-                            disabled={!isEditable}
-                            onChange={(e) =>
-                              handleMediaUpload(
-                                e,
-                                positionIndex,
-                                candidateIndex
-                              )
-                            }
-                            style={{ display: "none" }}
-                            multiple
-                          />
-                        </div>
-                        {candidate.media.docs && (
-                          <div>
-                            <button
-                              disabled={!isEditable}
-                              className="text-xl border-none outline-none bg-transparent disabled:opacity-40 disabled:cursor-not-allowed"
-                              onClick={(e) =>
-                                handleDeleteMedia(
-                                  e,
-                                  positionIndex,
-                                  candidateIndex
-                                )
-                              }
-                            >
-                              <MdDelete />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/** Handling media uploads */}
+                      Show pictures
+                    </label>
+                    <label className="flex items-center gap-2.5 text-sm text-foreground">
+                      <Switch
+                        checked={position.allow_abstain}
+                        disabled={!isEditable}
+                        onCheckedChange={(checked) =>
+                          handleAllowAbstain(checked, positionIndex)
+                        }
+                      />
+                      Allow abstain
+                    </label>
                   </div>
                 </div>
-              </div>
-            ))}
-            <div className="flex justify-center">
-              <button
-                type="button"
-                disabled={!isEditable}
-                className="mt-12 lg:text-xl text-base font-semibold text-blue-700 w-48 h-12 flex items-center justify-center gap-2.5 rounded-lg outline-none border-2 border-blue-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                onClick={() => handleAddCandidate(positionIndex)}
-              >
-                <span>Add Candidate</span>
-                <span>+</span>
-              </button>
-            </div>
-          </div>
-        ))}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            disabled={!isEditable}
-            onClick={handleAddPosition}
-            className="w-44 h-12 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <span>+</span>
-            <span>Add Position</span>
-          </button>
-        </div>
 
-        {/* <button type="submit">Submit</button> */}
+                {position.candidates.length === 0 && (
+                  <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border px-4 py-8 text-center">
+                    <UserRound
+                      className="h-6 w-6 text-muted-foreground"
+                      aria-hidden="true"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      No candidates yet. Add the people standing for this
+                      position.
+                    </p>
+                  </div>
+                )}
+
+                {position.candidates.map((candidate, candidateIndex) => {
+                  const base = `${positionIndex}-${candidateIndex}`;
+                  return (
+                    <div
+                      key={candidateIndex}
+                      className="rounded-lg border border-border p-4 smm:p-5"
+                    >
+                      <div className="mb-4 flex items-center justify-between gap-3">
+                        <p className="truncate text-sm font-semibold text-foreground">
+                          {candidate.candidate_name ||
+                            `Candidate ${candidateIndex + 1}`}
+                        </p>
+                        {isEditable && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              deleteCandidate(positionIndex, candidateIndex)
+                            }
+                            className="shrink-0 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                          >
+                            <Trash2 />
+                            <span className="hidden smm:inline">Remove</span>
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-5 md:flex-row">
+                        {position.show_pictures && (
+                          <>
+                            <CandidatePhoto
+                              inputId={`image-upload-${base}`}
+                              candidate={candidate}
+                              disabled={!isEditable}
+                            />
+                            <input
+                              type="file"
+                              id={`image-upload-${base}`}
+                              accept="image/*"
+                              disabled={!isEditable}
+                              className="hidden"
+                              onChange={(e) =>
+                                handleImageUpload(
+                                  e,
+                                  positionIndex,
+                                  candidateIndex,
+                                )
+                              }
+                            />
+                          </>
+                        )}
+
+                        <div className="flex-1 space-y-4">
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <FormField
+                              label="Candidate name"
+                              htmlFor={`candidate-name-${base}`}
+                              required
+                            >
+                              <Input
+                                id={`candidate-name-${base}`}
+                                placeholder="Full name"
+                                value={candidate.candidate_name}
+                                disabled={!isEditable}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    e,
+                                    positionIndex,
+                                    "candidate_name" as keyof Position,
+                                    candidateIndex,
+                                  )
+                                }
+                              />
+                            </FormField>
+                            <FormField
+                              label="Nickname"
+                              htmlFor={`candidate-nickname-${base}`}
+                              optional
+                            >
+                              <Input
+                                id={`candidate-nickname-${base}`}
+                                placeholder="What voters know them as"
+                                value={candidate.candidate_nickname}
+                                disabled={!isEditable}
+                                onChange={(e) =>
+                                  handleInputChange(
+                                    e,
+                                    positionIndex,
+                                    "candidate_nickname" as keyof Position,
+                                    candidateIndex,
+                                  )
+                                }
+                              />
+                            </FormField>
+                          </div>
+
+                          <FormField
+                            label="More details"
+                            htmlFor={`candidate-details-${base}`}
+                            optional
+                          >
+                            <Textarea
+                              id={`candidate-details-${base}`}
+                              placeholder="A short bio or manifesto"
+                              value={candidate.more_details}
+                              maxLength={DETAILS_MAX_LENGTH}
+                              disabled={!isEditable}
+                              className="min-h-[96px]"
+                              onChange={(e) =>
+                                handleInputChange(
+                                  e,
+                                  positionIndex,
+                                  "more_details" as keyof Position,
+                                  candidateIndex,
+                                )
+                              }
+                            />
+                            <span className="self-end text-xs text-muted-foreground">
+                              {candidate.more_details?.length || 0}/
+                              {DETAILS_MAX_LENGTH}
+                            </span>
+                          </FormField>
+
+                          <div>
+                            <input
+                              type="file"
+                              id={`media-upload-${base}`}
+                              accept="image/*,video/*,.pdf,.doc,.docx"
+                              disabled={!isEditable}
+                              className="hidden"
+                              onChange={(e) =>
+                                handleMediaUpload(
+                                  e,
+                                  positionIndex,
+                                  candidateIndex,
+                                )
+                              }
+                            />
+                            {candidate.media.docs ? (
+                              <MediaAttachment
+                                candidate={candidate}
+                                disabled={!isEditable}
+                                onRemove={(e) =>
+                                  handleDeleteMedia(
+                                    e,
+                                    positionIndex,
+                                    candidateIndex,
+                                  )
+                                }
+                              />
+                            ) : (
+                              <label
+                                htmlFor={`media-upload-${base}`}
+                                className={`inline-flex items-center gap-2 text-sm font-medium text-primary ${
+                                  isEditable
+                                    ? "cursor-pointer hover:underline"
+                                    : "cursor-not-allowed opacity-60"
+                                }`}
+                              >
+                                <Paperclip
+                                  className="h-4 w-4"
+                                  aria-hidden="true"
+                                />
+                                Attach media
+                                <span className="font-normal text-muted-foreground">
+                                  Image, video, PDF or DOC · Max 10 MB
+                                </span>
+                              </label>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!isEditable}
+                  onClick={() => handleAddCandidate(positionIndex)}
+                  className="w-full border-dashed"
+                >
+                  <Plus /> Add candidate
+                </Button>
+              </div>
+            </Card>
+          );
+        })}
+
+        <button
+          type="button"
+          disabled={!isEditable}
+          onClick={handleAddPosition}
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-secondary/40 py-5 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" /> Add position
+        </button>
       </form>
     </section>
   );

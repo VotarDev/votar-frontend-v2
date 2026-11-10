@@ -301,6 +301,9 @@ const Create = () => {
           if (ballotData.data) {
             // toast.success(ballotData.data.status);
             toast.success("Candidates created successfully");
+            // Saved: coming back to Ballot later starts a fresh ballot rather
+            // than re-sending these candidates.
+            setPositions([]);
           }
           newStep++;
           break;
@@ -376,6 +379,8 @@ const Create = () => {
       positionsLoaded.current = positions.length > 0;
       return;
     }
+    // Cleared after a save: nothing left to lose.
+    if (positions.length === 0) return;
     setHasUnsavedChanges(true);
   }, [positions]);
 
