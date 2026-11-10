@@ -15,6 +15,7 @@ import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { ELECTION_DRAFT_KEYS, getElectionDraft } from "@/utils/electionDraft";
+import { scrollToTop } from "@/utils/scrollToTop";
 import {
   DETAILS_FIELD_ORDER,
   type DetailsErrors,
@@ -363,6 +364,8 @@ const Create = () => {
   useEffect(() => {
     localStorage.setItem("electionSteps", JSON.stringify(currentStep));
     setFurthestStep((prev) => Math.max(prev, currentStep));
+    // Each step starts at the top of the page.
+    scrollToTop();
   }, [currentStep]);
 
   useEffect(() => {

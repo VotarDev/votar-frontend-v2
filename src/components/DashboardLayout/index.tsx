@@ -13,6 +13,8 @@ import { CircularProgress } from "@mui/material";
 import ProtectedRoutes from "../ProtectedRoutes";
 import DashboardNavbar from "../DashboardNavbar";
 import Cookies from "universal-cookie";
+import { useRouter } from "next/router";
+import { SCROLL_CONTAINER_PROPS, scrollToTop } from "@/utils/scrollToTop";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -25,6 +27,14 @@ const DashboardLayout = ({ children }: any) => {
   const user = useUser();
   const dispatch = useDispatch();
   const cookies = new Cookies();
+  const router = useRouter();
+
+  // Content scrolls inside this layout, not the window, so Next.js's own
+  // scroll reset doesn't reach it: start every page at the top.
+  useEffect(() => {
+    router.events.on("routeChangeComplete", scrollToTop);
+    return () => router.events.off("routeChangeComplete", scrollToTop);
+  }, [router.events]);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -70,12 +80,15 @@ const DashboardLayout = ({ children }: any) => {
   return (
     <>
       {isClient && (
-        <div className="overflow-auto">
+        <div className="overflow-auto" {...SCROLL_CONTAINER_PROPS}>
           <div className="flex ">
             <div className="relative lg:block hidden ">
               <SideBar opener={opener} setOpener={setOpener} />
             </div>
-            <div className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0">
+            <div
+              className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0"
+              {...SCROLL_CONTAINER_PROPS}
+            >
               <div className="lg:block hidden">
                 <Header opener={opener} />
               </div>
@@ -83,7 +96,10 @@ const DashboardLayout = ({ children }: any) => {
                 <DashboardNavbar />
               </div>
 
-              <div className="lg:mt-20 m-0 lg:p-6 w-full overflow-auto p-4">
+              <div
+                className="lg:mt-20 m-0 lg:p-6 w-full overflow-auto p-4"
+                {...SCROLL_CONTAINER_PROPS}
+              >
                 {children}
               </div>
             </div>
