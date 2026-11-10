@@ -1,5 +1,9 @@
 import { baseApi } from "./baseApi";
-import { getElectionIdUrl, getElectionsUrl } from "@/utils/api";
+import {
+  deleteElectionUrl,
+  getElectionIdUrl,
+  getElectionsUrl,
+} from "@/utils/api";
 import type { Election, ElectionDetails } from "@/utils/types";
 
 interface GetElectionsResponse {
@@ -30,7 +34,26 @@ export const electionsApi = baseApi.injectEndpoints({
       transformResponse: (response: { data: ElectionDetails }) => response.data,
       providesTags: ["Elections"],
     }),
+    /**
+     * Same request as `deleteElection` in utils/api (the path takes the user
+     * id; the election goes in the body). Refreshes every elections list.
+     */
+    deleteElection: build.mutation<
+      unknown,
+      { userId: string; electionId: string }
+    >({
+      query: ({ userId, electionId }) => ({
+        url: `${deleteElectionUrl}/${userId}`,
+        method: "DELETE",
+        data: { election_id: electionId },
+      }),
+      invalidatesTags: ["Elections"],
+    }),
   }),
 });
 
-export const { useGetElectionsQuery, useGetElectionByIdQuery } = electionsApi;
+export const {
+  useGetElectionsQuery,
+  useGetElectionByIdQuery,
+  useDeleteElectionMutation,
+} = electionsApi;
