@@ -963,11 +963,14 @@ export const dropIn = {
       stiffness: 500,
     },
   },
+  // Quick fade in step with the backdrop (it used to fly off screen for
+  // 0.7s, after the backdrop had already faded).
   exit: {
-    y: "100vh",
+    y: 16,
     opacity: 0,
     transition: {
-      duration: 0.7,
+      duration: 0.2,
+      ease: "easeIn",
     },
   },
 };
