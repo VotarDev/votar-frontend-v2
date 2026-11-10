@@ -327,7 +327,10 @@ const Create = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <div className="mx-auto w-full max-w-6xl pt-2">
+        {/* `relative` keeps the form's visually hidden inputs (file uploads,
+            the switch) inside the scrolling area; without it they stretch the
+            outer layout column and add a second, empty scroll. */}
+        <div className="relative mx-auto w-full max-w-6xl pt-2">
           <PageHeader
             title="Create an election"
             description="Set up your election step by step. Each step is saved when you continue."
