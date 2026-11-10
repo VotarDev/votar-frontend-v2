@@ -10,7 +10,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import { IoCopy } from "react-icons/io5";
 
-const Ballot = ({ positions, setPositions }: any) => {
+const Ballot = ({ positions, setPositions, onEditableChange }: any) => {
   const users = useCurrentUser();
   const user = useUser();
   const [election, setElection] = useState<any>([]);
@@ -19,6 +19,12 @@ const Ballot = ({ positions, setPositions }: any) => {
   const [error, setError] = useState("");
   const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
   const [isEditable, setIsEditable] = useState(true);
+
+  // Lets the create page skip ballot validation once the election has started
+  // and the ballot can no longer be edited.
+  useEffect(() => {
+    onEditableChange?.(isEditable);
+  }, [isEditable]);
   const textRef = useRef<HTMLElement | null>(null);
 
   let USER_ID = users?.data?.data

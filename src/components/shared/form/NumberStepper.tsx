@@ -12,6 +12,8 @@ interface NumberStepperProps {
   /** Disables the minus button (e.g. at the minimum). */
   atMinimum?: boolean;
   label: string;
+  /** Show the control as having an error. */
+  invalid?: boolean;
   className?: string;
 }
 
@@ -27,11 +29,13 @@ const NumberStepper = ({
   onChange,
   atMinimum,
   label,
+  invalid,
   className,
 }: NumberStepperProps) => (
   <div
     className={cn(
       "inline-flex h-11 items-stretch overflow-hidden rounded-md border border-input bg-background focus-within:border-primary focus-within:ring-2 focus-within:ring-ring/20",
+      invalid && "border-destructive",
       className,
     )}
   >
@@ -51,6 +55,7 @@ const NumberStepper = ({
       readOnly={!onChange}
       onChange={(e) => onChange?.(e.target.value)}
       aria-label={label}
+      aria-invalid={invalid || undefined}
       className="w-16 bg-transparent text-center text-sm font-semibold text-foreground outline-none"
     />
     <button

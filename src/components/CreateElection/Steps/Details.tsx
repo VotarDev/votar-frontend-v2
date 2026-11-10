@@ -21,6 +21,7 @@ import DatePicker, {
   parseDateValue,
 } from "@/src/components/shared/form/DatePicker";
 import TimePicker from "@/src/components/shared/form/TimePicker";
+import type { DetailsErrors } from "../validation";
 
 const MONTHS = [
   "January",
@@ -195,11 +196,12 @@ const Details = ({
   setBackgroundImageFile,
   numberofFreeVote,
   setNumberofFreeVote,
+  // Held by the create page, which validates the price when this is on.
+  monetizeElection,
+  setMonetizeElection,
+  errors = {},
 }: any) => {
-  // Monetising is on whenever a price is set, so it survives leaving the step.
-  const [monetizeElection, setMonetizeElection] = useState(
-    Number(pricePerVote) > 0,
-  );
+  const fieldErrors: DetailsErrors = errors;
   // The times as picked ("HH:mm"); the API value is recomputed from these
   // whenever the date or the time changes.
   const [startClock, setStartClock] = useState(() =>
@@ -376,6 +378,8 @@ const Details = ({
           <FormField
             label="Name of election"
             htmlFor="electionName"
+            required
+            error={fieldErrors.electionName}
             info="This is the official title of your election. It will be displayed prominently on the ballot page that voters see."
           >
             <Input
@@ -384,6 +388,7 @@ const Details = ({
               placeholder="e.g. Student Union Elections 2026"
               onChange={(e) => setElection(e.target.value)}
               value={election}
+              aria-invalid={!!fieldErrors.electionName || undefined}
               className="max-w-xl"
             />
           </FormField>
@@ -482,10 +487,13 @@ const Details = ({
             <FormField
               label="Start date"
               htmlFor="startDate"
+              required
+              error={fieldErrors.startDate}
               info="The date voting opens and voters can begin casting their votes."
             >
               <DatePicker
                 id="startDate"
+                invalid={!!fieldErrors.startDate}
                 value={startDate}
                 onChange={handleStartDateChange}
                 placeholder="Select start date"
@@ -495,10 +503,13 @@ const Details = ({
             <FormField
               label="Start time"
               htmlFor="startTime"
+              required
+              error={fieldErrors.startTime}
               info="The exact time voting begins on the start date."
             >
               <TimePicker
                 id="startTime"
+                invalid={!!fieldErrors.startTime}
                 value={startClock}
                 onChange={handleStartClockChange}
                 placeholder="Select start time"
@@ -507,10 +518,13 @@ const Details = ({
             <FormField
               label="End date"
               htmlFor="endDate"
+              required
+              error={fieldErrors.endDate}
               info="The date voting closes. No votes will be accepted after this date."
             >
               <DatePicker
                 id="endDate"
+                invalid={!!fieldErrors.endDate}
                 value={endDate}
                 onChange={handleEndDateChange}
                 placeholder="Select end date"
@@ -520,10 +534,13 @@ const Details = ({
             <FormField
               label="End time"
               htmlFor="endTime"
+              required
+              error={fieldErrors.endTime}
               info="The exact time voting closes on the end date."
             >
               <TimePicker
                 id="endTime"
+                invalid={!!fieldErrors.endTime}
                 value={endClock}
                 onChange={handleEndClockChange}
                 placeholder="Select end time"
@@ -579,6 +596,8 @@ const Details = ({
                       info="The amount (in your local currency) charged to a voter for each vote they cast."
                     >
                       <NumberStepper
+                        id="pricePerVote"
+                        invalid={!!fieldErrors.pricePerVote}
                         value={pricePerVote}
                         onIncrement={votingPriceIncrement}
                         onDecrement={votingPriceDecrement}
@@ -587,6 +606,14 @@ const Details = ({
                         label="price per vote"
                       />
                     </SettingRow>
+                    {fieldErrors.pricePerVote && (
+                      <p
+                        role="alert"
+                        className="mt-2 text-right text-xs font-medium text-destructive"
+                      >
+                        {fieldErrors.pricePerVote}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

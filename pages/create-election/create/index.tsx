@@ -16,6 +16,12 @@ import { Badge } from "@/src/components/ui/badge";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { ELECTION_DRAFT_KEYS, getElectionDraft } from "@/utils/electionDraft";
 import {
+  DETAILS_FIELD_ORDER,
+  type DetailsErrors,
+  validateBallot,
+  validateDetails,
+} from "@/src/components/CreateElection/validation";
+import {
   createFreeElection,
   createElection,
   createCandidate,
@@ -64,6 +70,10 @@ const Create = () => {
   const [numberofCandidate, setNumberofCandidate] = useState(0);
   const [numberofFreeVote, setNumberofFreeVote] = useState(1);
   const [pricePerVote, setPricePerVote] = useState(0);
+  const [monetizeElection, setMonetizeElection] = useState(false);
+  // Required-field errors on the Details step, shown after a save attempt.
+  const [detailsErrors, setDetailsErrors] = useState<DetailsErrors>({});
+  const [isBallotEditable, setIsBallotEditable] = useState(true);
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -131,11 +141,20 @@ const Create = () => {
             setPricePerVote={setPricePerVote}
             numberofFreeVote={numberofFreeVote}
             setNumberofFreeVote={setNumberofFreeVote}
+            monetizeElection={monetizeElection}
+            setMonetizeElection={setMonetizeElection}
+            errors={detailsErrors}
             setBackgroundImageFile={setBackgroundImageFile}
           />
         );
       case "Ballot":
-        return <Ballot setPositions={setPositions} positions={positions} />;
+        return (
+          <Ballot
+            setPositions={setPositions}
+            positions={positions}
+            onEditableChange={setIsBallotEditable}
+          />
+        );
       case "Voters Page":
         return <VotersPage />;
       case "Pay":
@@ -147,7 +166,62 @@ const Create = () => {
     }
   };
 
+  const detailsValues = {
+    electionName,
+    startDate,
+    endDate,
+    startTime,
+    endTime: endTIme,
+    monetizeElection,
+    pricePerVote,
+  };
+
+  // Checks the current step's required fields. Returns false (and shows what's
+  // missing) when the step can't be saved yet.
+  const canSaveStep = () => {
+    const stepName = steps[currentStep - 1];
+
+    if (stepName === "Details") {
+      const errors = validateDetails(detailsValues);
+      setDetailsErrors(errors);
+      const firstInvalid = DETAILS_FIELD_ORDER.find((field) => errors[field]);
+      if (firstInvalid) {
+        toast.error("Please fill in the required fields.");
+        const el = document.getElementById(firstInvalid);
+        el?.scrollIntoView({ behavior: "smooth", block: "center" });
+        el?.focus({ preventScroll: true });
+        return false;
+      }
+    }
+
+    if (stepName === "Ballot" && isBallotEditable) {
+      const problem = validateBallot(positions);
+      if (problem) {
+        toast.error(problem);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // After a failed attempt, update the errors as the user fixes each field.
+  useEffect(() => {
+    if (Object.keys(detailsErrors).length === 0) return;
+    setDetailsErrors(validateDetails(detailsValues));
+  }, [
+    electionName,
+    startDate,
+    endDate,
+    startTime,
+    endTIme,
+    monetizeElection,
+    pricePerVote,
+  ]);
+
   const handleClick = async (direction: string) => {
+    if (!canSaveStep()) return;
+
     const token = cookies.get("user-token");
 
     let newStep = currentStep;
