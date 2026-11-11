@@ -29,7 +29,7 @@ const initialState = {
 
 export const login = createAsyncThunk(
   `${process.env.NEXT_PUBLIC_BASE_URL}/user/login`,
-  async (userdata, thunkAPI) => {
+  async (userdata: { email: string; password: string }, thunkAPI) => {
     try {
       const cookies = new Cookies();
       const { data } = await authService.login(userdata);
@@ -51,7 +51,20 @@ export const login = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString();
-      toast.error(error.response.data.message || error.message);
+      if (
+        error.response?.status === 403 &&
+        message ===
+          "Email not verified. A new verification code has been sent to your email."
+      ) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ data: { data: { email: userdata.email } } })
+        );
+        toast.error(message);
+        window.location.href = "/signin/otp";
+      } else {
+        toast.error(message);
+      }
       return thunkAPI.rejectWithValue(message);
     }
   }
