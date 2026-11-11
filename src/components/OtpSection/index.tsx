@@ -12,7 +12,7 @@ let currentOTPIndex: number = 0;
 const OtpSection = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [otp, setOtp] = useState(new Array(7).fill(""));
+  const [otp, setOtp] = useState(new Array(6).fill(""));
   const [activeOTPIndex, setActiveOTPIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const user = useCurrentUser();
