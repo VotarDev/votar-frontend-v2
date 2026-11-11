@@ -6,7 +6,7 @@ import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 
 const CreateElection = () => {
   return (
-    <ProtectedRoutes>
+    <ProtectedRoutes requireVerifiedEmail>
       <DashboardLayout>
         <ElectionPlan />
       </DashboardLayout>
