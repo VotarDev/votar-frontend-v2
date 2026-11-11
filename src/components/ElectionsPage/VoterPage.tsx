@@ -24,7 +24,7 @@ import VoterTable from "./VoterTable";
 import Cookies from "universal-cookie";
 
 const VoterPage = () => {
-  const [preference, setPreference] = useState("");
+  const [preference, setPreference] = useState<string[]>([]);
   const [text, setText] = useState("");
   const [selectedRows, setSelectedRows] = useState<VoterResponse[]>([]);
   const [responses, setResponses] = useState<VoterResponse[]>([]);
@@ -60,8 +60,17 @@ const VoterPage = () => {
     ? users?.id
     : user?.user?.id;
 
-  const handlePreference = (e: ChangeEvent<HTMLInputElement>) => {
-    setPreference(e.target.value);
+  const handlePreference = (value: string) => {
+    if (!election.published) return;
+
+    if (value === "sms" && !election.notification_options?.includes("sms")) {
+      toast.error("Admin has not yet granted permission for this feature");
+      return;
+    }
+
+    setPreference((prev) =>
+      prev.includes(value) ? prev.filter((p) => p !== value) : [...prev, value]
+    );
   };
 
   const handleTextArea = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -102,7 +111,7 @@ const VoterPage = () => {
 
   useEffect(() => {
     if (Array.isArray(idType)) {
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     }
   }, [id, electionID]);
 
@@ -163,7 +172,18 @@ const VoterPage = () => {
               ? data.data
               : [];
 
-            setResponses(votersArray);
+            // The API doesn't guarantee a stable order, so the same page can
+            // come back reshuffled between requests. Sort by ID here so the
+            // table shows the same order every time you land on a page.
+            const sortedVotersArray = [...votersArray].sort(
+              (a: VoterResponse, b: VoterResponse) =>
+                String(a.id ?? "").localeCompare(String(b.id ?? ""), undefined, {
+                  numeric: true,
+                  sensitivity: "base",
+                })
+            );
+
+            setResponses(sortedVotersArray);
 
             if (data.data) {
               const currentPageFromBackend = data.data.page || pageToFetch;
@@ -208,6 +228,12 @@ const VoterPage = () => {
 
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (preference.length === 0) {
+      toast.error("Please select at least one notification option (Email or SMS) before sending.");
+      return;
+    }
+
     setIsSending(true);
     const token = cookies.get("user-token");
     if (token) {
@@ -274,8 +300,9 @@ const VoterPage = () => {
                     control={
                       <Checkbox
                         value="email"
-                        checked={preference === "email"}
-                        onChange={handlePreference}
+                        checked={preference.includes("email")}
+                        onChange={() => handlePreference("email")}
+                        disabled={!election.published}
                         inputProps={{ "aria-label": "controlled" }}
                         disableRipple
                         sx={{
@@ -296,8 +323,9 @@ const VoterPage = () => {
                     control={
                       <Checkbox
                         value="sms"
-                        checked={preference === "sms"}
-                        onChange={handlePreference}
+                        checked={preference.includes("sms")}
+                        onChange={() => handlePreference("sms")}
+                        disabled={!election.published}
                         inputProps={{ "aria-label": "controlled" }}
                         disableRipple
                         sx={{

@@ -1,13 +1,14 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import Cookies from "universal-cookie";
+import { Eye, Vote } from "lucide-react";
+import { PiWarningCircleFill } from "react-icons/pi";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import { getBallotCandidate, getElectionById } from "@/utils/api";
-import { Checkbox, CircularProgress, FormControlLabel } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import Header from "@/src/components/BallotPage/Header";
 import { useRouter } from "next/router";
 import { getCandidates } from "@/utils/api";
-import { FaCloudUploadAlt } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
 import leftline from "../../../public/assets/images/left-line.svg";
 import placeholder from "../../../public/assets/images/Placeholder.png";
 import rightline from "../../../public/assets/images/right-line.svg";
@@ -15,7 +16,6 @@ import MiniDashboard from "@/src/components/VotePage/MiniDashboard";
 import { Candidate, Details, Position } from "@/utils/types";
 import { AnimatePresence } from "framer-motion";
 import checked from "../../../public/assets/icons/checked.svg";
-import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import Modal from "@/src/components/Modal";
 import CandidateDetails from "@/src/components/VotePage/CandidateDetails";
 
@@ -82,14 +82,10 @@ const Castvote = () => {
   useEffect(() => {
     const getElection = async () => {
       setIsLoading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      // Email sign-in keeps the token on the user; everyone else (e.g. Google
+      // sign-in) has it in the cookie. Never clear the shared header here.
+      const token = users?.data?.data?.cookie || new Cookies().get("user-token");
+      if (token) setAuthToken(token);
       try {
         if (electionID) {
           const electionData = { election_id: electionID };
@@ -226,6 +222,16 @@ const Castvote = () => {
   };
   const closeModal = () => setShowModal(false);
 
+  // One colour per position for the whole visit (it used to change on every
+  // re-render, so selecting a candidate repainted every section).
+  const sectionColors = useMemo(
+    () =>
+      (votingData || []).map(
+        () => cols[Math.floor(Math.random() * cols.length)]
+      ),
+    [votingData?.length]
+  );
+
   const isCandidateActive = (position: string, candidate: Candidate) => {
     const positionData = selectedCandidates.find(
       (sc: any) => sc.position === position
@@ -251,163 +257,173 @@ const Castvote = () => {
   }
   console.log(position);
 
+  const hasBallot = !!votingData && votingData.length > 0;
+
   return (
     <>
       {isClient && (
-        <div className="">
+        <div className="pb-16">
+          <div className="sticky top-0 z-20 flex items-center justify-center gap-2 bg-slate-900 px-4 py-2.5 text-center text-sm text-white">
+            <Eye className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">Preview</span> · This is how
+              voters will see your ballot. Votes can&apos;t be cast here.
+            </span>
+          </div>
+
           <Header electionDetails={election} />
-          {/* <div>
-            <MiniDashboard />
-          </div> */}
-          <div className="mt-[126px] max-w-[1200px] mx-auto">
-            {votingData &&
-              votingData.map((preview, index) => {
-                const randomColor =
-                  cols[Math.floor(Math.random() * cols.length)];
-                return (
-                  <div
-                    key={index}
-                    className="bg-slate-50 my-20 p-10"
-                    style={{
-                      ...(isClient && {
-                        borderLeft: `4px solid ${randomColor}`,
-                      }),
-                    }}
-                  >
-                    <div className="text-center text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
-                      <div>
-                        <img
-                          src={leftline.src}
-                          alt="line"
-                          className="w-14 lg:w-full"
-                        />
-                      </div>
-                      <div>{preview.name_of_position}</div>
-                      <div>
-                        <img
-                          src={rightline.src}
-                          alt="line"
-                          className="w-14 lg:w-full"
-                        />
-                      </div>
+
+          {/* Mirrors the voter ballot page (/ballot), using the ballot as
+              entered on the Ballot step. */}
+          <div className="mt-[56px] max-w-[1200px] mx-auto px-4">
+            {!hasBallot && (
+              <div className="mx-auto my-16 flex max-w-md flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-10 text-center shadow-sm">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-700">
+                  <Vote className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Nothing to preview yet
+                </h2>
+                <p className="text-sm text-slate-500">
+                  Add positions and candidates on the Ballot step, then open
+                  the preview again.
+                </p>
+              </div>
+            )}
+
+            {hasBallot &&
+              votingData.map((preview, index) => (
+                <div
+                  key={index}
+                  className="bg-slate-50 mt-10 mb-8 lg:mt-20 lg:mb-14 p-4 lg:p-10 rounded-r-lg"
+                  style={{ borderLeft: `4px solid ${sectionColors[index]}` }}
+                >
+                  <div className="text-center text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
+                    <div>
+                      <img
+                        src={leftline.src}
+                        alt="line"
+                        className="w-14 lg:w-full"
+                      />
                     </div>
-                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16 justify-center">
-                      {preview.candidates.map((candidate, candidateIndex) => (
-                        <div
-                          key={candidateIndex}
-                          className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
-                            isCandidateActive(
-                              preview.name_of_position,
-                              candidate
-                            )
-                              ? "active"
-                              : "duration-500"
-                          }`}
-                        >
-                          {isCandidateActive(
+                    <div>
+                      {preview.name_of_position || `Position ${index + 1}`}
+                    </div>
+                    <div>
+                      <img
+                        src={rightline.src}
+                        alt="line"
+                        className="w-14 lg:w-full"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-center flex-wrap gap-6 lg:gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-10">
+                    {preview.candidates.map((candidate, candidateIndex) => (
+                      <div
+                        key={candidateIndex}
+                        className={`w-full max-w-[280px] lg:w-[calc(25%-40px)] lg:max-w-none mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-lg lg:text-xl font-semibold p-3 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md cursor-pointer relative ${
+                          isCandidateActive(preview.name_of_position, candidate)
+                            ? "active"
+                            : "duration-500"
+                        }`}
+                        onClick={() =>
+                          handleSelectCandidate(
                             preview.name_of_position,
                             candidate
-                          ) && (
-                            <div
-                              className="absolute -right-2 -top-3 "
-                              onClick={(e) =>
-                                handleSelectCandidate(
-                                  preview.name_of_position,
-                                  candidate
-                                )
-                              }
-                            >
-                              <img src={checked.src} alt="" />
+                          )
+                        }
+                      >
+                        {isCandidateActive(
+                          preview.name_of_position,
+                          candidate
+                        ) && (
+                          <div className="absolute -right-2 -top-3 ">
+                            <img src={checked.src} alt="" />
+                          </div>
+                        )}
+
+                        <div className="w-full">
+                          {preview.show_pictures && (
+                            <div className="mb-3">
+                              <img
+                                src={
+                                  candidate.candidate_picture_base64 ||
+                                  placeholder.src
+                                }
+                                className="w-full h-auto aspect-square object-cover rounded-lg"
+                                alt={`Image for ${candidate.candidate_name}`}
+                              />
                             </div>
                           )}
 
-                          <div>
-                            {preview.show_pictures && (
-                              <div
-                                className="mb-3"
-                                onClick={(e) =>
-                                  handleSelectCandidate(
-                                    preview.name_of_position,
-                                    candidate
-                                  )
-                                }
-                              >
-                                <img
-                                  src={candidate.candidate_picture_base64}
-                                  className="w-[269px] h-[269px] object-cover rounded"
-                                  alt={`Image for ${candidate.candidate_name}`}
-                                />
-                              </div>
-                            )}
-                            <div className="capitalize">
-                              <div>{candidate.candidate_name}</div>
+                          <div className="capitalize">
+                            <div>
+                              {candidate.candidate_name ||
+                                `Candidate ${candidateIndex + 1}`}
+                            </div>
+                            {candidate.candidate_nickname && (
                               <div className="text-base">
                                 ({candidate.candidate_nickname})
                               </div>
-                            </div>
-                            <div
-                              className="text-base text-blue-700 underline cursor-pointer font-normal"
-                              //   onClick={() => handleDetails(candidate)}
-                            >
-                              More Detials
-                            </div>
-                            {/* <div className="flex justify-center pt-3 gap-4 items-center">
-                              <div>
-                                <button
-                                  className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                    candidate.votes <= 0
-                                      ? "cursor-not-allowed opacity-50"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    handleVote(index, candidateIndex, false)
-                                  }
-                                  disabled={candidate.votes <= 0}
-                                >
-                                  <span className="text-xl">
-                                    <AiOutlineMinus />
-                                  </span>
-                                </button>
-                              </div>
-                              <div>{candidate.votes}</div>
-                              <div>
-                                <button
-                                  className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100`}
-                                  onClick={() =>
-                                    handleVote(index, candidateIndex, true)
-                                  }
-                                >
-                                  <span className="text-xl">
-                                    <AiOutlinePlus />
-                                  </span>
-                                </button>
-                              </div>
-                            </div> */}
+                            )}
+                          </div>
+                          <div className="text-base text-blue-700 underline cursor-pointer font-normal">
+                            More Details
                           </div>
                         </div>
-                      ))}
-                    </div>
-                    <div>
-                      {preview.allow_abstain && (
-                        <div className="flex justify-center items-center">
-                          <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl mb-10 uppercase">
-                            Abstain
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <AnimatePresence mode="wait">
-                      {showModal && (
-                        <Modal key="modal" handleClose={closeModal}>
-                          <CandidateDetails
-                            details={selectedCandidateDetails}
-                          />
-                        </Modal>
-                      )}
-                    </AnimatePresence>
+                      </div>
+                    ))}
                   </div>
-                );
-              })}
+                  {preview.allow_abstain && (
+                    <div className="flex justify-center items-center">
+                      <button
+                        type="button"
+                        className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl uppercase"
+                      >
+                        Abstain
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+            {hasBallot && (
+              <>
+                <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
+                  <div className="text-[#ECAE0D] text-xl">
+                    <PiWarningCircleFill />
+                  </div>
+                  <div className="text-[#826008]">
+                    To cast your vote using the “Enter Votes” button below,
+                    please make sure to select your preferred candidate for
+                    each position in the election. If you choose not to vote
+                    for a particular position, you may select “Abstain” (if
+                    this option is available in your election).
+                  </div>
+                </div>
+                <div className="flex flex-col items-center gap-2 mb-10">
+                  <button
+                    type="button"
+                    disabled
+                    title="Votes can't be cast in the preview"
+                    className="bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold"
+                  >
+                    Enter Votes
+                  </button>
+                  <span className="text-xs text-slate-500">
+                    Disabled in the preview
+                  </span>
+                </div>
+              </>
+            )}
+
+            <AnimatePresence mode="wait">
+              {showModal && (
+                <Modal key="modal" handleClose={closeModal}>
+                  <CandidateDetails details={selectedCandidateDetails} />
+                </Modal>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       )}

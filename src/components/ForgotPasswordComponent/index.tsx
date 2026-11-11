@@ -6,6 +6,8 @@ import { forgotPasswordRequest } from "@/utils/api";
 import { set } from "lodash";
 import { CircularProgress } from "@mui/material";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import logo from "../../../public/assets/logos/logo_white-1.png";
 
 const ForgotPasswordComponent = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,19 +48,24 @@ const ForgotPasswordComponent = () => {
   return (
     <div className="max-w-[1700px] mx-auto">
       <div>
-        <div className="relative w-full h-[140px]">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-purple-100 to-yellow-100 z-0"></div>
-
-          <div className="relative z-10 flex items-center pl-[100px] h-full">
-            <h1 className="text-4xl font-semibold text-black">
-              Forgot password
-            </h1>
-          </div>
+        <div className="w-full h-20 sm:h-[140px] bg-blue-700 flex items-center px-4 sm:px-10 lg:px-24 gap-3 sm:gap-6">
+          <Image
+            src={logo}
+            width={160}
+            alt="Votar logo"
+            className="w-[110px] sm:w-[160px] h-auto"
+          />
+          <div className="w-px h-8 sm:h-10 bg-white/30" />
+          <h1 className="text-lg sm:text-2xl font-semibold text-white">
+            Forgot Password
+          </h1>
         </div>
       </div>
       {steps === 1 && (
-        <div className="mt-12 max-w-[700px] mx-auto">
-          <h1 className="text-[24px] font-semibold">Forgot your password?</h1>
+        <div className="mt-8 sm:mt-12 max-w-[700px] mx-auto px-4 lg:px-0">
+          <h1 className="text-xl sm:text-[24px] font-semibold">
+            Forgot your password?
+          </h1>
           <p className="pt-3">
             Enter the email address associated with your account, then click
             &quot;Continue&quot;.
@@ -68,23 +75,23 @@ const ForgotPasswordComponent = () => {
           </p>
           <div className="pt-8 ">
             <h2>Email</h2>
-            <div className="flex items-center gap-4 pt-2">
-              <div className="">
+            <div className="flex flex-col md:flex-row md:items-center gap-4 pt-2">
+              <div className="w-full md:w-auto">
                 <input
                   type="email"
                   name="email"
                   id="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-[300px] border border-gray-300 outline-none h-12 p-4 rounded-md"
+                  className="w-full md:w-[300px] border border-gray-300 outline-none h-12 p-4 rounded-md"
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full md:w-auto">
                 <button
                   onClick={handleContinueHandler}
                   disabled={isLoading}
-                  className="w-[150px] h-12 gap-2 bg-blue-700 text-white flex items-center justify-center rounded-md outline-none"
+                  className="flex-1 md:flex-none md:w-[150px] h-12 gap-2 bg-blue-700 text-white flex items-center justify-center rounded-md outline-none"
                 >
                   {isLoading && (
                     <CircularProgress size={20} style={{ color: "#ffffff" }} />
@@ -94,7 +101,7 @@ const ForgotPasswordComponent = () => {
 
                 <button
                   onClick={handleCancelHandler}
-                  className="w-[150px] h-12 border border-red-500 text-red-500 flex items-center justify-center rounded-md outline-none"
+                  className="flex-1 md:flex-none md:w-[150px] h-12 border border-red-500 text-red-500 flex items-center justify-center rounded-md outline-none"
                 >
                   Cancel
                 </button>
@@ -105,9 +112,11 @@ const ForgotPasswordComponent = () => {
       )}
 
       {steps === 2 && (
-        <div className="mt-12 max-w-[700px] mx-auto">
+        <div className="mt-8 sm:mt-12 max-w-[700px] mx-auto px-4 lg:px-0">
           <div>
-            <h1 className="text-[24px] font-semibold">Check your email</h1>
+            <h1 className="text-xl sm:text-[24px] font-semibold">
+              Check your email
+            </h1>
             <p className="pt-3">
               If the email address you entered is associated with an account in
               our records, you will receive an email from us with instructions

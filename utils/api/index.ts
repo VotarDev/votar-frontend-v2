@@ -11,12 +11,12 @@ const usersUrl = "/user/get-profile";
 const updateUserUrl = "/user/profile-update";
 const emailUpdateUrl = "/user/verify-email";
 const googleAuthUrl = "/auth/google";
-const getElectionIdUrl = "/user/get-electionById";
+export const getElectionIdUrl = "/user/get-electionById";
 const createCandidateUrl = "/user/create-candidate";
 const createVotarFormsUrl = "/user/create-votar-form";
 const getFormsUrl = "/user/get-allForms";
 const votarResponseUrl = "/voter/addVoter-response";
-const getElectionsUrl = "user/get-elections";
+export const getElectionsUrl = "user/get-elections";
 const getResponseUrl = "/user/get-electionForm";
 const getUserResponseUrl = "/user/voter-response";
 
@@ -41,7 +41,7 @@ const monitorTotalLineChartUrl = "user/monitor-linechart";
 const dashboardCardsUrl = "user/cards";
 const deleteVoterUrl = "user/delete-voter";
 const deleteVoterResponseUrl = "user/delete-voterResponse";
-const deleteElectionUrl = "user/delete-election";
+export const deleteElectionUrl = "user/delete-election";
 const deletePositionUrl = "user/delete-position";
 const deleteCandidateUrl = "user/delete-candidate";
 const voterVerificationLinkUrl = "/voter/verifyLink";
@@ -51,7 +51,7 @@ const getImagesUrl = "/getImages";
 const addCardUrl = "/user/card_details/add";
 const getCardsUrl = "/user/card_details";
 const createWalletUrl = "/user/wallet";
-const getCreditUrl = "/user/get_credit";
+export const getCreditUrl = "/user/get_credit";
 const registerVoterUrl = "/user/register_freeVoter";
 const initializeVotarCreditPurchaseUrl = "/user/purchase_voterCredit/initialize";
 const verifyVotarCreditPurchaseUrl = "/user/purchase_voterCredit/verify";
@@ -66,6 +66,7 @@ const adminGetAllElectionsUrl = "/admin/getAllElection";
 const adminVotarPageByElectionUrl = "/admin/votarPageElection";
 const adminGetAllUsersUrl = "/admin/getAllUsers";
 const adminPublishElectionUrl = "/admin/publish";
+const adminToggleSmsUrl = "/admin/toggle-sms";
 const adminTopUpUrl = "/admin/top-up";
 const adminProfileUrl = "/admin/profile";
 const sudoAdminUrl = "/admin/sudo-admin";
@@ -145,6 +146,10 @@ export const getUserResponse = (data: any, id: string) => {
   return httpService.post(getUserResponseUrl + `/${id}`, data);
 };
 
+export const toggleForm = (data: any) => {
+  return httpService.patch(getUserResponseUrl, data);
+};
+
 export const getForms = (id: string) => {
   return httpService.get(getFormsUrl + `/${id}`);
 };
@@ -155,6 +160,10 @@ export const getElections = (id: string) => {
 
 export const getVoterResponse = (id: string, data: any) => {
   return httpService.post(getResponseUrl + `/${id}`, data);
+};
+
+export const getVoterResponse2 = (id: string) => {
+  return httpService.get(getResponseUrl, { params: { id } });
 };
 
 export const getUserForm = (id: string) => {
@@ -413,6 +422,10 @@ export const adminGetAllUsers = (
 
 export const adminPublishElection = (data: any) => {
   return httpService.post(adminPublishElectionUrl, data);
+};
+
+export const adminToggleSms = (data: { election_id: string; state: boolean }) => {
+  return httpService.post(adminToggleSmsUrl, data);
 };
 
 export const adminTopUp = (data: any) => {

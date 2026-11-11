@@ -6,8 +6,6 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { adminVotarCreditTable } from "@/utils/util";
-import { BiPlusCircle, BiMinusCircle } from "react-icons/bi";
 import { useRouter } from "next/router";
 import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
@@ -21,6 +19,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import UserRow from "./UserRow";
+import UserCard from "./UserCard";
 import { BiSearch } from "react-icons/bi";
 
 const VotarCreditTable = () => {
@@ -143,15 +142,32 @@ const VotarCreditTable = () => {
     [`&.${tableCellClasses.head}`]: {
       backgroundColor: "#015ce9",
       color: theme.palette.common.white,
-      fontSize: 18,
+      fontSize: 15,
       fontWeight: "bold",
+      whiteSpace: "nowrap",
     },
     [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
-      border: "none",
+      fontSize: 15,
+      fontWeight: 500,
+      borderBottom: "1px solid #F1F5F9",
     },
   }));
+
+  const paginationSx = {
+    "& .MuiPaginationItem-root": {
+      color: "#015CE9",
+      "&.Mui-selected": {
+        backgroundColor: "#015CE9",
+        color: "white",
+        "&:hover": {
+          backgroundColor: "#0146c7",
+        },
+      },
+      "&:hover": {
+        backgroundColor: "#e3f2fd",
+      },
+    },
+  };
 
   if (isFetchUsers)
     return (
@@ -205,85 +221,96 @@ const VotarCreditTable = () => {
         )}
       </div>
 
-      <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
-        <Table
-          sx={{
-            minWidth: 700,
-            borderCollapse: "separate",
-            borderSpacing: "0",
-          }}
-          stickyHeader
-          aria-label="sticky table"
-        >
-          <TableHead>
-            <TableRow className="text-white font-bold">
-              {headers.map((header, key) => {
-                return (
-                  <StyledTableCell
-                    key={key}
-                    className=" border border-[#F5F5F5]"
-                    align="center"
-                  >
-                    {header}
-                  </StyledTableCell>
-                );
-              })}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredUsersData.length > 0 ? (
-              filteredUsersData.map((row, index) => (
-                <UserRow
-                  key={row.email}
-                  row={row}
-                  index={index}
-                  serialNumber={(currentPage - 1) * limit + index + 1}
-                  topUpAmounts={topUpAmounts}
-                  setTopUpAmounts={setTopUpAmounts}
-                  adminTopUpVotarCredit={adminTopUpVotarCredit}
-                  loadingUserEmail={loadingUserEmail}
-                  StyledTableCell={StyledTableCell}
-                />
-              ))
-            ) : (
-              <TableRow>
-                <StyledTableCell colSpan={4} align="center">
-                  <div className="py-8 text-gray-500">
-                    {searchQuery
-                      ? "No users found matching your search"
-                      : "No users available"}
-                  </div>
-                </StyledTableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      {filteredUsersData.length === 0 ? (
+        <div className="py-10 text-center text-gray-400">
+          {searchQuery
+            ? "No users found matching your search"
+            : "No users available"}
+        </div>
+      ) : (
+        <>
+          {/* Mobile card list */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {filteredUsersData.map((row, index) => (
+              <UserCard
+                key={row.email}
+                row={row}
+                serialNumber={(currentPage - 1) * limit + index + 1}
+                adminTopUpVotarCredit={adminTopUpVotarCredit}
+                loadingUserEmail={loadingUserEmail}
+              />
+            ))}
+          </div>
+
+          {/* Desktop table */}
+          <TableContainer
+            sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
+            className="table-scroll"
+          >
+            <Table
+              sx={{
+                borderCollapse: "separate",
+                borderSpacing: "0",
+              }}
+              stickyHeader
+              aria-label="votar credit table"
+            >
+              <TableHead>
+                <TableRow>
+                  {headers.map((header, key) => (
+                    <StyledTableCell
+                      key={key}
+                      align={key === 1 ? "left" : "center"}
+                    >
+                      {header}
+                    </StyledTableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredUsersData.map((row, index) => (
+                  <UserRow
+                    key={row.email}
+                    row={row}
+                    index={index}
+                    serialNumber={(currentPage - 1) * limit + index + 1}
+                    topUpAmounts={topUpAmounts}
+                    setTopUpAmounts={setTopUpAmounts}
+                    adminTopUpVotarCredit={adminTopUpVotarCredit}
+                    loadingUserEmail={loadingUserEmail}
+                    StyledTableCell={StyledTableCell}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
 
       <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
+        {/* Compact pagination for mobile */}
         <Pagination
-          count={totalPages}
+          className="sm:hidden"
+          count={Math.max(totalPages, 1)}
+          page={currentPage}
+          onChange={handlePageChange}
+          color="primary"
+          size="small"
+          siblingCount={0}
+          boundaryCount={1}
+          sx={paginationSx}
+        />
+        {/* Full pagination for larger screens */}
+        <Pagination
+          className="hidden sm:flex"
+          count={Math.max(totalPages, 1)}
           page={currentPage}
           onChange={handlePageChange}
           color="primary"
           size="large"
           showFirstButton
           showLastButton
-          sx={{
-            "& .MuiPaginationItem-root": {
-              color: "#015CE9",
-              "&.Mui-selected": {
-                backgroundColor: "#015CE9",
-                color: "white",
-                "&:hover": {
-                  backgroundColor: "#0146c7",
-                },
-              },
-              "&:hover": {
-                backgroundColor: "#e3f2fd",
-              },
-            },
-          }}
+          sx={paginationSx}
         />
         <div className="text-sm text-gray-600">
           Page {currentPage} of {totalPages}

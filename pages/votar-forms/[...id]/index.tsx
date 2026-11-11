@@ -36,7 +36,7 @@ const CreateForm = () => {
       setElectionName(idType);
     } else if (Array.isArray(idType)) {
       setElectionName(idType[0]);
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     } else {
       return;
     }

@@ -13,6 +13,8 @@ import { CircularProgress } from "@mui/material";
 import ProtectedRoutes from "../ProtectedRoutes";
 import DashboardNavbar from "../DashboardNavbar";
 import Cookies from "universal-cookie";
+import { useRouter } from "next/router";
+import { SCROLL_CONTAINER_PROPS, scrollToTop } from "@/utils/scrollToTop";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
@@ -25,6 +27,14 @@ const DashboardLayout = ({ children }: any) => {
   const user = useUser();
   const dispatch = useDispatch();
   const cookies = new Cookies();
+  const router = useRouter();
+
+  // Content scrolls inside this layout, not the window, so Next.js's own
+  // scroll reset doesn't reach it: start every page at the top.
+  useEffect(() => {
+    router.events.on("routeChangeComplete", scrollToTop);
+    return () => router.events.off("routeChangeComplete", scrollToTop);
+  }, [router.events]);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -70,23 +80,25 @@ const DashboardLayout = ({ children }: any) => {
   return (
     <>
       {isClient && (
-        <div className="overflow-auto">
-          <div className="flex ">
-            <div className="relative lg:block hidden ">
-              <SideBar opener={opener} setOpener={setOpener} />
+        // Sidebar | header + content. Only <main> scrolls, so there's one
+        // scrollbar and the header stays in place.
+        <div className="flex h-screen overflow-hidden bg-white">
+          <div className="hidden lg:flex">
+            <SideBar opener={opener} setOpener={setOpener} />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="hidden lg:block">
+              <Header opener={opener} />
             </div>
-            <div className="flex-1 lg:flex h-screen relative max-w-full overflow-auto lg:ml-0">
-              <div className="lg:block hidden">
-                <Header opener={opener} />
-              </div>
-              <div className="lg:hidden">
-                <DashboardNavbar />
-              </div>
-
-              <div className="lg:mt-20 m-0 lg:p-6 w-full overflow-auto p-4">
-                {children}
-              </div>
+            <div className="lg:hidden">
+              <DashboardNavbar />
             </div>
+            <main
+              className="relative flex-1 overflow-y-auto p-4 lg:p-6"
+              {...SCROLL_CONTAINER_PROPS}
+            >
+              {children}
+            </main>
           </div>
         </div>
       )}

@@ -1,83 +1,77 @@
+import React, { useState } from "react";
 import { Check, Copy, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import { Card } from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { cn } from "@/utils/cn";
 
 interface MonitoringCardProps {
   title: string;
   description: string;
   url: string;
-  copyRef: any;
-  onCopy: () => void;
-  copied: boolean;
   icon: React.ElementType;
-  gradient?: string;
+  /** Classes for the icon tile, e.g. "bg-secondary text-primary". */
+  tone?: string;
 }
 
+/** A shareable monitoring link with copy and open actions. */
 export default function MonitoringCard({
   title,
   description,
   url,
-  copyRef,
-  onCopy,
-  copied,
   icon: Icon,
-  gradient,
+  tone = "bg-secondary text-primary",
 }: MonitoringCardProps) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+    }
+  };
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 p-6">
-      {/* Header */}
-      <div className="flex items-start gap-4 mb-6 flex-col lg:flex-row">
-        <div
-          className={`w-12 h-12 rounded-xl flex items-center justify-center ${gradient}`}
-        >
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-          <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
-        </div>
-      </div>
-
-      {/* URL Container */}
-      <div className="space-y-3">
-        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <ExternalLink className="w-4 h-4 text-gray-500" />
-            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
-              Monitoring URL
-            </span>
-          </div>
-          <div
-            ref={copyRef}
-            className="text-sm text-blue-600 font-mono break-all bg-white rounded p-3 border border-gray-200"
-          >
-            <Link href={url} target="_blank">
-              {url}
-            </Link>
-          </div>
-        </div>
-
-        {/* Copy Button */}
-        <button
-          onClick={onCopy}
-          className={`w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg font-medium text-sm transition-all duration-200 ${
-            copied
-              ? "bg-green-50 text-green-700 border border-green-200"
-              : "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 active:scale-98"
-          }`}
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>Copied to Clipboard!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4" />
-              <span>Copy Monitoring Link</span>
-            </>
+    <Card className="flex flex-col p-5">
+      <div className="flex items-start gap-3">
+        <span
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+            tone
           )}
-        </button>
+        >
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="font-semibold text-foreground">{title}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {description}
+          </p>
+        </div>
       </div>
-    </div>
+
+      <div className="mt-4 rounded-md border border-border bg-muted/50 px-3 py-2.5 font-mono text-xs text-slate-700 break-all">
+        {url}
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        <Button
+          type="button"
+          variant={copied ? "secondary" : "outline"}
+          onClick={copy}
+          className="flex-1"
+        >
+          {copied ? <Check /> : <Copy />}
+          {copied ? "Copied" : "Copy link"}
+        </Button>
+        <Button asChild variant="ghost" className="shrink-0">
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            <ExternalLink /> Open
+          </a>
+        </Button>
+      </div>
+    </Card>
   );
 }

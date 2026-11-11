@@ -1,22 +1,29 @@
 import DashboardLayout from "@/src/components/DashboardLayout";
 import React, { useState, useEffect, useReducer } from "react";
 import { useCurrentUser, useUser } from "@/utils/hooks";
-import { CircularProgress } from "@mui/material";
+import Link from "next/link";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import DetailsPage from "@/src/components/ElectionsPage/DetailsPage";
 import BallotsPage from "@/src/components/ElectionsPage/BallotsPage";
 import VoterPage from "@/src/components/ElectionsPage/VoterPage";
-import ReviewPage from "@/src/components/ElectionsPage/ReviewPage";
-import PayPage from "@/src/components/ElectionsPage/PayPage";
-import MonitorElectionPage from "@/src/components/ElectionsPage/MonitorElectionPage";
-import { PiCaretRightBold } from "react-icons/pi";
+import Pay from "@/src/components/CreateElection/Steps/Pay";
+import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElection";
+import StepHeader from "@/src/components/CreateElection/StepHeader";
+import PageHeader from "@/src/components/shared/PageHeader";
+import ActionBar from "@/src/components/shared/ActionBar";
+import ElectionStatusBadge from "@/src/components/shared/ElectionStatusBadge";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import { getStatusForElection } from "@/utils/electionStatus";
+import { scrollToTop } from "@/utils/scrollToTop";
 import { DetailFormAction, DetailFormState } from "@/utils/types";
 import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
 import setAuthToken from "@/utils/setAuthToken";
 import { updateElection, updateCandidate, getElectionById } from "@/utils/api";
-import { BsArrowLeft } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import Cookies from "universal-cookie";
 
@@ -55,22 +62,15 @@ const ElectionDetail = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFetchElection, setIsFetchElection] = useState(false);
   const [election, setElection] = useState<any>(null);
-  const [currentStep, setCurrentStep] = useState<number>(() => {
-    let savedStep;
-    if (typeof window !== "undefined") {
-      savedStep = localStorage.getItem("currentStep");
-    }
-    return savedStep ? Number(savedStep) : 0;
-  });
+  // 0-based. Remembered per election (it used to be one shared value, so
+  // opening another election landed on the step last used anywhere).
+  const [currentStep, setCurrentStep] = useState<number>(0);
   const [position, setPosition] = useState<any>([]);
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
   const [state, dispatch] = useReducer(reducer, initState);
   const cookies = new Cookies();
 
-  useEffect(() => {
-    localStorage.setItem("currentStep", String(currentStep));
-  }, [currentStep]);
 
   let USER_ID = users?.data?.data
     ? users?.data?.data?._id
@@ -83,9 +83,24 @@ const ElectionDetail = () => {
 
   useEffect(() => {
     if (Array.isArray(idType)) {
-      setElectionID(idType[1]);
+      setElectionID(idType[idType.length - 1]);
     }
   }, [id, electionID]);
+
+  const stepStorageKey = electionID ? `electionManageStep:${electionID}` : null;
+
+  useEffect(() => {
+    if (!stepStorageKey) return;
+    const saved = Number(localStorage.getItem(stepStorageKey));
+    setCurrentStep(Number.isFinite(saved) && saved > 0 ? saved : 0);
+  }, [stepStorageKey]);
+
+  useEffect(() => {
+    if (stepStorageKey) {
+      localStorage.setItem(stepStorageKey, String(currentStep));
+    }
+    scrollToTop();
+  }, [currentStep]);
 
   useEffect(() => {
     const getElection = async () => {
@@ -132,6 +147,7 @@ const ElectionDetail = () => {
   };
 
   const steps = getSteps(votarPlan);
+  const activeIndex = Math.min(currentStep, steps.length - 1);
 
   function reducer(
     state: DetailFormState,
@@ -336,89 +352,105 @@ const ElectionDetail = () => {
     }
   };
 
-  if (isFetchElection) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <CircularProgress />
-      </div>
-    );
-  }
+  const stepName = steps[activeIndex];
+  const isLastStep = activeIndex === steps.length - 1;
+  const savesStep = stepName === "Details" || stepName === "Ballot";
 
   return (
     <DashboardLayout>
       <ProtectedRoutes>
-        <div className="flex items-center lg:gap-5 gap-2 font-semibold lg:text-xl flex-wrap text-base">
-          {steps.map((step, index) => (
-            <div
-              key={step}
-              className="flex items-center gap-2 font-semibold lg:text-xl flex-wrap text-base"
-            >
-              <span
-                onClick={() => goToStep(index)}
-                className={`cursor-pointer ${
-                  currentStep === index ? "text-blue-600" : "text-[#1e1e1e]"
-                }`}
-              >
-                {step}
-              </span>
-              {index < steps.length - 1 && (
-                <span className="mx-1">
-                  <PiCaretRightBold />
-                </span>
-              )}
+        <div className="relative mx-auto w-full max-w-6xl pt-2">
+          <Link
+            href="/elections"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            All elections
+          </Link>
+
+          {isFetchElection || !election ? (
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-72" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-96 w-full" />
             </div>
-          ))}
-        </div>
+          ) : (
+            <>
+              <PageHeader
+                title={election.name_of_election || "Election"}
+                description="Update this election's details, ballot and voters."
+                actions={
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ElectionStatusBadge status={getStatusForElection(election)} />
+                    {election.type && (
+                      <Badge variant="secondary">{election.type}</Badge>
+                    )}
+                  </div>
+                }
+              />
 
-        <div className="mt-4">
-          {steps[currentStep] === "Details" && (
-            <DetailsPage
-              electionId={electionID}
-              userId={USER_ID}
-              state={state}
-              dispatch={dispatch}
-            />
-          )}
-          {steps[currentStep] === "Ballot" && (
-            <BallotsPage position={position} setPosition={setPosition} />
-          )}
-          {steps[currentStep] === "Voters Page" && <VoterPage />}
-          {steps[currentStep] === "Pay" && <PayPage />}
-          {steps[currentStep] === "Monitor Election" && (
-            <MonitorElectionPage electionId={electionID} />
-          )}
-        </div>
-
-        <div className="mt-5 flex gap-4 justify-end smm:flex-row flex-col">
-          <div>
-            <button
-              onClick={prevStep}
-              disabled={currentStep === 0}
-              className="flex items-center gap-2 p-[10px] border border-[#015CE9] rounded-lg text-[#015CE9] lg:text-[18px] text-base h-[52px]"
-            >
-              {" "}
-              <span>
-                <BsArrowLeft />
-              </span>
-              Go back
-            </button>
-          </div>
-          <div>
-            <button
-              onClick={nextStep}
-              disabled={isProcessing || currentStep === steps.length - 1}
-              className="flex items-center gap-2 p-[10px] bg-[#015CE9] rounded-lg text-[#f3f3f3] lg:text-[18px] text-base h-[52px]"
-            >
-              {isProcessing && (
-                <CircularProgress
-                  color="inherit"
-                  size={20}
-                  className="text-white mr-2 "
+              <div className="mt-6 rounded-lg border border-border bg-surface p-4 shadow-sm lg:px-6">
+                {/* Every step can be opened directly, as before. */}
+                <StepHeader
+                  steps={steps}
+                  currentStep={activeIndex + 1}
+                  furthestStep={steps.length}
+                  onStepChange={(step) => goToStep(step - 1)}
                 />
-              )}
-              Save Changes to Proceed
-            </button>
-          </div>
+              </div>
+
+              <div className="mt-6">
+                {stepName === "Details" && (
+                  <DetailsPage
+                    electionId={electionID}
+                    userId={USER_ID}
+                    state={state}
+                    dispatch={dispatch}
+                  />
+                )}
+                {stepName === "Ballot" && (
+                  <BallotsPage position={position} setPosition={setPosition} />
+                )}
+                {stepName === "Voters Page" && <VoterPage />}
+                {/* Same Pay and Monitor steps as the create flow. */}
+                {stepName === "Pay" && <Pay />}
+                {stepName === "Monitor Election" && (
+                  <MonitorElection electionId={electionID} />
+                )}
+              </div>
+
+              <ActionBar>
+                <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={prevStep}
+                    disabled={activeIndex === 0}
+                    className="h-11"
+                  >
+                    <ArrowLeft /> Back
+                  </Button>
+                  <span className="hidden text-sm text-muted-foreground smm:block">
+                    Step {activeIndex + 1} of {steps.length}
+                  </span>
+                  {isLastStep ? (
+                    <Button asChild className="h-11">
+                      <Link href="/elections">Done</Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={nextStep}
+                      disabled={isProcessing}
+                      className="h-11 min-w-[150px]"
+                    >
+                      {isProcessing && <Loader2 className="animate-spin" />}
+                      {savesStep ? "Save and continue" : "Continue"}
+                      {!isProcessing && <ArrowRight />}
+                    </Button>
+                  )}
+                </div>
+              </ActionBar>
+            </>
+          )}
         </div>
       </ProtectedRoutes>
     </DashboardLayout>

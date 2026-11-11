@@ -38,6 +38,45 @@ module.exports = {
       workSans: ["var(--font-work-sans)", "sans-serif"],
     },
     extend: {
+      // shadcn/ui design tokens (values live in styles/globals.css).
+      // shadcn's `card` colour is named `surface` here, because `bg-card` is
+      // already the card background image below. Use `bg-surface` in components
+      // added with the shadcn CLI instead of `bg-card`.
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          foreground: "hsl(var(--surface-foreground))",
+        },
+      },
       backgroundImage: {
         "review-bg": "url('../public/assets/images/bg-section.png')",
         "footer-bg": "url('../public/assets/images/footer-background.png')",

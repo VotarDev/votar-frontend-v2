@@ -1,154 +1,175 @@
-import React, { useState, useEffect, useRef } from "react";
-import Header from "../../BallotPage/Header";
-import Body from "../../BallotPage/Body";
-import { useCurrentUser, useUser } from "@/utils/hooks";
-import setAuthToken from "@/utils/setAuthToken";
-import { getElectionById } from "@/utils/api";
-import { CircularProgress } from "@mui/material";
-import { AiOutlineLink, AiOutlineEye } from "react-icons/ai";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
-import { IoCopy } from "react-icons/io5";
+import { Copy, Eye, Link2, Lock } from "lucide-react";
+import Cookies from "universal-cookie";
+import Header from "../../BallotPage/Header";
+import Body from "../../BallotPage/Body";
+import { Button } from "@/src/components/ui/button";
+import { useCurrentUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
+import { getElectionById } from "@/utils/api";
+import { parseElectionDate } from "@/utils/electionTime";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import { Card } from "@/src/components/ui/card";
+import type { Position } from "@/utils/types";
 
-const Ballot = ({ positions, setPositions }: any) => {
+const emptyPosition = (electionId: string): Position => ({
+  name_of_position: "",
+  show_pictures: true,
+  allow_abstain: true,
+  candidates: [],
+  election_id: electionId,
+});
+
+const copyText = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
+  } catch (error) {
+    console.error("Failed to copy text:", error);
+    toast.error("Copy operation failed. Please try again.");
+  }
+};
+
+const Ballot = ({ positions, setPositions, onEditableChange }: any) => {
   const users = useCurrentUser();
-  const user = useUser();
-  const [election, setElection] = useState<any>([]);
+  const [election, setElection] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [electionId, setElectionId] = useState<string | null>("");
   const [error, setError] = useState("");
-  const textRef = useRef<HTMLElement | null>(null);
+  const [targetDateTime, setTargetDateTime] = useState<Date | null>(null);
+  const [isEditable, setIsEditable] = useState(true);
 
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+  // Lets the create page skip ballot validation once the election has started
+  // and the ballot can no longer be edited.
+  useEffect(() => {
+    onEditableChange?.(isEditable);
+  }, [isEditable]);
 
   useEffect(() => {
     const getElection = async () => {
       setIsLoading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      // Email sign-in keeps the token on the user; everyone else (e.g. Google
+      // sign-in) has it in the cookie. Never clear the shared header here.
+      const token =
+        users?.data?.data?.cookie || new Cookies().get("user-token");
+      if (token) setAuthToken(token);
       try {
-        if (typeof window !== "undefined") {
-          const electionId = localStorage.getItem("ElectionId");
-          setElectionId(electionId);
-          const electionData = { election_id: electionId };
-          const { data } = await getElectionById(electionData);
-          if (data) {
-            setElection(data.data);
-            setPositions([
-              {
-                name_of_position: "",
-                show_pictures: true,
-                allow_abstain: true,
-                candidates: [],
-                election_id: data.data.election_id,
-              },
-            ]);
-            setIsLoading(false);
+        const electionId = localStorage.getItem("ElectionId");
+        const { data } = await getElectionById({ election_id: electionId });
+        if (data) {
+          setElection(data.data);
+
+          const start = parseElectionDate(data.data.start_date);
+          if (start) {
+            setTargetDateTime(start);
+          } else {
+            console.error("Invalid start_date format:", data.data.start_date);
+          }
+
+          // Keep a ballot the user is still filling in (e.g. after visiting
+          // Details); otherwise start with one empty position.
+          const hasDraftForElection =
+            positions.length > 0 &&
+            positions[0]?.election_id === data.data.election_id;
+          if (!hasDraftForElection) {
+            setPositions([emptyPosition(data.data.election_id)]);
           }
         }
       } catch (e: any) {
-        setError(e?.response?.data?.message);
+        setError(
+          e?.response?.data?.message ||
+            "We couldn't load this election. Please try again.",
+        );
         console.log(e?.response?.data?.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     getElection();
   }, []);
 
+  useEffect(() => {
+    if (targetDateTime) {
+      const updateEditableState = () => {
+        const now = new Date();
+        setIsEditable(now < targetDateTime);
+      };
+
+      updateEditableState();
+      const interval = setInterval(updateEditableState, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [targetDateTime]);
+
   if (isLoading) {
     return (
-      <div className="my-10">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      <div className="mt-6 space-y-4">
+        <Skeleton className="h-52 w-full" />
+        <Skeleton className="h-64 w-full" />
       </div>
     );
   }
+
   if (error) {
-    return <div className="my-10">{error}</div>;
+    return <Card className="mt-6 p-6 text-sm text-destructive">{error}</Card>;
   }
 
-  const handleCopyClick = async () => {
-    if (textRef.current) {
-      const selectedText = textRef.current.innerText;
-      try {
-        await navigator.clipboard.writeText(selectedText);
-
-        toast.success("Copied to clipboard!");
-      } catch (error) {
-        console.error("Failed to copy text:", error);
-        toast.error("Copy operation failed. Please try again.");
-      }
-    }
-  };
-
-  const handleCopy = async () => {
-    const url =
-      election?.type === "Free Votar"
-        ? window.location.origin + "/freevotar/ballot?candidate=" + electionId
-        : window.location.origin + "/vote";
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success("Copied to clipboard!");
-    } catch (error) {
-      console.error("Failed to copy text:", error);
-      toast.error("Copy operation failed. Please try again.");
-    }
-  };
-
   return (
-    <div className="my-[60px]">
+    <div className="mt-6 space-y-6">
+      {/* The ballot header exactly as voters will see it. */}
       <Header electionDetails={election} />
-      <div className="lg:mt-10 mt-5 flex lg:justify-end items-center lg:gap-10 gap-2 flex-wrap justify-center">
-        <div className="flex items-center gap-4 lg:text-xl text-base text-blue-700 font-semibold">
-          <div>
-            Election ID: <span ref={textRef}>{election?.election_id}</span>
-          </div>
-          <div onClick={handleCopyClick} className="cursor-pointer">
-            <IoCopy />
-          </div>
-        </div>
-        <div className="flex lg:gap-7 gap-2 flex-wrap justify-center">
-          <div>
-            <button
-              onClick={handleCopy}
-              className="lg:w-56 w-full lg:h-14 h-10 bg-zinc-100 rounded-lg flex justify-center items-center gap-2.5 lg:text-xl text-xs text-blue-700 font-semibold p-4 lg:p-0"
-            >
-              <span>
-                <AiOutlineLink />
-              </span>
-              Copy Election Link
-            </button>
-          </div>
-          <div>
+
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <button
+          type="button"
+          onClick={() => copyText(election?.election_id)}
+          className="inline-flex items-center gap-2 self-start text-sm font-semibold text-primary hover:underline"
+        >
+          Election ID:{" "}
+          <span className="font-mono">{election?.election_id}</span>
+          <Copy className="h-4 w-4" aria-hidden="true" />
+          <span className="sr-only">Copy election ID</span>
+        </button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              // Same links as before: Free Votar voters use the ballot link, others /vote.
+              copyText(
+                election?.type === "Free Votar"
+                  ? `${window.location.origin}/freevotar/ballot?candidate=${election?.election_id}`
+                  : `${window.location.origin}/vote`
+              )
+            }
+          >
+            <Link2 /> Copy election link
+          </Button>
+          <Button asChild>
             <Link
               href={`/cast-votes/${election?.election_id}`}
-              rel="noopener noreferrer"
               target="_blank"
+              rel="noopener noreferrer"
             >
-              <button className="lg:w-48 lg:h-14 h-10 w-full bg-blue-700 rounded-lg border border-zinc-100 justify-center items-center gap-4 flex lg:text-xl text-xs p-4 font-semibold text-zinc-100 lg:p-0">
-                <span>
-                  <AiOutlineEye />
-                </span>
-                Preview Ballot
-              </button>
+              <Eye /> Preview ballot
             </Link>
-          </div>
+          </Button>
         </div>
       </div>
+
+      {!isEditable && (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          Voting has started, so the ballot can no longer be changed.
+        </div>
+      )}
 
       <Body
         setPositions={setPositions}
         positions={positions}
-        electionDetails={election}
         electionId={election?.election_id}
+        isEditable={isEditable}
       />
     </div>
   );

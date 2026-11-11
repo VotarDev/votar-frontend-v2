@@ -1,48 +1,72 @@
-import React, { useState } from "react";
+import React from "react";
 import { electionPlans } from "@/utils/util";
 import { useRouter } from "next/router";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { selected_plan } from "@/redux/features/votarPlan/votarPlanSlice";
+import { FaYoutube } from "react-icons/fa";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import PageHeader from "@/src/components/shared/PageHeader";
+import { clearElectionDraft } from "@/utils/electionDraft";
+import ResumeElectionCard from "./ResumeElectionCard";
 
 const ElectionPlan = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const handlePlan = (plans: string) => {
+  // Without a plan (e.g. an older draft), the flow keeps the plan already saved.
+  const openCreateFlow = (plan?: string) => {
+    if (plan) {
+      localStorage.setItem("votar plan", JSON.stringify(plan));
+      dispatch(selected_plan(plan));
+    }
     router.push("/create-election/create");
-    localStorage.setItem("votar plan", JSON.stringify(plans));
-    dispatch(selected_plan(plans));
   };
+
+  // Choosing a plan starts a brand-new election.
+  const handlePlan = (plan: string) => {
+    clearElectionDraft();
+    openCreateFlow(plan);
+  };
+
   return (
-    <div className="mt-5 lg:px-3 px-0">
-      <div className="md:text-4xl font-bold text-2xl text-gray-900 leading-tight">
-        Choose an Election type to Create an Election
-      </div>
-      <div className="mt-9 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-        {electionPlans.map((plans) => (
-          <div
-            key={plans.id}
-            className="group rounded-md border border-[#696969] hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-lg relative min-h-[320px] flex flex-col"
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2 lg:space-y-8">
+      <PageHeader
+        title="Create an election"
+        description="Choose the type of election you want to run."
+      />
+
+      <ResumeElectionCard onResume={openCreateFlow} />
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:gap-6 xl:grid-cols-3">
+        {electionPlans.map((plan) => (
+          <Card
+            key={plan.id}
+            className="group flex flex-col p-5 transition-shadow hover:border-primary/40 hover:shadow-md lg:p-6"
           >
-            <div className="lg:mt-11 mt-6 mb-9 max-w-[160px] mx-auto">
-              <div className="bg-[#00122F] h-full relative before:content-[''] before:absolute before:w-full before:bg-[#5692F0] before:h-full before:top-2 before:left-2 before:-z-10 text-[#f3f3f3] px-3 py-2 text-sm font-semibold">
-                {plans.plan}
-              </div>
-            </div>
-            <div className="px-6 flex-1">
-              <p className="text-sm text-gray-600 leading-relaxed mb-6">
-                {plans.desc}
-              </p>
-            </div>
-            <div className="p-6 pt-0">
-              <button
-                className="w-full h-10 bg-[#015CE9] hover:bg-[#0146c7] text-white rounded-md outline-none transition-colors duration-200 font-medium text-sm"
-                onClick={() => handlePlan(plans.plan)}
-              >
-                {plans.btnText}
-              </button>
-            </div>
-          </div>
+            <span className="w-fit rounded-md bg-secondary px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+              {plan.plan}
+            </span>
+            <p className="mt-4 flex-1 text-sm leading-relaxed text-muted-foreground">
+              {plan.desc}
+            </p>
+            <a
+              href={plan.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[#FF0000] hover:underline"
+            >
+              <FaYoutube className="text-base" />
+              Watch how it works
+            </a>
+            <Button
+              className="mt-5 w-full"
+              onClick={() => handlePlan(plan.plan)}
+            >
+              {plan.btnText} <ArrowRight />
+            </Button>
+          </Card>
         ))}
       </div>
     </div>

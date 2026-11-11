@@ -8,13 +8,45 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { freeVotarAccessRequest, votarProAcessRequest } from "@/utils/util";
+import { votarProAcessRequest } from "@/utils/util";
 import SwitchButton from "@/src/components/Admin/AdminProfile/SwitchButton";
 import setAuthToken from "@/utils/setAuthToken";
 import { getVotarPageByElection } from "@/utils/api";
 import Cookies from "universal-cookie";
 import { CircularProgress } from "@mui/material";
+import { BsArrowLeft } from "react-icons/bs";
 import { v4 } from "uuid";
+
+const headers = [
+  "S/N",
+  "Election",
+  "Time and Date",
+  "Number of Voters",
+  "Status",
+  "Amount",
+  "Publish",
+];
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: "#015ce9",
+    color: theme.palette.common.white,
+    fontSize: 15,
+    fontWeight: "bold",
+    whiteSpace: "nowrap",
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 15,
+    fontWeight: 500,
+    borderBottom: "1px solid #F1F5F9",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)({
+  "&:hover": {
+    backgroundColor: "#F8FAFC",
+  },
+});
 
 const UserElections = () => {
   const router = useRouter();
@@ -57,109 +89,124 @@ const UserElections = () => {
     getVotarProPower();
   }, [userMail, plans]);
 
-  const headers = [
-    "S/N",
-    "Election",
-    "Time and Date",
-    "Number of Voters",
-    "Status",
-    "Amount",
-    "Publish",
-  ];
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
-      border: "none",
-    },
-  }));
-
-  console.log(electionDetails);
   if (isFetchElectionDetails)
     return (
       <AdminLayout>
-        <div className="text-center mt-10">
+        <div className="py-10 text-center">
           <CircularProgress size={30} style={{ color: "#015CE9" }} />
         </div>
       </AdminLayout>
     );
 
   return (
-    <div>
-      <AdminLayout>
-        <div className="py-[60px] max-w-[1300px] mx-auto ">
-          <div className="text-2xl font-bold">
+    <AdminLayout>
+      <div className="max-w-[1300px] mx-auto py-8 lg:py-[60px]">
+        <button
+          type="button"
+          onClick={() => router.push("/admin/free-pro-meeting")}
+          className="mb-4 flex items-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-[#015CE9]"
+        >
+          <BsArrowLeft /> Back to Free Votar
+        </button>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-xl lg:text-2xl font-bold">
             Free Votar Access Request & Management Panel
           </div>
-          <div className="text-slate-900 text-xl font-semibold pt-8 underline">
-            Email: {userMail}
+          <div className="w-fit rounded-lg bg-[#015CE9]/10 px-4 py-2.5 text-sm font-semibold text-[#015CE9]">
+            {userMail}
           </div>
+        </div>
 
-          <div className="pt-8">
-            <div className="mt-8 bg-white shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] rounded py-8 px-9 relative w-full">
-              {plans === "free-votar" && (
-                <TableContainer
-                  sx={{ maxHeight: 500 }}
-                  className="table-scroll"
-                >
-                  <Table
-                    sx={{
-                      minWidth: 700,
-                      borderCollapse: "separate",
-                      borderSpacing: "0",
-                    }}
-                    stickyHeader
-                    aria-label="sticky table"
+        <div className="mt-8">
+          <div className="bg-white shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] rounded py-5 px-4 lg:py-8 lg:px-9 relative w-full">
+            {plans === "free-votar" &&
+              (electionDetails.length === 0 ? (
+                <div className="py-10 text-center text-gray-400">
+                  No election found
+                </div>
+              ) : (
+                <>
+                  {/* Mobile card list */}
+                  <div className="flex flex-col gap-3 sm:hidden">
+                    {electionDetails.map((row: any, index: number) => (
+                      <div
+                        key={v4()}
+                        className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-medium text-gray-400">
+                            #{index < 9 ? `0${index + 1}` : index + 1}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleEmailClick(row.election_id, row.nameOfElection)
+                            }
+                            className="block truncate text-left text-sm font-semibold text-[#015CE9]"
+                          >
+                            {row.nameOfElection}
+                          </button>
+                        </div>
+
+                        <div className="mt-2 text-xs text-gray-500">
+                          {row.date} · {row.start_time} - {row.close_time}
+                        </div>
+                        <div className="mt-1 text-xs text-gray-500">
+                          {row.numberOfVoters.toLocaleString()} voters
+                        </div>
+
+                        <div className="mt-3 flex items-center justify-end rounded-lg bg-gray-50 px-3 py-2">
+                          <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                            Publish
+                            <SwitchButton id={index} row={row} userMail={userMail} />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop table */}
+                  <TableContainer
+                    sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
+                    className="table-scroll"
                   >
-                    <TableHead>
-                      <TableRow className="text-white font-bold">
-                        {headers.map((header, key) => {
-                          return (
+                    <Table
+                      sx={{
+                        borderCollapse: "separate",
+                        borderSpacing: "0",
+                      }}
+                      stickyHeader
+                      aria-label="free votar election details table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                          {headers.map((header, key) => (
                             <StyledTableCell
                               key={key}
-                              className=" border border-[#F5F5F5]"
-                              align="center"
+                              align={key === 1 ? "left" : "center"}
                             >
                               {header}
                             </StyledTableCell>
-                          );
-                        })}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {electionDetails.length === 0 && (
-                        <TableRow>
-                          <StyledTableCell colSpan={7} align="center">
-                            No election found
-                          </StyledTableCell>
+                          ))}
                         </TableRow>
-                      )}
-                      {electionDetails &&
-                        electionDetails.length > 0 &&
-                        electionDetails.map((row: any, index: number) => (
-                          <TableRow key={v4()}>
+                      </TableHead>
+                      <TableBody>
+                        {electionDetails.map((row: any, index: number) => (
+                          <StyledTableRow key={v4()}>
                             <StyledTableCell align="center">
                               {index < 9 ? `0${index + 1}` : index + 1}
                             </StyledTableCell>
-                            <StyledTableCell
-                              align="center"
-                              className="cursor-pointer hover:shadow-md duration-150"
-                              onClick={() =>
-                                handleEmailClick(
-                                  row.election_id,
-                                  row.nameOfElection
-                                )
-                              }
-                            >
-                              {row.nameOfElection}
+                            <StyledTableCell align="left">
+                              <span
+                                className="cursor-pointer text-[#015CE9] hover:underline font-semibold"
+                                onClick={() =>
+                                  handleEmailClick(row.election_id, row.nameOfElection)
+                                }
+                              >
+                                {row.nameOfElection}
+                              </span>
                             </StyledTableCell>
-
                             <StyledTableCell align="center">
                               {row.date}
                               <br />
@@ -168,108 +215,142 @@ const UserElections = () => {
                             <StyledTableCell align="center">
                               {row.numberOfVoters.toLocaleString()}
                             </StyledTableCell>
+                            <StyledTableCell align="center">—</StyledTableCell>
+                            <StyledTableCell align="center">—</StyledTableCell>
                             <StyledTableCell align="center">
-                              {/* <span
-                              className={`${
-                                row.status === "pending"
-                                  ? "text-[#E88749]"
-                                  : "text-green-400"
-                              } capitalize`}
-                            >
-                              {row.status}
-                            </span> */}
-                              #
+                              <SwitchButton id={index} row={row} userMail={userMail} />
                             </StyledTableCell>
-                            <StyledTableCell align="center">#</StyledTableCell>
-                            <StyledTableCell align="center">
-                              <SwitchButton
-                                id={index}
-                                row={row}
-                                userMail={userMail}
-                              />
-                            </StyledTableCell>
-                          </TableRow>
+                          </StyledTableRow>
                         ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              ))}
 
-              {plans === "votar-credits" && (
-                <TableContainer
-                  sx={{ maxHeight: 500 }}
-                  className="table-scroll"
-                >
-                  <Table
-                    sx={{
-                      minWidth: 700,
-                      borderCollapse: "separate",
-                      borderSpacing: "0",
-                    }}
-                    stickyHeader
-                    aria-label="sticky table"
+            {plans === "votar-credits" &&
+              (votarProAcessRequest.length === 0 ? (
+                <div className="py-10 text-center text-gray-400">
+                  No records found
+                </div>
+              ) : (
+                <>
+                  {/* Mobile card list */}
+                  <div className="flex flex-col gap-3 sm:hidden">
+                    {votarProAcessRequest.map((row, index) => (
+                      <div
+                        key={row.id}
+                        className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-xs font-medium text-gray-400">
+                              #{index <= 9 ? `0${index + 1}` : index + 1}
+                            </div>
+                            <div className="truncate text-sm font-semibold text-gray-800">
+                              {row.name}
+                            </div>
+                          </div>
+                          <span
+                            className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                              row.status === "pending"
+                                ? "bg-orange-50 text-[#E88749]"
+                                : "bg-green-50 text-green-500"
+                            }`}
+                          >
+                            {row.status}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 text-xs text-gray-500">
+                          {row.date} · {row.time}
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                          <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-600">
+                            {row.votarNumber.toLocaleString()} votes
+                          </span>
+                          <span className="rounded-full bg-[#015CE9]/10 px-2.5 py-1 text-xs font-semibold text-[#015CE9]">
+                            NGN {row.amount.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="mt-3 flex items-center justify-end rounded-lg bg-gray-50 px-3 py-2">
+                          <div className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                            Publish
+                            <SwitchButton />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Desktop table */}
+                  <TableContainer
+                    sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
+                    className="table-scroll"
                   >
-                    <TableHead>
-                      <TableRow className="text-white font-bold">
-                        {headers.map((header, key) => {
-                          return (
+                    <Table
+                      sx={{
+                        borderCollapse: "separate",
+                        borderSpacing: "0",
+                      }}
+                      stickyHeader
+                      aria-label="votar credits table"
+                    >
+                      <TableHead>
+                        <TableRow>
+                          {headers.map((header, key) => (
                             <StyledTableCell
                               key={key}
-                              className=" border border-[#F5F5F5]"
-                              align="center"
+                              align={key === 1 ? "left" : "center"}
                             >
                               {header}
                             </StyledTableCell>
-                          );
-                        })}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {votarProAcessRequest.map((row, index) => (
-                        <TableRow key={row.id}>
-                          <StyledTableCell align="center">
-                            {index <= 9 ? `0${index + 1}` : index + 1}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.name}
-                          </StyledTableCell>
-
-                          <StyledTableCell align="center">
-                            {row.date}
-                            <br />
-                            {row.time}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.votarNumber.toLocaleString()}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            <span
-                              className={`${
-                                row.status === "pending"
-                                  ? "text-[#E88749]"
-                                  : "text-green-400"
-                              } capitalize`}
-                            >
-                              {row.status}
-                            </span>
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            NGN {row.amount.toLocaleString()}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            <SwitchButton />
-                          </StyledTableCell>
+                          ))}
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </div>
+                      </TableHead>
+                      <TableBody>
+                        {votarProAcessRequest.map((row, index) => (
+                          <StyledTableRow key={row.id}>
+                            <StyledTableCell align="center">
+                              {index <= 9 ? `0${index + 1}` : index + 1}
+                            </StyledTableCell>
+                            <StyledTableCell align="left">{row.name}</StyledTableCell>
+                            <StyledTableCell align="center">
+                              {row.date}
+                              <br />
+                              {row.time}
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              {row.votarNumber.toLocaleString()}
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              <span
+                                className={`${
+                                  row.status === "pending"
+                                    ? "text-[#E88749]"
+                                    : "text-green-400"
+                                } capitalize`}
+                              >
+                                {row.status}
+                              </span>
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              NGN {row.amount.toLocaleString()}
+                            </StyledTableCell>
+                            <StyledTableCell align="center">
+                              <SwitchButton />
+                            </StyledTableCell>
+                          </StyledTableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              ))}
           </div>
         </div>
-      </AdminLayout>
-    </div>
+      </div>
+    </AdminLayout>
   );
 };
 

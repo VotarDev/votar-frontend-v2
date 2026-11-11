@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import watermark from "../../../../public/assets/logos/votar.svg";
 
 import { useRouter } from "next/router";
 import { Election } from "@/utils/types";
 import { useSelector } from "react-redux";
+import { withCacheBust } from "@/utils/electionMedia";
 import MiniDashboard from "../../VotePage/MiniDashboard";
 
 const Header = ({
@@ -19,6 +20,12 @@ const Header = ({
 
   const { votarPlan } = useSelector((state: any) => state.votarPlan);
 
+  // Computed once per URL (not on every render); see withCacheBust.
+  const backgroundUrl = useMemo(
+    () => withCacheBust(electionDetails?.elect_background_img),
+    [electionDetails?.elect_background_img],
+  );
+
   if (
     electionDetails?.type === "Free Votar" &&
     electionDetails?.elect_background_img
@@ -27,9 +34,7 @@ const Header = ({
       <div>
         <div
           style={{
-            backgroundImage: electionDetails?.elect_background_img
-              ? `url("${electionDetails.elect_background_img}?t=${Date.now()}")`
-              : "none",
+            backgroundImage: backgroundUrl ? `url("${backgroundUrl}")` : "none",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}

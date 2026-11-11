@@ -31,7 +31,7 @@ const MonitorAnElectionDetails = () => {
   useEffect(() => {
     if (idType) {
       setElectionName(idType[0]);
-      setElectionId(idType[1]);
+      setElectionId(idType[idType.length - 1]);
     }
   }, [id]);
 
@@ -92,11 +92,7 @@ const MonitorAnElectionDetails = () => {
               title="Total Numbers Monitoring"
               description="View aggregated election statistics, total vote counts, and overall participation metrics in real-time."
               url={`https://www.votar.ng/monitoring-elections/${electionId}/totalNumbers`}
-              copyRef={totalNumberRef}
-              onCopy={() => handleCopyClick(totalNumberRef, "totalNumbers")}
-              copied={copiedStates.totalNumbers}
               icon={BarChart3}
-              gradient="bg-gradient-to-br from-blue-500 to-blue-600"
             />
 
             {/* Individual Numbers Monitoring */}
@@ -104,13 +100,8 @@ const MonitorAnElectionDetails = () => {
               title="Individual Numbers Monitoring"
               description="Access detailed individual voting data, candidate-specific metrics, and granular election analytics."
               url={`https://www.votar.ng/monitoring-elections/${electionId}/individualNumbers`}
-              copyRef={individualNumberRef}
-              onCopy={() =>
-                handleCopyClick(individualNumberRef, "individualNumbers")
-              }
-              copied={copiedStates.individualNumbers}
               icon={Users}
-              gradient="bg-gradient-to-br from-green-500 to-green-600"
+              tone="bg-emerald-50 text-emerald-600"
             />
           </div>
         </div>

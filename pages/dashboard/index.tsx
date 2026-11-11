@@ -1,25 +1,9 @@
-// import withAuth from "@/hoc/withAuth";
-import React, { useEffect, useState } from "react";
-import { logout } from "@/redux/features/auth/authSlice";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
-import { signOut, useSession } from "next-auth/react";
-import { useCurrentUser, useUser } from "@/utils/hooks";
+import { useCurrentUserId } from "@/utils/hooks";
 import DashboardLayout from "@/src/components/DashboardLayout";
-import { elections } from "@/utils/util";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, FreeMode } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/scrollbar";
-import "swiper/css/controller";
-import line from "../../public/assets/icons/card-line.svg";
-import vote from "../../public/assets/icons/vote.svg";
-import calendar from "../../public/assets/icons/calendar.svg";
-import Tables from "@/src/components/TableComponent";
-import cardBg from "../../public/assets/images/card-bg.png";
-import Link from "next/link";
+import DashboardOverview from "@/src/components/Dashboard";
 import Chat from "@/src/components/Chat";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
@@ -27,30 +11,12 @@ import { GetServerSideProps, GetServerSidePropsContext } from "next";
 import setAuthToken from "@/utils/setAuthToken";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { googleAuth } from "@/redux/features/auth/authSlice";
-import { ElectionDetails } from "@/utils/types";
-import { getElections } from "@/utils/api";
-import { CircularProgress } from "@mui/material";
-import { dashboardCards } from "@/utils/api";
 import Cookies from "universal-cookie";
-import { Trophy, Vote } from "lucide-react";
 
 const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const users = useCurrentUser();
-  const user = useUser();
-  const [election, setElection] = useState<ElectionDetails[]>([]);
-  const [isFetchElections, setIsFetchElections] = useState(false);
-  const [cardDetails, setCardDetails] = useState<any>([]);
-  const [isFetchCards, setIsFetchCards] = useState(false);
-  const cookies = new Cookies();
-  const { data } = useSession();
-
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+  const USER_ID = useCurrentUserId();
 
   useEffect(() => {
     const cookies = new Cookies();
@@ -108,193 +74,10 @@ const Dashboard = ({ token, userInfo }: { token?: string; userInfo: any }) => {
     }
   }, [dispatch, userInfo, token]);
 
-  useEffect(() => {
-    if (!USER_ID) return;
-
-    setIsFetchElections(true);
-    const getElectionsData = async () => {
-      try {
-        const { data } = await getElections(USER_ID);
-        if (data) {
-          setElection(data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching elections:", error);
-      } finally {
-        setIsFetchElections(false);
-      }
-    };
-
-    getElectionsData();
-  }, [USER_ID]);
-
-  // Fetch dashboard cards
-  useEffect(() => {
-    if (!USER_ID) return;
-
-    const getDashboardCards = async () => {
-      setIsFetchCards(true);
-
-      const token = cookies.get("user-token");
-      if (token) {
-        setAuthToken(token);
-      }
-
-      // if (users?.data) {
-      //   setAuthToken(users.data.data.cookie);
-      // } else if (typeof window !== "undefined") {
-      //   const tokenLocal = localStorage.getItem("token");
-      //   if (tokenLocal) {
-      //     setAuthToken(tokenLocal);
-      //   }
-      // }
-
-      try {
-        const authorId = { author_id: USER_ID };
-        const { data } = await dashboardCards(authorId);
-        if (data) {
-          setCardDetails(data.data);
-        }
-      } catch (e: any) {
-        console.error("Error fetching dashboard cards:", e);
-      } finally {
-        setIsFetchCards(false);
-      }
-    };
-
-    getDashboardCards();
-  }, [USER_ID, users?.data, token]);
-
   return (
     <ProtectedRoutes googletoken={token}>
       <DashboardLayout>
-        {/* {isFetchCards ? (
-          <div className="my-10 flex justify-center">
-            <CircularProgress size={30} style={{ color: "#015CE9" }} />
-          </div>
-        ) : (
-          <div className="w-full flex">
-            <Swiper
-              modules={[A11y]}
-              spaceBetween={10}
-              breakpoints={{
-                240: { slidesPerView: 1, spaceBetween: 10 },
-                624: { slidesPerView: 1.5, spaceBetween: 10 },
-                1280: { slidesPerView: 1.8, spaceBetween: 10 },
-              }}
-              centeredSlides={true}
-              centeredSlidesBounds
-              className="w-full"
-            >
-              {cardDetails?.map((election: any, index: number) => (
-                <SwiperSlide
-                  key={election._id}
-                  className="lg:min-w-[483px] w-full text-center rounded-xl lg:px-7 font-semibold relative px-3"
-                  style={{
-                    backgroundColor: `${elections[index]?.style || "#015CE9"}`,
-                    borderLeft: `3px solid ${
-                      elections[index]?.border || "#015CE9"
-                    }`,
-                  }}
-                >
-                  <div>
-                    <Link href="/access">
-                      <div className="lg:text-xl text-base text-white pt-6">
-                        {election?.name_of_election}
-                      </div>
-                      <div className="flex pt-8 items-center text-white md:gap-6 justify-center text-xs lg:text-base gap-2">
-                        <div className="pb-4">
-                          Election Starts at {election?.start_date}
-                        </div>
-                        <div>
-                          <img
-                            src={line.src}
-                            alt="line"
-                            className="w-[20px] object-contain"
-                          />
-                        </div>
-                        <div className="pb-4">
-                          Election ends by {election.end_date}
-                        </div>
-                      </div>
-                      <div className="absolute top-0 left-0 bottom-0 right-0 -z-10 opacity-30">
-                        <img
-                          src={cardBg.src}
-                          alt="card-bg"
-                          className="lg:min-w-[483px] w-full h-full"
-                        />
-                      </div>
-                    </Link>
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>
-        )} */}
-
-        {isFetchElections ? (
-          <div className="text-center h-full flex items-center justify-center flex-col">
-            <CircularProgress size={30} style={{ color: "#015CE9" }} />
-            <p className="mt-4 text-gray-600">Loading elections...</p>
-          </div>
-        ) : (
-          <>
-            {/* <div className="flex mt-9 justify-center items-center gap-2 bg-[rgba(204_,222_,251_,0.50)] max-w-[643px] mx-auto sm:py-5 py-3 rounded-lg text-[#015CE9] font-bold flex-wrap text-center px-2 text-xs sm:text-base">
-              <span>
-                <img
-                  src={vote.src}
-                  alt="vote"
-                  className="w-4 h-4 object-contain"
-                />
-              </span>
-              You have participated in {election.length} Votar Elections
-            </div> */}
-            <div className="w-full">
-              <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 w-full max-w-2xl mx-auto rounded-r-lg">
-                <div className="flex items-center justify-between p-3 sm:p-4">
-                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-                    <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                      <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-blue-700 font-medium text-xs sm:text-sm md:text-base leading-tight">
-                        <span className="block sm:inline">
-                          Participated in{" "}
-                        </span>
-                        <span className="font-bold">
-                          {election.length} Votar elections
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex-shrink-0 ml-2">
-                    <div className="text-right">
-                      <div className="text-blue-600 font-bold text-lg sm:text-xl">
-                        {election.length}
-                      </div>
-                      <div className="text-blue-500 text-xs uppercase tracking-wide">
-                        Total
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-9">
-              <div className="flex gap-2 text-xl font-semibold">
-                Past Elections
-                <span>
-                  <img src={calendar.src} alt="calendar" />
-                </span>
-              </div>
-              <div className="mt-1">
-                <Tables election={election} />
-              </div>
-            </div>
-          </>
-        )}
+        <DashboardOverview userId={USER_ID} />
         <Chat />
       </DashboardLayout>
     </ProtectedRoutes>
