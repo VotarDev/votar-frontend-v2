@@ -270,7 +270,7 @@ const Create = () => {
   }, [currentStep]);
 
   return (
-    <ProtectedRoutes>
+    <ProtectedRoutes requireVerifiedEmail>
       <DashboardLayout>
         <div className="w-full lg:px-3 px-0">
           <div>
