@@ -1,4 +1,4 @@
-import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/query/react";
+import { createApi, type BaseQueryFn } from "@reduxjs/toolkit/dist/query/react/index.js";
 import type { AxiosError, AxiosRequestConfig } from "axios";
 import Cookies from "universal-cookie";
 import httpService from "@/utils/axios";
