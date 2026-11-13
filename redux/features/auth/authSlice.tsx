@@ -25,6 +25,20 @@ const initialState = {
   message: "",
 };
 
+const getRequestErrorMessage = (error: any) => {
+  const body = error?.response?.data;
+  const message =
+    body?.message ||
+    body?.data?.message ||
+    body?.error ||
+    error?.message ||
+    "The request could not be completed. Please try again.";
+  if (error?.code === "ERR_NETWORK" || !error?.response) {
+    return "Could not reach the Votar API. Check the API URL and that the backend is running.";
+  }
+  return typeof message === "string" ? message : JSON.stringify(message);
+};
+
 //login user
 
 export const login = createAsyncThunk(
@@ -45,12 +59,7 @@ export const login = createAsyncThunk(
       }
       return data;
     } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
+      const message = getRequestErrorMessage(error);
       if (
         error.response?.status === 403 &&
         message ===
@@ -85,14 +94,8 @@ export const register = createAsyncThunk(
       }
       return data;
     } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      console.log(error);
-      toast.error(error.response.data.message || error.message);
+      const message = getRequestErrorMessage(error);
+      toast.error(message);
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -158,6 +161,7 @@ const authSlice = createSlice({
         state.error = true;
         state.success = false;
         state.userData = null;
+        state.message = action.payload || action.error.message || "Signup failed.";
       });
   },
 });
