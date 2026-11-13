@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ArrowRight, History } from "lucide-react";
-import { skipToken } from "@reduxjs/toolkit/query/react";
+import { skipToken } from "@reduxjs/toolkit/dist/query/react/index.js";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
 import { useGetElectionByIdQuery } from "@/redux/api/electionsApi";
