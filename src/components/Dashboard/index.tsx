@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { skipToken } from "@reduxjs/toolkit/query/react";
+import { skipToken } from "@reduxjs/toolkit/dist/query/react/index.js";
 import { Button } from "@/src/components/ui/button";
 import PageHeader from "@/src/components/shared/PageHeader";
 import { useGetElectionsQuery } from "@/redux/api/electionsApi";
