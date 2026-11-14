@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
 import Cookies from "universal-cookie";
-import * as XLSX from "xlsx";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   FileSpreadsheet,
@@ -23,7 +22,6 @@ import {
   importFromCsv,
 } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
-import { downloadExcel } from "@/utils/exportExcel";
 import { cn } from "@/utils/cn";
 import { Button } from "@/src/components/ui/button";
 import { Card } from "@/src/components/ui/card";
@@ -149,6 +147,8 @@ const ResponseTable = () => {
     reader.onload = async (e) => {
       try {
         if (!e.target?.result) return;
+        // Loaded only when importing, to keep the page light.
+        const XLSX = await import("xlsx");
         const workBook = XLSX.read(e.target.result, { type: "binary" });
         const workSheet = workBook.Sheets[workBook.SheetNames[0]];
         const rows: any[][] = XLSX.utils.sheet_to_json(workSheet, {
@@ -380,7 +380,11 @@ const ResponseTable = () => {
             </Button>
             <Button
               variant="outline"
-              onClick={() => downloadExcel(excelData, "Excel Export")}
+              onClick={async () => {
+                // Loaded only when exporting, to keep the page light.
+                const { downloadExcel } = await import("@/utils/exportExcel");
+                downloadExcel(excelData, "Excel Export");
+              }}
               disabled={excelData.length === 0}
             >
               <FileSpreadsheet /> Export to Excel
