@@ -213,8 +213,10 @@ const ResponseTable = () => {
     setIsExporting(true);
     authorise();
 
+    // Only new, non-duplicate responses go to the election: duplicates and
+    // responses already exported stay out.
     const responseData: ResponseData = {
-      voters: votersToProcess,
+      voters: uniqueItems,
       election_id: electionID,
     };
 
