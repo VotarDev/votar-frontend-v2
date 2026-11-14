@@ -74,7 +74,8 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
               </span>
             }
           >
-            <div className="grid grid-cols-1 gap-4 ssm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {/* Centred, so a few candidates don't sit to one side. */}
+            <div className="flex flex-wrap items-stretch justify-center gap-4">
               {position.candidates.map((candidate: any, i: number) => {
                 const isLeading =
                   maxVotes > 0 && candidate.numberOfVotes === maxVotes;
@@ -82,7 +83,7 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
                   <div
                     key={i}
                     className={cn(
-                      "relative flex flex-col overflow-hidden rounded-lg border bg-white text-center",
+                      "relative flex w-full max-w-[280px] flex-col overflow-hidden rounded-lg border bg-white text-center ssm:w-[240px]",
                       isLeading
                         ? "border-primary ring-2 ring-primary/20"
                         : "border-border",
