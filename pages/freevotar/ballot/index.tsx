@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import PageMeta from "@/src/components/shared/PageMeta";
 import {
   BallotData,
   ElectionDetails,
@@ -609,6 +610,13 @@ const FreeVotarBallot = () => {
   // this background.
   const frame = (content: React.ReactNode, hideCredits = isVoteSuccessful) => (
     <div className="isolate min-h-screen bg-slate-50">
+      {election?.name_of_election && (
+        <PageMeta
+          title={`${election.name_of_election} ballot`}
+          description={`Vote for your preferred candidates in ${election.name_of_election} on Votar.`}
+          noIndex
+        />
+      )}
       <Header
         electionDetails={election}
         getVoterCredit={registerVotar}

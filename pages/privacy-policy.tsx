@@ -1,27 +1,10 @@
 import Footer from "@/src/components/Footer";
 import Nav from "@/src/components/Nav";
-import Head from "next/head";
 import React from "react";
 
 const PrivacyPolicy = () => {
   return (
     <div>
-      <Head>
-        <title>Privacy Policy - Votar</title>
-        <meta
-          name="description"
-          content="Read Votar's Privacy Policy to understand how we collect, use, and protect your personal information."
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Privacy Policy - Votar" />
-        <meta
-          property="og:description"
-          content="Learn how Votar handles your personal data and privacy."
-        />
-        <meta property="og:url" content="https://www.votar.ng/privacy-policy" />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://www.votar.ng/privacy-policy" />
-      </Head>
       <div className="max-w-[1300px] mx-auto px-4 lg:px-0 xl:px-10">
         <Nav />
       </div>

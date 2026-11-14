@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import PageMeta from "@/src/components/shared/PageMeta";
 import { useRouter } from "next/router";
 import Cookies from "universal-cookie";
 import ElectionTabs from "@/src/components/MonitoringElection/ElectionTabs";
@@ -60,6 +61,13 @@ const MonitoringElections = () => {
     // `isolate` keeps the header's branding (drawn behind its parent) above
     // this page's background.
     <div className="isolate min-h-screen bg-slate-50 pb-16">
+      {election?.name_of_election && (
+        <PageMeta
+          title={`${election.name_of_election}: live results`}
+          description={`Follow the results of ${election.name_of_election} live on Votar.`}
+          noIndex
+        />
+      )}
       {isLoading ? (
         <Skeleton className="h-56 w-full rounded-none" />
       ) : (

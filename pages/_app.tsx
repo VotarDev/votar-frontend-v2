@@ -12,7 +12,10 @@ import AppContext from "@/src/context/AppContext";
 import { Position } from "@/utils/types";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { Weight } from "lucide-react";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import PageMeta from "@/src/components/shared/PageMeta";
+import { DEFAULT_META, ROUTE_META } from "@/utils/pageMeta";
 
 const boing = localFont({
   src: "../public/fonts/Boing.ttf",
@@ -111,12 +114,28 @@ export default function App({ Component, pageProps }: AppProps) {
     preview,
     setpreview,
   };
+  // Title and description for this route (utils/pageMeta.ts). Pages can
+  // render their own <PageMeta> to override it.
+  const { pathname } = useRouter();
+  const meta = ROUTE_META[pathname] ?? DEFAULT_META;
+  const isDynamic = pathname.includes("[");
   return (
     <AppContext.Provider value={value}>
       <Provider store={store}>
         <SessionProvider session={pageProps.session}>
           <div className={` ${workSans.variable} font-workSans  font-light`}>
             <ThemeProvider theme={THEME}>
+              <Head>
+                <meta key="viewport" name="viewport" content="width=device-width, initial-scale=1" />
+                <meta key="theme-color" name="theme-color" content="#015CE9" />
+                <link key="icon" rel="icon" href="/favicon.ico" />
+              </Head>
+              <PageMeta
+                title={meta.title}
+                description={meta.description}
+                noIndex={meta.noIndex}
+                path={isDynamic ? undefined : pathname}
+              />
               <Toaster />
               <Component {...pageProps} />
             </ThemeProvider>

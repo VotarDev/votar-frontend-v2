@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import PageMeta from "@/src/components/shared/PageMeta";
 import { ElectionDetails } from "@/utils/types";
 import { toPng } from "html-to-image";
 import { RootState, AppDispatch } from "@/redux/store";
@@ -434,6 +435,13 @@ const Ballot = () => {
   // keeps the header's branding layer (-z-10) above this background.
   const frame = (greeting: string, content: React.ReactNode) => (
     <div className="isolate min-h-screen bg-slate-50">
+      {election?.name_of_election && (
+        <PageMeta
+          title={`${election.name_of_election} ballot`}
+          description={`Cast your vote in ${election.name_of_election} on Votar.`}
+          noIndex
+        />
+      )}
       <Header electionDetails={election} />
       <VoterBar
         greeting={greeting}

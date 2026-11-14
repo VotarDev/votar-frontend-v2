@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PageMeta from "@/src/components/shared/PageMeta";
 import Header from "@/src/components/BallotPage/Header";
 import PageLoader from "@/src/components/shared/PageLoader";
 import { getElectionById } from "@/utils/api";
@@ -49,6 +50,13 @@ const AccessPage = () => {
   // `isolate` keeps the header's branding layer (-z-10) above the background.
   return (
     <div className="isolate min-h-screen bg-slate-50">
+      {elections?.name_of_election && (
+        <PageMeta
+          title={`Vote in ${elections.name_of_election}`}
+          description={`Enter your access code to open your secret ballot for ${elections.name_of_election} on Votar.`}
+          noIndex
+        />
+      )}
       <Header electionDetails={elections} />
       <ElectionId
         electionId={electionId}
