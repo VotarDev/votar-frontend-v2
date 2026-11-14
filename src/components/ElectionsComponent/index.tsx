@@ -157,7 +157,7 @@ const ElectionsComponent = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
       <PageHeader
         title="Elections"
         description="Manage and monitor the elections you've created."

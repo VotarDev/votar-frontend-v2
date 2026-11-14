@@ -54,7 +54,7 @@ const Profile = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+        <div className="mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
           <PageHeader
             title="Profile"
             description="Manage your personal details and payment cards."

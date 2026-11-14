@@ -46,7 +46,7 @@ const CreateForm = () => {
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <div className="relative mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+        <div className="relative mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
           <Link
             href="/votar-forms"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"

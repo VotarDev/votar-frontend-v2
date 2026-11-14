@@ -46,7 +46,7 @@ const Responses = () => {
   return (
     <DashboardLayout>
       <ProtectedRoutes>
-        <div className="relative mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+        <div className="relative mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
           {election ? (
             <Link
               href={`/votar-forms/${election.name_of_election}/${electionID}`}

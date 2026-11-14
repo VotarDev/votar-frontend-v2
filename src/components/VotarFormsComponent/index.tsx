@@ -155,7 +155,7 @@ const VotarFormsComponent = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
       <PageHeader
         title="Votar Forms"
         description="Collect voter information for your elections, then send it to your election or export it to Excel."
