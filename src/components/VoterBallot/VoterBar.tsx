@@ -20,19 +20,21 @@ const VoterBar = ({
 }: VoterBarProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   return (
-    <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pt-6">
+    <div className="mx-auto flex w-full max-w-5xl items-start justify-between gap-3 px-4 pt-6 smm:items-center smm:gap-4">
       <div className="min-w-0">
         <p className="text-sm text-muted-foreground">{greeting},</p>
-        <h1 className="truncate text-xl font-bold capitalize text-foreground smm:text-2xl">
+        <h1 className="break-words text-lg font-bold capitalize leading-tight text-foreground ssm:text-xl smm:text-2xl">
           {name || "Voter"}
         </h1>
       </div>
       <Button
         variant="outline"
         onClick={() => setConfirmOpen(true)}
-        className="h-10 shrink-0"
+        className="h-9 shrink-0 px-3 smm:h-10 smm:px-4"
+        aria-label="Log out"
       >
-        <LogOut /> Log out
+        <LogOut />
+        <span className="hidden ssm:inline">Log out</span>
       </Button>
 
       <ConfirmDialog

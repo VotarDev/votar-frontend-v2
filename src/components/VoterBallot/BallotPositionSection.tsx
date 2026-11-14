@@ -44,13 +44,13 @@ const BallotPositionSection = ({
       className="overflow-hidden rounded-2xl border border-border bg-white shadow-sm"
       style={{ borderTop: `4px solid ${accent}` }}
     >
-      <header className="flex flex-col items-center gap-2 border-b border-border px-4 py-5 text-center smm:px-6">
+      <header className="flex flex-col items-center gap-2 border-b border-border px-3 py-4 text-center ssm:px-4 smm:px-6 smm:py-5">
         <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
           Position {number} of {total}
         </span>
         <h2
           id={`position-${number}`}
-          className="text-xl font-bold uppercase tracking-wide text-foreground smm:text-2xl"
+          className="break-words text-lg font-bold uppercase tracking-wide text-foreground ssm:text-xl smm:text-2xl"
         >
           {position.name_of_position}
         </h2>
@@ -73,8 +73,8 @@ const BallotPositionSection = ({
         </span>
       </header>
 
-      <div className="p-4 smm:p-6">
-        <div className="flex flex-wrap justify-center gap-4">
+      <div className="p-3 ssm:p-4 smm:p-6">
+        <div className="flex flex-wrap justify-center gap-3 smm:gap-4">
           {position.candidates.map((candidate, i) => (
             <BallotCandidateCard
               key={candidate._id || i}
@@ -91,8 +91,8 @@ const BallotPositionSection = ({
 
         <div className="mt-6 flex flex-col items-center gap-2 border-t border-border pt-5">
           {abstained ? (
-            <p className="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-sm font-medium text-amber-800">
-              <Ban className="h-4 w-4" aria-hidden="true" />
+            <p className="flex items-start gap-2 rounded-lg bg-amber-50 px-3 py-2 text-left text-sm font-medium text-amber-800 ssm:items-center ssm:px-4">
+              <Ban className="mt-0.5 h-4 w-4 shrink-0 ssm:mt-0" aria-hidden="true" />
               You&apos;re abstaining. Pick a candidate to change your mind.
             </p>
           ) : (
@@ -101,11 +101,11 @@ const BallotPositionSection = ({
                 type="button"
                 variant="outline"
                 onClick={onAbstain}
-                className="h-11 min-w-[160px]"
+                className="h-11 w-full ssm:w-auto ssm:min-w-[160px]"
               >
                 <Ban /> Abstain
               </Button>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-center text-xs text-muted-foreground">
                 Don&apos;t want to vote for this position? Abstain instead.
               </p>
             </>

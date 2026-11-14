@@ -22,7 +22,7 @@ const BallotCandidateCard = ({
 }: BallotCandidateCardProps) => (
   <div
     className={cn(
-      "relative flex w-[calc(50%-0.5rem)] flex-col overflow-hidden rounded-xl border-2 bg-white text-center shadow-sm transition-all smm:w-[200px] lg:w-[220px]",
+      "relative flex w-[calc(50%-0.375rem)] min-w-0 flex-col overflow-hidden rounded-xl border-2 bg-white text-center shadow-sm transition-all smm:w-[200px] lg:w-[220px]",
       selected
         ? "border-transparent shadow-md"
         : "border-border hover:-translate-y-0.5 hover:shadow-md",
@@ -50,7 +50,7 @@ const BallotCandidateCard = ({
         )}
         <span
           className={cn(
-            "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border-2 border-white shadow transition-all",
+            "absolute right-1.5 top-1.5 flex h-6 w-6 items-center ssm:right-2 ssm:top-2 ssm:h-7 ssm:w-7 justify-center rounded-full border-2 border-white shadow transition-all",
             selected ? "scale-100 text-white" : "scale-90 bg-white/80 text-transparent",
           )}
           style={selected ? { backgroundColor: accent } : undefined}
@@ -59,12 +59,12 @@ const BallotCandidateCard = ({
           <Check className="h-4 w-4" strokeWidth={3} />
         </span>
       </div>
-      <div className="flex flex-1 flex-col items-center justify-center px-3 py-3 text-center">
-        <p className="font-semibold capitalize leading-snug text-foreground smm:text-lg">
+      <div className="flex w-full flex-1 flex-col items-center justify-center px-2 py-2.5 text-center ssm:px-3 ssm:py-3">
+        <p className="break-words text-sm font-semibold capitalize leading-snug text-foreground ssm:text-base smm:text-lg">
           {candidate.candidate_name}
         </p>
         {candidate.candidate_nickname && (
-          <p className="mt-0.5 text-sm capitalize text-muted-foreground">
+          <p className="mt-0.5 break-words text-xs capitalize text-muted-foreground ssm:text-sm">
             ({candidate.candidate_nickname})
           </p>
         )}
@@ -74,7 +74,7 @@ const BallotCandidateCard = ({
       <button
         type="button"
         onClick={onShowDetails}
-        className="flex items-center justify-center gap-1.5 border-t border-border py-2.5 text-sm font-medium text-primary transition-colors hover:bg-secondary"
+        className="flex items-center justify-center gap-1.5 border-t border-border py-2.5 text-xs font-medium ssm:text-sm text-primary transition-colors hover:bg-secondary"
       >
         <Info className="h-4 w-4" aria-hidden="true" /> More details
       </button>

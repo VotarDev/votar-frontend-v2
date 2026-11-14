@@ -28,7 +28,7 @@ const ReviewVotesDialog = ({
     labelledBy="review-votes-title"
     className="flex max-h-[85vh] max-w-lg flex-col overflow-hidden p-0"
   >
-    <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-5 py-4 smm:px-6">
+    <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border px-4 py-4 smm:px-6">
       <div>
         <h2
           id="review-votes-title"
@@ -61,13 +61,13 @@ const ReviewVotesDialog = ({
       </button>
     </div>
 
-    <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4 smm:px-6">
+    <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 smm:px-6">
       {selections.map((selection, index) => (
         <div
           key={index}
           className="rounded-xl border border-border p-3 smm:p-4"
         >
-          <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 break-words text-xs font-semibold uppercase tracking-widest text-muted-foreground">
             {selection.position}
           </p>
           {selection.abstain ? (
@@ -112,7 +112,7 @@ const ReviewVotesDialog = ({
       </p>
     </div>
 
-    <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border px-5 py-4 smm:flex-row smm:justify-end smm:px-6">
+    <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-border px-4 py-4 smm:flex-row smm:justify-end smm:px-6">
       <Button
         variant="outline"
         onClick={onClose}

@@ -519,7 +519,7 @@ const Ballot = () => {
   const renderBallot = () => {
     if (isFetchCandidate) {
       return (
-        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6">
+        <div className="mx-auto w-full max-w-5xl space-y-4 px-3 py-5 ssm:px-4 smm:space-y-6 smm:py-6">
           {Array.from({ length: 2 }).map((_, i) => (
             <Skeleton key={i} className="h-[420px] w-full rounded-2xl" />
           ))}
@@ -540,7 +540,7 @@ const Ballot = () => {
 
     return (
       <>
-        <div className="mx-auto w-full max-w-5xl space-y-6 px-4 pb-32 pt-6">
+        <div className="mx-auto w-full max-w-5xl space-y-4 px-3 pb-32 pt-5 ssm:px-4 smm:space-y-6 smm:pt-6">
           <p className="flex items-start gap-2 rounded-xl border border-primary/15 bg-secondary px-4 py-3 text-sm text-foreground">
             <Info
               className="mt-0.5 h-4 w-4 shrink-0 text-primary"
@@ -582,11 +582,12 @@ const Ballot = () => {
         </div>
 
         {/* Progress and submit, always in reach. */}
-        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 px-4 py-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)] backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center gap-4">
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(15,23,42,0.06)] backdrop-blur">
+          <div className="mx-auto flex max-w-5xl items-center gap-3 smm:gap-4">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">
-                {positionsDone} of {positionCount} positions done
+              <p className="text-xs font-medium text-foreground ssm:text-sm">
+                {positionsDone} of {positionCount}
+                <span className="hidden ssm:inline"> positions</span> done
               </p>
               <div className="mt-1.5 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
                 <div
@@ -600,9 +601,10 @@ const Ballot = () => {
             <Button
               onClick={() => setShowModal(true)}
               disabled={!allPositionsSelected || positionCount === 0}
-              className="h-11 shrink-0"
+              className="h-11 shrink-0 px-3 ssm:px-4"
             >
-              Review votes <ArrowRight />
+              Review<span className="hidden ssm:inline"> votes</span>{" "}
+              <ArrowRight />
             </Button>
           </div>
         </div>

@@ -12,7 +12,7 @@ interface VoteSuccessProps {
 /** Shown after the votes are in: the voter's badge, actions and socials. */
 const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps) => (
   <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-12 pt-6">
-    <div className="rounded-2xl border border-border bg-white p-6 text-center shadow-sm smm:p-8">
+    <div className="rounded-2xl border border-border bg-white p-4 text-center shadow-sm ssm:p-6 smm:p-8">
       <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
         <PartyPopper className="h-7 w-7" aria-hidden="true" />
       </div>
@@ -23,12 +23,12 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
 
       {/* Saved as the badge image, so keep it self-contained. */}
       <div className="mt-6 flex justify-center">
-        <div ref={badgeRef} className="inline-block bg-white p-4">
+        <div ref={badgeRef} className="inline-block max-w-full bg-white p-2 ssm:p-4">
           <div className="text-center lg:px-12">
             <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 md:text-xs">
               Certified Voter
             </p>
-            <h3 className="max-w-[300px] break-words text-xl font-black uppercase leading-tight text-[#22C55E] md:max-w-[400px] md:text-3xl">
+            <h3 className="mx-auto max-w-[300px] break-words text-xl font-black uppercase leading-tight text-[#22C55E] md:max-w-[400px] md:text-3xl">
               {voterName}
             </h3>
           </div>
@@ -41,16 +41,16 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
       </div>
 
       <div className="mt-6 flex flex-col justify-center gap-3 smm:flex-row">
-        <Button onClick={onDownloadBadge} className="h-11">
+        <Button onClick={onDownloadBadge} className="h-11 w-full smm:w-auto">
           <Download /> Download my badge
         </Button>
-        <Button variant="outline" className="h-11">
+        <Button variant="outline" className="h-11 w-full smm:w-auto">
           <MessageSquare /> Give us feedback
         </Button>
       </div>
     </div>
 
-    <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center text-white shadow-sm smm:p-8">
+    <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 ssm:p-6 text-center text-white shadow-sm smm:p-8">
       <h3 className="text-lg font-semibold">Know more about Votar</h3>
       <p className="mt-1 text-sm text-white/80">
         Follow us on all our social media handles.

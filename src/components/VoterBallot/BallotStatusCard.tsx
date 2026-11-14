@@ -31,8 +31,8 @@ const BallotStatusCard = ({
 }: BallotStatusCardProps) => {
   const colours = TONES[tone];
   return (
-    <div className="flex justify-center px-4 py-10 lg:py-16">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-sm smm:p-10">
+    <div className="flex justify-center px-4 py-8 smm:py-10 lg:py-16">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-white p-6 text-center shadow-sm smm:p-10">
         <div
           className={cn(
             "mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full",
@@ -52,7 +52,7 @@ const BallotStatusCard = ({
                 {detailLabel}
               </p>
             )}
-            <p className={cn("font-bold", colours.text)}>{detail}</p>
+            <p className={cn("break-words font-bold", colours.text)}>{detail}</p>
             {detailHint && (
               <p className="mt-2 text-xs text-muted-foreground">{detailHint}</p>
             )}
