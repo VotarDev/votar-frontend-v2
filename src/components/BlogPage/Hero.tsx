@@ -3,13 +3,14 @@ import { BsArrowRight } from "react-icons/bs";
 import { motion } from "framer-motion";
 import { fadeZoomIn, elementList } from "@/utils/util";
 
-const Hero = () => {
+const Hero = ({ latestPostUrl }: { latestPostUrl?: string }) => {
   return (
     <div className="lg:pt-20 lg:pb-[150px] pt-28">
       <motion.div
         variants={elementList}
         initial="initial"
         whileInView="animate"
+        viewport={{ once: true }}
         className="flex lg:justify-between items-center text-[#f8f8f8] lg:gap-20 gap-10 lg:flex-row flex-col justify-center text-center lg:text-left"
       >
         <motion.div variants={fadeZoomIn} custom={0}>
@@ -31,12 +32,16 @@ const Hero = () => {
               </p>
             </div>
             <div>
-              <button className="flex justify-center items-center gap-2 w-[200px] h-[52px] blog-btn rounded-3xl py-2 px-4 mt-8 transition-all duration-150 ease-in mx-auto lg:mx-0">
-                <p>Read Full Blog </p>
-                <span>
-                  <BsArrowRight />
-                </span>
-              </button>
+              {/* Opens the latest post (or the blog on Medium). */}
+              <a
+                href={latestPostUrl || "https://medium.com/@votarhq"}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex justify-center items-center gap-2 w-[200px] h-[52px] blog-btn rounded-3xl py-2 px-4 mt-8 transition-all duration-150 ease-in mx-auto lg:mx-0"
+              >
+                <span>Read Full Blog</span>
+                <BsArrowRight className="transition-transform group-hover:translate-x-1" aria-hidden="true" />
+              </a>
             </div>
           </div>
         </motion.div>
@@ -48,7 +53,8 @@ const Hero = () => {
           <div className="lg:block">
             <iframe
               src="https://www.youtube.com/embed/20bG5T7umTg"
-              title="Sony 4K Demo: Another World"
+              title="Votar video"
+              loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="lg:w-[600px] lg:h-[400px] lg:rounded-3xl absolute top-0 left-0 w-full h-full lg:static rounded-xl"

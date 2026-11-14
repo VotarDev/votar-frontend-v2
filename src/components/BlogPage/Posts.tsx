@@ -1,70 +1,75 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { PiCaretRightBold } from "react-icons/pi";
+import { BiSearch } from "react-icons/bi";
 import { motion } from "framer-motion";
 import { fadeInAnimation } from "@/utils/util";
-import SuccessStory from "./SuccessStory";
-import { getPost } from "@/utils/api";
-import { ThreeDots } from "react-loader-spinner";
-import { ToText } from "@/utils/util";
 import { PostItem } from "@/utils/types";
-import { BiSearch } from "react-icons/bi";
+import { postDate, postExcerpt, postImage } from "@/utils/blog";
+import SuccessStory from "./SuccessStory";
 
-const Posts = () => {
-  const [mediumPosts, setMediumPosts] = useState<PostItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchInput, setSearchInput] = useState("");
-  const [visiblePosts, setVisiblePosts] = useState(3);
-  const [searchedPosts, setSearchedPosts] = useState<PostItem[]>([]);
+const PAGE = 3; // posts added per "See more posts", as before
 
-  useEffect(() => {
-    getPosts();
-  }, []);
+interface PostsProps {
+  posts: PostItem[];
+  isLoading: boolean;
+  error: boolean;
+  onRetry: () => void;
+}
 
-  const getPosts = async () => {
-    setIsLoading(true);
-    try {
-      const mediumUrl = await getPost();
-      if (mediumUrl) {
-        setMediumPosts(mediumUrl.data.items);
-        setIsLoading(false);
-      }
-    } catch (e: any) {
-      console.log(e);
-    }
-  };
-
-  const loadMorePosts = () => {
-    setVisiblePosts(visiblePosts + 3);
-  };
-  let previousPosts = mediumPosts.slice(3);
-  let visiblePostData = previousPosts.slice(0, visiblePosts);
-
-  const handleSearchHandler = (e: any) => {
-    e.preventDefault();
-    if (!searchInput) {
-      return setSearchedPosts([]);
-    }
-    const postsData = mediumPosts.filter((post) =>
-      post.title.toLowerCase().includes(searchInput.toLowerCase())
-    );
-    setSearchedPosts(postsData);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="max-w-[1300px] mx-auto px-4 lg:px-0 xl:px-10">
-        <ThreeDots
-          height="80"
-          width="80"
-          radius="9"
-          color="#015ce9"
-          ariaLabel="three-dots-loading"
-          wrapperStyle={{}}
-          visible={true}
+const PostCard = ({ post, index }: { post: PostItem; index: number }) => (
+  <motion.a
+    href={post.link}
+    target="_blank"
+    rel="noreferrer"
+    className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-xl transition-shadow hover:shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#015ce9]/30"
+    variants={fadeInAnimation}
+    initial="initial"
+    whileInView="animate"
+    viewport={{ once: true }}
+    custom={index % PAGE}
+  >
+    <div className="relative h-[160px] overflow-hidden bg-[#012E75]">
+      {postImage(post) && (
+        <img
+          src={postImage(post)}
+          alt=""
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-      </div>
-    );
-  }
+      )}
+      <div className="absolute inset-0 bg-[rgba(0,0,0,0.4)]" />
+      <h3 className="absolute inset-x-0 bottom-0 line-clamp-2 p-4 text-[18px] font-bold leading-snug text-[#f6fafd]">
+        {post.title}
+      </h3>
+    </div>
+    <div className="flex flex-1 flex-col p-4">
+      {postDate(post) && <p className="text-xs font-medium text-[#7c8e9b]/80">{postDate(post)}</p>}
+      <p className="mt-2 line-clamp-4 flex-1 text-[#7c8e9b]">{postExcerpt(post)}</p>
+      <span className="mt-4 flex items-center gap-1 text-sm transition-colors group-hover:text-[#015ce9]">
+        Read more <PiCaretRightBold className="text-[#015ce9]" aria-hidden="true" />
+      </span>
+    </div>
+  </motion.a>
+);
+
+const Posts = ({ posts, isLoading, error, onRetry }: PostsProps) => {
+  const [searchInput, setSearchInput] = useState("");
+  const [visiblePosts, setVisiblePosts] = useState(PAGE);
+  const query = searchInput.trim().toLowerCase();
+
+  // Searching covers every post; otherwise list the ones after the featured three.
+  const results = useMemo(
+    () =>
+      query
+        ? posts.filter((post) =>
+            [post.title, postExcerpt(post, 400), ...(post.categories || [])]
+              .join(" ")
+              .toLowerCase()
+              .includes(query),
+          )
+        : posts.slice(3),
+    [posts, query],
+  );
+  const shown = query ? results : results.slice(0, visiblePosts);
 
   return (
     <div className="bg-[#f7fafd] pb-20">
@@ -75,138 +80,75 @@ const Posts = () => {
             e-voting, and the Global Progressive Society
           </h2>
         </div>
-        <div className="max-w-[40rem] mx-auto pt-5 pb-10">
-          <form onSubmit={handleSearchHandler}>
-            <div className="flex items-center justify-center">
-              <input
-                type="text"
-                className=" py-5 px-3 outline-none rounded-tl rounded-bl border-[0.5px] border-[#BFBFBF] lg:w-1/2 w-full h-[48px]"
-                placeholder="Search for a post on the votar blog"
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-              <button className="bg-[#015ce9] py-5 px-3 rounded-tr rounded-br outline-none flex items-center justify-center h-[48px] text-white text-lg">
-                <span>
-                  <BiSearch />
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
 
-        {searchedPosts.length > 0 && (
+        <form
+          role="search"
+          onSubmit={(e) => e.preventDefault()}
+          className="mx-auto flex max-w-[30rem] items-center pt-5 pb-10"
+        >
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="h-12 w-full rounded-l border-[0.5px] border-[#BFBFBF] bg-white px-4 outline-none transition-shadow focus:border-[#015ce9] focus:ring-4 focus:ring-[#015ce9]/10"
+            placeholder="Search for a post on the votar blog"
+            aria-label="Search blog posts"
+          />
+          <button
+            type="submit"
+            aria-label="Search"
+            className="flex h-12 items-center justify-center rounded-r bg-[#015ce9] px-4 text-lg text-white"
+          >
+            <BiSearch aria-hidden="true" />
+          </button>
+        </form>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-[360px] animate-pulse rounded-2xl bg-white shadow-xl" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="mx-auto max-w-md rounded-2xl bg-white p-8 text-center shadow-sm">
+            <p className="text-[#7c8e9b]">We couldn&apos;t load the latest posts.</p>
+            <button
+              type="button"
+              onClick={onRetry}
+              className="mt-4 rounded-full bg-[#015ce9] px-6 py-2 text-sm font-semibold text-white"
+            >
+              Try again
+            </button>
+          </div>
+        ) : query && results.length === 0 ? (
+          <p className="py-10 text-center text-[#7c8e9b]">
+            No posts match “{searchInput.trim()}”.
+          </p>
+        ) : (
           <>
-            <h1 className="my-3 text-[38px]">Searched Posts</h1>
-            <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-col-1 justify-center gap-10 items-stretch my-10">
-              {searchedPosts.map((post, index) => {
-                var tagIndex = post.description.indexOf("<img");
-                var srcIndex =
-                  post.description.substring(tagIndex).indexOf("src=") +
-                  tagIndex;
-                var srcStart = srcIndex + 5;
-                var srcEnd =
-                  post.description.substring(srcStart).indexOf('"') + srcStart;
-                var src = post.description.substring(srcStart, srcEnd);
-
-                return (
-                  <motion.div
-                    key={post.title}
-                    className="rounded-2xl overflow-hidden shadow-xl pb-14 relative bg-white w-full"
-                    variants={fadeInAnimation}
-                    initial="initial"
-                    whileInView="animate"
-                    custom={index}
-                  >
-                    <div className="relative ">
-                      <img
-                        src={src}
-                        alt="posts"
-                        className="lg:w-full h-[150px] object-cover  w-full"
-                      />
-                      <div className="absolute bg-[rgba(0,0,0,0.4)] w-full h-full top-0 bottom-0"></div>
-                      <div className="absolute top-8 left-0 text-[#f6fafd] text-[18px] font-bold px-4">
-                        <h3>{post.title}</h3>
-                      </div>
-                    </div>
-                    <div className="text-[#7c8e9b] text-justify p-4">
-                      <p>{`${ToText(
-                        post.description.substring(0, 360)
-                      )}...`}</p>
-                    </div>
-
-                    <div className="absolute bottom-0 px-4 py-4 text-sm transition duration-150 ease-in hover:text-[#015ce9] cursor-pointer ">
-                      <a
-                        href={post.link}
-                        target="_blank"
-                        className="flex items-center gap-1"
-                      >
-                        <p>Read more</p>
-                        <span>
-                          <PiCaretRightBold className="text-[#015ce9]" />
-                        </span>
-                      </a>
-                    </div>
-                  </motion.div>
-                );
-              })}
+            {query && (
+              <p className="mb-6 text-center text-sm text-[#7c8e9b]">
+                {results.length} post{results.length === 1 ? "" : "s"} found
+              </p>
+            )}
+            <div className="grid grid-cols-1 items-stretch gap-10 sm:grid-cols-2 lg:grid-cols-3">
+              {shown.map((post, index) => (
+                <PostCard key={post.guid || post.title} post={post} index={index} />
+              ))}
             </div>
+            {!query && visiblePosts < results.length && (
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisiblePosts((n) => n + PAGE)}
+                  className="rounded-full bg-white px-6 py-3 text-[#7c8e9b] shadow-lg transition-colors hover:bg-[#015ce9] hover:text-white"
+                >
+                  See more posts
+                </button>
+              </div>
+            )}
           </>
         )}
-
-        <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-col-1 justify-center gap-10 items-stretch">
-          {visiblePostData.map((post, index) => {
-            var tagIndex = post.description.indexOf("<img");
-            var srcIndex =
-              post.description.substring(tagIndex).indexOf("src=") + tagIndex;
-            var srcStart = srcIndex + 5;
-            var srcEnd =
-              post.description.substring(srcStart).indexOf('"') + srcStart;
-            var src = post.description.substring(srcStart, srcEnd);
-
-            return (
-              <motion.div
-                key={post.title}
-                className="rounded-2xl overflow-hidden shadow-xl pb-14 relative bg-white w-full"
-                variants={fadeInAnimation}
-                initial="initial"
-                whileInView="animate"
-                custom={index}
-              >
-                <div className="relative ">
-                  <img
-                    src={src}
-                    alt="posts"
-                    className="lg:w-full h-[150px] object-cover  w-full"
-                  />
-                  <div className="absolute bg-[rgba(0,0,0,0.4)] w-full h-full top-0 bottom-0"></div>
-                  <div className="absolute top-8 left-0 text-[#f6fafd] text-[18px] font-bold px-4">
-                    <h3>{post.title}</h3>
-                  </div>
-                </div>
-                <div className="text-[#7c8e9b] text-justify p-4">
-                  <p>{`${ToText(post.description.substring(0, 360))}...`}</p>
-                </div>
-
-                <div className="absolute bottom-0 px-4 py-4 text-sm transition duration-150 ease-in hover:text-[#015ce9] cursor-pointer ">
-                  <a
-                    href={post.link}
-                    target="_blank"
-                    className="flex items-center gap-1"
-                  >
-                    Read more
-                    <span>
-                      <PiCaretRightBold className="text-[#015ce9]" />
-                    </span>
-                  </a>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-        <div className="flex justify-end my-5 text-[#7c8e9b]">
-          {visiblePosts < previousPosts.length && (
-            <button onClick={loadMorePosts}>See more posts...</button>
-          )}
-        </div>
       </div>
       <SuccessStory />
     </div>
