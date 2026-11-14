@@ -34,7 +34,7 @@ const ElectionsComponent = () => {
     isError,
     refetch,
   } = useGetElectionsQuery(userId ?? skipToken, {
-    refetchOnMountOrArgChange: true,
+    refetchOnMountOrArgChange: 60,
   });
   const isPending = !userId || isLoading;
 

@@ -8,6 +8,8 @@ import cardFormReducer from "./features/cardDetailsForm/cardDetailsSlice";
 import votarCreditReducer from "./features/votarCredit/votarCreditSlice";
 import creditSliceReducer from "./features/creditSlice/creditSlice";
 import { baseApi } from "./api/baseApi";
+import { invalidateOnWrite } from "./api/invalidateOnWrite";
+import httpService from "@/utils/axios";
 
 const store = configureStore({
   reducer: {
@@ -24,6 +26,9 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(baseApi.middleware),
 });
+
+// Refresh cached data after writes made through the old axios calls.
+invalidateOnWrite(httpService, store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

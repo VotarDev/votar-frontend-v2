@@ -104,11 +104,11 @@ const SidebarContent = ({ collapsed = false }: SidebarContentProps) => {
   const [showAddCredits, setShowAddCredits] = useState(false);
   const [showLogout, setShowLogout] = useState(false);
 
-  // Shared through the RTK Query cache: one request, refreshed every 30
-  // seconds and whenever the sidebar mounts.
+  // Shared through the RTK Query cache. Refetched after a credit purchase or
+  // election creation (see invalidateOnWrite), otherwise at most every 5 min.
   const { data: credit = 0, isLoading: isCreditLoading } = useGetCreditQuery(
     userId as string,
-    { skip: !userId, pollingInterval: 30000, refetchOnMountOrArgChange: true }
+    { skip: !userId, refetchOnMountOrArgChange: 300 }
   );
 
   const profile = user?.user?.data;

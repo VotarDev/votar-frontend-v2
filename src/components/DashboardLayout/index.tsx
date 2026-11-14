@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import SideBar from "../SideBar";
 import Header from "../Header";
-import { getUserData } from "@/utils/api";
+import { useGetUserProfileQuery } from "@/redux/api/userApi";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import { useDispatch } from "react-redux";
 import { userData } from "@/redux/features/userProfile/userProfileSlice";
@@ -18,9 +18,6 @@ import { SCROLL_CONTAINER_PROPS, scrollToTop } from "@/utils/scrollToTop";
 
 const DashboardLayout = ({ children }: any) => {
   const [isClient, setIsClient] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState("");
   const [opener, setOpener] = useState(true);
   const [token, setToken] = useState<string | null>("");
   const users = useCurrentUser();
@@ -50,28 +47,20 @@ const DashboardLayout = ({ children }: any) => {
     }
   }, []);
 
+  // Pages' own axios calls rely on the auth header being set here.
   useEffect(() => {
-    const getUser = async () => {
-      const token = cookies.get("user-token");
-      if (token) {
-        setAuthToken(token);
-      }
+    const token = cookies.get("user-token");
+    if (token) setAuthToken(token);
+  }, [users]);
 
-      try {
-        const { data } = await getUserData(USER_ID);
-
-        if (data) {
-          dispatch(userData(data));
-          setIsLoading(false);
-          setSuccess(true);
-        }
-      } catch (e: any) {
-        setError(e.message);
-        console.log(e);
-      }
-    };
-    getUser();
-  }, [dispatch, users]);
+  // Cached: fetched once per user, not on every page change. Refreshed after
+  // a profile update (see invalidateOnWrite).
+  const { data: profileData } = useGetUserProfileQuery(USER_ID as string, {
+    skip: !USER_ID,
+  });
+  useEffect(() => {
+    if (profileData) dispatch(userData(profileData));
+  }, [dispatch, profileData]);
 
   useEffect(() => {
     setIsClient(true);
