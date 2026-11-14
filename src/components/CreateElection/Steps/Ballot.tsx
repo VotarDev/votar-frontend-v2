@@ -104,7 +104,7 @@ const Ballot = ({ positions, setPositions, onEditableChange }: any) => {
 
   if (isLoading) {
     return (
-      <div className="mt-6 space-y-4">
+      <div className="space-y-4">
         <Skeleton className="h-52 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -112,11 +112,11 @@ const Ballot = ({ positions, setPositions, onEditableChange }: any) => {
   }
 
   if (error) {
-    return <Card className="mt-6 p-6 text-sm text-destructive">{error}</Card>;
+    return <Card className="p-6 text-sm text-destructive">{error}</Card>;
   }
 
   return (
-    <div className="mt-6 space-y-6">
+    <div className="space-y-6">
       {/* The ballot header exactly as voters will see it. */}
       <Header electionDetails={election} />
 

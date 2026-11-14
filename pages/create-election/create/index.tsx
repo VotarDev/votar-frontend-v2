@@ -435,7 +435,9 @@ const Create = () => {
               onStepChange={goToStep}
             />
           </div>
+          {/* Same spacing under the step indicator as the edit page. */}
           <div
+            className="mt-6"
             onInputCapture={() => setHasUnsavedChanges(true)}
             onChangeCapture={() => setHasUnsavedChanges(true)}
           >

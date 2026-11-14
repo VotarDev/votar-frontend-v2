@@ -264,7 +264,7 @@ const Details = ({
   const endTimeError = fieldErrors.endTime || timeOrderError;
 
   return (
-    <div className="mt-6 space-y-6">
+    <div className="space-y-6">
       <form
         className="space-y-6"
         encType="multipart/form-data"
