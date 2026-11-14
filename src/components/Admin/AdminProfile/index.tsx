@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../AdminLayout";
-import Table from "@mui/material/Table";
-import { styled } from "@mui/material/styles";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Modal from "../../Modal";
-import { AnimatePresence } from "framer-motion";
-import { CircularProgress } from "@mui/material";
+import { Loader2, Lock, Plus, ShieldCheck, Users } from "lucide-react";
+import PageHeader from "@/src/components/shared/PageHeader";
+import EmptyState from "@/src/components/shared/EmptyState";
+import DialogShell from "@/src/components/shared/DialogShell";
+import { Card } from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import { Switch } from "@/src/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/ui/table";
 import Cookies from "universal-cookie";
 import toast from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
@@ -48,6 +55,7 @@ const AdminProfile = () => {
   const [showModal, setShowModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const closeModal = () => setShowModal(false);
+  const [accessPending, setAccessPending] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -160,34 +168,57 @@ const AdminProfile = () => {
     }
   };
 
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
-      border: "none",
-    },
-  }));
+  const toggleAccess = async (target: AdminRecord, hasAccess: boolean) => {
+    setAccessPending(target._id);
+    await handleAccessChange(target, hasAccess);
+    setAccessPending(null);
+  };
+
+  const AccessSwitch = ({ admin, locked }: { admin: AdminRecord; locked: boolean }) => (
+    <div className="inline-flex items-center gap-2">
+      <Switch
+        checked={admin.hasAccess}
+        disabled={locked || accessPending === admin._id}
+        onCheckedChange={(value) => toggleAccess(admin, value)}
+        aria-label={`Access for ${admin.username}`}
+      />
+      {accessPending === admin._id && (
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+      )}
+    </div>
+  );
+
+  const RoleBadge = ({ admin }: { admin: AdminRecord }) =>
+    admin.sudo ? <Badge variant="secondary">Superadmin</Badge> : <Badge variant="muted">Admin</Badge>;
 
   if (isLoading) {
-    return <AdminLayout><div className="text-center mt-12"><CircularProgress size={30} /></div></AdminLayout>;
+    return (
+      <AdminLayout>
+        <div className="mx-auto w-full max-w-6xl space-y-6">
+          <Skeleton className="h-10 w-56" />
+          <Skeleton className="h-28 w-full rounded-xl" />
+          <Skeleton className="h-72 w-full rounded-xl" />
+        </div>
+      </AdminLayout>
+    );
   }
 
   if (isAuthorized !== true) {
     return (
       <AdminLayout>
-        <div className="my-[60px] max-w-[1300px] mx-auto rounded-lg bg-white p-8 shadow">
-          <h1 className="text-2xl font-bold">Admin Profile</h1>
-          <p className="mt-4 text-slate-600">
-            {isAuthorized === false
-              ? "This page is limited to superadmins."
-              : loadError || "Could not verify your admin access."}
-          </p>
+        <div className="mx-auto w-full max-w-6xl space-y-6">
+          <PageHeader title="Admin profile" />
+          <Card>
+            <EmptyState
+              icon={Lock}
+              title={isAuthorized === false ? "Superadmins only" : "We couldn't check your access"}
+              description={
+                isAuthorized === false
+                  ? "Only superadmins can manage admin accounts."
+                  : loadError || "Could not verify your admin access."
+              }
+            />
+          </Card>
         </div>
       </AdminLayout>
     );
@@ -195,99 +226,149 @@ const AdminProfile = () => {
 
   return (
     <AdminLayout>
-      <div className="my-[60px] max-w-[1300px] mx-auto">
-        <div className="pb-9 font-bold text-2xl">Admin Profile</div>
-        <div className="shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] p-4 sm:p-8">
-          {loadError && <p role="alert" className="mb-4 text-red-600">{loadError}</p>}
-          {/* Mobile card list */}
-          <div className="flex flex-col gap-3 sm:hidden">
-            {admins.map((admin, index) => {
-              const protectedAccount = admin.sudo || admin._id === profile?._id;
-              return (
-                <div key={admin._id} className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-xs font-medium text-gray-400">#{String(index + 1).padStart(2, "0")}</div>
-                      <div className="truncate text-sm font-semibold text-gray-800">{admin.username}</div>
-                    </div>
-                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${admin.sudo ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
-                      {admin.sudo ? "Superadmin" : "Admin"}
-                    </span>
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-3 text-sm">
-                    <label className="flex items-center gap-2 text-gray-600">
-                      <input
-                        aria-label={`Access for ${admin.username}`}
-                        type="checkbox"
-                        checked={admin.hasAccess}
-                        disabled={protectedAccount}
-                        onChange={(event) => handleAccessChange(admin, event.target.checked)}
-                      />
-                      Has access
-                    </label>
-                    {!protectedAccount && (
-                      <div className="flex items-center gap-3">
-                        <EditAdminForm selectedAdmin={admin} onSave={handleUpdateAdmin} isSaving={isSaving} />
-                        <DeleteDialog selectedAdmin={admin} onDelete={handleDeleteAdmin} isDeleting={isSaving} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-            {admins.length === 0 && <p className="py-6 text-center text-sm text-gray-500">No admin accounts found.</p>}
-          </div>
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <PageHeader
+          title="Admin profile"
+          description="Your account, and the administrators who can sign in to the admin console."
+          actions={
+            <Button onClick={() => setShowModal(true)}>
+              <Plus /> Add admin
+            </Button>
+          }
+        />
 
-          {/* Desktop table */}
-          <TableContainer sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }} className="table-scroll">
-            <Table sx={{ minWidth: 700, borderCollapse: "separate", borderSpacing: "0" }} stickyHeader aria-label="Admin accounts">
-              <TableHead>
-                <TableRow className="text-white font-bold">
-                  {["S/N", "Username", "Role", "Access", "Edit", "Delete"].map((header) => (
-                    <StyledTableCell key={header} align="center">{header}</StyledTableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {admins.map((admin, index) => {
+        {profile && (
+          <Card className="flex flex-col gap-4 p-5 smm:flex-row smm:items-center">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
+              <ShieldCheck className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Signed in as
+              </p>
+              <p className="truncate text-lg font-semibold text-foreground">{profile.username}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="secondary">{profile.sudo ? "Superadmin" : "Admin"}</Badge>
+              <Badge variant={profile.hasAccess ? "success" : "muted"}>
+                {profile.hasAccess ? "Access on" : "Access off"}
+              </Badge>
+            </div>
+          </Card>
+        )}
+
+        <Card className="overflow-hidden">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <h2 className="font-semibold text-foreground">Admin accounts</h2>
+            <span className="text-sm text-muted-foreground">
+              {admins.filter((a) => a.hasAccess).length} of {admins.length} with access
+            </span>
+          </div>
+          {loadError && (
+            <p role="alert" className="border-b border-border bg-red-50 px-4 py-2 text-sm text-red-700">
+              {loadError}
+            </p>
+          )}
+
+          {admins.length === 0 ? (
+            <EmptyState
+              icon={Users}
+              title="No admin accounts yet"
+              action={
+                <Button variant="outline" onClick={() => setShowModal(true)}>
+                  <Plus /> Add admin
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <ul className="divide-y divide-border smm:hidden">
+                {admins.map((admin) => {
                   const protectedAccount = admin.sudo || admin._id === profile?._id;
                   return (
-                    <TableRow key={admin._id}>
-                      <StyledTableCell align="center">{String(index + 1).padStart(2, "0")}</StyledTableCell>
-                      <StyledTableCell align="center">{admin.username}</StyledTableCell>
-                      <StyledTableCell align="center">{admin.sudo ? "Superadmin" : "Admin"}</StyledTableCell>
-                      <StyledTableCell align="center">
-                        <input
-                          aria-label={`Access for ${admin.username}`}
-                          type="checkbox"
-                          checked={admin.hasAccess}
-                          disabled={protectedAccount}
-                          onChange={(event) => handleAccessChange(admin, event.target.checked)}
-                        />
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {!protectedAccount && <EditAdminForm selectedAdmin={admin} onSave={handleUpdateAdmin} isSaving={isSaving} />}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {!protectedAccount && <DeleteDialog selectedAdmin={admin} onDelete={handleDeleteAdmin} isDeleting={isSaving} />}
-                      </StyledTableCell>
-                    </TableRow>
+                    <li key={admin._id} className="space-y-3 p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">
+                            {admin.username}
+                            {admin._id === profile?._id && (
+                              <span className="ml-1.5 text-xs font-normal text-muted-foreground">(you)</span>
+                            )}
+                          </p>
+                        </div>
+                        <RoleBadge admin={admin} />
+                      </div>
+                      <div className="flex items-center justify-between gap-3">
+                        <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <AccessSwitch admin={admin} locked={protectedAccount} />
+                          {admin.hasAccess ? "Can sign in" : "No access"}
+                        </label>
+                        {!protectedAccount && (
+                          <div className="flex items-center gap-1">
+                            <EditAdminForm selectedAdmin={admin} onSave={handleUpdateAdmin} isSaving={isSaving} />
+                            <DeleteDialog selectedAdmin={admin} onDelete={handleDeleteAdmin} isDeleting={isSaving} />
+                          </div>
+                        )}
+                      </div>
+                    </li>
                   );
                 })}
-                {admins.length === 0 && <TableRow><StyledTableCell colSpan={6} align="center">No admin accounts found.</StyledTableCell></TableRow>}
-              </TableBody>
-            </Table>
-          </TableContainer>
-          <div className="flex justify-center">
-            <button type="button" onClick={() => setShowModal(true)} className="w-44 h-12 mt-10 flex justify-center items-center bg-blue-700 gap-2.5 text-zinc-100 lg:text-xl text-base font-semibold outline-none rounded-lg">
-              <span>+</span><span>Add Admin</span>
-            </button>
-          </div>
-          <AnimatePresence mode="wait">
-            {showModal && <Modal key="modal" handleClose={closeModal}><AddAdmin onSubmit={handleCreateAdmin} onCancel={closeModal} isSaving={isSaving} /></Modal>}
-          </AnimatePresence>
-        </div>
+              </ul>
+
+              <div className="hidden smm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Access</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {admins.map((admin) => {
+                      const protectedAccount = admin.sudo || admin._id === profile?._id;
+                      return (
+                        <TableRow key={admin._id}>
+                          <TableCell className="font-medium text-foreground">
+                            {admin.username}
+                            {admin._id === profile?._id && (
+                              <span className="ml-1.5 text-xs font-normal text-muted-foreground">(you)</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <RoleBadge admin={admin} />
+                          </TableCell>
+                          <TableCell>
+                            <AccessSwitch admin={admin} locked={protectedAccount} />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {protectedAccount ? (
+                              <span className="text-xs text-muted-foreground">Protected</span>
+                            ) : (
+                              <div className="inline-flex items-center gap-1">
+                                <EditAdminForm selectedAdmin={admin} onSave={handleUpdateAdmin} isSaving={isSaving} />
+                                <DeleteDialog selectedAdmin={admin} onDelete={handleDeleteAdmin} isDeleting={isSaving} />
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
+          )}
+        </Card>
+        <p className="text-xs text-muted-foreground">
+          Superadmin accounts and your own account are protected: their access can&apos;t be changed and they can&apos;t be edited or deleted here.
+        </p>
       </div>
+
+      <DialogShell open={showModal} onClose={closeModal} labelledBy="add-admin-title" className="max-w-md">
+        <AddAdmin onSubmit={handleCreateAdmin} onCancel={closeModal} isSaving={isSaving} />
+      </DialogShell>
     </AdminLayout>
   );
 };
