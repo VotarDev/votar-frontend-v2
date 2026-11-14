@@ -23,9 +23,14 @@ const ForgotPasswordComponent = () => {
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     e.preventDefault();
+    const trimmed = email.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error("Enter a valid email address");
+      return;
+    }
     try {
       setIsLoading(true);
-      const { data } = await forgotPasswordRequest({ email });
+      const { data } = await forgotPasswordRequest({ email: trimmed });
       if (data) {
         console.log(data);
         setIsLoading(false);
@@ -38,8 +43,7 @@ const ForgotPasswordComponent = () => {
           error.response.data.message) ||
         error.message ||
         error.toString();
-      console.log(error);
-      toast.error(error.response.data.message || error.message);
+      toast.error(message);
 
       setIsLoading(false);
     }

@@ -1,54 +1,80 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/dashboard", "/access"];
-const publicRoutes = ["/signin", "/forgot-password"];
+/** Organiser pages: need the organiser's `user-token` cookie. */
+const ORGANISER_ROUTES = [
+  "/dashboard",
+  "/elections",
+  "/create-election",
+  "/monitor-election", // the organiser's links page (public results are /monitoring-elections)
+  "/votar-forms",
+  "/profile",
+  "/participate",
+  "/preview-election",
+  "/cast-votes",
+];
+
+/** Where Google sign-in sends the organiser back, with ?token=… */
+const GOOGLE_RETURN_ROUTE = "/dashboard";
+
+const matches = (pathname: string, route: string) =>
+  pathname === route || pathname.startsWith(`${route}/`);
 
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
-  const cookies = request.cookies;
-  let token = cookies.get("user-token")?.value;
+  const userToken = request.cookies.get("user-token")?.value;
+  const adminToken = request.cookies.get("admin-token")?.value;
+
+  // Google sign-in returns to the dashboard with the token in the URL: store
+  // it as the session cookie and drop it from the address bar. Only accepted
+  // on that one route, so a link like /anything?token=… can't sign someone
+  // into another account.
   const tokenFromUrl = searchParams.get("token");
-
-  console.log("Current pathname:", pathname);
-  console.log("Token from cookie:", token);
-  console.log("Token from URL:", tokenFromUrl);
-
-  // If there's a token in the URL, set it as a cookie and redirect to clean URL
-  if (tokenFromUrl) {
-    const cleanUrl = new URL(pathname, request.url);
-    // Remove token from search params for clean redirect
-    cleanUrl.search = "";
-
+  if (tokenFromUrl && pathname === GOOGLE_RETURN_ROUTE) {
+    const cleanUrl = request.nextUrl.clone();
+    cleanUrl.searchParams.delete("token");
     const response = NextResponse.redirect(cleanUrl);
     response.cookies.set("user-token", tokenFromUrl, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 days
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      httpOnly: false, // Changed to false so JavaScript can read it
+      sameSite: "lax",
+      httpOnly: false, // the app reads it to authorise API requests
     });
-
-    console.log("Setting cookie and redirecting to:", cleanUrl.toString());
     return response;
   }
 
-  // Allow public routes
-  if (publicRoutes.includes(pathname)) {
+  // Admin area (except its login page) needs the admin token.
+  if (matches(pathname, "/admin") && !matches(pathname, "/admin/login")) {
+    if (!adminToken) {
+      return NextResponse.redirect(new URL("/admin/login", request.url));
+    }
     return NextResponse.next();
   }
+  if (matches(pathname, "/admin/login") && adminToken) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
 
-  // Check if trying to access protected route without token
-  if (!token && protectedRoutes.some((route) => pathname.startsWith(route))) {
-    console.log("No token found, redirecting to signin");
+  // Organiser pages need the organiser token; come back here after signing in.
+  if (!userToken && ORGANISER_ROUTES.some((route) => matches(pathname, route))) {
     const signInUrl = new URL("/signin", request.url);
+    signInUrl.searchParams.set("next", pathname + request.nextUrl.search);
     return NextResponse.redirect(signInUrl);
   }
 
-  console.log("Allowing access to:", pathname);
+  // Already signed in: skip the sign-in form.
+  if (pathname === "/signin" && userToken) {
+    const next = searchParams.get("next");
+    const safe =
+      next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/signin")
+        ? next
+        : "/dashboard";
+    return NextResponse.redirect(new URL(safe, request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|assets|.*\\..*).*)"],
 };

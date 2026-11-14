@@ -9,6 +9,7 @@ import votarCreditReducer from "./features/votarCredit/votarCreditSlice";
 import creditSliceReducer from "./features/creditSlice/creditSlice";
 import { baseApi } from "./api/baseApi";
 import { invalidateOnWrite } from "./api/invalidateOnWrite";
+import { handleSessionExpiry } from "./api/sessionExpiry";
 import httpService from "@/utils/axios";
 
 const store = configureStore({
@@ -29,6 +30,8 @@ const store = configureStore({
 
 // Refresh cached data after writes made through the old axios calls.
 invalidateOnWrite(httpService, store.dispatch);
+// Sign out (and go to sign in) when the API rejects an expired token.
+handleSessionExpiry(httpService, store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

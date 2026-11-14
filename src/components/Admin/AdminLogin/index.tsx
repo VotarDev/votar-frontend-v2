@@ -1,4 +1,4 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import logo from "../../../../public/assets/logos/votar-logo.svg";
 import {
   TextField,
@@ -15,7 +15,6 @@ import { setAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
 import useForm from "@/utils/formValidation/useForm";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
-import ro from "date-fns/locale/ro/index.js";
 
 const Login = () => {
   const useOutlinedInputStyles = makeStyles({
@@ -33,6 +32,15 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const dispatch = useDispatch();
+
+  // Sent here because the admin session ran out.
+  useEffect(() => {
+    if (router.query.expired) {
+      toast.error("Your session has expired. Please sign in again.", {
+        id: "admin-session-expired",
+      });
+    }
+  }, [router.query.expired]);
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { signOut, useSession } from "next-auth/react";
-import Cookies from "universal-cookie";
 import {
   Coins,
   FileText,
@@ -32,6 +31,8 @@ import {
 import { cn } from "@/utils/cn";
 import AddCreditsDialog from "./AddCreditsDialog";
 import ConfirmDialog from "@/src/components/shared/ConfirmDialog";
+import { clearUserSession } from "@/utils/session";
+import { baseApi } from "@/redux/api/baseApi";
 
 interface NavItem {
   label: string;
@@ -123,14 +124,15 @@ const SidebarContent = ({ collapsed = false }: SidebarContentProps) => {
       .join("") || "V";
 
   const handleLogout = async () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    new Cookies().remove("user-token", { path: "/" });
+    // Token cookie, API header, saved user and any half-made election.
+    clearUserSession();
     dispatch(logout());
     dispatch(userData({}));
+    // Don't show this account's cached elections or credits to the next user.
+    dispatch(baseApi.util.resetApiState());
 
     if (session) {
-      return await signOut();
+      return await signOut({ callbackUrl: "/signin" });
     }
     router.push("/signin");
   };
