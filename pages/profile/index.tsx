@@ -1,66 +1,40 @@
 import React, { useState, useEffect } from "react";
-import withAuth from "@/hoc/withAuth";
 import DashboardLayout from "@/src/components/DashboardLayout";
-import ProfileHeader from "@/src/components/Profile/Header";
 import ProfileBody from "@/src/components/Profile/Body";
-import CardHeader from "@/src/components/CardDetailComponent/CardHeader";
-import CardsList from "@/src/components/CardDetailComponent/CardsList";
+import PaymentCards from "@/src/components/Profile/PaymentCards";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
+import PageHeader from "@/src/components/shared/PageHeader";
 import { getCards } from "@/utils/api";
 import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
-import { useCurrentUser, useUser } from "@/utils/hooks";
+import { useCurrentUserId } from "@/utils/hooks";
 import eventEmitter from "@/utils/eventsEmitter";
 
 const Profile = () => {
-  const [debitCards, setDebitCards] = useState([]);
-  const [error, setError] = useState(null);
-  const users = useCurrentUser();
-  const user = useUser();
+  const [debitCards, setDebitCards] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loadCard, setLoadCard] = useState(false);
-
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
-
-  const [cards, setCards] = useState([
-    {
-      id: 1,
-      name: "Zenith bank",
-      status: "Active",
-      cardHolder: "Anthony Okon",
-      cardNumber: "5-800-627-8372",
-      expires: "12/2023",
-    },
-  ]);
+  const USER_ID = useCurrentUserId();
 
   useEffect(() => {
+    if (!USER_ID) return;
+
     const fetchCards = async () => {
-      const cookies = new Cookies();
-      const token = cookies.get("user-token");
-      if (token) {
-        setAuthToken(token);
-      }
+      const token = new Cookies().get("user-token");
+      if (token) setAuthToken(token);
       setLoadCard(true);
       try {
         const response = await getCards(USER_ID);
-
         setDebitCards(response.data.data);
-        setLoadCard(false);
+        setError(null);
       } catch (error: any) {
         const message =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-
+          error?.response?.data?.message || error?.message || error?.toString();
+        // A failed request means there's no wallet yet (see PaymentCards).
         setError(message);
-        setLoadCard(false);
-
         console.log(message);
+      } finally {
+        setLoadCard(false);
       }
     };
 
@@ -75,18 +49,18 @@ const Profile = () => {
     return () => {
       eventEmitter.off("cardAdded", handleCardAdded);
     };
-  }, []);
+  }, [USER_ID]);
+
   return (
     <ProtectedRoutes>
       <DashboardLayout>
-        <ProfileHeader />
-        <ProfileBody />
-        <div>
-          <CardHeader />
-          {/* <h1 className="text-xl">Coming Soon...</h1> */}
-          <CardsList
-            cards={cards}
-            setNewCard={setCards}
+        <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+          <PageHeader
+            title="Profile"
+            description="Manage your personal details and payment cards."
+          />
+          <ProfileBody />
+          <PaymentCards
             debitCards={debitCards}
             error={error}
             userId={USER_ID}

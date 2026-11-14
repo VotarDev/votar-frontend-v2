@@ -1,21 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
-import Avatar from "@mui/material/Avatar";
-import { MdEdit } from "react-icons/md";
-import { useCurrentUser, useUser } from "@/utils/hooks";
-import setAuthToken from "@/utils/setAuthToken";
-import { getUserData } from "@/utils/api";
-import { CircularProgress } from "@mui/material";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { MdOutlineCancel } from "react-icons/md";
-import { GiCheckMark } from "react-icons/gi";
-import { IoCopy } from "react-icons/io5";
-import toast from "react-hot-toast";
-import { updateProfile, getImages } from "@/utils/api";
-import { userData } from "@/redux/features/userProfile/userProfileSlice";
 import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
 import Cookies from "universal-cookie";
+import {
+  AlertCircle,
+  BadgeCheck,
+  Camera,
+  Copy,
+  Loader2,
+  XCircle,
+} from "lucide-react";
+import { useCurrentUserId, useUser } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
+import { getUserData, updateProfile } from "@/utils/api";
+import { userData } from "@/redux/features/userProfile/userProfileSlice";
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import FormSection from "@/src/components/shared/form/FormSection";
+import FormField from "@/src/components/shared/form/FormField";
+import EmptyState from "@/src/components/shared/EmptyState";
 
-interface User {
+interface ProfileForm {
   fullname: string;
   email: string;
   number: string;
@@ -24,40 +32,45 @@ interface User {
   profilePicture: string;
 }
 
+const EMPTY_FORM: ProfileForm = {
+  fullname: "",
+  email: "",
+  number: "",
+  address: "",
+  referralId: "",
+  profilePicture: "",
+};
+
 const ProfileBody = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [userImage, setUserImage] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const dispatch = useDispatch();
   const [error, setError] = useState("");
-  const users = useCurrentUser();
+  const [isVerified, setIsVerified] = useState(true);
+  const [userInput, setUserInput] = useState<ProfileForm>(EMPTY_FORM);
+  const dispatch = useDispatch();
   const user = useUser();
   const router = useRouter();
-  const [token, setToken] = useState<string | null>("");
-  const [isVerified, setIsVerified] = useState(true);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const [userInput, setUserInput] = useState<User>({
-    fullname: "",
-    email: "",
-    number: "",
-    address: "",
-    referralId: "",
-    profilePicture: "",
-  });
-  const cookies = new Cookies();
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+  const USER_ID = useCurrentUserId();
 
-  const handleImageChange = (e: any) => {
-    const file = e.target.files[0];
+  // Preview a newly chosen avatar, releasing the object URL afterwards.
+  useEffect(() => {
+    if (!selectedImage) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(selectedImage);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [selectedImage]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) setSelectedImage(file);
   };
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserInput((prevInput) => ({
       ...prevInput,
       [e.target.name]: e.target.value,
@@ -65,60 +78,43 @@ const ProfileBody = () => {
   };
 
   const getUser = async () => {
-    const token = cookies.get("user-token");
-    if (token) {
-      setAuthToken(token);
-    }
+    if (!USER_ID) return;
+    const token = new Cookies().get("user-token");
+    if (token) setAuthToken(token);
     setIsLoading(true);
+    setError("");
 
     try {
       const { data } = await getUserData(USER_ID);
-
       if (data) {
         dispatch(userData(data));
-        setUserInput((prev) => ({
-          ...prev,
-          fullname: data.data.userName,
-          email: data.data.email,
-          number: data.data.phoneNumber ? data.data.phoneNumber : "",
-          address: data.data.homeAddress ? data.data.homeAddress : "",
-          referralId: data.data.referal_id ? data.data.referal_id : "",
-          profilePicture: data.data.profile_picture,
-        }));
+        setUserInput({
+          fullname: data.data.userName || "",
+          email: data.data.email || "",
+          number: data.data.phoneNumber || "",
+          address: data.data.homeAddress || "",
+          referralId: data.data.referal_id || "",
+          profilePicture: data.data.profile_picture || "",
+        });
         setIsVerified(data.data.email_verified);
-
-        setIsLoading(false);
       }
     } catch (e: any) {
+      setError(e.message || "Something went wrong");
+    } finally {
       setIsLoading(false);
-      setError(e.message);
     }
   };
 
   useEffect(() => {
-    const getImagesFile = async () => {
-      if (userInput.profilePicture && userInput.fullname) {
-        try {
-          const { data } = await getImages(
-            userInput.fullname,
-            userInput.profilePicture
-          );
-          if (data) {
-            console.log(data.data);
-          }
-        } catch (e: any) {
-          console.log(e);
-        }
-      }
-    };
-    getImagesFile();
-  }, []);
+    getUser();
+  }, [USER_ID]);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const { fullname, email, number, address, referralId } = userInput;
+      // Same fields as before; address and referral ID aren't part of the update.
+      const { fullname, email, number } = userInput;
       const formData = new FormData();
       formData.append("userName", fullname);
       formData.append("country", "Nigeria");
@@ -130,217 +126,227 @@ const ProfileBody = () => {
 
       const { data } = await updateProfile(formData, USER_ID);
       if (data) {
-        console.log(data);
         toast.success(data.message);
-        setIsUpdating(false);
+        setSelectedImage(null);
       }
     } catch (e: any) {
-      setIsUpdating(false);
-      toast.error(e.message);
+      toast.error(e?.response?.data?.message || e.message);
       console.log(e);
+    } finally {
+      setIsUpdating(false);
     }
     getUser();
   };
+
   const handleCopy = async () => {
-    if (inputRef.current) {
-      const selectedText = inputRef.current.value;
-
-      try {
-        await navigator.clipboard.writeText(selectedText);
-
-        toast.success("Copied to clipboard!");
-      } catch (error) {
-        console.error("Failed to copy text:", error);
-        toast.error("Copy operation failed. Please try again.");
-      }
+    try {
+      await navigator.clipboard.writeText(userInput.referralId);
+      toast.success("Copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      toast.error("Copy operation failed. Please try again.");
     }
   };
 
-  useEffect(() => {
-    getUser();
-  }, []);
-
-  if (isLoading) {
+  if (isLoading && !userInput.email) {
     return (
-      <div className="my-10">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+        <Skeleton className="h-80 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full rounded-lg" />
       </div>
     );
   }
+
   if (error) {
-    return <div className="my-10">Something went wrong</div>;
+    return (
+      <Card>
+        <EmptyState
+          icon={AlertCircle}
+          title="Something went wrong"
+          description="We couldn't load your profile."
+          action={
+            <Button variant="outline" onClick={getUser}>
+              Try again
+            </Button>
+          }
+        />
+      </Card>
+    );
   }
 
+  const avatarSrc =
+    previewUrl || userInput.profilePicture || user?.user?.picture || "";
+  const initials =
+    userInput.fullname
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "V";
+
+  const verificationBadge = isVerified ? (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+      <BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />
+      Verified
+    </span>
+  ) : (
+    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
+      <XCircle className="h-3.5 w-3.5" aria-hidden="true" />
+      Unverified
+    </span>
+  );
+
   return (
-    <div className="my-10 max-w-[35rem] mx-auto">
-      <form>
-        <div className="flex justify-center flex-col items-center">
-          <label htmlFor="imageInput" className="relative">
-            <Avatar
-              src={
-                selectedImage
-                  ? URL.createObjectURL(selectedImage)
-                  : userInput.profilePicture
-                  ? userInput.profilePicture
-                  : user.user.picture
-              }
-              sx={{ width: 150, height: 150 }}
-            />
-
-            <div className="absolute bottom-3 right-[-5px] text-xl text-white cursor-pointer w-10 h-10 bg-[#015CE9] flex items-center justify-center rounded-full">
-              <MdEdit />
-            </div>
-          </label>
-          <input
-            type="file"
-            id="imageInput"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleImageChange}
-          />
-        </div>
-        <div className="bg-[#015CE9] font-semibold  px-5 py-4 rounded-lg mt-5 text-white text-center relative max-w-[17rem] mx-auto">
-          <div className="bg-card bg-center bg-cover opacity-30 w-full h-full absolute top-0 right-0 left-0 "></div>
-          <div className="flex justify-between">
-            <div className="z-1">
-              <div className="">
-                Unredeemed <br /> Referral
-              </div>
-              <div className="text-[40px]">##</div>
-            </div>
-
-            <div className="z-1">
-              <div className="">
-                Redeemed
-                <br /> Referral
-              </div>
-              <div className="text-[40px]">##</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-col gap-5">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="fullname" className="font-semibold">
-              Full Name
-            </label>
-            <input
-              type="text"
-              name="fullname"
-              id="fullname"
-              defaultValue={userInput.fullname}
-              onChange={handleInputChange}
-              className="h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="relative">
-              <label htmlFor="email" className="font-semibold">
-                Email
-              </label>
-              <div className=" relative">
-                <input
-                  type="text"
-                  name="email"
-                  id="email"
-                  defaultValue={userInput.email}
-                  onChange={handleInputChange}
-                  className="h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-                />
-                {!isVerified ? (
-                  <>
-                    <span className="absolute top-1/2 right-4 -translate-y-1/2 text-xl text-red-600">
-                      <MdOutlineCancel />
-                    </span>
-                  </>
-                ) : (
-                  <span className="absolute top-1/2 right-4 -translate-y-1/2 text-xl h-6 w-6 rounded-full flex justify-center items-center bg-[#00e239] text-white">
-                    <GiCheckMark />
-                  </span>
-                )}
-              </div>
-              {!isVerified && (
-                <div className="absolute right-[-90px] top-1/2 -translate-y-[20%] leading-none flex flex-col gap-2 text-red-600 text-sm">
-                  <div className="">Unverified</div>
-                  <div className="text-[#000] cursor-pointer">
-                    Click to verify
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="number" className="font-semibold">
-              Number
-            </label>
-            <input
-              type="text"
-              name="number"
-              id="number"
-              defaultValue={userInput.number}
-              onChange={handleInputChange}
-              className="h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label htmlFor="address" className="font-semibold">
-              Address
-            </label>
-            <input
-              type="text"
-              name="address"
-              id="address"
-              defaultValue={userInput.address}
-              onChange={handleInputChange}
-              className="h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label htmlFor="referralId" className="font-semibold">
-              Referral ID
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="referralId"
-                id="referralId"
-                onChange={handleInputChange}
-                defaultValue={userInput.referralId}
-                ref={inputRef}
-                className="h-[48px] w-full p-4 rounded border border-[#1e1e1e] outline-none"
+    <div className="grid gap-6 lg:grid-cols-[320px_1fr] lg:items-start">
+      {/* Overview */}
+      <Card className="flex flex-col items-center p-6 text-center">
+        <label
+          htmlFor="imageInput"
+          className="group relative cursor-pointer"
+          aria-label="Change profile photo"
+        >
+          <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-secondary text-2xl font-semibold text-primary ring-4 ring-white shadow-md">
+            {avatarSrc ? (
+              <img
+                src={avatarSrc}
+                alt=""
+                className="h-full w-full object-cover"
               />
-              <span
-                className="absolute top-1/2 -translate-y-1/2 right-4 text-xl cursor-pointer"
+            ) : (
+              initials
+            )}
+          </span>
+          <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-primary text-primary-foreground shadow-sm transition-transform group-hover:scale-105">
+            <Camera className="h-4 w-4" aria-hidden="true" />
+          </span>
+        </label>
+        <input
+          type="file"
+          id="imageInput"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageChange}
+        />
+        {selectedImage && (
+          <p className="mt-2 text-xs text-primary">
+            New photo selected · save to apply
+          </p>
+        )}
+
+        <h2 className="mt-4 text-lg font-semibold capitalize text-foreground">
+          {userInput.fullname || "Your name"}
+        </h2>
+        <p className="mt-0.5 break-all text-sm text-muted-foreground">
+          {userInput.email}
+        </p>
+        <div className="mt-2">{verificationBadge}</div>
+
+        {userInput.referralId && (
+          <div className="mt-6 w-full border-t border-border pt-5 text-left">
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              Referral ID
+            </p>
+            <div className="mt-2 flex items-center gap-2">
+              <code className="min-w-0 flex-1 truncate rounded-md bg-muted px-3 py-2 font-mono text-sm text-foreground">
+                {userInput.referralId}
+              </code>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
                 onClick={handleCopy}
+                aria-label="Copy referral ID"
+                className="shrink-0"
               >
-                <IoCopy />
-              </span>
+                <Copy />
+              </Button>
             </div>
           </div>
-        </div>
+        )}
+      </Card>
+
+      {/* Details */}
+      <form onSubmit={handleSubmit}>
+        <FormSection
+          title="Personal information"
+          description="Keep your name and contact details up to date."
+        >
+          <div className="grid gap-6 md:grid-cols-2">
+            <FormField label="Full name" htmlFor="fullname">
+              <Input
+                id="fullname"
+                name="fullname"
+                value={userInput.fullname}
+                onChange={handleInputChange}
+              />
+            </FormField>
+            <FormField label="Phone number" htmlFor="number" optional>
+              <Input
+                id="number"
+                name="number"
+                type="tel"
+                value={userInput.number}
+                onChange={handleInputChange}
+              />
+            </FormField>
+            <FormField
+              label="Email"
+              htmlFor="email"
+              className="md:col-span-2"
+              hint={
+                isVerified
+                  ? undefined
+                  : "Your email isn't verified yet. Sign in again to get a new verification code."
+              }
+            >
+              <div className="relative">
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={userInput.email}
+                  onChange={handleInputChange}
+                  className="pr-28"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {verificationBadge}
+                </span>
+              </div>
+            </FormField>
+            <FormField
+              label="Address"
+              htmlFor="address"
+              optional
+              className="md:col-span-2"
+            >
+              <Input
+                id="address"
+                name="address"
+                value={userInput.address}
+                onChange={handleInputChange}
+              />
+            </FormField>
+          </div>
+
+          <div className="flex flex-col-reverse gap-2 border-t border-border pt-5 smm:flex-row smm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="min-w-[140px]"
+            >
+              {isUpdating && <Loader2 className="animate-spin" />}
+              Save changes
+            </Button>
+          </div>
+        </FormSection>
       </form>
-      <div className="flex gap-4 justify-end smm:flex-row flex-col my-10">
-        <div>
-          <button
-            className="w-[200px] flex justify-center items-center gap-2 p-[10px] border border-[#015CE9] rounded-lg text-[#015CE9] lg:text-[18px] text-base h-[52px]"
-            onClick={() => router.back()}
-          >
-            <span></span>
-            Back To Home
-          </button>
-        </div>
-        <div>
-          <button
-            className="w-[200px] flex justify-center items-center gap-2 p-[10px] bg-[#015CE9] rounded-lg text-[#f3f3f3] lg:text-[18px] text-base h-[52px]"
-            disabled={isUpdating}
-            onClick={handleSubmit}
-          >
-            {isUpdating && <CircularProgress color="inherit" size={20} />}
-            Save Changes
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
