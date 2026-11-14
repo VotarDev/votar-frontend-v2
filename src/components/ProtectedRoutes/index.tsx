@@ -4,6 +4,7 @@ import { getUserData } from "@/utils/api";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
+import PageLoader from "@/src/components/shared/PageLoader";
 
 type ProtectedRoutesProps = {
   children: ReactNode;
@@ -96,11 +97,7 @@ function ProtectedRoutes({
   };
 
   if (loading || redirecting) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <PageLoader message={redirecting ? "Taking you to sign in" : undefined} />;
   }
 
   if (verificationError || emailVerified === false) {
