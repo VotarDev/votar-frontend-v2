@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { FaAnglesRight } from "react-icons/fa6";
-import Modal from "@/src/components/Modal";
-import { AnimatePresence } from "framer-motion";
+import { ArrowRight, History } from "lucide-react";
 import { VoterResponse } from "@/utils/types";
+import DialogShell from "@/src/components/shared/DialogShell";
+import { Button } from "@/src/components/ui/button";
 
 interface ChangeLog {
   _id: string;
@@ -17,6 +17,15 @@ interface ChangeLogModalProps {
   currentVoter: VoterResponse;
 }
 
+const RELEVANT_FIELDS = ["name", "email", "phoneNumber", "subgroup"];
+const FIELD_LABELS: Record<string, string> = {
+  name: "Name",
+  email: "Email",
+  phoneNumber: "Phone",
+  subgroup: "Sub-group",
+};
+
+/** A voter's earlier details next to their current ones. Hidden when unchanged. */
 const ChangeLogModal = ({
   changeLogs,
   voterId,
@@ -24,84 +33,84 @@ const ChangeLogModal = ({
 }: ChangeLogModalProps) => {
   const [open, setOpen] = useState(false);
 
-  const handleClickOpen = () => setOpen(true);
-  const handleClickClose = () => setOpen(false);
-
   if (changeLogs.length === 0) return null;
 
-  const relevantFields = ["name", "email", "phoneNumber", "subgroup"];
+  const titleId = `change-log-${voterId}`;
 
   return (
-    <div>
-      <div
-        onClick={handleClickOpen}
-        className="cursor-pointer text-blue-700 hover:text-blue-800 font-semibold"
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-secondary"
       >
-        View
-      </div>
-      <AnimatePresence mode="wait">
-        {open && (
-          <Modal key="modal" handleClose={handleClickClose}>
-            <div className="bg-white rounded-lg py-6 px-10 text-left max-w-[800px] w-full">
-              <div className="text-xl font-semibold pb-5">
-                Change Log for Voter ID: {voterId}
-              </div>
-              <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                {changeLogs.map((log, index) => {
-                  const changedFields = relevantFields.filter(
-                    (field) =>
-                      log[field as keyof ChangeLog] !== undefined &&
-                      log[field as keyof ChangeLog] !==
-                        currentVoter[field as keyof VoterResponse]
-                  );
+        <History className="h-3.5 w-3.5" aria-hidden="true" />
+        Changes
+      </button>
 
-                  if (changedFields.length === 0) return null;
+      <DialogShell
+        open={open}
+        onClose={() => setOpen(false)}
+        labelledBy={titleId}
+        className="max-w-lg"
+      >
+        <h2 id={titleId} className="text-lg font-semibold text-foreground">
+          Change history
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Voter ID: {voterId}
+        </p>
+        <div className="mt-4 max-h-72 space-y-3 overflow-y-auto pr-1">
+          {changeLogs.map((log) => {
+            const changedFields = RELEVANT_FIELDS.filter(
+              (field) =>
+                log[field as keyof ChangeLog] !== undefined &&
+                log[field as keyof ChangeLog] !==
+                  currentVoter[field as keyof VoterResponse],
+            );
+            if (changedFields.length === 0) return null;
 
-                  return (
-                    <div
-                      key={log._id}
-                      className="py-2 border-b border-gray-100 last:border-b-0"
-                    >
-                      {changedFields.map((field) => (
-                        <div
-                          key={field}
-                          className="flex justify-between items-center gap-3 "
-                        >
-                          <span className="capitalize text-lg font-semibold">
-                            {field}:
-                          </span>
-                          <div className="flex items-center gap-2 text-base">
-                            <span className="text-gray-800">
-                              {log[field as keyof ChangeLog] || "N/A"}
-                            </span>
-                            <span className="text-green-500">
-                              <FaAnglesRight />
-                            </span>
-                            <span className="text-gray-800">
-                              {currentVoter[field as keyof VoterResponse] ||
-                                "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+            return (
+              <div
+                key={log._id}
+                className="space-y-2 rounded-lg border border-border p-3"
+              >
+                {changedFields.map((field) => (
+                  <div key={field} className="text-sm">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      {FIELD_LABELS[field] || field}
+                    </p>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <span className="text-muted-foreground line-through">
+                        {log[field as keyof ChangeLog] || "N/A"}
+                      </span>
+                      <ArrowRight
+                        className="h-3.5 w-3.5 shrink-0 text-emerald-500"
+                        aria-hidden="true"
+                      />
+                      <span className="font-medium text-foreground">
+                        {(currentVoter[
+                          field as keyof VoterResponse
+                        ] as string) || "N/A"}
+                      </span>
                     </div>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleClickClose}
-                  className="bg-gray-300 text-gray-800 w-40 h-12 rounded flex items-center justify-center outline-none hover:bg-gray-400"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </Modal>
-        )}
-      </AnimatePresence>
-    </div>
+            );
+          })}
+        </div>
+        <div className="mt-6 flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setOpen(false)}
+          >
+            Close
+          </Button>
+        </div>
+      </DialogShell>
+    </>
   );
 };
 

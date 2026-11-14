@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import ProtectedRoutes from "@/src/components/ProtectedRoutes";
 import DetailsPage from "@/src/components/ElectionsPage/DetailsPage";
 import BallotsPage from "@/src/components/ElectionsPage/BallotsPage";
-import VoterPage from "@/src/components/ElectionsPage/VoterPage";
+import VotersPage from "@/src/components/CreateElection/Steps/VotersPage";
 import Pay from "@/src/components/CreateElection/Steps/Pay";
 import MonitorElection from "@/src/components/CreateElection/Steps/MonitorElection";
 import StepHeader from "@/src/components/CreateElection/StepHeader";
@@ -411,7 +411,10 @@ const ElectionDetail = () => {
                 {stepName === "Ballot" && (
                   <BallotsPage position={position} setPosition={setPosition} />
                 )}
-                {stepName === "Voters Page" && <VoterPage />}
+                {/* Same Voters step as the create flow. */}
+                {stepName === "Voters Page" && (
+                  <VotersPage electionId={electionID} />
+                )}
                 {/* Same Pay and Monitor steps as the create flow. */}
                 {stepName === "Pay" && <Pay />}
                 {stepName === "Monitor Election" && (
