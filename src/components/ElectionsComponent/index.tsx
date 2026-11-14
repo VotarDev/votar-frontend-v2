@@ -7,7 +7,13 @@ import { Card } from "@/src/components/ui/card";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import PageHeader from "@/src/components/shared/PageHeader";
 import EmptyState from "@/src/components/shared/EmptyState";
-import { useGetElectionsQuery } from "@/redux/api/electionsApi";
+import {
+  ELECTIONS_PAGE_SIZE,
+  useGetElectionsPageQuery,
+  useGetElectionsQuery,
+} from "@/redux/api/electionsApi";
+import Pagination from "@/src/components/shared/Pagination";
+import { scrollToTop } from "@/utils/scrollToTop";
 import { useCurrentUserId } from "@/utils/hooks";
 import { getStatusForElection } from "@/utils/electionStatus";
 import type { ElectionStatus } from "@/utils/electionTime";
@@ -28,20 +34,29 @@ const ElectionsComponent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const {
-    data: elections = [],
-    isLoading,
-    isError,
-    refetch,
-  } = useGetElectionsQuery(userId ?? skipToken, {
-    refetchOnMountOrArgChange: 60,
-  });
-  const isPending = !userId || isLoading;
+  const [page, setPage] = useState(1);
+  const isFiltering = searchTerm.trim() !== "" || statusFilter !== "all";
+
+  // Browsing: the server sends elections a page at a time.
+  const pageQuery = useGetElectionsPageQuery(
+    userId && !isFiltering ? { userId, page } : skipToken,
+    { refetchOnMountOrArgChange: 60 },
+  );
+  // Searching or filtering needs every election, so they're loaded (once,
+  // then cached) only when the user starts to search or filter.
+  const allQuery = useGetElectionsQuery(
+    userId && isFiltering ? userId : skipToken,
+    { refetchOnMountOrArgChange: 60 },
+  );
+  const { isError, refetch } = isFiltering ? allQuery : pageQuery;
 
   // Newest first, each with its status worked out once.
   const withStatus = useMemo(() => {
     const now = Date.now();
-    return [...elections]
+    const source = isFiltering
+      ? allQuery.data ?? []
+      : pageQuery.data?.elections ?? [];
+    return [...source]
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -50,28 +65,66 @@ const ElectionsComponent = () => {
         election,
         status: getStatusForElection(election, now),
       }));
-  }, [elections]);
+  }, [isFiltering, allQuery.data, pageQuery.data]);
 
+  const matches = isFiltering
+    ? withStatus.filter(
+        ({ election, status }) =>
+          (statusFilter === "all" || status === statusFilter) &&
+          (election.name_of_election || "")
+            .toLowerCase()
+            .includes(searchTerm.trim().toLowerCase()),
+      )
+    : withStatus;
+
+  const pageSize = pageQuery.data?.limit || ELECTIONS_PAGE_SIZE;
+  // Elections the user has in total (known from either query).
+  const grandTotal = allQuery.data?.length ?? pageQuery.data?.total ?? 0;
+  const total = isFiltering ? matches.length : pageQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  // When filtering, page through the matches here.
+  const visible = isFiltering
+    ? matches.slice((page - 1) * pageSize, page * pageSize)
+    : matches;
+
+  // Skeletons while loading, including when a new page is on its way.
+  const isPending =
+    !userId ||
+    (isFiltering
+      ? allQuery.isLoading
+      : pageQuery.isLoading ||
+        (pageQuery.isFetching && pageQuery.data?.page !== page));
+
+  // Status counts need every election, so they appear once those are loaded.
   const counts = useMemo(() => {
+    if (!allQuery.data) return null;
     const result: Record<StatusFilter, number> = {
-      all: withStatus.length,
+      all: allQuery.data.length,
       active: 0,
       not_started: 0,
       ended: 0,
     };
-    withStatus.forEach(({ status }) => {
+    const now = Date.now();
+    allQuery.data.forEach((election) => {
+      const status = getStatusForElection(election, now);
       if (status) result[status] += 1;
     });
     return result;
-  }, [withStatus]);
+  }, [allQuery.data]);
 
-  const visible = withStatus.filter(
-    ({ election, status }) =>
-      (statusFilter === "all" || status === statusFilter) &&
-      (election.name_of_election || "")
-        .toLowerCase()
-        .includes(searchTerm.trim().toLowerCase()),
-  );
+  const goToPage = (next: number) => {
+    setPage(next);
+    scrollToTop();
+  };
+  // A new search or filter starts from its first page.
+  const updateSearch = (value: string) => {
+    setSearchTerm(value);
+    setPage(1);
+  };
+  const updateFilter = (value: StatusFilter) => {
+    setStatusFilter(value);
+    setPage(1);
+  };
 
   const renderContent = () => {
     if (isPending) {
@@ -101,7 +154,7 @@ const ElectionsComponent = () => {
       );
     }
 
-    if (elections.length === 0) {
+    if (!isFiltering && grandTotal === 0) {
       return (
         <Card>
           <EmptyState
@@ -131,8 +184,8 @@ const ElectionsComponent = () => {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSearchTerm("");
-                  setStatusFilter("all");
+                  updateSearch("");
+                  updateFilter("all");
                 }}
               >
                 Clear filters
@@ -155,6 +208,9 @@ const ElectionsComponent = () => {
       </div>
     );
   };
+
+  const firstShown = (page - 1) * pageSize + 1;
+  const lastShown = Math.min(page * pageSize, total);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2">
@@ -181,7 +237,7 @@ const ElectionsComponent = () => {
             placeholder="Search elections..."
             aria-label="Search elections"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => updateSearch(e.target.value)}
             className="h-10 w-full rounded-lg border border-input bg-white pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20"
           />
         </div>
@@ -198,7 +254,7 @@ const ElectionsComponent = () => {
                 type="button"
                 role="tab"
                 aria-selected={selected}
-                onClick={() => setStatusFilter(filter.value)}
+                onClick={() => updateFilter(filter.value)}
                 className={cn(
                   "flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
                   selected
@@ -207,14 +263,14 @@ const ElectionsComponent = () => {
                 )}
               >
                 {filter.label}
-                {!isPending && (
+                {(counts || (filter.value === "all" && grandTotal > 0)) && (
                   <span
                     className={cn(
                       "rounded-full px-1.5 text-xs",
                       selected ? "bg-secondary text-primary" : "bg-white/70",
                     )}
                   >
-                    {counts[filter.value]}
+                    {counts ? counts[filter.value] : grandTotal}
                   </span>
                 )}
               </button>
@@ -224,6 +280,20 @@ const ElectionsComponent = () => {
       </div>
 
       {renderContent()}
+
+      {!isPending && !isError && totalPages > 1 && (
+        <div className="flex flex-col items-center gap-3 border-t border-border pt-5 smm:flex-row smm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Showing {firstShown}–{lastShown} of {total}{" "}
+            {isFiltering ? "matching elections" : "elections"}
+          </p>
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={goToPage}
+          />
+        </div>
+      )}
     </div>
   );
 };
