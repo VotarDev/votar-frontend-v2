@@ -101,6 +101,20 @@ const PreviewVote = () => {
 
   const maxChoices = election?.max_number_candidate || 1;
 
+  // The preview opens in a new tab (no history), so fall back to the
+  // election's page; same route as the elections list.
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else if (election?.election_id) {
+      router.push(
+        `/elections/${election.name_of_election}/${election.election_id}`,
+      );
+    } else {
+      router.push("/elections");
+    }
+  };
+
   // Same rules as the real ballot: tap to pick or unpick; picking past the
   // limit drops the earliest pick; picking cancels an abstention.
   const selectCandidate = (position: string, candidate: BallotCandidate) => {
@@ -179,10 +193,10 @@ const PreviewVote = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => router.back()}
+            onClick={goBack}
             className="shrink-0 bg-white"
           >
-            <ArrowLeft /> Back
+            <ArrowLeft /> Back to election
           </Button>
         </div>
 
