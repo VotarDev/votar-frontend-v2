@@ -1,205 +1,206 @@
 import React, { useState } from "react";
-import AdminLayout from "../AdminLayout";
-import Table from "@mui/material/Table";
-import { styled } from "@mui/material/styles";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import SwitchButton from "../AdminProfile/SwitchButton";
-import { drop } from "@/utils/util";
-import ViewElections from "./ViewElections";
-import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "react-hot-toast";
+import { Eye, FlaskConical, Plus, Ticket } from "lucide-react";
+import FormField from "@/src/components/shared/form/FormField";
+import EmptyState from "@/src/components/shared/EmptyState";
+import { Card } from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Switch } from "@/src/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/ui/table";
+import ViewElections, { type Coupon } from "./ViewElections";
 
+// Same options as before.
+const DISCOUNTS = ["50% off", "1000", "0", "10% off", "20% off"];
+
+const describeDiscount = (value: string) =>
+  value.endsWith("% off")
+    ? value
+    : value === "0"
+      ? "Free"
+      : `₦${Number(value).toLocaleString()} off`;
+
+// Sample coupons (there's no coupon API yet).
+const SAMPLE_COUPONS: Coupon[] = [
+  { id: 1, couponName: "Votar 50", couponCodeCriteria: "50% off", couponAccess: "All elections", active: true },
+  { id: 2, couponName: "Votar 1k", couponCodeCriteria: "1000", couponAccess: "All elections", active: true },
+  { id: 3, couponName: "Free", couponCodeCriteria: "0", couponAccess: "All elections", active: false },
+];
+
+/**
+ * Coupon management. Not connected to the server yet: coupons, toggles and new
+ * coupons only live on this page, so the design can be reviewed safely.
+ */
 const CouponSection = () => {
-  const headers = [
-    "S/N",
-    "Coupon Name",
-    "Coupon Code Criteria",
-    "Elections",
-    "Coupon Access",
-  ];
-  const [isDropDown, setIsDropDown] = useState(false);
-  const [filteredOption, setFilteredOption] = useState("Coupon Code Criteria");
-  const options = ["50% off", "1000", "0", "10% off", "20% off"];
-  const filteredOptionHandler = (opt: string) => {
-    setFilteredOption(opt);
-    setIsDropDown(false);
-  };
-  const couponData = [
-    {
-      id: 1,
-      couponName: "Votar 50",
-      couponCodeCriteria: "50% off",
-      elections: "View elections",
-      couponAccess: "All Elections",
-    },
-    {
-      id: 2,
-      couponName: "Votar 1k",
-      couponCodeCriteria: "1000",
-      elections: "View elections",
-      couponAccess: "All Elections",
-    },
-    {
-      id: 3,
-      couponName: "Free",
-      couponCodeCriteria: "0",
-      elections: "View elections",
-      couponAccess: "All Elections",
-    },
-  ];
+  const [coupons, setCoupons] = useState<Coupon[]>(SAMPLE_COUPONS);
+  const [name, setName] = useState("");
+  const [discount, setDiscount] = useState("");
+  const [viewing, setViewing] = useState<Coupon | null>(null);
 
-  const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-      backgroundColor: "#015ce9",
-      color: theme.palette.common.white,
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    [`&.${tableCellClasses.body}`]: {
-      fontSize: 16,
-      fontWeight: 600,
-      border: "none",
-    },
-  }));
+  const createCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !discount) {
+      toast.error("Enter a coupon name and choose a discount");
+      return;
+    }
+    setCoupons((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        couponName: name.trim(),
+        couponCodeCriteria: discount,
+        couponAccess: "All elections",
+        active: true,
+      },
+    ]);
+    setName("");
+    setDiscount("");
+    toast("Added for this preview only. Nothing was saved.", { icon: "🧪" });
+  };
+
+  const toggle = (id: number, active: boolean) =>
+    setCoupons((prev) => prev.map((c) => (c.id === id ? { ...c, active } : c)));
 
   return (
-    <div className="w-full px-4">
-      <div className="flex items-center justify-center gap-2 text-2xl font-medium"></div>
-      <div className="flex flex-col gap-5 mt-10">
-        <div>
-          <input
-            type="text"
-            placeholder="Enter Coupon Name"
-            className="border w-full max-w-xs h-12 p-4 outline-none"
-          />
-        </div>
-        <div className="relative">
-          <div
-            className="border p-4 w-full max-w-xs h-12 flex items-center cursor-pointer"
-            onClick={() => setIsDropDown((dropdown) => !dropdown)}
-          >
-            {filteredOption}
-          </div>
-          <AnimatePresence mode="wait">
-            {isDropDown && (
-              <motion.div
-                className="absolute top-full left-0 w-full max-w-xs py-2 text-lg mt-2 bg-white shadow-[0px_4px_16px_0px_rgba(0_,0_,0_,0.08)] z-20"
-                variants={drop}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
+    <div className="space-y-6">
+      <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <FlaskConical className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+        <p>
+          <span className="font-semibold">Preview.</span> Coupons aren&apos;t
+          connected to the server yet. The coupons below are samples, and
+          anything you add or switch here isn&apos;t saved.
+        </p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="p-5 smm:p-6">
+          <h2 className="font-semibold text-foreground">Create a coupon</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Give organisers a discount on their election.
+          </p>
+          <form onSubmit={createCoupon} className="mt-5 space-y-4" noValidate>
+            <FormField label="Coupon name" htmlFor="coupon-name" required>
+              <Input
+                id="coupon-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. VOTAR50"
+              />
+            </FormField>
+            <FormField label="Discount" htmlFor="coupon-discount" required>
+              <select
+                id="coupon-discount"
+                value={discount}
+                onChange={(e) => setDiscount(e.target.value)}
+                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
               >
-                <div className="flex flex-col gap-2 [&>*]:cursor-pointer">
-                  {options.map((opt, index) => (
-                    <div
-                      key={index}
-                      onClick={() => filteredOptionHandler(opt)}
-                      className={`hover:bg-[#dadada] px-4 py-2 ${
-                        filteredOption == opt ? " bg-[#dadada]" : ""
-                      }`}
-                    >
-                      {opt}
+                <option value="">Choose a discount</option>
+                {DISCOUNTS.map((option) => (
+                  <option key={option} value={option}>
+                    {describeDiscount(option)}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+            <Button type="submit" className="h-11 w-full">
+              <Plus /> Create coupon
+            </Button>
+          </form>
+        </Card>
+
+        <Card className="overflow-hidden lg:col-span-2">
+          <div className="flex items-center justify-between border-b border-border p-4">
+            <h2 className="font-semibold text-foreground">Coupons</h2>
+            <span className="text-sm text-muted-foreground">
+              {coupons.filter((c) => c.active).length} of {coupons.length} active
+            </span>
+          </div>
+          {coupons.length === 0 ? (
+            <EmptyState icon={Ticket} title="No coupons yet" />
+          ) : (
+            <>
+              <ul className="divide-y divide-border smm:hidden">
+                {coupons.map((coupon) => (
+                  <li key={coupon.id} className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-mono font-semibold text-foreground">
+                          {coupon.couponName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">{coupon.couponAccess}</p>
+                      </div>
+                      <Badge variant="secondary">{describeDiscount(coupon.couponCodeCriteria)}</Badge>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div>
-          <button className="bg-blue-700 w-full max-w-xs h-12 flex items-center justify-center rounded-3xl text-lg text-white font-medium">
-            Implement Coupon
-          </button>
-        </div>
-      </div>
-      <div className="mt-20">
-        {/* Mobile card list */}
-        <div className="flex flex-col gap-3 sm:hidden">
-          {couponData.map((row, index) => (
-            <div
-              key={row.id}
-              className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs font-medium text-gray-400">
-                    #{index <= 9 ? `0${index + 1}` : index + 1}
-                  </div>
-                  <div className="truncate text-sm font-semibold text-gray-800">
-                    {row.couponName}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {row.couponCodeCriteria}
-                  </div>
-                </div>
-                <div className="shrink-0">
-                  <SwitchButton />
-                </div>
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Switch
+                          checked={coupon.active}
+                          onCheckedChange={(v) => toggle(coupon.id, v)}
+                          aria-label={`${coupon.couponName} active`}
+                        />
+                        {coupon.active ? "Active" : "Off"}
+                      </label>
+                      <Button variant="ghost" size="sm" onClick={() => setViewing(coupon)}>
+                        <Eye /> Elections
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="hidden smm:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Coupon</TableHead>
+                      <TableHead>Discount</TableHead>
+                      <TableHead>Applies to</TableHead>
+                      <TableHead>Active</TableHead>
+                      <TableHead className="text-right">Elections</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {coupons.map((coupon) => (
+                      <TableRow key={coupon.id}>
+                        <TableCell className="font-mono font-semibold text-foreground">
+                          {coupon.couponName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {describeDiscount(coupon.couponCodeCriteria)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{coupon.couponAccess}</TableCell>
+                        <TableCell>
+                          <Switch
+                            checked={coupon.active}
+                            onCheckedChange={(v) => toggle(coupon.id, v)}
+                            aria-label={`${coupon.couponName} active`}
+                          />
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" onClick={() => setViewing(coupon)}>
+                            <Eye /> View
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-              <div className="mt-3 text-sm font-semibold text-blue-700">
-                <ViewElections selectedElection={row} num={index} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Desktop table */}
-        <TableContainer
-          sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
-          className="table-scroll"
-        >
-          <Table
-            sx={{
-              minWidth: 700,
-              borderCollapse: "separate",
-              borderSpacing: "0",
-            }}
-            stickyHeader
-            aria-label="sticky table"
-          >
-            <TableHead>
-              <TableRow className="text-white font-bold">
-                {headers.map((header, key) => {
-                  return (
-                    <StyledTableCell
-                      key={key}
-                      className=" border border-[#F5F5F5]"
-                      align="center"
-                    >
-                      {header}
-                    </StyledTableCell>
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {couponData.map((row, index) => (
-                <TableRow key={row.id}>
-                  <StyledTableCell align="center">
-                    {index <= 9 ? `0${index + 1}` : index + 1}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.couponName}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    {row.couponCodeCriteria}
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <ViewElections selectedElection={row} num={index} />
-                  </StyledTableCell>
-                  <StyledTableCell align="center">
-                    <SwitchButton />
-                  </StyledTableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </>
+          )}
+        </Card>
       </div>
+
+      <ViewElections coupon={viewing} onClose={() => setViewing(null)} />
     </div>
   );
 };

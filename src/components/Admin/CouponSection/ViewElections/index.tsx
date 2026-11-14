@@ -1,168 +1,91 @@
 import React, { useState } from "react";
-import Modal from "@/src/components/Modal";
-import { AnimatePresence } from "framer-motion";
-import Table from "@mui/material/Table";
-import { styled } from "@mui/material/styles";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import { Search, X } from "lucide-react";
+import DialogShell from "@/src/components/shared/DialogShell";
 
-interface ViewElectionsProps {
-  selectedElection: ElectionData;
-  num: number;
-}
-interface ElectionData {
+export interface Coupon {
   id: number;
   couponName: string;
   couponCodeCriteria: string;
-  elections: string;
   couponAccess: string;
+  active: boolean;
 }
 
-const tableData = [
-  {
-    id: 1,
-    elections: "National economics election",
-    actualAmount: "20000",
-    discountedAmount: "10000",
-  },
-  {
-    id: 2,
-    elections: "Biology election",
-    actualAmount: "15000",
-    discountedAmount: "7500",
-  },
-  {
-    id: 3,
-    elections: "Mechanical election",
-    actualAmount: "12000",
-    discountedAmount: "6000",
-  },
+// Sample rows (there's no coupon API yet).
+const SAMPLE_ELECTIONS = [
+  { id: 1, election: "National economics election", actualAmount: 20000, discountedAmount: 10000 },
+  { id: 2, election: "Biology election", actualAmount: 15000, discountedAmount: 7500 },
+  { id: 3, election: "Mechanical election", actualAmount: 12000, discountedAmount: 6000 },
 ];
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: "#015ce9",
-    color: theme.palette.common.white,
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 16,
-    fontWeight: 600,
-    border: "none",
-  },
-}));
-const ViewElections = ({ selectedElection, num }: ViewElectionsProps) => {
-  const [open, setOpen] = useState<boolean>(false);
-  const handleClickOpen = () => setOpen(true);
-  const handleClickClose = () => setOpen(false);
-  const headers = ["S/N", "Elections", "Actual Amount", "Discounted Amount"];
-  return (
-    <div>
-      <div onClick={handleClickOpen} className="cursor-pointer">
-        {" "}
-        View elections
-      </div>
-      <AnimatePresence mode="wait">
-        {open && (
-          <Modal
-            handleClose={handleClickClose}
-            key="modal"
-            className="max-w-[60rem]"
-          >
-            <div className="bg-white w-full p-4 sm:p-10">
-              <div className="flex justify-end mb-5">
-                <input
-                  type="text"
-                  placeholder="Search Elections"
-                  className="w-full sm:w-72 h-12 p-4 border outline-none font-normal rounded-3xl"
-                />
-              </div>
-              <h1 className="text-lg">
-                Elections for: {selectedElection.couponName}
-              </h1>
-              <div className="mt-5">
-                {/* Mobile card list */}
-                <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto sm:hidden">
-                  {tableData.map((row, index) => (
-                    <div
-                      key={row.id}
-                      className="rounded-xl border border-gray-100 px-4 py-3 text-left shadow-sm"
-                    >
-                      <div className="text-xs font-medium text-gray-400">
-                        #{index <= 9 ? `0${index + 1}` : index + 1}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-800">
-                        {row.elections}
-                      </div>
-                      <div className="mt-2 flex justify-between text-xs text-gray-500">
-                        <span>Actual: {row.actualAmount}</span>
-                        <span>Discounted: {row.discountedAmount}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+const naira = (value: number) => `₦${value.toLocaleString()}`;
 
-                {/* Desktop table */}
-                <TableContainer
-                  sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
-                  className="table-scroll"
-                >
-                  <Table
-                    sx={{
-                      minWidth: 500,
-                      borderCollapse: "separate",
-                      borderSpacing: "0",
-                      fontSize: 14,
-                    }}
-                    stickyHeader
-                    aria-label="sticky table"
-                  >
-                    <TableHead>
-                      <TableRow className="text-white font-bold text-sm">
-                        {headers.map((header, key) => {
-                          return (
-                            <StyledTableCell
-                              key={key}
-                              className=" border border-[#F5F5F5]"
-                              align="center"
-                              style={{ fontSize: 14 }}
-                            >
-                              {header}
-                            </StyledTableCell>
-                          );
-                        })}
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {tableData.map((row, index) => (
-                        <TableRow key={row.id}>
-                          <StyledTableCell align="center">
-                            {index <= 9 ? `0${index + 1}` : index + 1}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.elections}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.actualAmount}
-                          </StyledTableCell>
-                          <StyledTableCell align="center">
-                            {row.discountedAmount}
-                          </StyledTableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </div>
-            </div>
-          </Modal>
+/** Elections a coupon was used on (sample data until coupons have an API). */
+const ViewElections = ({
+  coupon,
+  onClose,
+}: {
+  coupon: Coupon | null;
+  onClose: () => void;
+}) => {
+  const [search, setSearch] = useState("");
+  const rows = SAMPLE_ELECTIONS.filter((row) =>
+    row.election.toLowerCase().includes(search.trim().toLowerCase()),
+  );
+
+  return (
+    <DialogShell
+      open={!!coupon}
+      onClose={onClose}
+      labelledBy="coupon-elections-title"
+      className="flex max-h-[85vh] max-w-xl flex-col overflow-hidden p-0"
+    >
+      <div className="flex items-start justify-between gap-4 border-b border-border px-5 py-4">
+        <div>
+          <h2 id="coupon-elections-title" className="font-semibold text-foreground">
+            Elections using {coupon?.couponName}
+          </h2>
+          <p className="text-xs text-muted-foreground">Sample data. Not connected yet.</p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="border-b border-border p-4">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search elections"
+            aria-label="Search elections"
+            className="h-10 w-full rounded-lg border border-input bg-white pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-ring/20"
+          />
+        </div>
+      </div>
+      <ul className="flex-1 divide-y divide-border overflow-y-auto">
+        {rows.length === 0 ? (
+          <li className="p-6 text-center text-sm text-muted-foreground">No elections match.</li>
+        ) : (
+          rows.map((row) => (
+            <li key={row.id} className="flex items-center justify-between gap-4 px-5 py-3">
+              <span className="min-w-0 truncate font-medium text-foreground">{row.election}</span>
+              <span className="shrink-0 text-right text-sm">
+                <span className="block font-semibold text-foreground">{naira(row.discountedAmount)}</span>
+                <span className="block text-xs text-muted-foreground line-through">
+                  {naira(row.actualAmount)}
+                </span>
+              </span>
+            </li>
+          ))
         )}
-      </AnimatePresence>
-    </div>
+      </ul>
+    </DialogShell>
   );
 };
 
