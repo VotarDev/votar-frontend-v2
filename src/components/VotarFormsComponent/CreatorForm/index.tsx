@@ -1,129 +1,101 @@
-import React, { useState, useEffect } from "react";
-import { IoIosArrowRoundForward } from "react-icons/io";
-import { MdEdit, MdDelete } from "react-icons/md";
-import { BsLink } from "react-icons/bs";
-import InputSelect from "../../InputSelect";
-import { AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import Modal from "@/src/components/Modal";
-import EditModal from "./EditModal";
 import { toast } from "react-hot-toast";
-import { useCurrentUser, useUser } from "@/utils/hooks";
+import Cookies from "universal-cookie";
+import {
+  Check,
+  Copy,
+  ExternalLink,
+  Inbox,
+  Link2,
+  Loader2,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
+import { useCurrentUserId } from "@/utils/hooks";
 import { createVotarForms, toggleForm } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress } from "@mui/material";
-import Cookies from "universal-cookie";
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Switch } from "@/src/components/ui/switch";
+import InfoTip from "@/src/components/shared/form/InfoTip";
 
 interface Item {
   id: number;
   option: string;
 }
 
+// The fields every Votar form asks voters for (the sub-group list is yours).
+const PREVIEW_FIELDS = [
+  { label: "ID", type: "text" },
+  { label: "Name", type: "text" },
+  { label: "Sub-group", type: "select" },
+  { label: "Phone number", type: "tel" },
+  { label: "Email address", type: "email" },
+];
+
+/** Build an election's voter registration form and share its link. */
 const CreatorForm = ({ electionId }: { electionId: string }) => {
   const [subGroup, setSubGroup] = useState<Item[]>([]);
-  const [toggleAddSubGroup, setToggleAddSubGroup] = useState<boolean>(false);
+  const [newSubGroup, setNewSubGroup] = useState("");
+  const [editingItemId, setEditingItemId] = useState<number | null>(null);
+  const [editingValue, setEditingValue] = useState("");
   const [formLink, setFormLink] = useState("");
-  const [openEdit, setOpenEdit] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formActive, setFormActive] = useState(true);
   const [isToggling, setIsToggling] = useState(false);
-  const [newItemContent, setNewItemContent] = useState<string>("Add option");
-  const [editingItemId, setEditingItemId] = useState<number | null>(null);
-  const [electionID, setElectionID] = useState("");
-  const cookies = new Cookies();
-  const users = useCurrentUser();
-  const user = useUser();
+  const [copied, setCopied] = useState(false);
   const router = useRouter();
-  const { id } = router.query;
-  let idType: string | string[] | undefined = id;
-
-  const option = subGroup.map((item) => {
-    return { value: item.option, label: item.option };
-  });
+  const USER_ID = useCurrentUserId();
 
   const addItem = () => {
-    const newItem: Item = {
-      id: Date.now(),
-      option: newItemContent,
-    };
-    setSubGroup((prev) => [...prev, newItem]);
+    const option = newSubGroup.trim();
+    if (!option) return;
+    setSubGroup((prev) => [...prev, { id: Date.now(), option }]);
+    setNewSubGroup("");
   };
 
-  const startEditing = (itemId: number) => {
-    setEditingItemId(itemId);
-    handleOpen();
+  const startEditing = (item: Item) => {
+    setEditingItemId(item.id);
+    setEditingValue(item.option);
   };
 
-  const finishEditing = (newContent: string) => {
-    setSubGroup((prevItems) =>
-      prevItems.map((item) =>
-        item.id === editingItemId ? { ...item, option: newContent } : item,
-      ),
-    );
+  const finishEditing = () => {
+    const option = editingValue.trim();
+    if (option) {
+      setSubGroup((prevItems) =>
+        prevItems.map((item) =>
+          item.id === editingItemId ? { ...item, option } : item,
+        ),
+      );
+    }
     setEditingItemId(null);
-  };
-
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-      ? users?.id
-      : user?.user?.id;
-
-  //   const editItem = (itemId: number, newContent: string) => {
-  //     setSubGroup((prevItems) =>
-  //       prevItems.map((item) =>
-  //         item.id === itemId ? { ...item, option: newContent } : item
-  //       )
-  //     );
-  //   };
-
-  const handleViewResponse = () => {
-    router.push(`/votar-forms/responses/${electionId}`);
   };
 
   const deleteItem = (itemId: number) => {
     setSubGroup((prevItems) => prevItems.filter((item) => item.id !== itemId));
   };
 
-  useEffect(() => {
-    if (Array.isArray(idType)) {
-      setElectionID(idType[idType.length - 1]);
-    } else {
-      console.log("ID is undefined");
-    }
-  }, [electionID]);
-
   const formHandler = async () => {
     setIsLoading(true);
-    const token = cookies.get("user-token");
-    if (token) {
-      setAuthToken(token);
-    }
-    // if (users?.data) {
-    //   setAuthToken(users.data.data.cookie);
-    // } else {
-    //   if (typeof window !== "undefined") {
-    //     const tokenLocal = localStorage.getItem("token");
-    //     setAuthToken(tokenLocal);
-    //   }
-    // }
+    const token = new Cookies().get("user-token");
+    if (token) setAuthToken(token);
     try {
-      if (typeof window !== "undefined") {
-        const electionId = localStorage.getItem("ElectionId");
-        const formData = {
-          election_id: electionID,
-          subgroup: subGroup.map((item) => item.option),
-        };
-        const { data } = await createVotarForms(formData, USER_ID);
-        if (data) {
-          toast.success("Form created succesfully");
-          setFormLink(data.data.votar_form_link);
-
-          setIsLoading(false);
-        }
+      const formData = {
+        election_id: electionId,
+        subgroup: subGroup.map((item) => item.option),
+      };
+      const { data } = await createVotarForms(formData, USER_ID as string);
+      if (data) {
+        toast.success("Form created succesfully");
+        setFormLink(data.data.votar_form_link);
       }
     } catch (e: any) {
-      toast.error(e?.response?.data?.message);
+      toast.error(e?.response?.data?.message || "Couldn't create the form");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -132,7 +104,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
     const newStatus = !formActive;
     setIsToggling(true);
     try {
-      const token = cookies.get("user-token");
+      const token = new Cookies().get("user-token");
       if (token) setAuthToken(token);
       await toggleForm({ electionId, status: newStatus });
       setFormActive(newStatus);
@@ -144,197 +116,243 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
     }
   };
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(formLink ?? "");
-    toast.success("Link copied to clipboard");
+  const copyLink = async () => {
+    if (!formLink) return;
+    try {
+      await navigator.clipboard.writeText(formLink);
+      toast.success("Link copied to clipboard");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Copy operation failed. Please try again.");
+    }
   };
 
-  const handleOpen = () => setOpenEdit(true);
-  const handleClose = () => setOpenEdit(false);
-
   return (
-    <div>
-      <div className="text-xl text-center pt-5">
-        <span className="font-bold">INSTRUCTION:</span> Please Fill in your
-        Details Correctly
-      </div>
-      <div className="flex justify-between items-center pt-10">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-zinc-700">
-            Form {formActive ? "Active" : "Inactive"}
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+      {/* What voters will see */}
+      <Card className="p-5 smm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-semibold text-foreground">Form preview</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              What voters will fill in. Ask them to enter their details
+              correctly.
+            </p>
+          </div>
+          <span className="shrink-0 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+            Preview
           </span>
-          <button
-            type="button"
-            onClick={handleToggleForm}
-            disabled={isToggling}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${formActive ? "bg-blue-700" : "bg-zinc-300"}`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 ${formActive ? "translate-x-6" : "translate-x-1"}`}
-            />
-          </button>
         </div>
-        <button
-          className="p-4 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
-          onClick={handleViewResponse}
-        >
-          View Response
-          <span className="text-3xl">
-            <IoIosArrowRoundForward />
-          </span>
-        </button>
-      </div>
-      <form className="pt-10">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-            <label htmlFor="id">ID</label>
-            <input
-              type="text"
-              name="id"
-              className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-            />
-          </div>
-          <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-            <label htmlFor="name">Name</label>
-            <input
-              type="text"
-              name="name"
-              className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-            />
-          </div>
-          <div className="flex flex-col gap-1">
-            <div className="border border-zinc-400 px-10 py-16 rounded-lg relative flex justify-between items-center">
-              <div className="flex-1">
-                <label htmlFor="subGroup">Sub-Group</label>
-                <InputSelect
-                  placeholder={""}
-                  option={option}
-                  optionValue={""}
-                  className={
-                    "lg:w-[40%] h-10 w-full placeholder:white cursor-pointer"
-                  }
-                />
-              </div>
-              {!toggleAddSubGroup && (
-                <div className="">
-                  <div
-                    onClick={() => setToggleAddSubGroup(true)}
-                    className="cursor-pointer flex items-center justify-center outline-none text-xl font-semibold"
-                  >
-                    + Add Sub-Group
-                  </div>
-                </div>
-              )}
-              {toggleAddSubGroup && (
-                <div className="right-6  bg-white z-10 rounded-md shadow-lg p-4">
-                  <h1 className="text-center underline pb-5">Add Subgroup</h1>
-                  <div className="flex flex-col gap-2">
-                    {subGroup.map((sub, index) => (
-                      <div className="flex items-center gap-2" key={index}>
-                        <div>
-                          <input
-                            type="text"
-                            name="subGroup"
-                            value={sub.option}
-                            disabled
-                            onChange={(e) => setNewItemContent(e.target.value)}
-                            className="border-b border-zinc-600 outline-none p-2"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span
-                            onClick={() => startEditing(sub.id)}
-                            className="cursor-pointer"
-                          >
-                            <MdEdit />
-                          </span>
-                          <span
-                            onClick={() => deleteItem(sub.id)}
-                            className="cursor-pointer"
-                          >
-                            <MdDelete />
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                    <AnimatePresence mode="wait">
-                      {openEdit && (
-                        <Modal key="modal" handleClose={handleClose}>
-                          <EditModal
-                            option={
-                              subGroup.find((item) => item.id === editingItemId)
-                                ?.option || ""
-                            }
-                            handleClose={handleClose}
-                            onEdit={(newContent) => finishEditing(newContent)}
-                          />
-                        </Modal>
-                      )}
-                    </AnimatePresence>
-                    <div className="flex items-center justify-between gap-2">
-                      <div
-                        onClick={addItem}
-                        className="cursor-pointer bg-blue-700 text-zinc-200 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
-                      >
-                        Add +
-                      </div>
-                      <div
-                        onClick={() => setToggleAddSubGroup(false)}
-                        className="cursor-pointer bg-zinc-200 text-slate-900 outline-none rounded-md p-2 mt-3 flex justify-center items-center w-20"
-                      >
-                        Close
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <div className="mt-6 space-y-5">
+          {PREVIEW_FIELDS.map((field) => (
+            <div key={field.label} className="flex flex-col gap-2">
+              <span className="text-sm font-medium text-foreground">
+                {field.label}
+              </span>
+              {field.type === "select" ? (
+                <select
+                  disabled
+                  className="h-11 w-full cursor-not-allowed rounded-md border border-input bg-muted/40 px-3 text-sm text-muted-foreground"
+                >
+                  <option>
+                    {subGroup.length
+                      ? `${subGroup.length} option${subGroup.length === 1 ? "" : "s"}: ${subGroup
+                          .map((s) => s.option)
+                          .join(", ")}`
+                      : "No sub-groups yet"}
+                  </option>
+                </select>
+              ) : (
+                <Input disabled type={field.type} className="bg-muted/40" />
               )}
             </div>
+          ))}
+        </div>
+      </Card>
+
+      <div className="space-y-6">
+        {/* Sub-groups */}
+        <Card className="p-5">
+          <div className="flex items-center gap-1.5">
+            <h2 className="font-semibold text-foreground">Sub-groups</h2>
+            <InfoTip label="About sub-groups">
+              The groups voters choose from on the form, such as departments,
+              levels or units.
+            </InfoTip>
           </div>
 
-          <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-            <label htmlFor="phone">Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
+          <form
+            className="mt-4 flex gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              addItem();
+            }}
+          >
+            <Input
+              value={newSubGroup}
+              onChange={(e) => setNewSubGroup(e.target.value)}
+              placeholder="e.g. Computer Science"
+              aria-label="New sub-group"
             />
-          </div>
-          <div className="flex flex-col gap-1 border border-zinc-400 px-10 py-16 rounded-lg">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              className="border-b border-zinc-600 w-1/3 h-10 outline-none p-2"
-            />
-          </div>
-          <div className="flex justify-center">
-            <button
-              onClick={formHandler}
-              className="p-4 w-40 h-12 outline-none flex items-center justify-center bg-blue-700 text-white rounded-lg gap-2 text-lg"
-              disabled={isLoading}
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={!newSubGroup.trim()}
             >
-              <span>Create Form</span>
-              {isLoading && (
-                <CircularProgress
-                  color="inherit"
-                  className=" text-white"
-                  size={20}
-                />
-              )}
-            </button>
+              <Plus /> Add
+            </Button>
+          </form>
+
+          {subGroup.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              No sub-groups yet. Add the options voters can choose from.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-border rounded-lg border border-border">
+              {subGroup.map((item) => (
+                <li key={item.id} className="flex items-center gap-2 px-3 py-2">
+                  {editingItemId === item.id ? (
+                    <form
+                      className="flex flex-1 items-center gap-1"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        finishEditing();
+                      }}
+                    >
+                      <Input
+                        autoFocus
+                        value={editingValue}
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        aria-label="Edit sub-group"
+                        className="h-9"
+                      />
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Save"
+                        className="h-9 w-9"
+                      >
+                        <Check />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Cancel"
+                        className="h-9 w-9"
+                        onClick={() => setEditingItemId(null)}
+                      >
+                        <X />
+                      </Button>
+                    </form>
+                  ) : (
+                    <>
+                      <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                        {item.option}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Edit ${item.option}`}
+                        className="h-8 w-8 text-muted-foreground"
+                        onClick={() => startEditing(item)}
+                      >
+                        <Pencil />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        aria-label={`Remove ${item.option}`}
+                        className="h-8 w-8 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                        onClick={() => deleteItem(item.id)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        {/* Publish */}
+        <Card className="space-y-5 p-5">
+          <div>
+            <h2 className="font-semibold text-foreground">Share the form</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Create the form to get a link you can send to voters.
+            </p>
           </div>
-        </div>
-      </form>
-      <div className="mt-5 flex justify-end gap-3 py-5">
-        <button
-          className="p-4 h-12 outline-none flex items-center justify-center border border-blue-700 text-blue-700 rounded-lg gap-2 text-lg"
-          onClick={() => copyLink()}
+
+          <Button
+            type="button"
+            onClick={formHandler}
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? <Loader2 className="animate-spin" /> : <Link2 />}
+            Create form
+          </Button>
+
+          {formLink ? (
+            <div className="space-y-2">
+              <div className="break-all rounded-md border border-border bg-muted/50 px-3 py-2.5 font-mono text-xs text-slate-700">
+                {formLink}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={copyLink}
+                  className="flex-1"
+                >
+                  {copied ? <Check /> : <Copy />}
+                  {copied ? "Copied" : "Copy link"}
+                </Button>
+                <Button asChild variant="ghost">
+                  <a href={formLink} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink /> Open
+                  </a>
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              The link appears here once the form is created.
+            </p>
+          )}
+
+          <div className="flex items-center justify-between gap-3 border-t border-border pt-4">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                Accepting responses
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Form is {formActive ? "active" : "inactive"}
+              </p>
+            </div>
+            <Switch
+              checked={formActive}
+              onCheckedChange={handleToggleForm}
+              disabled={isToggling}
+              aria-label="Accepting responses"
+            />
+          </div>
+        </Card>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => router.push(`/votar-forms/responses/${electionId}`)}
         >
-          <span className="text-3xl">
-            <BsLink />
-          </span>
-          Copy Link
-        </button>
+          <Inbox /> View responses
+        </Button>
       </div>
     </div>
   );

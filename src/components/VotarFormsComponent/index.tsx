@@ -1,333 +1,206 @@
-import React, { useState } from "react";
-import { useUser } from "@/utils/hooks";
-import { useRouter } from "next/router";
-import { ElectionDetails } from "@/utils/types";
-import { CircularProgress } from "@mui/material";
+import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import {
-  MdCalendarToday,
-  MdDescription,
-  MdPersonAdd,
-  MdFileDownload,
-  MdAssignment,
-  MdGroup,
-} from "react-icons/md";
-import { FiSearch, FiFileText } from "react-icons/fi";
-import { AnimatePresence, motion } from "framer-motion";
+  AlertCircle,
+  ClipboardList,
+  FileSpreadsheet,
+  FileText,
+  Search,
+  SearchX,
+  UserPlus,
+} from "lucide-react";
+import { skipToken } from "@reduxjs/toolkit/dist/query/react/index.js";
+import { useGetElectionsQuery } from "@/redux/api/electionsApi";
+import { useCurrentUserId } from "@/utils/hooks";
+import { Button } from "@/src/components/ui/button";
+import { Card } from "@/src/components/ui/card";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import PageHeader from "@/src/components/shared/PageHeader";
+import EmptyState from "@/src/components/shared/EmptyState";
+import ElectionCard from "@/src/components/ElectionsComponent/ElectionCard";
 
-const VotarFormsComponent = ({
-  elections,
-  isFetchElections,
-}: {
-  elections: ElectionDetails[];
-  isFetchElections: boolean;
-}) => {
-  const user = useUser();
-  const router = useRouter();
+const FEATURES = [
+  {
+    icon: UserPlus,
+    title: "Voter registration",
+    description: "Share a form to collect voter details.",
+  },
+  {
+    icon: FileSpreadsheet,
+    title: "Export",
+    description: "Send responses to your election or to Excel.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Manage responses",
+    description: "Spot duplicates and remove entries.",
+  },
+];
+
+// Same route as before for an election's form.
+const formHref = (name?: string, id?: string) => `/votar-forms/${name}/${id}`;
+
+/** Pick an election to create or manage its voter registration form. */
+const VotarFormsComponent = () => {
+  const userId = useCurrentUserId();
   const [searchTerm, setSearchTerm] = useState("");
+  const {
+    data: elections = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useGetElectionsQuery(userId ?? skipToken, {
+    refetchOnMountOrArgChange: true,
+  });
+  const isPending = !userId || isLoading;
 
-  const handleElectionDetails = (election: string, id: string) => {
-    router.push(`/votar-forms/${election}/${id}`);
-  };
+  // Forms are only for paid elections; Free Votar elections are left out, as before.
+  const formElections = useMemo(
+    () =>
+      [...elections]
+        .filter((election) => election.type !== "Free Votar")
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        ),
+    [elections],
+  );
 
-  const filteredElections = elections
-    .filter((election) => election.type !== "Free Votar")
-    .filter((election) =>
-      election.name_of_election.toLowerCase().includes(searchTerm.toLowerCase())
+  const visible = formElections.filter((election) =>
+    (election.name_of_election || "")
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase()),
+  );
+
+  const renderContent = () => {
+    if (isPending) {
+      return (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-60 w-full rounded-lg" />
+          ))}
+        </div>
+      );
+    }
+    if (isError) {
+      return (
+        <Card>
+          <EmptyState
+            icon={AlertCircle}
+            title="We couldn't load your elections"
+            description="Check your connection and try again."
+            action={
+              <Button variant="outline" onClick={refetch}>
+                Try again
+              </Button>
+            }
+          />
+        </Card>
+      );
+    }
+    if (formElections.length === 0) {
+      return (
+        <Card>
+          <EmptyState
+            icon={FileText}
+            title="No elections available"
+            description="Forms are available for Votar Pro elections. Create one to get started."
+            action={
+              <Button asChild>
+                <Link href="/create-election">Create election</Link>
+              </Button>
+            }
+          />
+        </Card>
+      );
+    }
+    if (visible.length === 0) {
+      return (
+        <Card>
+          <EmptyState
+            icon={SearchX}
+            title="No elections found"
+            description="Try a different search."
+            action={
+              <Button variant="outline" onClick={() => setSearchTerm("")}>
+                Clear search
+              </Button>
+            }
+          />
+        </Card>
+      );
+    }
+    return (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {visible.map((election) => (
+          <ElectionCard
+            key={election.election_id}
+            election={election}
+            actions={
+              <Button asChild variant="outline" size="sm" className="flex-1">
+                <Link
+                  href={formHref(
+                    election.name_of_election,
+                    election.election_id,
+                  )}
+                >
+                  <FileText /> Open form
+                </Link>
+              </Button>
+            }
+          />
+        ))}
+      </div>
     );
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Date not set";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
   };
 
   return (
-    <div className="min-h-screen p-0 relative">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2">
-                Votar Forms
-              </h1>
-              <p className="text-lg text-gray-600 max-w-3xl capitalize">
-                <span className="font-semibold text-black">
-                  Hello {user?.user?.data?.userName || "User"}
-                </span>
-                ! <br /> Welcome to Votar Forms.
-                <br /> Create a form with Votar Forms to collect voter
-                information for your election. Export the voters information
-                directly to your election or export to an Excel sheet for
-                personal use.
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2">
+      <PageHeader
+        title="Votar Forms"
+        description="Collect voter information for your elections, then send it to your election or export it to Excel."
+      />
+
+      <div className="grid gap-3 smm:grid-cols-3">
+        {FEATURES.map(({ icon: Icon, title, description }) => (
+          <Card key={title} className="flex items-start gap-3 p-4">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-primary">
+              <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-foreground">{title}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {description}
               </p>
             </div>
-          </div>
-        </div>
+          </Card>
+        ))}
+      </div>
 
-        {/* Features Section */}
-        <div className="mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex lg:items-center gap-3 flex-col md:flex-row">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <MdPersonAdd className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
-                    Voter Registration
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Collect voter data
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex lg:items-center gap-3 flex-col md:flex-row">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <MdFileDownload className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
-                    Export to Excel
-                  </div>
-                  <div className="text-xs text-gray-500">Download data</div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-              <div className="flex lg:items-center gap-3 flex-col md:flex-row">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <MdAssignment className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-900">
-                    Form Management
-                  </div>
-                  <div className="text-xs text-gray-500">Create & manage</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Search and Stats Section */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-6">
-            {/* Search Bar */}
-            <div className="flex-1">
-              <div className="relative">
-                <FiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  type="text"
-                  placeholder="Search elections to create forms..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="lg:w-[400px] w-full pl-12 pr-4 py-3 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all duration-300 shadow-sm"
-                />
-              </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="flex gap-4">
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
-                <div className="text-2xl font-bold text-blue-600">
-                  {filteredElections.length}
-                </div>
-                <div className="text-sm text-gray-600">Available Elections</div>
-              </div>
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
-                <div className="text-2xl font-bold text-green-600">
-                  {
-                    filteredElections.filter((e) => e.status === "active")
-                      .length
-                  }
-                </div>
-                <div className="text-sm text-gray-600">Active Elections</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Elections Content */}
-        <div className="mb-6">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Select an Election to Create Forms
-          </h2>
-          <p className="text-gray-600">
-            Choose from the available elections below to create or access voter
-            registration forms.
+      <div className="flex flex-col gap-3 smm:flex-row smm:items-end smm:justify-between">
+        <div>
+          <h2 className="font-semibold text-foreground">Choose an election</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            Open an election&apos;s form to set it up or see its responses.
           </p>
         </div>
-
-        {isFetchElections ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <CircularProgress size={40} style={{ color: "#2563eb" }} />
-              <p className="mt-4 text-gray-600">Loading elections...</p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            {filteredElections.length === 0 ? (
-              <div className="text-center py-10">
-                <div className="bg-white rounded-2xl p-12 shadow-sm border border-gray-100 max-w-md mx-auto">
-                  <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <FiFileText className="w-10 h-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {searchTerm
-                      ? "No elections found"
-                      : "No elections available"}
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    {searchTerm
-                      ? "Try adjusting your search terms"
-                      : "There are no elections available to create forms for at the moment"}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
-                <AnimatePresence>
-                  {filteredElections
-                    .slice()
-                    .reverse()
-                    .map((election, index) => (
-                      <motion.div
-                        key={election.election_id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
-                        className="group relative h-full flex flex-col"
-                      >
-                        <div
-                          className="bg-white shadow-sm hover:shadow-xl border border-gray-100 transition-all duration-300 transform hover:-translate-y-1 relative h-full flex flex-col cursor-pointer overflow-hidden"
-                          onClick={() =>
-                            handleElectionDetails(
-                              election.name_of_election,
-                              election.election_id
-                            )
-                          }
-                        >
-                          {/* Card Header */}
-                          <div className="bg-[#015ce9] p-6 text-white">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <h3 className="text-xl font-bold mb-2 line-clamp-2">
-                                  {election.name_of_election}
-                                </h3>
-                                <div className="flex items-center gap-2 text-blue-100">
-                                  <MdCalendarToday className="w-4 h-4" />
-                                  <span className="text-sm">
-                                    {formatDate(election.start_date)}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 ml-3">
-                                <div
-                                  className={`w-3 h-3 rounded-full ${
-                                    election.status === "active"
-                                      ? "bg-green-400"
-                                      : election.status === "completed"
-                                      ? "bg-gray-400"
-                                      : "bg-yellow-400"
-                                  }`}
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Card Body */}
-                          <div className="p-6 flex-1">
-                            {/* Description */}
-                            {election.description && (
-                              <div className="mb-4">
-                                <div className="flex items-center gap-2 text-white mb-2 max-w-[120px] p-2 rounded bg-[#015ce9]">
-                                  <MdDescription className="w-4 h-4" />
-                                  <span className="text-sm font-medium">
-                                    Description
-                                  </span>
-                                </div>
-                                <p className="text-gray-600 text-sm line-clamp-3">
-                                  {election.description}
-                                </p>
-                              </div>
-                            )}
-
-                            {/* Form Features */}
-                            <div className="mb-4">
-                              <div className="text-sm font-medium text-gray-700 mb-2">
-                                Form Features:
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                                  <MdPersonAdd className="w-3 h-3 mr-1" />
-                                  Registration
-                                </span>
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                                  <MdFileDownload className="w-3 h-3 mr-1" />
-                                  Export
-                                </span>
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 text-purple-800">
-                                  <MdGroup className="w-3 h-3 mr-1" />
-                                  Manage
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Status Badge */}
-                            <div className="mb-4">
-                              <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                  election.status === "active"
-                                    ? "bg-green-100 text-green-800"
-                                    : election.status === "completed"
-                                    ? "bg-gray-100 text-gray-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                                }`}
-                              >
-                                {election.status?.charAt(0).toUpperCase() +
-                                  election.status?.slice(1) || "Pending"}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Card Footer */}
-                          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                            <div className="flex items-center justify-between">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleElectionDetails(
-                                    election.name_of_election,
-                                    election.election_id
-                                  );
-                                }}
-                                className="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
-                              >
-                                <FiFileText className="w-4 h-4" />
-                                Create Form
-                              </button>
-                              <div className="text-xs text-gray-500">
-                                Click to manage forms
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                </AnimatePresence>
-              </div>
-            )}
-          </div>
-        )}
+        <div className="relative w-full smm:max-w-xs">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            placeholder="Search elections..."
+            aria-label="Search elections"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="h-10 w-full rounded-lg border border-input bg-white pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20"
+          />
+        </div>
       </div>
+
+      {renderContent()}
     </div>
   );
 };
