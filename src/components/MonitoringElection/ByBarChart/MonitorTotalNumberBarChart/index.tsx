@@ -2,147 +2,91 @@ import React, { useState, useEffect } from "react";
 import { Chart } from "chart.js/auto";
 import { Bar } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
+import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
-import { useCurrentUser, useUser } from "@/utils/hooks";
 import { monitorBarChart } from "@/utils/api";
-import { CircularProgress } from "@mui/material";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import PositionCard from "../../PositionCard";
+
 Chart.register(CategoryScale);
 
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  maxBarThickness: 100,
+  scales: {
+    x: { grid: { display: false } },
+    y: {
+      beginAtZero: true,
+      ticks: { precision: 0 },
+      grid: { color: "rgba(15, 23, 42, 0.06)" },
+      title: { display: true, text: "No of Votes" },
+    },
+  },
+  plugins: { legend: { display: false } },
+};
+
+/** Total votes cast in the election, as a single bar. */
 const MonitorTotalNumberBarChart = ({ electionId }: { electionId: string }) => {
-  const [voteData, setVoteData] = useState([{ x: "Candidates", y: 200 }]);
   const [isFetchBarData, setIsFetchBarData] = useState(false);
   const [barData, setBarData] = useState<any>(null);
-  const users = useCurrentUser();
-  const user = useUser();
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
-  const data = {
-    labels: voteData.map((x) => x.x),
-    datasets: [
-      {
-        label: "No of Votes",
-        data: voteData.map((v, i, a) => {
-          return v.y;
-        }),
-        backgroundColor: "#015CE9",
-        borderColor: "#015CE9",
-        tension: 1,
-      },
-    ],
-  };
+  const [totalParticipants, setTotalParticipants] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
-    const monitorElectionBySubgroup = async () => {
+    const monitorElectionTotals = async () => {
       setIsFetchBarData(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      // Use the signed-in token when there is one; never clear the header.
+      const token = new Cookies().get("user-token");
+      if (token) setAuthToken(token);
       try {
         const { data } = await monitorBarChart(electionId);
-        const [{ totalVoters }, { totalParticipants }, ...filteredData] =
-          data.data;
-
-        console.log(totalVoters);
-        console.log(totalParticipants);
-        console.log(filteredData);
-
-        const totalVotes = filteredData.reduce(
-          (sum: number, position: any) => sum + position.totalNumberOfVotes,
-          0
-        );
-
-        console.log(totalVotes);
-
-        const bars = {
-          datasets: [
-            {
-              label: "No of Votes",
-              data: {
-                "Total Votes": totalParticipants,
-              },
-              backgroundColor: "#015CE9", // Set to black if abstained > 0
-              borderColor: "#015CE9",
-              scaleOverride: true,
-              scaleSteps: 9,
-              scaleStartValue: 0,
-              scaleStepWidth: 1,
-              tension: 1.0,
-            },
-          ],
-        };
-
+        // The first two entries are the overall voter and participant counts.
+        const [, { totalParticipants: participants }] = data.data;
         if (data.data) {
-          console.log(data.data);
-          setBarData(bars);
-          setIsFetchBarData(false);
+          setTotalParticipants(participants);
+          setBarData({
+            datasets: [
+              {
+                label: "No of Votes",
+                data: { "Total Votes": participants },
+                backgroundColor: "#015CE9",
+                borderColor: "#015CE9",
+                borderRadius: 6,
+              },
+            ],
+          });
         }
       } catch (e: any) {
         console.log(e);
+      } finally {
         setIsFetchBarData(false);
       }
     };
-    monitorElectionBySubgroup();
+    monitorElectionTotals();
   }, []);
-  // console.log(barData && barData[0].totalVoters);
 
-  const options = {
-    maxBarThickness: 100,
-    scales: {
-      x: {
-        grid: {
-          display: false,
-          color: "#000",
-          borderColor: "#000",
-        },
-      },
-      y: {
-        beginAtZero: true,
+  if (isFetchBarData) return <Skeleton className="h-80 w-full rounded-xl" />;
 
-        ticks: {
-          min: 0,
-          max: 700,
-          stepSize: 5,
-          suggestedMin: 0,
-          suggestedMax: 700,
-        },
-        grid: {
-          display: false,
-          color: "#000",
-          borderColor: "#000",
-        },
-        title: {
-          display: true,
-          text: "No of Votes",
-        },
-      },
-    },
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-  };
-
-  if (isFetchBarData)
-    return (
-      <div className="text-center">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
-      </div>
-    );
   return (
-    <div className="mb-20 max-w-[1200px] mx-auto flex flex-row bg-slate-50 px-10 p-[90px] border-l-4 border-l-[#015CE9]">
-      <div className="w-[812px] pb-20 pt-10">
+    <PositionCard
+      title="Total votes"
+      meta={
+        totalParticipants !== null && (
+          <span>
+            <span className="font-semibold text-foreground">
+              {totalParticipants.toLocaleString()}
+            </span>{" "}
+            votes cast
+          </span>
+        )
+      }
+    >
+      <div className="relative h-72 w-full lg:h-96">
         {barData && <Bar data={barData} options={options} />}
       </div>
-    </div>
+    </PositionCard>
   );
 };
 
