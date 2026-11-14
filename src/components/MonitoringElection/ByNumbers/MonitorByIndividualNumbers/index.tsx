@@ -95,7 +95,9 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
                         Leading
                       </span>
                     )}
-                    <div className="flex aspect-square w-full items-center justify-center bg-muted">
+                    {/* overflow-hidden + shrink-0 keep every photo the same
+                        square size, whatever the image's own proportions. */}
+                    <div className="flex aspect-square w-full shrink-0 items-center justify-center overflow-hidden bg-muted">
                       {candidate.image ? (
                         <img
                           src={candidate.image}
