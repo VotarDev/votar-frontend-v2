@@ -443,7 +443,16 @@ const Ballot = () => {
   const frame = (greeting: string, content: React.ReactNode) => (
     <div className="isolate min-h-screen bg-slate-50">
       <Header electionDetails={election} />
-      <VoterBar greeting={greeting} name={voterName} onLogout={handleLogout} />
+      <VoterBar
+        greeting={greeting}
+        name={voterName}
+        onLogout={handleLogout}
+        hasUnsavedChoices={
+          !isVoteSuccessful &&
+          (selectedCandidates.length > 0 ||
+            Object.values(abstentions).some((a: any) => a?.abstained))
+        }
+      />
       {content}
     </div>
   );
