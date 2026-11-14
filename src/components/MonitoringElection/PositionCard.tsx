@@ -36,11 +36,11 @@ const PositionCard = ({
     )}
     style={{ borderTop: `4px solid ${accent}` }}
   >
-    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 smm:px-6">
-      <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground smm:text-base">
+    <div className="flex flex-col items-center gap-1 border-b border-border px-4 py-4 text-center smm:px-6">
+      <h3 className="text-lg font-semibold uppercase tracking-wide text-foreground smm:text-xl lg:text-2xl">
         {title}
       </h3>
-      {meta && <div className="text-sm text-muted-foreground">{meta}</div>}
+      {meta && <div className="text-sm text-muted-foreground smm:text-base">{meta}</div>}
     </div>
     <div className="p-4 smm:p-6">{children}</div>
   </section>

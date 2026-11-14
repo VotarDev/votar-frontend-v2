@@ -128,16 +128,16 @@ const MonitorByindividualNumbers = ({ electionId }: { electionId: string }) => {
               })}
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-4 text-sm">
-              <span className="rounded-full bg-muted px-3 py-1 text-muted-foreground">
-                <span className="font-semibold text-foreground">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-5 text-base lg:text-lg">
+              <span className="rounded-full bg-muted px-4 py-1.5 text-muted-foreground">
+                <span className="text-xl font-bold text-foreground lg:text-2xl">
                   {position.abstained.toLocaleString()}
                 </span>{" "}
                 abstained
               </span>
-              <span className="rounded-full bg-secondary px-3 py-1 text-primary">
+              <span className="rounded-full bg-secondary px-4 py-1.5 text-primary">
                 Total votes:{" "}
-                <span className="font-semibold">
+                <span className="text-xl font-bold lg:text-2xl">
                   {(totalVotes + position.abstained).toLocaleString()}
                 </span>
               </span>
