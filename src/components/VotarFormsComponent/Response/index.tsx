@@ -274,7 +274,10 @@ const ResponseTable = () => {
   const counts = useMemo(
     () => ({
       duplicates: votarResponses.filter((r) => r.isDuplicate).length,
-      exported: votarResponses.filter((r) => r.isExported).length,
+      // Same rule as the status column (and the export toast): a duplicate
+      // counts as a duplicate, even if the server also flags it exported.
+      exported: votarResponses.filter((r) => r.isExported && !r.isDuplicate)
+        .length,
     }),
     [votarResponses],
   );
