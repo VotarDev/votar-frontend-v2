@@ -82,7 +82,10 @@ const DashboardLayout = ({ children }: any) => {
       {isClient && (
         // Sidebar | header + content. Only <main> scrolls, so there's one
         // scrollbar and the header stays in place.
-        <div className="flex h-screen overflow-hidden bg-white">
+        // No background colour here: the ballot and Votar Forms headers draw
+        // the election's branding on a layer behind their parent (-z-10), and a
+        // background on this container would paint over it.
+        <div className="flex h-screen overflow-hidden">
           <div className="hidden lg:flex">
             <SideBar opener={opener} setOpener={setOpener} />
           </div>
