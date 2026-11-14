@@ -4,7 +4,9 @@ export type BallotCandidate = {
   candidate_picture: string;
   media: string;
   more_details?: string;
-  votes: number;
+  votes?: number;
+  /** Free Votar: how many votes the voter gave this candidate. */
+  vote?: number;
   _id: string;
 };
 
@@ -20,6 +22,6 @@ export type BallotPosition = {
 
 export type SelectedCandidates = {
   position: string;
-  candidates: BallotCandidate[];
+  candidates?: BallotCandidate[];
   abstain?: boolean;
 };

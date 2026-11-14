@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import leftline from "../../../public/assets/images/left-line.svg";
-import rightline from "../../../public/assets/images/right-line.svg";
 import {
   BallotData,
   ElectionDetails,
@@ -8,10 +6,6 @@ import {
   FreeVoteDetail,
   SelectedCandidates,
 } from "@/utils/types";
-import { AnimatePresence } from "framer-motion";
-import Modal from "@/src/components/Modal";
-
-import { PiWarningCircleFill } from "react-icons/pi";
 import { RootState, AppDispatch } from "@/redux/store";
 import FetchVoterProfile from "@/src/components/VotePage/FetchVoterProfile";
 import Cookies from "universal-cookie";
@@ -29,8 +23,6 @@ import {
   enterFreeVotes,
 } from "@/utils/api";
 import Header from "@/src/components/BallotPage/Header";
-import { CircularProgress } from "@mui/material";
-
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { GoogleSignInButton } from "@/src/components/authButton/authButtons";
@@ -39,13 +31,19 @@ import {
   loadVotarCreditFromStorage,
   setVotarCredit,
 } from "@/redux/features/votarCredit/votarCreditSlice";
-
 import { toPng } from "html-to-image";
 import { MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED } from "@/utils/constants";
-import SuccessScreen from "@/src/components/FreeVotarBallotPage/SuccessScreen";
-import PositionSection from "@/src/components/FreeVotarBallotPage/PositionSection";
-import VoteConfirmationModal from "@/src/components/FreeVotarBallotPage/VoteConfimationModal";
-import CandidateDetailsModal from "@/src/components/FreeVotarBallotPage/CandidateDetailsModal";
+import { ArrowRight, Info, Lock, Vote } from "lucide-react";
+import { Button } from "@/src/components/ui/button";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import PageLoader from "@/src/components/shared/PageLoader";
+import { accentFor } from "@/src/components/MonitoringElection/PositionCard";
+import BallotStatusCard from "@/src/components/VoterBallot/BallotStatusCard";
+import CandidateDetailsDialog from "@/src/components/VoterBallot/CandidateDetailsDialog";
+import ReviewVotesDialog from "@/src/components/VoterBallot/ReviewVotesDialog";
+import VoteSuccess from "@/src/components/VoterBallot/VoteSuccess";
+import VoterBar from "@/src/components/VoterBallot/VoterBar";
+import FreeVotarPositionSection from "@/src/components/FreeVotarBallot/FreeVotarPositionSection";
 
 const FreeVotarBallot = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -72,12 +70,12 @@ const FreeVotarBallot = () => {
   const [showModal, setShowModal] = useState(false);
   const [candidateId, setCandidateId] = useState<string | null>(null);
   const [freeVoteDetails, setFreeVoteDetails] = useState<FreeVoteDetail[]>([]);
-  const [showDetails, setShowDetails] = useState<boolean>(false);
-  const [selectedDetails, setSelecteDetails] = useState<string | null>(null);
+  const [detailsCandidate, setDetailsCandidate] =
+    useState<FreeVotarCandidate | null>(null);
   const { data: session, status } = useSession();
 
   const now = new Date();
-  const badgeRef = useRef(null);
+  const badgeRef = useRef<HTMLDivElement>(null);
   const formattedDate = now.toLocaleString("en-US", {
     timeZone: "Africa/Lagos",
   });
@@ -585,11 +583,6 @@ const FreeVotarBallot = () => {
     }
   }, [selectedCandidates, candidates]);
 
-  const handleDetails = (details: string) => {
-    setShowDetails(true);
-    setSelecteDetails(details);
-  };
-
   const downloadBadge = () => {
     if (badgeRef.current === null) return;
 
@@ -605,207 +598,245 @@ const FreeVotarBallot = () => {
       });
   };
 
-  // Early returns
+  const voterName =
+    voterProfile.userData?.name || session?.user?.name || undefined;
+
+  // Page frame: the election's branded header (with the credits card), then
+  // the voter bar. `isolate` keeps the header's branding layer (-z-10) above
+  // this background.
+  const frame = (content: React.ReactNode, hideCredits = isVoteSuccessful) => (
+    <div className="isolate min-h-screen bg-slate-50">
+      <Header
+        electionDetails={election}
+        getVoterCredit={registerVotar}
+        isVoteSuccessful={hideCredits}
+      />
+      <VoterBar
+        greeting={isVoteSuccessful ? "Congratulations" : "Welcome"}
+        name={voterName}
+        onLogout={handleLogout}
+        hasUnsavedChoices={!isVoteSuccessful && selectedCandidates.length > 0}
+      />
+      {content}
+    </div>
+  );
+
+  if (!isClient) return null;
+
+  // Free Votar voters sign in with Google first.
   if (election?.type === "Free Votar" && status !== "authenticated") {
     return (
-      <AnimatePresence mode="wait">
-        <Modal key="modal">
-          <div className="w-full h-full bg-white flex items-center px-6 rounded-lg justify-center">
-            <GoogleSignInButton />
+      <div className="isolate min-h-screen bg-slate-50">
+        {/* Credits are hidden until the voter has signed in. */}
+        <Header electionDetails={election} isVoteSuccessful />
+        <div className="flex justify-center px-4 pb-16 pt-2">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-white p-6 text-center shadow-sm smm:p-8">
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-secondary text-primary">
+              <Vote className="h-7 w-7" aria-hidden="true" />
+            </div>
+            <h1 className="text-xl font-bold text-foreground smm:text-2xl">
+              Sign in to vote
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              Continue with Google to open the ballot
+              {election?.name_of_election ? (
+                <>
+                  {" "}
+                  for{" "}
+                  <span className="font-medium text-foreground">
+                    {election.name_of_election}
+                  </span>
+                </>
+              ) : null}
+              .
+            </p>
+            <div className="mt-6 flex justify-center">
+              <GoogleSignInButton />
+            </div>
           </div>
-        </Modal>
-      </AnimatePresence>
+        </div>
+      </div>
     );
+  }
+
+  if (isFetchElection && !election) {
+    return <PageLoader message="Loading your ballot" />;
   }
 
   if (election?.published === false) {
-    return (
-      <>
-        <div>
-          <Header electionDetails={election} getVoterCredit={registerVotar} />
-        </div>
-        <div className="mt-5 flex justify-end mr-10">
-          <button
-            onClick={handleLogout}
-            className="bg-blue-700 p-4 text-white rounded-md"
-          >
-            Logout
-          </button>
-        </div>
-        <div className="text-center mt-5">
-          <h1 className="text-4xl font-bold capitalize">
-            Welcome, {voterProfile.userData?.name}
-          </h1>
-        </div>
-        <div className="text-center pt-5">
-          You do not have Access to this election
-        </div>
-      </>
+    return frame(
+      <BallotStatusCard
+        icon={Lock}
+        tone="neutral"
+        title="No access"
+        description="You do not have access to this election."
+      />,
     );
   }
 
+  // Same rules as the vote counter (handleVote): votes past a position's free
+  // votes are paid from the voter's credits.
+  const freeVotesFor = (positionName: string) =>
+    (Array.isArray(freeVoteDetails) &&
+      freeVoteDetails.find((d) => d.position === positionName)?.free_votes) ||
+    0;
+  const pricePerVote = Number(election?.price_per_vote ?? 0);
+  const allowedPaidVotes =
+    pricePerVote > 0 ? Math.floor(votarCredit / pricePerVote) : Infinity;
+  const paidVotesUsed = candidates.reduce((acc, pos) => {
+    const posTotal = pos.candidates.reduce((sum, c) => sum + c.vote, 0);
+    return acc + Math.max(0, posTotal - freeVotesFor(pos.name_of_position));
+  }, 0);
+  const totalVotes = candidates.reduce(
+    (acc, pos) => acc + pos.candidates.reduce((sum, c) => sum + c.vote, 0),
+    0,
+  );
+  const positionsDone = candidates.filter((pos) =>
+    selectedCandidates.some((sc) => sc.position === pos.name_of_position),
+  ).length;
+
+  const renderBallot = () => {
+    if (isFetchCandidate) {
+      return (
+        <div className="mx-auto w-full max-w-5xl space-y-4 px-3 py-5 ssm:px-4 smm:space-y-6 smm:py-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-[460px] w-full rounded-2xl" />
+          ))}
+        </div>
+      );
+    }
+
+    if (electionEnded) {
+      return (
+        <BallotStatusCard
+          icon={Info}
+          tone="neutral"
+          title="The ballot isn't available"
+          description={electionEnded}
+        />
+      );
+    }
+
+    return (
+      <>
+        <div className="mx-auto w-full max-w-5xl space-y-4 px-3 pb-32 pt-5 ssm:px-4 smm:space-y-6 smm:pt-6">
+          <p className="flex items-start gap-2 rounded-xl border border-primary/15 bg-secondary px-4 py-3 text-sm text-foreground">
+            <Info
+              className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+              aria-hidden="true"
+            />
+            <span>
+              Use + and − to give votes to up to{" "}
+              {MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED} candidates per position,
+              or abstain. Each position has some free votes
+              {pricePerVote > 0
+                ? `; extra votes cost ₦${pricePerVote.toLocaleString()} each from your Votar credits`
+                : ""}
+              .
+            </span>
+          </p>
+
+          {candidates.map((position, positionIndex) => {
+            const freeVotes = freeVotesFor(position.name_of_position);
+            const positionTotal = position.candidates.reduce(
+              (sum, c) => sum + c.vote,
+              0,
+            );
+            const willUsePaidVote =
+              freeVotes === 0 ? true : positionTotal >= freeVotes;
+            return (
+              <FreeVotarPositionSection
+                key={position.name_of_position}
+                position={position}
+                positionIndex={positionIndex}
+                total={candidates.length}
+                accent={accentFor(positionIndex)}
+                freeVotes={freeVotes}
+                abstained={!!abstentions[position.name_of_position]?.abstained}
+                outOfVotes={willUsePaidVote && paidVotesUsed >= allowedPaidVotes}
+                onSelect={(candidate) =>
+                  handleSelectCandidate(position.name_of_position, candidate)
+                }
+                onVote={(candidateIndex, increment) =>
+                  handleVote(positionIndex, candidateIndex, increment)
+                }
+                onAbstain={() => handleAbstain(position.name_of_position)}
+                onShowDetails={setDetailsCandidate}
+              />
+            );
+          })}
+        </div>
+
+        {candidates.length > 0 && (
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)] backdrop-blur">
+            <div className="mx-auto flex max-w-5xl items-center gap-3 smm:gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium text-foreground ssm:text-sm">
+                  {positionsDone} of {candidates.length}
+                  <span className="hidden ssm:inline"> positions</span> done
+                  <span className="text-muted-foreground">
+                    {" "}
+                    · {totalVotes} vote{totalVotes === 1 ? "" : "s"}
+                    {paidVotesUsed > 0 && pricePerVote > 0 && (
+                      <span className="hidden smm:inline">
+                        {" "}
+                        ({paidVotesUsed} paid, ₦
+                        {(paidVotesUsed * pricePerVote).toLocaleString()})
+                      </span>
+                    )}
+                  </span>
+                </p>
+                <div className="mt-1.5 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all duration-300"
+                    style={{
+                      width: `${(positionsDone / candidates.length) * 100}%`,
+                    }}
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={() => setShowModal(true)}
+                disabled={!allPositionsSelected}
+                className="h-11 shrink-0 px-3 ssm:px-4"
+              >
+                Review<span className="hidden ssm:inline"> votes</span>{" "}
+                <ArrowRight />
+              </Button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
-      {isClient && (
-        <>
-          {election?.type === "Votar Pro" && <FetchVoterProfile />}
-
-          {isFetchElection ? (
-            <div className="mt-10 text-center">
-              <CircularProgress size={30} style={{ color: "#015CE9" }} />
-            </div>
-          ) : (
-            <div>
-              <Header
-                electionDetails={election}
-                getVoterCredit={registerVotar}
-                isVoteSuccessful={isVoteSuccessful}
-              />
-            </div>
-          )}
-
-          <div className="px-4 relative">
-            <div className="">
-              <div className="mt-5 flex justify-end mr-4 md:mr-10">
-                <button
-                  onClick={handleLogout}
-                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 px-6 py-3 md:px-8 md:py-4 text-white rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 inline-flex items-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Logout
-                </button>
-              </div>
-            </div>
-
-            {isFetchCandidate ? (
-              <div className="mt-10 text-center">Fetching candidates...</div>
-            ) : (
-              <div>
-                <div className="text-center mt-10">
-                  <h1 className="text-4xl font-bold capitalize max-w-[550px] mx-auto">
-                    {!isVoteSuccessful ? "Welcome," : "Congratulations,"}{" "}
-                    {voterProfile.userData?.name
-                      ? voterProfile.userData?.name
-                      : session?.user?.name}
-                  </h1>
-                  {election && !isVoteSuccessful && (
-                    <div className="flex justify-center">
-                      <div className="mt-10  bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg px-6 py-4 mb-6 max-w-md w-full">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium text-gray-600">
-                            Price per Vote
-                          </span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-blue-700">
-                              ₦{election?.price_per_vote}
-                            </span>
-                            <span className="text-sm text-gray-500">/vote</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {isVoteSuccessful ? (
-                  <SuccessScreen
-                    voterName={
-                      voterProfile.userData?.name ||
-                      session?.user?.name ||
-                      "Voter"
-                    }
-                    badgeRef={badgeRef}
-                    onDownloadBadge={downloadBadge}
-                  />
-                ) : (
-                  <div>
-                    {electionEnded ? (
-                      <div className="text-center p-20 text-xl font-semibold">
-                        {electionEnded}
-                      </div>
-                    ) : (
-                      <div className="mt-[56px] max-w-[1200px] mx-auto">
-                        {candidates &&
-                          candidates.map((position, positionIndex) => (
-                            <PositionSection
-                              key={positionIndex}
-                              position={position}
-                              positionIndex={positionIndex}
-                              candidates={candidates}
-                              freeVoteDetails={freeVoteDetails}
-                              abstentions={abstentions}
-                              votarCredit={votarCredit}
-                              election={election}
-                              onSelectCandidate={handleSelectCandidate}
-                              onVote={handleVote}
-                              onAbstain={handleAbstain}
-                              onDetails={handleDetails}
-                            />
-                          ))}
-
-                        <div className="flex bg-[#FFBC11] bg-opacity-20 text-left p-4 justify-center my-10 max-w-[700px] w-full mx-auto gap-2">
-                          <div className="text-[#ECAE0D] text-xl">
-                            <PiWarningCircleFill />
-                          </div>
-                          <div className="text-[#826008]">
-                            To cast your vote using the "Enter Votes" button
-                            below, please make sure to select your preferred
-                            candidate for each position in the election. If you
-                            choose not to vote for a particular position, you
-                            may select "Abstain" (if this option is available in
-                            your election).
-                          </div>
-                        </div>
-                        <div className="flex justify-center mb-10">
-                          <button
-                            onClick={() => setShowModal(true)}
-                            disabled={!allPositionsSelected}
-                            className={`bg-blue-700 text-slate-100 outline-none border-none w-40 h-12 flex justify-center items-center rounded-md uppercase font-semibold ${
-                              !allPositionsSelected
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
-                            }`}
-                          >
-                            Enter Votes
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <VoteConfirmationModal
-              showModal={showModal}
-              selectedCandidates={selectedCandidates}
-              voterName={
-                voterProfile.userData?.name || session?.user?.name || ""
-              }
-              isCastVote={isCastVote}
-              onClose={closeModal}
-              onConfirm={enterVotesHandler}
-            />
-
-            <CandidateDetailsModal
-              showDetails={showDetails}
-              selectedDetails={selectedDetails}
-              onClose={() => setShowDetails(false)}
-            />
-          </div>
-        </>
+      {election?.type === "Votar Pro" && <FetchVoterProfile />}
+      {frame(
+        isVoteSuccessful ? (
+          <VoteSuccess
+            voterName={voterName || "Voter"}
+            badgeRef={badgeRef}
+            onDownloadBadge={downloadBadge}
+          />
+        ) : (
+          renderBallot()
+        ),
       )}
+
+      <ReviewVotesDialog
+        open={showModal}
+        onClose={closeModal}
+        onConfirm={enterVotesHandler}
+        isSubmitting={isCastVote}
+        voterName={voterName}
+        selections={selectedCandidates}
+      />
+      <CandidateDetailsDialog
+        candidate={detailsCandidate}
+        onClose={() => setDetailsCandidate(null)}
+      />
     </>
   );
 };

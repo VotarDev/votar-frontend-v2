@@ -186,7 +186,7 @@ const Ballot = () => {
       (sc: any) => sc.position === position
     );
     return (
-      positionData?.candidates.some(
+      positionData?.candidates?.some(
         (c) => c.candidate_name === candidate.candidate_name
       ) ?? false
     );

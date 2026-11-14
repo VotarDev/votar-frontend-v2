@@ -76,7 +76,10 @@ const ReviewVotesDialog = ({
             </p>
           ) : (
             <ul className="space-y-2">
-              {selection.candidates?.map((candidate, i) => (
+              {selection.candidates
+                // Free Votar keeps every candidate; show only those voted for.
+                ?.filter((c) => c.vote === undefined || c.vote > 0)
+                .map((candidate, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                     {candidate.candidate_picture ? (
@@ -89,7 +92,7 @@ const ReviewVotesDialog = ({
                       <UserRound className="h-5 w-5 text-muted-foreground" />
                     )}
                   </span>
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium capitalize text-foreground">
                       {candidate.candidate_name}
                     </span>
@@ -99,6 +102,11 @@ const ReviewVotesDialog = ({
                       </span>
                     )}
                   </span>
+                  {candidate.vote !== undefined && (
+                    <span className="shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      {candidate.vote} vote{candidate.vote === 1 ? "" : "s"}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
