@@ -20,17 +20,17 @@ const VoterBar = ({
 }: VoterBarProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   return (
-    <div className="mx-auto flex w-full max-w-5xl items-start justify-between gap-3 px-4 pt-6 smm:items-center smm:gap-4">
-      <div className="min-w-0">
-        <p className="text-sm text-muted-foreground">{greeting},</p>
-        <h1 className="break-words text-lg font-bold capitalize leading-tight text-foreground ssm:text-xl smm:text-2xl">
-          {name || "Voter"}
-        </h1>
-      </div>
+    // Name centred under the (centred) election header; log out sits in the
+    // corner, with side padding so a long name never runs under it.
+    <div className="relative mx-auto w-full max-w-5xl px-14 pt-6 text-center ssm:px-28 smm:px-32">
+      <p className="text-sm text-muted-foreground">{greeting},</p>
+      <h1 className="break-words text-xl font-bold capitalize leading-tight text-foreground smm:text-2xl lg:text-3xl">
+        {name || "Voter"}
+      </h1>
       <Button
         variant="outline"
         onClick={() => setConfirmOpen(true)}
-        className="h-9 shrink-0 px-3 smm:h-10 smm:px-4"
+        className="absolute right-4 top-6 h-9 px-3 smm:h-10 smm:px-4"
         aria-label="Log out"
       >
         <LogOut />
