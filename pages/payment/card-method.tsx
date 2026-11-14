@@ -1,47 +1,80 @@
-import { AlertCircle, CheckCircle2, CreditCard, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, CreditCard, Loader2, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Cookies from "universal-cookie";
 import { toast } from "react-hot-toast";
 import { voterLoginCookieName } from "@/src/__env";
 import setAuthToken from "@/utils/setAuthToken";
 import { initializeVotarCreditPurchase, verifyVotarCreditPurchase } from "@/utils/api";
+import PaymentLayout from "@/src/components/Payment/PaymentLayout";
+import { cancelPayment, getPaymentReturnUrl } from "@/src/components/Payment/paymentSession";
+import { Button } from "@/src/components/ui/button";
+import PageLoader from "@/src/components/shared/PageLoader";
+
+// Same token choice as before: the organiser's or the voter's, depending on
+// where the purchase started.
+const authorise = () => {
+  const cookie = new Cookies();
+  const authContext = localStorage.getItem("payment_auth_context");
+  const userToken = cookie.get("user-token");
+  const voterToken = cookie.get(voterLoginCookieName);
+  const token =
+    authContext === "user" ? userToken || voterToken : voterToken || userToken;
+  if (token) setAuthToken(token);
+  return token;
+};
+
+type VerifyState = "idle" | "verifying" | "success" | "failed";
 
 const CardMethod: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState<number | null>(null);
+  const [verifyState, setVerifyState] = useState<VerifyState>("idle");
+  const [verifyError, setVerifyError] = useState("");
+  const [creditsAdded, setCreditsAdded] = useState<number | null>(null);
   const router = useRouter();
+  const reference =
+    typeof router.query.reference === "string" ? router.query.reference : "";
 
-  useEffect(() => {
-    if (!router.isReady) return;
-    const reference = typeof router.query.reference === "string" ? router.query.reference : "";
-    if (reference) {
-      const cookie = new Cookies();
-      const authContext = localStorage.getItem("payment_auth_context");
-      const userToken = cookie.get("user-token");
-      const voterToken = cookie.get(voterLoginCookieName);
-      const token = authContext === "user"
-        ? userToken || voterToken
-        : voterToken || userToken;
-      if (token) setAuthToken(token);
-      setIsProcessing(true);
-      verifyVotarCreditPurchase(reference).then(({ data }) => {
+  // Paystack sends the voter back here with ?reference=…; confirm it with our
+  // server, then return to where the purchase started.
+  const verify = useCallback(() => {
+    if (!reference) return;
+    const cookie = new Cookies();
+    authorise();
+    setVerifyState("verifying");
+    setVerifyError("");
+    verifyVotarCreditPurchase(reference)
+      .then(({ data }) => {
         const result = data?.data;
         if (!result) throw new Error("Payment verification returned no result");
         cookie.set("votar-credits", result.votar_credits, { path: "/" });
+        setCreditsAdded(Number(result.amount));
+        setVerifyState("success");
         toast.success(`${result.amount} Votar credits added`);
-        const returnUrl = localStorage.getItem("payment_return_url") || "/";
+        const returnUrl = getPaymentReturnUrl();
         localStorage.removeItem("payment_amount");
         localStorage.removeItem("payment_return_url");
         localStorage.removeItem("election_id");
         localStorage.removeItem("payment_auth_context");
         const url = new URL(returnUrl, window.location.origin);
         url.searchParams.set("payment", "success");
-        window.location.assign(url.toString());
-      }).catch((error: any) => {
-        toast.error(error?.response?.data?.message || "Payment could not be verified");
-        setIsProcessing(false);
+        // A moment on the success screen before heading back.
+        window.setTimeout(() => window.location.assign(url.toString()), 1500);
+      })
+      .catch((error: any) => {
+        const message =
+          error?.response?.data?.message || "Payment could not be verified";
+        toast.error(message);
+        setVerifyError(message);
+        setVerifyState("failed");
       });
+  }, [reference]);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (reference) {
+      verify();
       return;
     }
     const storedAmount = Number(localStorage.getItem("payment_amount"));
@@ -51,25 +84,17 @@ const CardMethod: React.FC = () => {
       return;
     }
     setAmount(storedAmount);
-  }, [router.isReady, router.query.reference, router]);
+  }, [router.isReady, reference, verify, router]);
 
   const handlePaystackPayment = async () => {
-    if (amount <= 0) {
+    if (!amount || amount <= 0) {
       toast.error("Invalid payment amount. Please try again.");
       return;
     }
-    const cookie = new Cookies();
-    const authContext = localStorage.getItem("payment_auth_context");
-    const userToken = cookie.get("user-token");
-    const voterToken = cookie.get(voterLoginCookieName);
-    const token = authContext === "user"
-      ? userToken || voterToken
-      : voterToken || userToken;
-    if (!token) {
+    if (!authorise()) {
       toast.error("Please log in to proceed with payment.");
       return;
     }
-    setAuthToken(token);
     setIsProcessing(true);
     try {
       const { data } = await initializeVotarCreditPurchase({
@@ -85,29 +110,117 @@ const CardMethod: React.FC = () => {
     }
   };
 
+  // Back from Paystack: confirming, confirmed, or couldn't confirm.
+  if (reference) {
+    return (
+      <PaymentLayout title="Card payment">
+        <div className="flex flex-col items-center py-4 text-center">
+          {verifyState === "failed" ? (
+            <>
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+                <AlertCircle className="h-7 w-7" aria-hidden="true" />
+              </span>
+              <h2 className="text-lg font-semibold text-foreground">
+                We couldn&apos;t confirm your payment
+              </h2>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                {verifyError}. If you were charged, try again in a moment or
+                contact support with this reference:
+              </p>
+              <code className="mt-3 break-all rounded-md bg-muted px-3 py-1.5 text-xs text-foreground">
+                {reference}
+              </code>
+              <div className="mt-6 flex w-full flex-col gap-2 smm:flex-row smm:justify-center">
+                <Button variant="outline" onClick={cancelPayment} className="h-11">
+                  Back to Votar
+                </Button>
+                <Button onClick={verify} className="h-11">
+                  Try again
+                </Button>
+              </div>
+            </>
+          ) : verifyState === "success" ? (
+            <>
+              <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                <CheckCircle2 className="h-7 w-7" aria-hidden="true" />
+              </span>
+              <h2 className="text-lg font-semibold text-foreground">
+                Payment confirmed
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {creditsAdded?.toLocaleString()} Votar credits have been added.
+                Taking you back…
+              </p>
+            </>
+          ) : (
+            <>
+              <Loader2 className="mb-4 h-10 w-10 animate-spin text-primary" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-foreground">
+                Confirming your payment
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                This only takes a moment. Please don&apos;t close this page.
+              </p>
+            </>
+          )}
+        </div>
+      </PaymentLayout>
+    );
+  }
+
+  if (amount === null) return <PageLoader message="Loading checkout" />;
+
   return (
-    <div className="bg-white rounded-lg p-6 lg:p-10 max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-blue-700 text-xl lg:text-2xl font-semibold">Card Payment</h2>
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700"><X size={24} /></button>
-      </div>
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <p className="text-blue-900 text-center text-lg lg:text-xl font-semibold">Amount to Pay: NGN {amount.toLocaleString()}</p>
-      </div>
-      <div className="bg-gray-50 rounded-lg p-6 mb-6">
-        <div className="flex items-center justify-center mb-4"><div className="w-16 h-16 bg-blue-700 rounded-full flex items-center justify-center text-white"><CreditCard size={32} /></div></div>
-        <h3 className="text-lg font-semibold text-center text-gray-800 mb-2">Secure Card Payment</h3>
-        <p className="text-center text-gray-600 text-sm mb-4">You’ll be redirected to Paystack to complete your payment securely.</p>
-        <div className="space-y-3 text-sm text-gray-700">
-          <div className="flex items-center gap-2"><CheckCircle2 className="text-green-600" size={18} /><span>SSL encrypted payment</span></div>
-          <div className="flex items-center gap-2"><CheckCircle2 className="text-green-600" size={18} /><span>Credits added after server verification</span></div>
-          <div className="flex items-center gap-2"><CheckCircle2 className="text-green-600" size={18} /><span>Accepts major cards</span></div>
+    <PaymentLayout
+      title="Pay with card"
+      description="You'll finish paying on Paystack's secure page."
+      amount={amount}
+      onBack={() => router.push("/payment/select-method")}
+      backLabel="Choose a different method"
+      onClose={cancelPayment}
+    >
+      <div className="flex items-center gap-3 rounded-xl border border-border p-4">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
+          <CreditCard className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div>
+          <p className="font-semibold text-foreground">Secure card payment</p>
+          <p className="text-sm text-muted-foreground">
+            Visa, Mastercard and Verve, processed by Paystack.
+          </p>
         </div>
       </div>
-      <div className="bg-orange-100 p-4 rounded-lg mb-6"><div className="flex gap-2 items-start"><AlertCircle className="text-[#ECAE0D] mt-1 flex-shrink-0" size={20} /><p className="text-sm text-gray-700">Credits appear after Paystack confirms payment with our server.</p></div></div>
-      <button onClick={handlePaystackPayment} disabled={isProcessing} className="w-full h-14 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-400 rounded-lg text-white font-semibold text-lg">{isProcessing ? "Processing..." : "Proceed to Payment"}</button>
-      <button onClick={() => router.back()} disabled={isProcessing} className="w-full mt-3 h-12 bg-gray-200 hover:bg-gray-300 disabled:bg-gray-300 rounded-lg text-gray-700 font-semibold">Choose Different Method</button>
-    </div>
+
+      <ul className="mt-4 space-y-2.5 text-sm text-foreground">
+        {[
+          "Encrypted payment. Votar never sees your card details.",
+          "Credits are added once Paystack confirms the payment with our server.",
+          "You'll come straight back here when you're done.",
+        ].map((item) => (
+          <li key={item} className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      <Button
+        onClick={handlePaystackPayment}
+        disabled={isProcessing}
+        className="mt-6 h-12 w-full text-base"
+      >
+        {isProcessing && <Loader2 className="animate-spin" />}
+        {isProcessing ? "Opening Paystack…" : `Pay ₦${amount.toLocaleString()}`}
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => router.push("/payment/select-method")}
+        disabled={isProcessing}
+        className="mt-2 h-11 w-full"
+      >
+        Choose a different method
+      </Button>
+    </PaymentLayout>
   );
 };
 
