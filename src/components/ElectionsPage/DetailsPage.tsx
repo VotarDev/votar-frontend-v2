@@ -24,15 +24,6 @@ import TimePicker from "@/src/components/shared/form/TimePicker";
 import ColorSelect from "@/src/components/shared/form/ColorSelect";
 import ImageCropDialog from "@/src/components/shared/form/ImageCropDialog";
 
-// Unchanged: the saved time shown as "HH:mm" (read in the viewer's timezone).
-const formatTimeToHHMM = (dateString: string | undefined) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
-
 const IMAGE_LIMIT_BYTES = 100 * 1024; // 100KB, as before
 const IMAGE_LIMIT_MESSAGE =
   "File size exceeds 100kb. Please select a smaller image.";
@@ -93,17 +84,8 @@ const DetailsPage = ({
 
             // Voting start, for locking fields that can't change once it begins.
             setTargetDateTime(parseElectionDate(electionData.start_date));
-
-            dispatch({
-              type: "SET_FIELD",
-              field: "start_time",
-              value: formatTimeToHHMM(electionData.start_date),
-            });
-            dispatch({
-              type: "SET_FIELD",
-              field: "end_time",
-              value: formatTimeToHHMM(electionData.end_date),
-            });
+            // SET_ELECTION fills the dates and times in the organiser's
+            // timezone (see toOrganiserDateTime).
             // Show the price when the election already charges per vote.
             setMonetizeElection(Number(electionData.price_per_vote) > 0);
           }

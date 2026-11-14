@@ -21,7 +21,11 @@ import { Skeleton } from "@/src/components/ui/skeleton";
 import { getStatusForElection } from "@/utils/electionStatus";
 import { scrollToTop } from "@/utils/scrollToTop";
 import { DetailFormAction, DetailFormState } from "@/utils/types";
-import { formatDate, formatDateToISO, formatTimeToHHMM } from "@/utils/util";
+import { formatDate } from "@/utils/util";
+import {
+  fromOrganiserDateTime,
+  toOrganiserDateTime,
+} from "@/utils/electionTime";
 import setAuthToken from "@/utils/setAuthToken";
 import { updateElection, updateCandidate, getElectionById } from "@/utils/api";
 import { useSelector } from "react-redux";
@@ -184,10 +188,12 @@ const ElectionDetail = () => {
           primary_color: action.value.primary_color,
           secondary_color: action.value.secondary_color,
           image: action.value.association_logo,
-          start_date: formatDateToISO(action.value.start_date),
-          end_date: formatDateToISO(action.value.end_date),
-          start_time: formatTimeToHHMM(Number(action.value.start_time || "")),
-          end_time: formatTimeToHHMM(Number(action.value.end_time || "")),
+          // Stored in UTC; shown in the organiser's time (WAT), like the
+          // create form.
+          start_date: toOrganiserDateTime(action.value.start_date)?.date ?? "",
+          end_date: toOrganiserDateTime(action.value.end_date)?.date ?? "",
+          start_time: toOrganiserDateTime(action.value.start_date)?.time ?? "",
+          end_time: toOrganiserDateTime(action.value.end_date)?.time ?? "",
           max_number_candidate: action.value.max_number_candidate,
           price_per_vote: action.value.price_per_vote,
           free_votes: action.value.free_votes,
@@ -248,8 +254,14 @@ const ElectionDetail = () => {
       }
     }
     const formData = new FormData();
-    const startDateData = formattedStartDate + " " + state.start_time;
-    const endDateData = formattedEndDate + " " + state.end_time;
+    // Saved in UTC, the same way the create form saves them (the ballot reads
+    // them as UTC). Falls back to the old format if a value is missing.
+    const startDateData =
+      fromOrganiserDateTime(state.start_date, String(state.start_time ?? "")) ||
+      formattedStartDate + " " + state.start_time;
+    const endDateData =
+      fromOrganiserDateTime(state.end_date, String(state.end_time ?? "")) ||
+      formattedEndDate + " " + state.end_time;
     formData.append("name_of_election", state.electionName);
     formData.append("description", state.description);
     formData.append("primary_color", state.primary_color);
