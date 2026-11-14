@@ -10,6 +10,22 @@ import ScrollAnimation from "react-animate-on-scroll";
 import Link from "next/link";
 import Marquee from "react-fast-marquee";
 
+const HERO_PHOTOS = [
+  "/assets/images/hero-image1.jpeg",
+  "/assets/images/hero-image2.jpeg",
+  "/assets/images/hero-image3.jpeg",
+  "/assets/images/hero-image4.jpeg",
+  "/assets/images/hero-image-5.jpeg",
+  "/assets/images/hero-image6.jpeg",
+  "/assets/images/hero-image7.jpeg",
+  "/assets/images/hero-image8.jpeg",
+  "/assets/images/hero-image9.jpeg",
+  "/assets/images/hero-image10.jpeg",
+  "/assets/images/hero-image11.jpeg",
+  "/assets/images/hero-image12.jpeg",
+  "/assets/images/hero-image13.jpeg",
+];
+
 const Hero = () => {
   return (
     <div className="lg:mt-[1rem]  mt-[4rem]   px-4 overflow-hidden">
@@ -109,48 +125,57 @@ const Hero = () => {
         </ScrollAnimation>
       </div>
 
-      <div className="w-full overflow-hidden pt-10 relative">
-        <div className="absolute left-0 top-0 h-full w-5 bg-gradient-to-r from-white via-white/80 to-transparent z-10 pointer-events-none" />
+      {/* Photos from elections run on Votar, scrolling in two rows. */}
+      <section
+        aria-labelledby="votar-in-action"
+        className="-mx-4 mt-12 overflow-hidden py-10 lg:mt-16 lg:py-14"
+      >
+        <div className="mx-auto mb-8 max-w-2xl px-4 text-center lg:mb-10">
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#015CE9]">
+            Votar in action
+          </p>
+          <h2
+            id="votar-in-action"
+            className="mt-2 text-2xl font-bold leading-tight text-slate-900 lg:text-4xl"
+          >
+            Trusted at real elections
+          </h2>
+          <p className="mt-3 text-base text-slate-600 lg:text-lg">
+            Organisations use Votar to run transparent elections and watch the results come in live.
+          </p>
+        </div>
 
-        <div className="absolute right-0 top-0 h-full w-5 bg-gradient-to-l from-white via-white/80 to-transparent z-10 pointer-events-none" />
-        <Marquee
-          pauseOnHover
-          speed={100}
-          gradientColor="white"
-          gradientWidth={200}
-        >
-          <div className="flex w-full">
-            {[
-              "/assets/images/hero-image1.jpeg",
-              "/assets/images/hero-image2.jpeg",
-              "/assets/images/hero-image3.jpeg",
-              "/assets/images/hero-image4.jpeg",
-              "/assets/images/hero-image-5.jpeg",
-              "/assets/images/hero-image6.jpeg",
-              "/assets/images/hero-image7.jpeg",
-              "/assets/images/hero-image8.jpeg",
-              "/assets/images/hero-image9.jpeg",
-              "/assets/images/hero-image10.jpeg",
-              "/assets/images/hero-image11.jpeg",
-              "/assets/images/hero-image12.jpeg",
-              "/assets/images/hero-image13.jpeg",
-            ].map((src, index) => (
-              <div
-                key={index}
-                className=" flex justify-center items-center px-4 "
-              >
-                <Image
-                  src={src}
-                  alt={`logo-${index + 1}`}
-                  width={300}
-                  height={200}
-                  className="h-[200px] w-[250px] object-cover rounded-lg border-2 border-[#25D366]"
-                />
-              </div>
-            ))}
-          </div>
-        </Marquee>
-      </div>
+        <div className="space-y-4 lg:space-y-6">
+          {[HERO_PHOTOS.slice(0, 7), HERO_PHOTOS.slice(7)].map((row, rowIndex) => (
+            <Marquee
+              key={rowIndex}
+              pauseOnHover
+              speed={rowIndex === 0 ? 40 : 32}
+              direction={rowIndex === 0 ? "left" : "right"}
+              gradient
+              gradientColor="white"
+              gradientWidth={80}
+              autoFill
+            >
+              {row.map((src, index) => (
+                <figure
+                  key={src}
+                  className="group mx-2 overflow-hidden rounded-2xl bg-slate-100 shadow-[0_8px_24px_rgba(15,23,42,0.08)] ring-1 ring-black/5 lg:mx-3"
+                >
+                  <Image
+                    src={src}
+                    alt={`An election run on Votar (photo ${rowIndex * 7 + index + 1})`}
+                    width={360}
+                    height={240}
+                    sizes="(min-width: 998px) 320px, 240px"
+                    className="h-[160px] w-[240px] object-cover transition-transform duration-500 group-hover:scale-105 lg:h-[220px] lg:w-[320px]"
+                  />
+                </figure>
+              ))}
+            </Marquee>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };
