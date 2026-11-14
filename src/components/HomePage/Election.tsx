@@ -7,13 +7,34 @@ import "react-modal-video/scss/modal-video.scss";
 import Reveal from "./Reveal";
 import Image from "next/image";
 
+// Same plans, text and pictures as before (typos fixed).
+const PLANS = [
+  {
+    name: "Free Votar",
+    description: "Set up and participate in an online election or poll for free",
+    image: freeVotar,
+    opensVideo: true,
+  },
+  {
+    name: "Votar Pro",
+    description:
+      "Enjoy more privacy and security features with Votar Pro from the comfort of your couch or on site",
+    image: votarPro,
+    opensVideo: false,
+  },
+  {
+    name: "Votar Meetings",
+    description:
+      "Participate in motion votes, annual meeting confirmation, executive positions, Board of directors vote, By-laws amendment, budget approval, contract reformation",
+    image: votarMeetings,
+    opensVideo: false,
+  },
+];
+
 const Election = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const openVideoHandler = () => {
-    setIsOpen(!isOpen);
-  };
-  const closeVideoHandler = () => {
     setIsOpen(!isOpen);
   };
 
@@ -24,79 +45,55 @@ const Election = () => {
       </Reveal>
       <Reveal
         delay={0.1}
-        className="grid sm:grid-cols-2 grid-cols-1 lg:grid-cols-3  lg:mt-[62px] mt-[30px] justify-items-center items-center lg:gap-10 gap-4"
+        className="grid sm:grid-cols-2 grid-cols-1 lg:grid-cols-3 lg:mt-[62px] mt-[30px] items-stretch lg:gap-10 gap-10"
       >
-        <div className="text-center">
-          <div>
-            <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              <h1>Free Votar</h1>
-            </div>
-            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
-              <p>
-                Setup and participate in <br />
-                an online election or poll <br />
-                for free
+        {PLANS.map((plan) => {
+          const media = (
+            <Image
+              src={plan.image}
+              alt={`${plan.name} on Votar`}
+              className="h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+            />
+          );
+          return (
+            // Title and text on top, photo pinned to the bottom, so the three
+            // photos line up however long each description is.
+            <div key={plan.name} className="flex h-full flex-col text-center">
+              <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
+                <h2>{plan.name}</h2>
+              </div>
+              <p className="mx-auto max-w-[22rem] flex-1 [text-wrap:balance] lg:text-xl leading-[30px] text-base">
+                {plan.description}
               </p>
-            </div>
-          </div>
-          <div
-            className="cursor-pointer lg:mt-5 mt-2"
-            onClick={openVideoHandler}
-          >
-            <Image src={freeVotar} alt="votar election" />
-          </div>
-          {isOpen && (
-            <div>
-              <div className="video-modal w-full h-[100vh] fixed top-0 bottom-0 left-0 flex item-center justify-center z-[999]">
-                <ModalVideo
-                  channel="custom"
-                  url="/assets/videos/dummy-video.mp4"
-                  isOpen={isOpen}
-                  // videoId="L61p2uyiMSo"
-                  onClose={() => setIsOpen(false)}
-                />
+              <div className="mx-auto mt-5 w-full max-w-[420px] overflow-hidden rounded-xl">
+                {plan.opensVideo ? (
+                  <button
+                    type="button"
+                    onClick={openVideoHandler}
+                    aria-label={`Watch a video about ${plan.name}`}
+                    className="group block w-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#015CE9] focus-visible:ring-offset-2"
+                  >
+                    {media}
+                  </button>
+                ) : (
+                  <div className="group">{media}</div>
+                )}
               </div>
             </div>
-          )}
-        </div>
-
-        <div className="text-center">
-          <div>
-            <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              <h1>Votar Pro</h1>
-            </div>
-            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base">
-              <p>
-                Enjoy more privacy and security
-                <br /> features with Votar Pro from the
-                <br />
-                comfort of your couch or on site
-              </p>
-            </div>
-          </div>
-          <div className="cursor-pointer lg:mt-5 mt-2">
-            <Image src={votarPro} alt="votar election" />
-          </div>
-        </div>
-
-        <div className="text-center">
-          <div>
-            <div className="lg:text-[40px] text-[#015CE9] font-semibold text-2xl pb-2">
-              <h1>Votar Meetings</h1>
-            </div>
-            <div className="lg:text-xl leading-[30px] lg:h-[120px] text-base max-w-[20rem] mx-auto">
-              <p>
-                Participate in motion votes, annual meeting confirmation,
-                executive positions, Board of directors vote, By-laws
-                ammendment, budget approval, contract reformation
-              </p>
-            </div>
-          </div>
-          <div className="cursor-pointer lg:mt-5 mt-2">
-            <Image src={votarMeetings} alt="votar election" />
-          </div>
-        </div>
+          );
+        })}
       </Reveal>
+
+      {isOpen && (
+        <div className="video-modal w-full h-[100vh] fixed top-0 bottom-0 left-0 flex item-center justify-center z-[999]">
+          <ModalVideo
+            channel="custom"
+            url="/assets/videos/dummy-video.mp4"
+            isOpen={isOpen}
+            onClose={() => setIsOpen(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
