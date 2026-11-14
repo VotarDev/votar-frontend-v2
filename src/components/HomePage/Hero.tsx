@@ -6,9 +6,10 @@ import illustrationOne from "../../../public/assets/illustrations/illustration-1
 import illustrationTwo from "../../../public/assets/illustrations/illustration-2.png";
 import illustrationThree from "../../../public/assets/illustrations/illustration-3.png";
 import testimony from "../../../public/assets/testimonies/testmonies.png";
-import ScrollAnimation from "react-animate-on-scroll";
+import Reveal from "./Reveal";
 import Link from "next/link";
 import Marquee from "react-fast-marquee";
+import { useReducedMotion } from "framer-motion";
 
 const HERO_PHOTOS = [
   "/assets/images/hero-image1.jpeg",
@@ -27,13 +28,12 @@ const HERO_PHOTOS = [
 ];
 
 const Hero = () => {
+  // Keep the photo rows still for people who prefer reduced motion.
+  const reduceMotion = useReducedMotion();
   return (
     <div className="lg:mt-[1rem]  mt-[4rem]   px-4 overflow-hidden">
       <div className="lg:flex-row flex-col-reverse flex justify-between items-center w-full text-center lg:text-left max-w-[1300px] lg:px-[50px] mx-auto">
-        <ScrollAnimation
-          animateIn="animate__fadeIn"
-          animateOut="animate__fadeOut"
-        >
+        <Reveal onLoad>
           <div className="mt-0 lg:mt-0">
             {/* <Typed
               strings={[`Your Choice is Visible <br/> Your Voice is Heard`]}
@@ -77,11 +77,8 @@ const Hero = () => {
               </Button>
             </Link>
           </div>
-        </ScrollAnimation>
-        <ScrollAnimation
-          animateIn="animate__bounceInRight"
-          animateOut="animate__bounceOutRight"
-        >
+        </Reveal>
+        <Reveal onLoad from="right" delay={0.15}>
           <div className="flex lg:gap-[38px] gap-0 lg:p-10 p-6">
             <Image
               src={illustrationOne}
@@ -122,7 +119,7 @@ const Hero = () => {
               </div>
             </div>
           </div>
-        </ScrollAnimation>
+        </Reveal>
       </div>
 
       {/* Photos from elections run on Votar, scrolling in two rows. */}
@@ -130,7 +127,7 @@ const Hero = () => {
         aria-labelledby="votar-in-action"
         className="-mx-4 mt-12 overflow-hidden py-10 lg:mt-16 lg:py-14"
       >
-        <div className="mx-auto mb-8 max-w-2xl px-4 text-center lg:mb-10">
+        <Reveal className="mx-auto mb-8 max-w-2xl px-4 text-center lg:mb-10">
           <p className="text-sm font-semibold uppercase tracking-widest text-[#015CE9]">
             Votar in action
           </p>
@@ -143,13 +140,14 @@ const Hero = () => {
           <p className="mt-3 text-base text-slate-600 lg:text-lg">
             Organisations use Votar to run transparent elections and watch the results come in live.
           </p>
-        </div>
+        </Reveal>
 
         <div className="space-y-4 lg:space-y-6">
           {[HERO_PHOTOS.slice(0, 7), HERO_PHOTOS.slice(7)].map((row, rowIndex) => (
             <Marquee
               key={rowIndex}
               pauseOnHover
+              play={!reduceMotion}
               speed={rowIndex === 0 ? 40 : 32}
               direction={rowIndex === 0 ? "left" : "right"}
               gradient

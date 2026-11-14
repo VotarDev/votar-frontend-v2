@@ -13,10 +13,6 @@ export default function Home() {
   return (
     <main>
       <Head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css"
-        />
 
         <script
           type="application/ld+json"

@@ -1,7 +1,6 @@
 import React from "react";
 import { logos } from "@/utils/util";
-import ScrollAnimation from "react-animate-on-scroll";
-import "animate.css/animate.min.css";
+import Reveal from "./Reveal";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, A11y, FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -12,10 +11,7 @@ import Image from "next/image";
 const Logos = () => {
   return (
     <div className="mt-[65px] max-w-[1300px] mx-auto px-4 ">
-      <ScrollAnimation
-        animateIn="animate__fadeIn"
-        animateOut="animate__fadeOut"
-      >
+      <Reveal>
         <div className="lg:px-[25px] lg:text-[24px] mb-4 text-[18px] px-4">
           <p>Join our list of trusted clients</p>
         </div>
@@ -123,7 +119,7 @@ const Logos = () => {
             </div>
           </div>
         </div>
-      </ScrollAnimation>
+      </Reveal>
     </div>
   );
 };

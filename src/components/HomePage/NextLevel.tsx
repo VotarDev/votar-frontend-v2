@@ -1,13 +1,14 @@
 import React from "react";
+import Reveal from "./Reveal";
 
 const NextLevel = () => {
   return (
     <div className="max-w-[1340px] mx-auto lg:mt-[200px] mt-[80px] lg:mb-[200px] mb-[100px] px-4">
-      <div className="text-center lg:text-5xl font-semibold text-[30px]">
+      <Reveal className="text-center lg:text-5xl font-semibold text-[30px]">
         <h1>Take Your Voting Process to the Next Level</h1>
-      </div>
+      </Reveal>
 
-      <div className="flex items-center flex-wrap justify-center lg:gap-[50px] gap-10 text-center lg:mt-[66px] mt-[50px]">
+      <Reveal delay={0.1} className="flex items-center flex-wrap justify-center lg:gap-[50px] gap-10 text-center lg:mt-[66px] mt-[50px]">
         <div className="sm:flex-[33.33%] md:flex-[25%] flex-[100%]">
           <div className="text-[#012E75] text-2xl font-semibold">
             <h2>
@@ -67,7 +68,7 @@ const NextLevel = () => {
             </p>
           </div>
         </div>
-      </div>
+      </Reveal>
     </div>
   );
 };

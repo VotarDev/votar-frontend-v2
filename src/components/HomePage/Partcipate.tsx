@@ -1,4 +1,5 @@
 import React from "react";
+import Reveal from "./Reveal";
 import people from "../../../public/assets/icons/people.svg";
 import { LiaSmsSolid } from "react-icons/lia";
 import { TfiEmail } from "react-icons/tfi";
@@ -7,14 +8,14 @@ import Image from "next/image";
 const Partcipate = () => {
   return (
     <div className="max-w-[1340px] mx-auto lg:mt-[100px] px-4 mt-[60px]">
-      <div className="lg:text-5xl text-[30px] text-center font-semibold">
+      <Reveal className="lg:text-5xl text-[30px] text-center font-semibold">
         <h1>
           Participate and Recieve Notifications, Information and
           <br /> Results via:
         </h1>
-      </div>
+      </Reveal>
 
-      <div className="flex justify-center items-stretch flex-wrap text-[#F5F5F5] lg:gap-[85px] gap-10 lg:mt-[117px] mt-[40px]">
+      <Reveal delay={0.1} className="flex justify-center items-stretch flex-wrap text-[#F5F5F5] lg:gap-[85px] gap-10 lg:mt-[117px] mt-[40px]">
         <div className="bg-[#015CE9] rounded-lg p-6 w-[293px] ">
           <div>
             <Image src={people} alt="icons" />
@@ -57,7 +58,7 @@ const Partcipate = () => {
             </p>
           </div>
         </div>
-      </div>
+      </Reveal>
     </div>
   );
 };

@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import freeVotar from "../../../public/assets/images/free votar.svg";
 import votarPro from "../../../public/assets/images/votar pro.svg";
 import votarMeetings from "../../../public/assets/images/votar meetings.svg";
 import ModalVideo from "react-modal-video";
 import "react-modal-video/scss/modal-video.scss";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import Reveal from "./Reveal";
 import Image from "next/image";
 
 const Election = () => {
-  useEffect(() => {
-    AOS.init();
-  }, []);
   const [isOpen, setIsOpen] = useState(false);
 
   const openVideoHandler = () => {
@@ -23,18 +19,12 @@ const Election = () => {
 
   return (
     <div className="lg:mt-[172px] mt-[60px] max-w-[1340px] mx-auto px-4">
-      <div
-        className="lg:text-5xl text-[30px] text-center font-semibold"
-        data-aos="fade-up"
-        data-aos-easing="ease-in-out"
-      >
+      <Reveal className="lg:text-5xl text-[30px] text-center font-semibold">
         <h1>Choose the Election that Suits you best</h1>
-      </div>
-      <div
+      </Reveal>
+      <Reveal
+        delay={0.1}
         className="grid sm:grid-cols-2 grid-cols-1 lg:grid-cols-3  lg:mt-[62px] mt-[30px] justify-items-center items-center lg:gap-10 gap-4"
-        data-aos="fade-up"
-        data-aos-easing="ease-in-out"
-        data-aos-duration="1000"
       >
         <div className="text-center">
           <div>
@@ -106,7 +96,7 @@ const Election = () => {
             <Image src={votarMeetings} alt="votar election" />
           </div>
         </div>
-      </div>
+      </Reveal>
     </div>
   );
 };
