@@ -21,12 +21,10 @@ import { enterVotes } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import { useSession, signOut } from "next-auth/react";
-import { ArrowRight, CalendarX, Clock, Info, Lock } from "lucide-react";
+import { ArrowRight, Info } from "lucide-react";
 import {
   parseElectionDate,
   getElectionStatus,
-  formatInViewerTimeZone,
-  getViewerTimeZone,
   type ElectionStatus,
 } from "@/utils/electionTime";
 import { Button } from "@/src/components/ui/button";
@@ -35,6 +33,7 @@ import PageLoader from "@/src/components/shared/PageLoader";
 import { accentFor } from "@/src/components/MonitoringElection/PositionCard";
 import BallotPositionSection from "@/src/components/VoterBallot/BallotPositionSection";
 import BallotStatusCard from "@/src/components/VoterBallot/BallotStatusCard";
+import BallotAvailability from "@/src/components/VoterBallot/BallotAvailability";
 import CandidateDetailsDialog from "@/src/components/VoterBallot/CandidateDetailsDialog";
 import ReviewVotesDialog from "@/src/components/VoterBallot/ReviewVotesDialog";
 import VoteSuccess from "@/src/components/VoterBallot/VoteSuccess";
@@ -428,13 +427,6 @@ const Ballot = () => {
       });
   };
 
-  // Election times shown in the voter's own timezone (falls back to the raw
-  // text if the stored value can't be read).
-  const formatElectionTime = (value: unknown) => {
-    const instant = parseElectionDate(value);
-    return instant ? formatInViewerTimeZone(instant) : String(value ?? "");
-  };
-
   const voterName =
     voterProfile.userData?.name || session?.user?.name || undefined;
 
@@ -457,47 +449,17 @@ const Ballot = () => {
     </div>
   );
 
-  const localTimeHint = `Shown in your local time (${getViewerTimeZone()})`;
-
-  if (election?.published === false) {
-    return frame(
-      "Welcome",
-      <BallotStatusCard
-        icon={Lock}
-        tone="neutral"
-        title="No access"
-        description="You do not have access to this election."
-      />,
-    );
-  }
-
-  if (election && electionStatus === "not_started") {
-    return frame(
-      "Welcome",
-      <BallotStatusCard
-        icon={Clock}
-        title="Voting hasn't started yet"
-        description="This election isn't open for voting yet. This page opens the ballot automatically when it begins."
-        detailLabel="Starts on"
-        detail={formatElectionTime((election as any).start_date)}
-        detailHint={localTimeHint}
-      />,
-    );
-  }
-
-  if (election && electionStatus === "ended") {
-    return frame(
-      "Welcome",
-      <BallotStatusCard
-        icon={CalendarX}
-        tone="danger"
-        title="This election has ended"
-        description="The voting period is now closed. Thank you for your participation."
-        detailLabel="Ended on"
-        detail={formatElectionTime((election as any).end_date)}
-        detailHint={localTimeHint}
-      />,
-    );
+  // Ended, not published, or not started yet: explain why voting is closed.
+  const unavailable = (
+    <BallotAvailability election={election} status={electionStatus} />
+  );
+  if (
+    election &&
+    (election.published === false ||
+      electionStatus === "not_started" ||
+      electionStatus === "ended")
+  ) {
+    return frame("Welcome", unavailable);
   }
 
   if (!isClient) return null;

@@ -33,12 +33,15 @@ import {
 } from "@/redux/features/votarCredit/votarCreditSlice";
 import { toPng } from "html-to-image";
 import { MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED } from "@/utils/constants";
-import { ArrowRight, Info, Lock, Vote } from "lucide-react";
+import { ArrowRight, Info, Vote } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import PageLoader from "@/src/components/shared/PageLoader";
 import { accentFor } from "@/src/components/MonitoringElection/PositionCard";
 import BallotStatusCard from "@/src/components/VoterBallot/BallotStatusCard";
+import BallotAvailability, {
+  statusForElection,
+} from "@/src/components/VoterBallot/BallotAvailability";
 import CandidateDetailsDialog from "@/src/components/VoterBallot/CandidateDetailsDialog";
 import ReviewVotesDialog from "@/src/components/VoterBallot/ReviewVotesDialog";
 import VoteSuccess from "@/src/components/VoterBallot/VoteSuccess";
@@ -663,15 +666,16 @@ const FreeVotarBallot = () => {
     return <PageLoader message="Loading your ballot" />;
   }
 
-  if (election?.published === false) {
-    return frame(
-      <BallotStatusCard
-        icon={Lock}
-        tone="neutral"
-        title="No access"
-        description="You do not have access to this election."
-      />,
-    );
+  // Ended, not published, or not started yet: explain why voting is closed.
+  const electionStatus = statusForElection(election);
+  if (
+    election &&
+    (election.published === false ||
+      electionStatus === "not_started" ||
+      electionStatus === "ended") &&
+    !isVoteSuccessful
+  ) {
+    return frame(<BallotAvailability election={election} />, true);
   }
 
   // Same rules as the vote counter (handleVote): votes past a position's free

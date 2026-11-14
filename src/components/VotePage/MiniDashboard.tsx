@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import Modal from "../Modal";
+import DialogShell from "@/src/components/shared/DialogShell";
 import BuyVotingCredit from "../BuyVotingCredit";
 import Cookies from "universal-cookie";
 import { useRouter } from "next/router";
@@ -85,18 +84,18 @@ const MiniDashboard = ({
         </Button>
       </div>
 
-      {/* Modal */}
-      <AnimatePresence mode="wait">
-        {showModal && (
-          <Modal key="modal" handleClose={closeModal}>
-            <BuyVotingCredit
-              election={election}
-              setShowModal={setShowModal}
-              getVotarCredit={getVotarCredit}
-            />
-          </Modal>
-        )}
-      </AnimatePresence>
+      <DialogShell
+        open={showModal}
+        onClose={closeModal}
+        labelledBy="buy-credits-title"
+        className="max-w-md bg-transparent p-0 shadow-none"
+      >
+        <BuyVotingCredit
+          election={election}
+          setShowModal={setShowModal}
+          getVotarCredit={getVotarCredit}
+        />
+      </DialogShell>
     </div>
   );
 };
