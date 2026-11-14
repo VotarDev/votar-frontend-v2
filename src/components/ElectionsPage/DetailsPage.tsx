@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import Cookies from "universal-cookie";
-import { Lock } from "lucide-react";
+import VotingLockNotice from "@/src/components/shared/VotingLockNotice";
 import { getElectionById } from "@/utils/api";
 import { useCurrentUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -373,11 +373,11 @@ const DetailsPage = ({
 
         <FormSection title="Voting rules">
           {!isEditable && (
-            <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              Voting has started, so the number of candidates per position can
-              no longer be changed.
-            </div>
+            <VotingLockNotice
+              endDate={election?.end_date}
+              subject="the number of candidates per position"
+              className="p-3"
+            />
           )}
           <SettingRow
             label="Max candidates per position"

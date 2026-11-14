@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { Copy, Eye, Link2, Lock } from "lucide-react";
+import VotingLockNotice from "@/src/components/shared/VotingLockNotice";
 import Cookies from "universal-cookie";
 import Header from "../../BallotPage/Header";
 import Body from "../../BallotPage/Body";
@@ -159,10 +160,7 @@ const Ballot = ({ positions, setPositions, onEditableChange }: any) => {
       </div>
 
       {!isEditable && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          Voting has started, so the ballot can no longer be changed.
-        </div>
+        <VotingLockNotice endDate={election?.end_date} subject="the ballot" />
       )}
 
       <Body

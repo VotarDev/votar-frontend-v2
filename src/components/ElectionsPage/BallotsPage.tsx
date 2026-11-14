@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import Cookies from "universal-cookie";
 import { Copy, Eye, Link2, Lock, Trash2 } from "lucide-react";
+import VotingLockNotice from "@/src/components/shared/VotingLockNotice";
 import { useCurrentUserId } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import {
@@ -242,10 +243,7 @@ const BallotsPage = ({ position, setPosition }: any) => {
       </div>
 
       {!isEditable && (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-          Voting has started, so the ballot can no longer be changed.
-        </div>
+        <VotingLockNotice endDate={election?.end_date} subject="the ballot" />
       )}
 
       <Body
