@@ -1,35 +1,49 @@
-import { useState } from "react";
-import AddCardDetails from "@/src/components/CardDetailComponent/AddCardComponent/AddCardDetails";
-import BillingAddress from "@/src/components/CardDetailComponent/AddCardComponent/BillingAddress";
-import BillingAddressDetails from "@/src/components/CardDetailComponent/BillingAddressDetails";
-import DashboardLayout from "@/src/components/DashboardLayout";
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { addCard } from "@/utils/api";
-import { useCurrentUser, useUser } from "@/utils/hooks";
-import { toast } from "react-hot-toast";
-import { CircularProgress } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-hot-toast";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import DashboardLayout from "@/src/components/DashboardLayout";
+import PageHeader from "@/src/components/shared/PageHeader";
+import ActionBar from "@/src/components/shared/ActionBar";
+import CardForm, {
+  CardFormErrors,
+  validateCardForm,
+} from "@/src/components/CardDetailComponent/CardForm";
+import { Button } from "@/src/components/ui/button";
+import { resetForm } from "@/redux/features/cardDetailsForm/cardDetailsSlice";
+import { addCard } from "@/utils/api";
+import { useCurrentUserId } from "@/utils/hooks";
 import eventEmitter from "@/utils/eventsEmitter";
+import { scrollToTop } from "@/utils/scrollToTop";
 
 const AddCard = () => {
   const { cardDetails, addressDetails } = useSelector(
-    (state: any) => state.cardForm
+    (state: any) => state.cardForm,
   );
+  const dispatch = useDispatch();
   const router = useRouter();
-  const users = useCurrentUser();
-  const user = useUser();
+  const USER_ID = useCurrentUserId();
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<CardFormErrors>({});
 
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+  // Start with an empty form (the edit page shares the same slice).
+  useEffect(() => {
+    dispatch(resetForm());
+  }, [dispatch]);
 
   const addCardDetailsHandler = async () => {
+    const found = validateCardForm(cardDetails, addressDetails);
+    setErrors(found);
+    if (Object.keys(found).length) {
+      toast.error("Fill in the required fields");
+      scrollToTop();
+      return;
+    }
     try {
       setIsLoading(true);
+      // Same payload as before.
       const cardDetail = {
         name: "",
         name_on_card: cardDetails.nameOnCard,
@@ -46,53 +60,57 @@ const AddCard = () => {
         billing_postal_code: addressDetails.zip,
         type: cardDetails.cardType,
       };
-      console.log(cardDetail);
-      const { data } = await addCard(cardDetail, USER_ID);
+      const { data } = await addCard(cardDetail, USER_ID as string);
       if (data) {
         toast.success("Card Added Successfully");
-        setIsLoading(false);
-        console.log(data);
         eventEmitter.emit("cardAdded");
       }
     } catch (error: any) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
+      toast.error(
+        error?.response?.data?.message || error?.message || String(error),
+      );
+    } finally {
       setIsLoading(false);
-      console.log(message);
     }
   };
 
   return (
-    <div>
-      <DashboardLayout>
-        <AddCardDetails />
-        <BillingAddress />
-        <div className="pt-10 flex items-center gap-5">
-          <div>
-            <button
-              onClick={addCardDetailsHandler}
-              disabled={isLoading}
-              className="w-40 h-12 flex items-center gap-2 justify-center rounded outline-none border-none bg-blue-700 text-slate-200 font-semibold"
-            >
-              {isLoading && (
-                <CircularProgress size={20} style={{ color: "#ffffff" }} />
-              )}
-              Save Changes
-            </button>
-          </div>
-          <button
-            className="text-blue-700 text-lg font-semibold"
+    <DashboardLayout>
+      <div className="mx-auto w-full max-w-4xl space-y-6 pt-2">
+        <div className="space-y-3">
+          <Link
+            href="/profile"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to profile
+          </Link>
+          <PageHeader
+            title="Add new card"
+            description="Save a card for checkout, auto-renewals and top-ups."
+          />
+        </div>
+        <CardForm mode="add" errors={errors} />
+      </div>
+      <ActionBar>
+        <div className="mx-auto flex max-w-4xl items-center justify-end gap-3">
+          <Button
+            variant="outline"
+            className="h-11"
             onClick={() => router.push("/profile")}
           >
             Cancel
-          </button>
+          </Button>
+          <Button
+            className="h-11"
+            onClick={addCardDetailsHandler}
+            disabled={isLoading}
+          >
+            {isLoading && <Loader2 className="animate-spin" />}
+            Save card
+          </Button>
         </div>
-      </DashboardLayout>
-    </div>
+      </ActionBar>
+    </DashboardLayout>
   );
 };
 
