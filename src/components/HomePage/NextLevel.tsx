@@ -30,14 +30,14 @@ const NextLevel = () => {
 
       <Reveal
         delay={0.1}
-        className="grid grid-cols-1 gap-x-8 gap-y-10 text-center sm:grid-cols-2 lg:grid-cols-4 lg:mt-12 mt-8"
+        className="mx-auto grid max-w-5xl grid-cols-1 gap-x-16 gap-y-10 text-center sm:grid-cols-2 lg:gap-y-14 lg:mt-14 mt-8"
       >
         {BENEFITS.map((benefit) => (
-          <div key={benefit.title} className="mx-auto max-w-[360px]">
+          <div key={benefit.title} className="mx-auto max-w-[460px]">
             <h3 className="text-[#012E75] text-2xl font-semibold [text-wrap:balance]">
               {benefit.title}
             </h3>
-            <p className="mt-4 lg:text-lg leading-8 text-base">{benefit.text}</p>
+            <p className="mt-4 lg:text-xl leading-8 text-base">{benefit.text}</p>
           </div>
         ))}
       </Reveal>
