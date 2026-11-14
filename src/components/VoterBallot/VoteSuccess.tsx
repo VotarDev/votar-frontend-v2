@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Download, MessageSquare, PartyPopper } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 
@@ -10,57 +10,82 @@ interface VoteSuccessProps {
 }
 
 /** Shown after the votes are in: the voter's badge, actions and socials. */
-const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps) => (
-  <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-12 pt-6">
-    <div className="rounded-2xl border border-border bg-white p-4 text-center shadow-sm ssm:p-6 smm:p-8">
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-        <PartyPopper className="h-7 w-7" aria-hidden="true" />
-      </div>
-      <h2 className="text-2xl font-bold text-foreground">Your vote is in!</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Thanks for voting. Download your badge and share it.
-      </p>
+const VoteSuccess = ({
+  voterName,
+  badgeRef,
+  onDownloadBadge,
+}: VoteSuccessProps) => {
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-      {/* Saved as the badge image, so keep it self-contained. */}
-      <div className="mt-6 flex justify-center">
-        <div ref={badgeRef} className="inline-block max-w-full bg-white p-2 ssm:p-4">
-          <div className="text-center lg:px-12">
-            <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 md:text-xs">
-              Certified Voter
-            </p>
-            <h3 className="mx-auto max-w-[300px] break-words text-xl font-black uppercase leading-tight text-[#22C55E] md:max-w-[400px] md:text-3xl">
-              {voterName}
-            </h3>
+  // Shown right after the votes go in: bring the badge into view (past the
+  // election header) so the voter sees it and can download it.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      sectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-12 pt-6">
+      <div
+        ref={sectionRef}
+        className="scroll-mt-4 rounded-2xl border border-border bg-white p-4 text-center shadow-sm ssm:p-6 smm:p-8"
+      >
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+          <PartyPopper className="h-7 w-7" aria-hidden="true" />
+        </div>
+        <h2 className="text-2xl font-bold text-foreground">Your vote is in!</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Thanks for voting. Download your badge and share it.
+        </p>
+
+        {/* Saved as the badge image, so keep it self-contained. */}
+        <div className="mt-6 flex justify-center">
+          <div
+            ref={badgeRef}
+            className="flex max-w-full flex-col items-center bg-white p-2 ssm:p-4"
+          >
+            <div className="text-center lg:px-12">
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 md:text-xs">
+                Certified Voter
+              </p>
+              <h3 className="mx-auto max-w-[300px] break-words text-xl font-black uppercase leading-tight text-[#22C55E] md:max-w-[400px] md:text-3xl">
+                {voterName}
+              </h3>
+            </div>
+            <img
+              src="/assets/images/customizable-image.jpeg"
+              alt="Certified voter badge"
+              className="mx-auto block h-auto w-full max-w-[320px] md:max-w-[420px]"
+            />
           </div>
-          <img
-            src="/assets/images/customizable-image.jpeg"
-            alt="Certified voter badge"
-            className="h-auto w-full max-w-[320px] md:max-w-[420px]"
-          />
+        </div>
+
+        <div className="mt-6 flex flex-col justify-center gap-3 smm:flex-row">
+          <Button onClick={onDownloadBadge} className="h-11 w-full smm:w-auto">
+            <Download /> Download my badge
+          </Button>
+          <Button variant="outline" className="h-11 w-full smm:w-auto">
+            <MessageSquare /> Give us feedback
+          </Button>
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col justify-center gap-3 smm:flex-row">
-        <Button onClick={onDownloadBadge} className="h-11 w-full smm:w-auto">
-          <Download /> Download my badge
-        </Button>
-        <Button variant="outline" className="h-11 w-full smm:w-auto">
-          <MessageSquare /> Give us feedback
-        </Button>
-      </div>
-    </div>
-
-    <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 ssm:p-6 text-center text-white shadow-sm smm:p-8">
-      <h3 className="text-lg font-semibold">Know more about Votar</h3>
-      <p className="mt-1 text-sm text-white/80">
-        Follow us on all our social media handles.
-      </p>
-      <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+      <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-5 ssm:p-6 text-center text-white shadow-sm smm:p-8">
+        <h3 className="text-lg font-semibold">Know more about Votar</h3>
+        <p className="mt-1 text-sm text-white/80">
+          Follow us on all our social media handles.
+        </p>
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
           <a
             href="https://api.whatsapp.com/send?phone=2348144092733&text=Good%20day%20Votar%20How%20can%20i%20enroll?"
             aria-label="WhatsApp"
-          target="_blank"
-          rel="noreferrer"
+            target="_blank"
+            rel="noreferrer"
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border transition-transform hover:scale-110"
           >
             <svg
@@ -76,8 +101,8 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
           <a
             href="https://www.instagram.com/votarhq?igsh=MWZydTF3MHJ1aDJiNg%3D%3D&utm_source=qr"
             aria-label="Instagram"
-          target="_blank"
-          rel="noreferrer"
+            target="_blank"
+            rel="noreferrer"
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border transition-transform hover:scale-110"
           >
             <svg
@@ -93,8 +118,8 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
           <a
             href="https://www.facebook.com/profile.php?id=61553214208461&mibextid=LQQJ4d"
             aria-label="Facebook"
-          target="_blank"
-          rel="noreferrer"
+            target="_blank"
+            rel="noreferrer"
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border transition-transform hover:scale-110"
           >
             <svg
@@ -110,8 +135,8 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
           <a
             href="https://x.com/votarhq?s=21"
             aria-label="X"
-          target="_blank"
-          rel="noreferrer"
+            target="_blank"
+            rel="noreferrer"
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border transition-transform hover:scale-110"
           >
             <svg
@@ -127,8 +152,8 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
           <a
             href="https://www.tiktok.com/@votarhq?_r=1&_t=ZS-92J1VqVoCe7"
             aria-label="TikTok"
-          target="_blank"
-          rel="noreferrer"
+            target="_blank"
+            rel="noreferrer"
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-border transition-transform hover:scale-110"
           >
             <svg
@@ -139,9 +164,10 @@ const VoteSuccess = ({ voterName, badgeRef, onDownloadBadge }: VoteSuccessProps)
               <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
             </svg>
           </a>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default VoteSuccess;
