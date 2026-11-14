@@ -68,7 +68,13 @@ const Responses = () => {
           {isFetchElection && !election ? (
             <Skeleton className="h-56 w-full" />
           ) : (
-            election && <Header electionDetails={election} />
+            election && (
+              // The ballot header's content runs past its fixed height, so
+              // give it room before the page title.
+              <div className="pb-4 lg:pb-10">
+                <Header electionDetails={election} />
+              </div>
+            )
           )}
 
           <PageHeader

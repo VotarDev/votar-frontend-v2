@@ -136,7 +136,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start">
+    <div className="grid gap-6 lg:grid-cols-[1fr_360px] lg:items-start lg:gap-8">
       {/* What voters will see */}
       <Card className="p-5 smm:p-6">
         <div className="flex items-start justify-between gap-3">

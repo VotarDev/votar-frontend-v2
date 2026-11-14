@@ -63,7 +63,9 @@ const CreateForm = () => {
           ) : (
             <>
               {/* The election's branding, as voters will see it on the form. */}
-              <Header electionDetails={election} />
+              <div className="pb-4 lg:pb-10">
+                <Header electionDetails={election} />
+              </div>
               <PageHeader
                 title={`${election.name_of_election} form`}
                 description="Set up the voter registration form for this election and share its link."
