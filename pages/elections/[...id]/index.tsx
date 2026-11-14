@@ -436,8 +436,9 @@ const ElectionDetail = () => {
                     Step {activeIndex + 1} of {steps.length}
                   </span>
                   {isLastStep ? (
-                    <Button asChild className="h-11">
-                      <Link href="/elections">Done</Link>
+                    // Same last-step button as the create flow.
+                    <Button asChild className="h-11 min-w-[150px]">
+                      <Link href="/elections">Finish</Link>
                     </Button>
                   ) : (
                     <Button
