@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Header from "@/src/components/BallotPage/Header";
-import { CircularProgress } from "@mui/material";
+import PageLoader from "@/src/components/shared/PageLoader";
 import { getElectionById } from "@/utils/api";
 import { useRouter } from "next/router";
 import { ElectionDetails } from "@/utils/types";
-import { get } from "lodash";
 import ElectionId from "@/src/components/VoteAccess/ElectionId";
 
 const AccessPage = () => {
@@ -44,27 +43,18 @@ const AccessPage = () => {
     getElection();
   }, [electionId]);
 
+  if (!isClient) return null;
+  if (isFecthElection) return <PageLoader message="Loading the election" />;
+
+  // `isolate` keeps the header's branding layer (-z-10) above the background.
   return (
-    <>
-      {isClient && (
-        <div>
-          {isFecthElection ? (
-            <div className="mt-10 text-center">
-              <CircularProgress size={30} style={{ color: "#015CE9" }} />
-            </div>
-          ) : (
-            <div>
-              <div>
-                <Header electionDetails={elections} />
-              </div>
-              <div>
-                <ElectionId electionId={electionId} />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-    </>
+    <div className="isolate min-h-screen bg-slate-50">
+      <Header electionDetails={elections} />
+      <ElectionId
+        electionId={electionId}
+        electionName={elections?.name_of_election}
+      />
+    </div>
   );
 };
 
