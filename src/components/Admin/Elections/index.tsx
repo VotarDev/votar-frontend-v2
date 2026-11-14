@@ -27,8 +27,9 @@ import { scrollToTop } from "@/utils/scrollToTop";
 
 const PAGE_SIZE = 100; // as before
 
-type SortKey = "date" | "name" | "time" | "payment";
+type SortKey = "latest" | "date" | "name" | "time" | "payment";
 const SORTS: { value: SortKey; label: string }[] = [
+  { value: "latest", label: "Latest created" },
   { value: "date", label: "Newest start date" },
   { value: "name", label: "Election name (A–Z)" },
   { value: "time", label: "Start time (earliest)" },
@@ -51,7 +52,7 @@ const Elections = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortKey>("date");
+  const [sort, setSort] = useState<SortKey>("latest");
 
   // Same requests as before: the paginated list, falling back to the old
   // un-paginated endpoint if the first one fails.
@@ -115,6 +116,10 @@ const Elections = () => {
           );
         }
         if (sort === "time") return time(a.start_date) - time(b.start_date);
+        if (sort === "latest") {
+          const created = (e: any) => Date.parse(e.createdAt || "") || time(e.start_date);
+          return created(b) - created(a);
+        }
         return time(b.start_date) - time(a.start_date);
       })
       .map((election) => ({

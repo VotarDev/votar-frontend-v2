@@ -8,6 +8,7 @@ import SwitchButton from "../AdminProfile/SwitchButton";
 import SmsSwitchButton from "../AdminProfile/SmsSwitchButton";
 import { getVotarPageByElection } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
+import { parseElectionDate } from "@/utils/electionTime";
 import PageHeader from "@/src/components/shared/PageHeader";
 import EmptyState from "@/src/components/shared/EmptyState";
 import { Card } from "@/src/components/ui/card";
@@ -42,6 +43,19 @@ const PLANS = {
 
 type Plan = keyof typeof PLANS;
 
+/** When an election was created (or, failing that, when it starts), for sorting. */
+const sortTime = (row: any): number => {
+  const created = Date.parse(row.createdAt || "");
+  if (!Number.isNaN(created)) return created;
+  const start =
+    parseElectionDate(row.start_date) ??
+    parseElectionDate(`${row.date || ""} ${row.start_time || ""}`.trim()) ??
+    parseElectionDate(row.date);
+  if (start) return start.getTime();
+  const loose = Date.parse(`${row.date || ""} ${row.start_time || ""}`);
+  return Number.isNaN(loose) ? 0 : loose;
+};
+
 const StatusBadge = ({ status }: { status?: string }) => (
   <Badge variant={status === "Pending" ? "warning" : "success"} className="capitalize">
     {status || "—"}
@@ -69,7 +83,9 @@ const OrganiserElections = ({ plan }: { plan: Plan }) => {
     if (token) setAuthToken(token);
     try {
       const { data } = await getVotarPageByElection(email, config.apiType);
-      setElections(Array.isArray(data?.data) ? data.data : []);
+      const list = Array.isArray(data?.data) ? data.data : [];
+      // Latest first.
+      setElections([...list].sort((a, b) => sortTime(b) - sortTime(a)));
     } catch (e) {
       console.log(e);
       setError(true);
