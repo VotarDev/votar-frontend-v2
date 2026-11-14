@@ -1,373 +1,324 @@
-import React, { useState, useEffect } from "react";
-import AdminLayout from "../AdminLayout";
-import { BsCaretDownFill, BsFillCaretUpFill, BsCheck2 } from "react-icons/bs";
-
-import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
-import Table from "@mui/material/Table";
-import { styled } from "@mui/material/styles";
-import TableBody from "@mui/material/TableBody";
-import TableCell, { tableCellClasses } from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import { Pagination, Stack } from "@mui/material";
-import { drop } from "@/utils/util";
+import React, { useState, useEffect, useMemo } from "react";
 import Cookies from "universal-cookie";
+import { AlertCircle, Inbox, Search, SearchX } from "lucide-react";
+import AdminLayout from "../AdminLayout";
 import { adminGetAllUsers } from "@/utils/api";
 import setAuthToken from "@/utils/setAuthToken";
-import { v4 as uuidv4 } from "uuid";
+import PageHeader from "@/src/components/shared/PageHeader";
+import EmptyState from "@/src/components/shared/EmptyState";
+import Pagination from "@/src/components/shared/Pagination";
+import { Card } from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/ui/table";
+import { cn } from "@/utils/cn";
+import { scrollToTop } from "@/utils/scrollToTop";
 
-import { CircularProgress } from "@mui/material";
-
-interface MergedData {
+interface MergedUser {
   name: string;
   email: string;
-  category: string;
+  isCreator: boolean;
+  isVoter: boolean;
 }
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: "#015ce9",
-    color: theme.palette.common.white,
-    fontSize: 15,
-    fontWeight: "bold",
-    whiteSpace: "nowrap",
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 15,
-    fontWeight: 500,
-    borderBottom: "1px solid #F1F5F9",
-  },
-}));
+type Filter = "all" | "creators" | "voters";
 
-const StyledTableRow = styled(TableRow)({
-  "&:hover": {
-    backgroundColor: "#F8FAFC",
-  },
-});
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: "all", label: "All" },
+  { id: "creators", label: "Election creators" },
+  { id: "voters", label: "Voters" },
+];
 
-const paginationSx = {
-  "& .MuiPaginationItem-root": {
-    color: "#015CE9",
-    "&.Mui-selected": {
-      backgroundColor: "#015CE9",
-      color: "white",
-      "&:hover": {
-        backgroundColor: "#0146c7",
-      },
-    },
-    "&:hover": {
-      backgroundColor: "#e3f2fd",
-    },
-  },
-};
+const PAGE_SIZE = 30; // as before
 
+const initials = (name: string, email: string) =>
+  (name || email || "?")
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+
+/** Everyone on Votar: election creators and voters. */
 const UserSection = () => {
-  const [isDropDown, setIsDropdown] = useState(false);
-  const [filteredOption, setFilteredOption] = useState("All");
-  const [usersData, setUsersData] = useState<MergedData[]>([]);
-  const [isFetchUsers, setIsFetchUsers] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [limit] = useState(30);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [totalCreators, setTotalCreators] = useState(0);
-  const [totalVoters, setTotalVoters] = useState(0);
+  const [users, setUsers] = useState<MergedUser[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const options = ["All", "Election Creator", "Voter"];
+  // Server-side search, half a second after typing stops.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const headers = ["S/N", "Name", "Email", "Category"];
-
-  const filteredOptionHandler = (opt: string) => {
-    setFilteredOption(opt);
-    setIsDropdown(false);
-    setCurrentPage(1);
-    getAllAdminUsers(1, opt);
-  };
-
-  // Calculate total based on filter
-  const getDisplayTotal = () => {
-    if (filteredOption === "All") {
-      return totalUsers;
-    } else if (filteredOption === "Election Creator") {
-      return totalCreators;
-    } else if (filteredOption === "Voter") {
-      return totalVoters;
-    }
-    return 0;
-  };
-
-  const displayTotal = getDisplayTotal();
-  const totalPages = Math.ceil(displayTotal / limit);
-
-  const getAllAdminUsers = async (
-    page: number = currentPage,
-    filter: string = filteredOption
-  ) => {
-    setIsFetchUsers(true);
-    const cookies = new Cookies();
-    const token = cookies.get("admin-token");
+  const fetchUsers = async () => {
+    setIsLoading(true);
+    setError(false);
+    const token = new Cookies().get("admin-token");
     if (token) setAuthToken(token);
-
     try {
+      // Same request as before (creators and voters together), plus search.
       const { data } = await adminGetAllUsers(
         "",
-        page.toString(),
-        limit.toString()
+        String(page),
+        String(PAGE_SIZE),
+        debouncedSearch || undefined,
       );
+      const creators: any[] = data?.data?.electionCreators || [];
+      const voters: any[] = data?.data?.voters || [];
 
-      if (data) {
-        const creatorsTotal = data.data.electionCreators.length || 0;
-        const votersTotal = data.data.voters.length || 0;
-        const totalUsers = data.data.pagination.total || 0;
-
-        setTotalCreators(creatorsTotal);
-        setTotalVoters(votersTotal);
-        setTotalUsers(totalUsers);
-
-        const mergedDataArray: MergedData[] = [];
-
-        // Add creators based on filter
-        if (filter === "All" || filter === "Election Creator") {
-          data.data.electionCreators.forEach((creator: any) => {
-            mergedDataArray.push({
-              name: creator.userName,
-              email: creator.email,
-              category: "Election Creator",
-            });
+      // Someone who creates elections and also votes appears once, as both.
+      const byEmail = new Map<string, MergedUser>();
+      creators.forEach((c) =>
+        byEmail.set(c.email, {
+          name: c.userName || "",
+          email: c.email,
+          isCreator: true,
+          isVoter: false,
+        }),
+      );
+      voters.forEach((v) => {
+        const existing = byEmail.get(v.email);
+        if (existing) existing.isVoter = true;
+        else
+          byEmail.set(v.email, {
+            name: v.name || "",
+            email: v.email,
+            isCreator: false,
+            isVoter: true,
           });
-        }
-
-        // Add voters based on filter
-        if (filter === "All" || filter === "Voter") {
-          data.data.voters.forEach((voter: any) => {
-            const existingCreatorIndex = mergedDataArray.findIndex(
-              (user) => user.email === voter.email
-            );
-            if (existingCreatorIndex > -1) {
-              // User exists as creator, add Voter to category
-              if (
-                !mergedDataArray[existingCreatorIndex].category.includes(
-                  "Voter"
-                )
-              ) {
-                mergedDataArray[existingCreatorIndex].category += ", Voter";
-              }
-            } else {
-              mergedDataArray.push({
-                name: voter.name,
-                email: voter.email,
-                category: "Voter",
-              });
-            }
-          });
-        }
-
-        setUsersData(mergedDataArray);
-        setIsFetchUsers(false);
-      }
-    } catch (e: any) {
-      setIsFetchUsers(false);
+      });
+      setUsers(Array.from(byEmail.values()));
+      setTotal(data?.data?.pagination?.total || 0);
+    } catch (e) {
       console.log(e);
+      setError(true);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handlePageChange = (
-    event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
-    setCurrentPage(value);
-    getAllAdminUsers(value);
-  };
-
-  const getSerialNumber = (index: number) => {
-    const serialNumber = (currentPage - 1) * limit + index + 1;
-    return serialNumber <= 9 ? `0${serialNumber}` : serialNumber.toString();
   };
 
   useEffect(() => {
-    getAllAdminUsers();
-  }, []);
+    fetchUsers();
+  }, [page, debouncedSearch]);
 
-  if (isFetchUsers)
-    return (
-      <AdminLayout>
-        <div className="py-10 text-center">
-          <CircularProgress size={30} style={{ color: "#015CE9" }} />
+  const counts = useMemo(
+    () => ({
+      all: users.length,
+      creators: users.filter((u) => u.isCreator).length,
+      voters: users.filter((u) => u.isVoter).length,
+    }),
+    [users],
+  );
+  const visible = users.filter((u) =>
+    filter === "creators" ? u.isCreator : filter === "voters" ? u.isVoter : true,
+  );
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const goToPage = (next: number) => {
+    setPage(next);
+    scrollToTop();
+  };
+
+  const RoleBadges = ({ user }: { user: MergedUser }) => (
+    <div className="flex flex-wrap gap-1.5">
+      {user.isCreator && <Badge variant="secondary">Election creator</Badge>}
+      {user.isVoter && <Badge variant="muted">Voter</Badge>}
+    </div>
+  );
+
+  const Avatar = ({ user }: { user: MergedUser }) => (
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-primary">
+      {initials(user.name, user.email)}
+    </span>
+  );
+
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-2 p-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
         </div>
-      </AdminLayout>
+      );
+    }
+    if (error) {
+      return (
+        <EmptyState
+          icon={AlertCircle}
+          title="We couldn't load users"
+          description="Check your connection and try again."
+          action={
+            <Button variant="outline" onClick={fetchUsers}>
+              Try again
+            </Button>
+          }
+        />
+      );
+    }
+    if (users.length === 0) {
+      return debouncedSearch ? (
+        <EmptyState
+          icon={SearchX}
+          title="No users match your search"
+          action={
+            <Button variant="outline" onClick={() => setSearch("")}>
+              Clear search
+            </Button>
+          }
+        />
+      ) : (
+        <EmptyState icon={Inbox} title="No users yet" />
+      );
+    }
+    if (visible.length === 0) {
+      return (
+        <EmptyState
+          icon={Inbox}
+          title={`No ${filter === "creators" ? "election creators" : "voters"} on this page`}
+          description="Try the next page, or switch back to All."
+        />
+      );
+    }
+    return (
+      <>
+        <ul className="divide-y divide-border smm:hidden">
+          {visible.map((user) => (
+            <li key={user.email} className="flex items-start gap-3 p-4">
+              <Avatar user={user} />
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <p className="truncate font-medium capitalize text-foreground">
+                  {user.name || "—"}
+                </p>
+                <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                <RoleBadges user={user} />
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden smm:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visible.map((user) => (
+                <TableRow key={user.email}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar user={user} />
+                      <span className="font-medium capitalize text-foreground">
+                        {user.name || "—"}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                  <TableCell>
+                    <RoleBadges user={user} />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </>
     );
+  };
 
   return (
     <AdminLayout>
-      <div className="max-w-[1300px] mx-auto py-8 lg:py-[60px]">
-        <div className="text-xl lg:text-2xl font-bold">Users</div>
+      <div className="mx-auto w-full max-w-6xl space-y-6">
+        <PageHeader
+          title="Users"
+          description={
+            isLoading
+              ? "Election creators and voters on Votar."
+              : `${total.toLocaleString()} ${debouncedSearch ? "matching " : ""}user${total === 1 ? "" : "s"} on Votar.`
+          }
+        />
 
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-fit">
-            <button
-              type="button"
-              onClick={() => setIsDropdown((dropdown) => !dropdown)}
-              className={`flex items-center gap-2 rounded-lg border bg-white px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors ${
-                isDropDown
-                  ? "border-[#015CE9] text-[#015CE9]"
-                  : "border-gray-200 text-gray-700 hover:border-[#015CE9] hover:text-[#015CE9]"
-              }`}
+        <Card className="overflow-hidden">
+          <div className="flex flex-col gap-3 border-b border-border p-4 md:flex-row md:items-center md:justify-between">
+            <div
+              role="tablist"
+              aria-label="Filter users"
+              className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1"
             >
-              <span>
-                Sort By: <span className="text-[#015CE9]">{filteredOption}</span>
-              </span>
-              <span className="text-xs">
-                {isDropDown ? <BsFillCaretUpFill /> : <BsCaretDownFill />}
-              </span>
-            </button>
-
-            <AnimatePresence>
-              {isDropDown && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setIsDropdown(false)}
-                  />
-                  <motion.div
-                    className="absolute top-full left-0 mt-2 w-52 rounded-lg border border-gray-100 bg-white py-2 shadow-lg z-20"
-                    variants={drop}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    {options.map((opt, index) => (
-                      <div
-                        key={index}
-                        onClick={() => filteredOptionHandler(opt)}
-                        className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                          filteredOption === opt
-                            ? "bg-[#015CE9]/10 font-semibold text-[#015CE9]"
-                            : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                      >
-                        {opt}
-                        {filteredOption === opt && <BsCheck2 className="text-base" />}
-                      </div>
-                    ))}
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-          <div className="w-fit rounded-lg bg-[#015CE9]/10 px-4 py-2.5 text-sm font-semibold text-[#015CE9]">
-            {displayTotal} {displayTotal === 1 ? "user" : "users"}
-          </div>
-        </div>
-
-        {usersData.length === 0 ? (
-          <div className="py-10 text-center text-gray-400">No users found</div>
-        ) : (
-          <div className="w-full mt-5">
-            {/* Mobile card list */}
-            <div className="flex flex-col gap-3 sm:hidden">
-              {usersData.map((row) => (
-                <div
-                  key={uuidv4()}
-                  className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm"
+              {FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={filter === f.id}
+                  onClick={() => setFilter(f.id)}
+                  className={cn(
+                    "flex h-8 shrink-0 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
+                    filter === f.id
+                      ? "bg-white text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-sm font-semibold text-gray-800">
-                        {row.name}
-                      </div>
-                      <div className="truncate text-xs text-gray-500">
-                        {row.email}
-                      </div>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-[#015CE9]/10 px-2.5 py-1 text-xs font-semibold capitalize text-[#015CE9]">
-                      {row.category}
+                  {f.label}
+                  {!isLoading && (
+                    <span className="rounded-full bg-white/70 px-1.5 text-xs">
+                      {counts[f.id]}
                     </span>
-                  </div>
-                </div>
+                  )}
+                </button>
               ))}
             </div>
-
-            {/* Desktop table */}
-            <TableContainer
-              sx={{ maxHeight: "80%", display: { xs: "none", sm: "block" } }}
-              className="table-scroll"
-            >
-              <Table
-                sx={{
-                  minWidth: 700,
-                  borderCollapse: "separate",
-                  borderSpacing: "0",
-                }}
-                stickyHeader
-                aria-label="users table"
-              >
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header, key) => (
-                      <StyledTableCell key={key} align="center">
-                        {header}
-                      </StyledTableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {usersData.map((row, index) => (
-                    <StyledTableRow key={uuidv4()}>
-                      <StyledTableCell align="center">
-                        {getSerialNumber(index)}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {row.name}
-                      </StyledTableCell>
-                      <StyledTableCell align="center">
-                        {row.email}
-                      </StyledTableCell>
-                      <StyledTableCell align="center" className="capitalize">
-                        {row.category}
-                      </StyledTableCell>
-                    </StyledTableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <Stack spacing={2} alignItems="center" sx={{ mt: 3 }}>
-                {/* Compact pagination for mobile */}
-                <Pagination
-                  className="sm:hidden"
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="small"
-                  siblingCount={0}
-                  boundaryCount={1}
-                  sx={paginationSx}
-                />
-                {/* Full pagination for larger screens */}
-                <Pagination
-                  className="hidden sm:flex"
-                  count={totalPages}
-                  page={currentPage}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size="large"
-                  showFirstButton
-                  showLastButton
-                  sx={paginationSx}
-                />
-                <div className="text-sm text-gray-600">
-                  Showing {(currentPage - 1) * limit + 1} to{" "}
-                  {Math.min(currentPage * limit, displayTotal)} of{" "}
-                  {displayTotal} users
-                </div>
-              </Stack>
-            )}
+            <div className="relative w-full md:max-w-xs">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name or email"
+                aria-label="Search users"
+                className="h-10 w-full rounded-lg border border-input bg-white pl-9 pr-3 text-sm outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-ring/20"
+              />
+            </div>
           </div>
-        )}
+          {filter !== "all" && !isLoading && totalPages > 1 && (
+            <p className="border-b border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+              Showing {filter === "creators" ? "election creators" : "voters"} on this page. The tab counts are for this page.
+            </p>
+          )}
+
+          {renderBody()}
+
+          {!isLoading && !error && totalPages > 1 && (
+            <div className="flex flex-col items-center gap-3 border-t border-border p-4 smm:flex-row smm:justify-between">
+              <p className="text-sm text-muted-foreground">
+                Page {page} of {totalPages}
+              </p>
+              <Pagination page={page} totalPages={totalPages} onPageChange={goToPage} />
+            </div>
+          )}
+        </Card>
       </div>
     </AdminLayout>
   );
