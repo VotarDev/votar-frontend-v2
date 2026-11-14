@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -79,7 +79,11 @@ const AdminNav = () => {
   const admin = useSelector((state: RootState) => state.admin.data) as
     | { username?: string }
     | undefined;
-  const username = admin?.username || "Admin";
+  // The admin's name comes from browser storage, which the server can't see:
+  // show it only after mounting so both renders match (no hydration error).
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+  const username = (isMounted && admin?.username) || "Admin";
 
   const logout = () => {
     dispatch(removeAdminData());
