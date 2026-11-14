@@ -1,105 +1,78 @@
 import React, { useState, useEffect } from "react";
-import { useCurrentUser, useUser } from "@/utils/hooks";
-import setAuthToken from "@/utils/setAuthToken";
-import { getBallotCandidate, getElectionById } from "@/utils/api";
-import { Checkbox, CircularProgress, FormControlLabel } from "@mui/material";
-import Header from "@/src/components/BallotPage/Header";
 import { useRouter } from "next/router";
-import { getCandidates } from "@/utils/api";
-import { FaCloudUploadAlt } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
-import leftline from "../../../public/assets/images/left-line.svg";
-import placeholder from "../../../public/assets/images/Placeholder.png";
-import rightline from "../../../public/assets/images/right-line.svg";
-import MiniDashboard from "@/src/components/VotePage/MiniDashboard";
-import { Candidate, Details, Position } from "@/utils/types";
-import { AnimatePresence } from "framer-motion";
-import checked from "../../../public/assets/icons/checked.svg";
-import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-import Modal from "@/src/components/Modal";
-import CandidateDetails from "@/src/components/VotePage/CandidateDetails";
+import toast from "react-hot-toast";
+import { AlertCircle, ArrowLeft, ArrowRight, Eye } from "lucide-react";
+import { useCurrentUser, useCurrentUserId } from "@/utils/hooks";
+import setAuthToken from "@/utils/setAuthToken";
+import { getCandidates, getElectionById } from "@/utils/api";
+import Header from "@/src/components/BallotPage/Header";
+import PageLoader from "@/src/components/shared/PageLoader";
+import { Button } from "@/src/components/ui/button";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import { accentFor } from "@/src/components/MonitoringElection/PositionCard";
+import BallotPositionSection from "@/src/components/VoterBallot/BallotPositionSection";
+import BallotStatusCard from "@/src/components/VoterBallot/BallotStatusCard";
+import CandidateDetailsDialog from "@/src/components/VoterBallot/CandidateDetailsDialog";
+import ReviewVotesDialog from "@/src/components/VoterBallot/ReviewVotesDialog";
+import type {
+  BallotCandidate,
+  BallotPosition,
+  SelectedCandidates,
+} from "@/src/components/VoterBallot/types";
 
-let positions: Position[];
-if (typeof window !== "undefined") {
-  const positionData = localStorage.getItem("positions");
-  if (positionData) {
-    positions = JSON.parse(positionData);
-  }
-}
-type SelectedCandidates = {
-  position: string;
-  candidates: Candidate[];
-};
-
-const MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED = 1;
+/**
+ * The organiser's preview of the ballot: the same layout voters get, with
+ * selections kept on this page only (nothing is submitted).
+ */
 const PreviewVote = () => {
-  const users = useCurrentUser();
   const router = useRouter();
-  const user = useUser();
-  const [votingData, setVotingData] = useState<Position[]>(positions);
-  const [election, setElection] = useState<any>([]);
+  const users = useCurrentUser();
+  const USER_ID = useCurrentUserId();
+  const [election, setElection] = useState<any>(null);
   const [electionID, setElectionID] = useState("");
-  const [candidates, setCandidates] = useState<any>([]);
-  const [isFetchCandidate, setIsFetchCandidate] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  const [position, setPosition] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedCandidates, setSelectedCandidates] = useState<
-    SelectedCandidates[]
-  >([]);
-  const [selectedCandidateDetails, setSelectedCandidateDetails] = useState<
-    Details[]
-  >([]);
-  const [showModal, setShowModal] = useState(false);
+  const [positions, setPositions] = useState<BallotPosition[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetchCandidates, setIsFetchCandidates] = useState(false);
   const [error, setError] = useState("");
-  const cols = [
-    "#b138b3",
-    "#00ff00",
-    "#015CE9",
-    "#E46F24",
-    "#93241F",
-    "#406b83",
-  ];
+  const [isClient, setIsClient] = useState(false);
+
+  // Preview-only choices: position -> chosen candidates, or abstained.
+  const [choices, setChoices] = useState<Record<string, BallotCandidate[]>>(
+    {},
+  );
+  const [abstained, setAbstained] = useState<Record<string, boolean>>({});
+  const [showReview, setShowReview] = useState(false);
+  const [detailsCandidate, setDetailsCandidate] =
+    useState<BallotCandidate | null>(null);
 
   const { id } = router.query;
-  let idType: string | string[] | undefined = id;
 
   useEffect(() => {
-    if (Array.isArray(idType)) {
-      setElectionID(idType[0]);
+    if (Array.isArray(id)) setElectionID(id[0]);
+  }, [id]);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const authorise = () => {
+    if (users?.data) {
+      setAuthToken(users.data.data.cookie);
+    } else if (typeof window !== "undefined") {
+      setAuthToken(localStorage.getItem("token"));
     }
-  }, [id, electionID]);
-  console.log(electionID);
-
-  let USER_ID = users?.data?.data
-    ? users?.data?.data?._id
-    : users?.id
-    ? users?.id
-    : user?.user?.id;
+  };
 
   useEffect(() => {
+    if (!electionID) return;
     const getElection = async () => {
       setIsLoading(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      authorise();
       try {
-        if (electionID) {
-          const electionData = { election_id: electionID };
-          const { data } = await getElectionById(electionData);
-          if (data) {
-            setElection(data.data);
-            setIsLoading(false);
-          }
-        }
+        const { data } = await getElectionById({ election_id: electionID });
+        if (data) setElection(data.data);
       } catch (e: any) {
-        setError(e?.response?.data?.message);
-        console.log(e?.response?.data?.message);
+        setError(e?.response?.data?.message || "We couldn't load this election.");
       } finally {
         setIsLoading(false);
       }
@@ -108,299 +81,195 @@ const PreviewVote = () => {
   }, [electionID]);
 
   useEffect(() => {
-    try {
-      const fetchData = async () => {
-        if (electionID) {
-          const electionIdData = { election_id: electionID };
-          const { data } = await getCandidates(USER_ID, electionIdData);
-          if (data) {
-            setPosition(data.data);
-            console.log(data);
-          }
-        }
-      };
-      fetchData();
-    } catch (e) {
-      console.log(e);
-    }
-  }, [electionID]);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    const getCandidatesData = async () => {
-      setIsFetchCandidate(true);
-      //   const cookie = new Cookies();
-      //   const token = cookie.get(voterLoginCookieName);
-      //   if (token) {
-      //     setAuthToken(token);
-      //   }
+    if (!electionID || !USER_ID) return;
+    const fetchPositions = async () => {
+      setIsFetchCandidates(true);
+      authorise();
       try {
-        const electionData = {
+        const { data } = await getCandidates(USER_ID, {
           election_id: electionID,
-        };
-        if (electionID) {
-          const { data } = await getBallotCandidate(electionData);
-          console.log(data);
-          if (data) {
-            setCandidates(data.data);
-            setIsFetchCandidate(false);
-          }
-        }
-      } catch (error: any) {
-        console.log(error);
+        });
+        if (data) setPositions(data.data || []);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setIsFetchCandidates(false);
       }
     };
+    fetchPositions();
+  }, [electionID, USER_ID]);
 
-    getCandidatesData();
-  }, [electionID]);
+  const maxChoices = election?.max_number_candidate || 1;
 
-  const handleSelectCandidate = (position: string, candidate: Candidate) => {
-    setSelectedCandidates((prevState: any) => {
-      const existingIndex = prevState.findIndex(
-        (sc: any) => sc.position === position
+  // Same rules as the real ballot: tap to pick or unpick; picking past the
+  // limit drops the earliest pick; picking cancels an abstention.
+  const selectCandidate = (position: string, candidate: BallotCandidate) => {
+    setAbstained((prev) => ({ ...prev, [position]: false }));
+    setChoices((prev) => {
+      const current = prev[position] || [];
+      const exists = current.some(
+        (c) => c.candidate_name === candidate.candidate_name,
       );
-
-      if (existingIndex !== -1) {
-        const updatedCandidates = [...prevState[existingIndex].candidates];
-        const candidateIndex = updatedCandidates.findIndex(
-          (c) => c.candidate_name === candidate.candidate_name
-        );
-
-        if (candidateIndex !== -1) {
-          // Remove the candidate if already selected
-          updatedCandidates.splice(candidateIndex, 1);
-        } else {
-          // Add the candidate if not selected
-          if (
-            updatedCandidates.length >= MAX_NUMBER_OF_CANDIDATES_TO_BE_SELECTED
-          ) {
-            // Remove the first candidate to maintain the limit
-            updatedCandidates.shift();
-          }
-          updatedCandidates.push(candidate);
-        }
-
-        const updatedSelectedCandidates = [...prevState];
-        updatedSelectedCandidates[existingIndex] = {
-          position,
-          candidates: updatedCandidates,
-        };
-
-        return updatedSelectedCandidates.filter(
-          (sc) => sc.candidates.length > 0
-        ); // Remove empty positions
-      } else {
-        return [...prevState, { position, candidates: [candidate] }];
-      }
+      let next = exists
+        ? current.filter((c) => c.candidate_name !== candidate.candidate_name)
+        : [...current, candidate];
+      if (!exists && next.length > maxChoices) next = next.slice(1);
+      return { ...prev, [position]: next };
     });
   };
 
-  const handleDetails = (candidate: Candidate) => {
-    setSelectedCandidateDetails([
-      //@ts-ignore
-      { dets: candidate.details, media: candidate.media },
-    ]);
-    setShowModal(true);
-  };
-  const handleVote = (
-    positionIndex: number,
-    candidateIndex: number,
-    increment: boolean
-  ) => {
-    if (votingData && votingData[positionIndex]) {
-      const updatedData = [...votingData];
-      const candidate = updatedData[positionIndex].candidates[candidateIndex];
-      if (candidate) {
-        if (increment) {
-          candidate.votes++;
-        } else {
-          candidate.votes--;
-        }
-      }
-      setVotingData(updatedData);
-    }
+  const abstain = (position: string) => {
+    setChoices((prev) => ({ ...prev, [position]: [] }));
+    setAbstained((prev) => ({ ...prev, [position]: true }));
   };
 
-  const isCandidateActive = (position: string, candidate: Candidate) => {
-    const positionData = selectedCandidates.find(
-      (sc: any) => sc.position === position
+  const positionsDone = positions.filter(
+    (p) =>
+      abstained[p.name_of_position] ||
+      (choices[p.name_of_position]?.length ?? 0) > 0,
+  ).length;
+  const allDone = positions.length > 0 && positionsDone === positions.length;
+
+  const selections: SelectedCandidates[] = positions
+    .filter(
+      (p) =>
+        abstained[p.name_of_position] ||
+        (choices[p.name_of_position]?.length ?? 0) > 0,
+    )
+    .map((p) =>
+      abstained[p.name_of_position]
+        ? { position: p.name_of_position, candidates: [], abstain: true }
+        : {
+            position: p.name_of_position,
+            candidates: choices[p.name_of_position],
+          },
     );
-    return (
-      positionData?.candidates.some(
-        (c) => c.candidate_name === candidate.candidate_name
-      ) ?? false
-    );
-  };
 
-  const closeModal = () => setShowModal(false);
+  if (!isClient) return null;
+  if (isLoading) return <PageLoader message="Loading the preview" />;
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="my-10 text-center">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      <div className="min-h-screen bg-slate-50">
+        <BallotStatusCard
+          icon={AlertCircle}
+          tone="danger"
+          title="Preview unavailable"
+          description={error}
+        />
       </div>
     );
   }
-  if (error) {
-    return <div className="my-10">{error}</div>;
-  }
-  console.log(position);
 
   return (
-    <>
-      {isClient && (
-        <div className="">
-          <Header electionDetails={election} />
-          {/* <div>
-            <MiniDashboard />
-          </div> */}
-          <div className="mt-[126px] max-w-[1200px] mx-auto">
-            {position &&
-              position.map((preview: any, index: any) => {
-                const randomColor =
-                  cols[Math.floor(Math.random() * cols.length)];
-                return (
-                  <div
-                    key={index}
-                    className="bg-slate-50 my-20 p-10"
-                    style={{
-                      ...(isClient && {
-                        borderLeft: `4px solid ${randomColor}`,
-                      }),
-                    }}
-                  >
-                    <div className="text-center text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
-                      <div>
-                        <img
-                          src={leftline.src}
-                          alt="line"
-                          className="w-14 lg:w-full"
-                        />
-                      </div>
-                      <div>{preview.name_of_position}</div>
-                      <div>
-                        <img
-                          src={rightline.src}
-                          alt="line"
-                          className="w-14 lg:w-full"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-10 items-stretch lg:max-w-[1200px] max-w-full w-full mx-auto my-16 justify-center">
-                      {preview.candidates.map(
-                        (candidate: any, candidateIndex: any) => {
-                          const maxObject = preview.candidates.reduce(
-                            (max: any, obj: any) =>
-                              obj.votes > max.votes ? obj : max,
-                            preview.candidates[0]
-                          );
-                          console.log(candidate.votes);
+    // `isolate` keeps the header's branding layer (-z-10) above the background.
+    <div className="isolate min-h-screen bg-slate-50">
+      <Header electionDetails={election} />
 
-                          return (
-                            <div
-                              key={candidateIndex}
-                              className={`lg:w-[calc(25%-40px)] w-[18.5rem] mx-auto lg:mx-0 flex flex-col justify-center items-center text-center text-xl font-semibold p-3 rounded cursor-pointer relative ${
-                                candidate.votes === maxObject.votes
-                                  ? ""
-                                  : "duration-500"
-                              }`}
-                              onClick={() =>
-                                handleSelectCandidate(
-                                  preview.name_of_position,
-                                  candidate
-                                )
-                              }
-                            >
-                              {/* {candidate.votes === maxObject.votes && (
-                                <div className="absolute -right-2 -top-3 ">
-                                  <img src={checked.src} alt="" />
-                                </div>
-                              )} */}
+      <div className="mx-auto w-full max-w-5xl space-y-4 px-3 pb-32 pt-5 ssm:px-4 smm:space-y-6 smm:pt-6">
+        <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 smm:flex-row smm:items-center smm:justify-between">
+          <p className="flex items-start gap-2 text-sm text-amber-900">
+            <Eye className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <span>
+              <span className="font-semibold">Preview.</span> This is what
+              voters will see. Try it out: nothing you pick here is saved or
+              submitted.
+            </span>
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.back()}
+            className="shrink-0 bg-white"
+          >
+            <ArrowLeft /> Back
+          </Button>
+        </div>
 
-                              <div>
-                                <div className="mb-3">
-                                  <img
-                                    src={candidate.candidate_picture}
-                                    className="w-[269px] h-[269px] object-cover rounded"
-                                    alt={`Image for ${candidate.candidate_name}`}
-                                  />
-                                </div>
+        {isFetchCandidates ? (
+          Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-[420px] w-full rounded-2xl" />
+          ))
+        ) : positions.length === 0 ? (
+          <BallotStatusCard
+            icon={AlertCircle}
+            tone="neutral"
+            title="No positions yet"
+            description="Add positions and candidates to the ballot to preview it."
+          />
+        ) : (
+          positions.map((position, index) => (
+            <BallotPositionSection
+              key={position.name_of_position}
+              position={position}
+              number={index + 1}
+              total={positions.length}
+              accent={accentFor(index)}
+              maxChoices={maxChoices}
+              selectedCount={choices[position.name_of_position]?.length ?? 0}
+              abstained={!!abstained[position.name_of_position]}
+              isSelected={(candidate) =>
+                !abstained[position.name_of_position] &&
+                (choices[position.name_of_position] || []).some(
+                  (c) => c.candidate_name === candidate.candidate_name,
+                )
+              }
+              onSelect={(candidate) =>
+                selectCandidate(position.name_of_position, candidate)
+              }
+              onAbstain={() => abstain(position.name_of_position)}
+              onShowDetails={setDetailsCandidate}
+            />
+          ))
+        )}
+      </div>
 
-                                <div className="capitalize">
-                                  <div>{candidate.candidate_name}</div>
-                                  <div className="text-base">
-                                    ({candidate.candidate_nickname})
-                                  </div>
-                                </div>
-                                <div className="text-base text-blue-700 underline cursor-pointer font-normal">
-                                  More Details
-                                </div>
-                                {/* <div className="flex justify-center pt-3 gap-4 items-center">
-                                  <div>
-                                    <button
-                                      className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100 ${
-                                        candidate.votes <= 0
-                                          ? "cursor-not-allowed opacity-50"
-                                          : ""
-                                      }`}
-                                      onClick={() =>
-                                        handleVote(index, candidateIndex, false)
-                                      }
-                                      disabled={candidate.votes <= 0}
-                                    >
-                                      <span className="text-xl">
-                                        <AiOutlineMinus />
-                                      </span>
-                                    </button>
-                                  </div>
-                                  <div>{candidate.votes}</div>
-                                  <div>
-                                    <button
-                                      className={`w-10 h-10  bg-blue-700 rounded flex items-center justify-center text-neutral-100`}
-                                      onClick={() =>
-                                        handleVote(index, candidateIndex, true)
-                                      }
-                                    >
-                                      <span className="text-xl">
-                                        <AiOutlinePlus />
-                                      </span>
-                                    </button>
-                                  </div>
-                                </div> */}
-                              </div>
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
-                    <div>
-                      {preview.allow_abstain && (
-                        <div className="flex justify-center items-center">
-                          <button className="w-32 h-14 bg-blue-700 rounded-lg text-zinc-100 font-bold text-xl mb-10 uppercase">
-                            Abstain
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    <AnimatePresence mode="wait">
-                      {showModal && (
-                        <Modal key="modal" handleClose={closeModal}>
-                          <CandidateDetails
-                            details={selectedCandidateDetails}
-                          />
-                        </Modal>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
+      {positions.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-white/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-4px_12px_rgba(15,23,42,0.06)] backdrop-blur">
+          <div className="mx-auto flex max-w-5xl items-center gap-3 smm:gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-foreground ssm:text-sm">
+                {positionsDone} of {positions.length}
+                <span className="hidden ssm:inline"> positions</span> done
+              </p>
+              <div className="mt-1.5 h-1.5 w-full max-w-xs overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-300"
+                  style={{
+                    width: `${(positionsDone / positions.length) * 100}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowReview(true)}
+              disabled={!allDone}
+              className="h-11 shrink-0 px-3 ssm:px-4"
+            >
+              Review<span className="hidden ssm:inline"> votes</span>{" "}
+              <ArrowRight />
+            </Button>
           </div>
         </div>
       )}
-    </>
+
+      <ReviewVotesDialog
+        open={showReview}
+        onClose={() => setShowReview(false)}
+        onConfirm={() => {
+          setShowReview(false);
+          toast("This is a preview, so votes aren't submitted.", {
+            icon: "👀",
+          });
+        }}
+        isSubmitting={false}
+        selections={selections}
+      />
+      <CandidateDetailsDialog
+        candidate={detailsCandidate}
+        onClose={() => setDetailsCandidate(null)}
+      />
+    </div>
   );
 };
 
