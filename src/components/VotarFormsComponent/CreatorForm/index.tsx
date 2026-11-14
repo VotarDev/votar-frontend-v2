@@ -23,6 +23,13 @@ import { Input } from "@/src/components/ui/input";
 import { Switch } from "@/src/components/ui/switch";
 import InfoTip from "@/src/components/shared/form/InfoTip";
 
+/**
+ * The API returns the form link without a protocol ("www.votar.ng/usersForm?…"),
+ * which browsers treat as a path on the current page. Make it a full URL.
+ */
+const toAbsoluteUrl = (link: string) =>
+  /^[a-z][a-z\d+.-]*:\/\//i.test(link) ? link : `https://${link.replace(/^\/+/, "")}`;
+
 interface Item {
   id: number;
   option: string;
@@ -91,7 +98,7 @@ const CreatorForm = ({ electionId }: { electionId: string }) => {
       const { data } = await createVotarForms(formData, USER_ID as string);
       if (data) {
         toast.success("Form created succesfully");
-        setFormLink(data.data.votar_form_link);
+        setFormLink(toAbsoluteUrl(data.data.votar_form_link));
       }
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Couldn't create the form");
