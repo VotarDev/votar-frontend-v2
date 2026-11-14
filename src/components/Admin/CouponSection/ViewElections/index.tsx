@@ -73,20 +73,42 @@ const ViewElections = ({ selectedElection, num }: ViewElectionsProps) => {
             key="modal"
             className="max-w-[60rem]"
           >
-            <div className="bg-white w-full p-10 ">
+            <div className="bg-white w-full p-4 sm:p-10">
               <div className="flex justify-end mb-5">
                 <input
                   type="text"
                   placeholder="Search Elections"
-                  className="w-72 h-12 p-4 border outline-none font-normal rounded-3xl"
+                  className="w-full sm:w-72 h-12 p-4 border outline-none font-normal rounded-3xl"
                 />
               </div>
               <h1 className="text-lg">
                 Elections for: {selectedElection.couponName}
               </h1>
               <div className="mt-5">
+                {/* Mobile card list */}
+                <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto sm:hidden">
+                  {tableData.map((row, index) => (
+                    <div
+                      key={row.id}
+                      className="rounded-xl border border-gray-100 px-4 py-3 text-left shadow-sm"
+                    >
+                      <div className="text-xs font-medium text-gray-400">
+                        #{index <= 9 ? `0${index + 1}` : index + 1}
+                      </div>
+                      <div className="text-sm font-semibold text-gray-800">
+                        {row.elections}
+                      </div>
+                      <div className="mt-2 flex justify-between text-xs text-gray-500">
+                        <span>Actual: {row.actualAmount}</span>
+                        <span>Discounted: {row.discountedAmount}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table */}
                 <TableContainer
-                  sx={{ maxHeight: 500 }}
+                  sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }}
                   className="table-scroll"
                 >
                   <Table

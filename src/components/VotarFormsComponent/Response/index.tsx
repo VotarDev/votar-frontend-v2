@@ -38,6 +38,9 @@ type ResponseData = {
 };
 
 const ROW_HEIGHT = 53;
+// Estimated height of a card on phones; real heights are measured.
+const CARD_HEIGHT = 168;
+const MOBILE_QUERY = "(max-width: 774px)";
 const checkboxClass =
   "h-4 w-4 shrink-0 cursor-pointer rounded accent-[#015CE9] disabled:cursor-not-allowed disabled:opacity-40";
 
@@ -66,6 +69,8 @@ const ResponseTable = () => {
     null,
   );
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Phones get cards instead of the wide table.
+  const [isMobile, setIsMobile] = useState(false);
   const USER_ID = useCurrentUserId();
   const router = useRouter();
   const { id } = router.query;
@@ -274,13 +279,44 @@ const ResponseTable = () => {
     [votarResponses],
   );
 
-  // Only the visible rows are rendered, so long lists stay fast.
+  useEffect(() => {
+    const query = window.matchMedia(MOBILE_QUERY);
+    const update = () => setIsMobile(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  // Only the visible rows (or cards) are rendered, so long lists stay fast.
   const rowVirtualizer = useVirtualizer({
     count: filteredRows.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: () => ROW_HEIGHT,
-    overscan: 10,
+    estimateSize: () => (isMobile ? CARD_HEIGHT : ROW_HEIGHT),
+    overscan: isMobile ? 4 : 10,
   });
+
+  // Re-measure when switching between cards and table rows.
+  useEffect(() => {
+    rowVirtualizer.measure();
+  }, [isMobile]);
+
+  const isSelected = (row: VoterResponse) =>
+    selectedRows.some((selectedRow) => selectedRow.id === row.id);
+
+  const statusBadge = (row: VoterResponse) =>
+    row.isDuplicate ? (
+      <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-700">
+        Duplicate
+      </span>
+    ) : row.isExported ? (
+      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+        Exported
+      </span>
+    ) : (
+      <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+        New
+      </span>
+    );
   const virtualItems = rowVirtualizer.getVirtualItems();
   const totalSize = rowVirtualizer.getTotalSize();
   const paddingTop = virtualItems.length > 0 ? virtualItems[0].start : 0;
@@ -372,6 +408,75 @@ const ResponseTable = () => {
             title="No responses found"
             description={`Nothing matches "${searchQuery}".`}
           />
+        ) : isMobile ? (
+          <div ref={scrollContainerRef} className="max-h-[70vh] overflow-auto">
+            <div className="relative w-full" style={{ height: totalSize }}>
+              {virtualItems.map((virtualRow) => {
+                const row = filteredRows[virtualRow.index];
+                const index = virtualRow.index;
+                const locked = row.isDuplicate || row.isExported;
+                return (
+                  <div
+                    key={`${row.id ?? "row"}-${index}`}
+                    data-index={index}
+                    ref={rowVirtualizer.measureElement}
+                    className={cn(
+                      "absolute left-0 top-0 flex w-full gap-3 border-b border-border p-4",
+                      row.isDuplicate && "bg-red-50/70",
+                      row.isExported && "text-muted-foreground",
+                      isSelected(row) && "bg-secondary/40",
+                    )}
+                    style={{ transform: `translateY(${virtualRow.start}px)` }}
+                  >
+                    <input
+                      type="checkbox"
+                      className={cn(checkboxClass, "mt-1")}
+                      disabled={locked}
+                      checked={isSelected(row)}
+                      onChange={() => handleCheckboxChange(row)}
+                      aria-label={`Select ${row.name}`}
+                    />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate font-medium text-foreground">
+                            {row.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            #{index < 9 ? `0${index + 1}` : index + 1} · ID{" "}
+                            {row.id}
+                          </p>
+                        </div>
+                        {statusBadge(row)}
+                      </div>
+                      {row.subgroup && (
+                        <p className="text-sm text-muted-foreground">
+                          {row.subgroup}
+                        </p>
+                      )}
+                      <p className="text-sm text-muted-foreground">
+                        {row.phoneNumber}
+                      </p>
+                      <p className="break-all text-sm text-muted-foreground">
+                        {row.email}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      disabled={row.isExported}
+                      onClick={() => setPendingDelete(row)}
+                      aria-label={`Delete ${row.name}`}
+                      className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         ) : (
           <div ref={scrollContainerRef} className="max-h-[640px] overflow-auto">
             <table className="w-full min-w-[860px] text-sm">

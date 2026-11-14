@@ -197,9 +197,49 @@ const AdminProfile = () => {
     <AdminLayout>
       <div className="my-[60px] max-w-[1300px] mx-auto">
         <div className="pb-9 font-bold text-2xl">Admin Profile</div>
-        <div className="shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] p-8">
+        <div className="shadow-[0px_4px_39px_0px_rgba(0_,0_,0_,0.08)] p-4 sm:p-8">
           {loadError && <p role="alert" className="mb-4 text-red-600">{loadError}</p>}
-          <TableContainer sx={{ maxHeight: 500 }} className="table-scroll">
+          {/* Mobile card list */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {admins.map((admin, index) => {
+              const protectedAccount = admin.sudo || admin._id === profile?._id;
+              return (
+                <div key={admin._id} className="rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium text-gray-400">#{String(index + 1).padStart(2, "0")}</div>
+                      <div className="truncate text-sm font-semibold text-gray-800">{admin.username}</div>
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${admin.sudo ? "bg-blue-50 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
+                      {admin.sudo ? "Superadmin" : "Admin"}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between gap-3 text-sm">
+                    <label className="flex items-center gap-2 text-gray-600">
+                      <input
+                        aria-label={`Access for ${admin.username}`}
+                        type="checkbox"
+                        checked={admin.hasAccess}
+                        disabled={protectedAccount}
+                        onChange={(event) => handleAccessChange(admin, event.target.checked)}
+                      />
+                      Has access
+                    </label>
+                    {!protectedAccount && (
+                      <div className="flex items-center gap-3">
+                        <EditAdminForm selectedAdmin={admin} onSave={handleUpdateAdmin} isSaving={isSaving} />
+                        <DeleteDialog selectedAdmin={admin} onDelete={handleDeleteAdmin} isDeleting={isSaving} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {admins.length === 0 && <p className="py-6 text-center text-sm text-gray-500">No admin accounts found.</p>}
+          </div>
+
+          {/* Desktop table */}
+          <TableContainer sx={{ maxHeight: 500, display: { xs: "none", sm: "block" } }} className="table-scroll">
             <Table sx={{ minWidth: 700, borderCollapse: "separate", borderSpacing: "0" }} stickyHeader aria-label="Admin accounts">
               <TableHead>
                 <TableRow className="text-white font-bold">
