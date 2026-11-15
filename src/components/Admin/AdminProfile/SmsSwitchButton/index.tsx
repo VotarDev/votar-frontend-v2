@@ -3,6 +3,8 @@ import toast from "react-hot-toast";
 import { adminToggleSms } from "@/utils/api";
 import Cookies from "universal-cookie";
 import setAuthToken from "@/utils/setAuthToken";
+import { Loader2 } from "lucide-react";
+import { Switch } from "@/src/components/ui/switch";
 
 interface SmsSwitchButtonProps {
   row?: any;
@@ -16,8 +18,7 @@ const SmsSwitchButton = ({ row }: SmsSwitchButtonProps) => {
   );
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newStatus = event.target.checked;
+  const handleChange = async (newStatus: boolean) => {
     setIsUpdating(true);
     const cookies = new Cookies();
     const token = cookies.get("admin-token");
@@ -35,16 +36,17 @@ const SmsSwitchButton = ({ row }: SmsSwitchButtonProps) => {
   };
 
   return (
-    <label className="toggle">
-      <input
-        className="toggle-checkbox"
-        type="checkbox"
-        onChange={handleChange}
+    <div className="inline-flex items-center gap-2">
+      <Switch
         checked={smsEnabled}
+        onCheckedChange={handleChange}
         disabled={isUpdating}
+        aria-label={smsEnabled ? "Turn off SMS" : "Turn on SMS"}
       />
-      <div className="toggle-switch"></div>
-    </label>
+      {isUpdating && (
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+      )}
+    </div>
   );
 };
 

@@ -120,3 +120,59 @@ export const formatInViewerTimeZone = (date: Date): string =>
     minute: "2-digit",
     timeZoneName: "short",
   });
+
+/**
+ * Organisers pick times in West Africa Time (UTC+1); the create form converts
+ * them to UTC before saving (Details.tsx -> formatDateTimeToUTC). The edit
+ * form uses the two helpers below so it reads and saves the same way.
+ */
+const ORGANISER_UTC_OFFSET_MINUTES = 60;
+
+const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** A stored election time as the organiser's "YYYY-MM-DD" and "HH:mm" (WAT). */
+export const toOrganiserDateTime = (
+  value: unknown,
+): { date: string; time: string } | null => {
+  const instant = parseElectionDate(value);
+  if (!instant) return null;
+  const wat = new Date(
+    instant.getTime() + ORGANISER_UTC_OFFSET_MINUTES * 60 * 1000,
+  );
+  return {
+    date: `${wat.getUTCFullYear()}-${pad(wat.getUTCMonth() + 1)}-${pad(wat.getUTCDate())}`,
+    time: `${pad(wat.getUTCHours())}:${pad(wat.getUTCMinutes())}`,
+  };
+};
+
+/**
+ * The organiser's "YYYY-MM-DD" + "HH:mm" (WAT) as the UTC string the API
+ * stores, e.g. "November 14, 2026 15:27" — same format as the create form.
+ */
+export const fromOrganiserDateTime = (
+  date: string | undefined,
+  time: string | undefined,
+): string => {
+  const [y, m, d] = (date || "").split(" ")[0].split("-").map(Number);
+  const [h, min] = (time || "").split(":").map(Number);
+  if ([y, m, d, h, min].some((n) => Number.isNaN(n))) return "";
+  const utc = new Date(
+    Date.UTC(y, m - 1, d, h, min) - ORGANISER_UTC_OFFSET_MINUTES * 60 * 1000,
+  );
+  return `${MONTH_NAMES[utc.getUTCMonth()]} ${utc.getUTCDate()}, ${utc.getUTCFullYear()} ${pad(utc.getUTCHours())}:${pad(utc.getUTCMinutes())}`;
+};

@@ -77,6 +77,21 @@ module.exports = {
           foreground: "hsl(var(--surface-foreground))",
         },
       },
+      // Page loader (src/components/shared/PageLoader.tsx).
+      keyframes: {
+        "loader-float": {
+          "0%, 100%": { transform: "translateY(0) scale(1)" },
+          "50%": { transform: "translateY(-6px) scale(1.04)" },
+        },
+        "loader-fade-in": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "loader-float": "loader-float 2.4s ease-in-out infinite",
+        "loader-fade-in": "loader-fade-in 0.4s ease-out both",
+      },
       backgroundImage: {
         "review-bg": "url('../public/assets/images/bg-section.png')",
         "footer-bg": "url('../public/assets/images/footer-background.png')",

@@ -1,6 +1,7 @@
 import React, { FormEvent, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "@/redux/features/auth/authSlice";
+import { login, reset } from "@/redux/features/auth/authSlice";
+import Cookies from "universal-cookie";
 import { useRouter } from "next/router";
 import Button from "@/src/components/HomePage/Button";
 import google from "../../public/assets/logos/google.svg";
@@ -17,6 +18,8 @@ import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useCurrentUser } from "@/utils/hooks";
 import useForm from "@/utils/formValidation/useForm";
+import toast from "react-hot-toast";
+import { safeNextPath } from "@/utils/session";
 
 const SigninComponent = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,17 +36,38 @@ const SigninComponent = () => {
     setShowPassword(!showPassword);
   };
 
+  // Start clean: a "signed in" flag left from an earlier (now expired)
+  // session must not bounce this page straight back to the dashboard.
   useEffect(() => {
-    if (success) router.push("/dashboard");
+    dispatch(reset());
+  }, [dispatch]);
+
+  // After signing in, go back to the page that asked for it (same-site only).
+  useEffect(() => {
+    if (success && new Cookies().get("user-token")) {
+      router.push(safeNextPath(router.query.next));
+    }
   }, [success, router]);
+
+  // Sent here because the session ran out.
+  useEffect(() => {
+    if (router.query.expired) {
+      toast.error("Your session has expired. Please sign in again.", {
+        id: "session-expired",
+      });
+    }
+  }, [router.query.expired]);
 
   const loginHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!String(email || "").trim() || !password) {
+      toast.error("Enter your email and password");
+      return;
+    }
 
-    const userdata = { email, password };
+    const userdata = { email: String(email).trim(), password };
     //@ts-ignore
     await dispatch(login(userdata));
-    console.log(message);
   };
 
   const googleAuthHandler = async () => {
@@ -118,7 +142,8 @@ const SigninComponent = () => {
         </div>
 
         <button
-          className="bg-[#015CE9] text-white h-[52px] rounded mt-7 flex items-center justify-center gap-2 font-proximaNova w-full transition ease-out duration-150 hover:scale-[1.03]"
+          type="submit"
+          className="bg-[#015CE9] text-white h-[52px] rounded mt-7 flex items-center justify-center gap-2 font-proximaNova w-full transition ease-out duration-150 hover:scale-[1.03] disabled:opacity-70"
           disabled={loading}
         >
           {loading && (

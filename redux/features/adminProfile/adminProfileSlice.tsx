@@ -10,6 +10,19 @@ interface AdminState {
   loading: boolean;
 }
 
+// Older versions saved the admin's password here; drop it.
+if (typeof window !== "undefined") {
+  try {
+    const saved = JSON.parse(localStorage.getItem("adminData") || "null");
+    if (saved && "password" in saved) {
+      delete saved.password;
+      localStorage.setItem("adminData", JSON.stringify(saved));
+    }
+  } catch {
+    localStorage.removeItem("adminData");
+  }
+}
+
 const initialState: AdminState = {
   available: false,
   data:
@@ -29,13 +42,10 @@ const AdminSlice = createSlice({
       state.tested = true;
       state.available = true;
       state.loading = false;
-      // Save admin data to local storage
-      const { id, username, password } = payload;
+      // Save who's signed in (never the password) to local storage.
+      const { id, username } = payload || {};
       if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "adminData",
-          JSON.stringify({ id, username, password })
-        );
+        localStorage.setItem("adminData", JSON.stringify({ id, username }));
       }
     },
 

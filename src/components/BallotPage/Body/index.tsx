@@ -602,19 +602,25 @@ function Body({
                             ) : (
                               <label
                                 htmlFor={`media-upload-${base}`}
-                                className={`inline-flex items-center gap-2 text-sm font-medium text-primary ${
+                                className={`flex w-full items-center gap-3 rounded-lg border border-dashed border-border px-3 py-3 text-left transition-colors ${
                                   isEditable
-                                    ? "cursor-pointer hover:underline"
+                                    ? "cursor-pointer hover:border-primary hover:bg-secondary/40"
                                     : "cursor-not-allowed opacity-60"
                                 }`}
                               >
-                                <Paperclip
-                                  className="h-4 w-4"
-                                  aria-hidden="true"
-                                />
-                                Attach media
-                                <span className="font-normal text-muted-foreground">
-                                  Image, video, PDF or DOC · Max 10 MB
+                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-secondary text-primary">
+                                  <Paperclip
+                                    className="h-4 w-4"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                                <span className="flex min-w-0 flex-col">
+                                  <span className="whitespace-nowrap text-sm font-medium text-primary">
+                                    Attach media
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Image, video, PDF or DOC · Max 10 MB
+                                  </span>
                                 </span>
                               </label>
                             )}

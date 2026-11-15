@@ -16,13 +16,15 @@ import type { ElectionDetails } from "@/utils/types";
 interface ElectionCardProps {
   election: Partial<ElectionDetails>;
   userId?: string;
+  /** Replaces the default Manage / Delete footer (e.g. on Votar Forms). */
+  actions?: React.ReactNode;
 }
 
 // Same route as before for an election's details.
 export const electionHref = (election: Partial<ElectionDetails>) =>
   `/elections/${election.name_of_election}/${election.election_id}`;
 
-const ElectionCard = ({ election, userId }: ElectionCardProps) => {
+const ElectionCard = ({ election, userId, actions }: ElectionCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteElection] = useDeleteElectionMutation();
   const status = getStatusForElection(election);
@@ -92,21 +94,25 @@ const ElectionCard = ({ election, userId }: ElectionCardProps) => {
       </div>
 
       <div className="flex items-center gap-2 border-t border-border pt-4">
-        <Button asChild variant="outline" size="sm" className="flex-1">
-          <Link href={electionHref(election)}>
-            <Settings2 /> Manage
-          </Link>
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => setConfirmOpen(true)}
-          aria-label={`Delete ${election.name_of_election}`}
-          className="h-9 w-9 shrink-0 p-0 text-muted-foreground hover:bg-red-50 hover:text-destructive"
-        >
-          <Trash2 />
-        </Button>
+        {actions ?? (
+          <>
+            <Button asChild variant="outline" size="sm" className="flex-1">
+              <Link href={electionHref(election)}>
+                <Settings2 /> Manage
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setConfirmOpen(true)}
+              aria-label={`Delete ${election.name_of_election}`}
+              className="h-9 w-9 shrink-0 p-0 text-muted-foreground hover:bg-red-50 hover:text-destructive"
+            >
+              <Trash2 />
+            </Button>
+          </>
+        )}
       </div>
 
       <ConfirmDialog

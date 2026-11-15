@@ -31,7 +31,7 @@ const ElectionPlan = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 pb-24 pt-2 lg:space-y-8">
+    <div className="mx-auto w-full max-w-6xl space-y-6 pb-6 pt-2 lg:space-y-8">
       <PageHeader
         title="Create an election"
         description="Choose the type of election you want to run."

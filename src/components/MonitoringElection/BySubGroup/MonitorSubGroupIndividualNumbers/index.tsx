@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "universal-cookie";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import PositionCard, { accentFor } from "../../PositionCard";
 import { Chart } from "chart.js/auto";
 import { Pie } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
@@ -33,7 +36,7 @@ const CustomLegend = ({ subgroups, candidateSubgroup, abstained }: any) => {
   console.log(subgroupCounts);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
       {Object.keys(subgroupCounts).map((key, index) => (
         <div
           key={index}
@@ -164,14 +167,9 @@ const MonitorSubGroupIndividualNumbers = ({
   useEffect(() => {
     const monitorElectionBySubgroup = async () => {
       setIsFetchSubGroup(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      // Use the signed-in token when there is one; never clear the header.
+      const token = new Cookies().get("user-token");
+      if (token) setAuthToken(token);
 
       try {
         const { data } = await monitorIndividualSubgroup(electionId);
@@ -288,87 +286,53 @@ const MonitorSubGroupIndividualNumbers = ({
 
   console.log(candidates);
 
-  if (isFetchSubGroup)
+  if (isFetchSubGroup) {
     return (
-      <div className="text-center">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
+      <div className="space-y-4">
+        <Skeleton className="h-96 w-full rounded-xl" />
       </div>
     );
+  }
 
   return (
-    <>
-      <div className="max-w-[1200px] mx-auto flex flex-col gap-20 pb-20">
-        {candidates?.map((items: any, index: any) => {
-          const generateRandomColor =
-            randomColors[Math.floor(Math.random() * randomColors.length)];
-
-          return (
-            <div
-              key={index}
-              className="bg-slate-50 p-10 "
-              style={{
-                ...(isMounted && {
-                  borderLeft: `4px solid ${generateRandomColor}`,
-                }),
-              }}
-            >
-              <div className="text-center text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
-                <div>
-                  <img
-                    src={leftline.src}
-                    alt="line"
-                    className="w-14 lg:w-full"
-                  />
-                </div>
-                <div>{items.position}</div>
-                <div>
-                  <img
-                    src={rightline.src}
-                    alt="line"
-                    className="w-14 lg:w-full"
-                  />
-                </div>
-              </div>
-              <div className="pt-10 relative">
-                <div className="absolute left-0 top-6">
-                  <CustomLegend
-                    subgroups={subgroupColors}
-                    candidateSubgroup={items.candidates}
-                    abstained={items.abstain}
-                  />
-                </div>
-
-                <div className="max-w-[700px] w-full mx-auto grid lg:grid-cols-3 grid-cols-1 p-6 gap-10">
-                  {items.candidates.map(
-                    (candidate: any, candidateIndex: any) => (
-                      <div key={candidateIndex}>
-                        <div>
-                          {chartData &&
-                            chartData.length > index &&
-                            chartData[index][candidateIndex] && ( // Ensure indices align correctly
-                              <Pie
-                                //@ts-ignore
-                                options={option}
-                                data={chartData[index][candidateIndex]} // Correct index for candidate chart data
-                                /** @ts-ignore */
-                                plugins={[ChartDataLabels]}
-                              />
-                            )}
-                          <div className="flex justify-center py-10 text-xl font-semibold">
-                            {candidate.candidateName}
-                          </div>
-                        </div>
-                      </div>
-                    )
+    <div className="space-y-6">
+      {candidates?.map((items: any, index: number) => (
+        <PositionCard key={index} title={items.position} accent={accentFor(index)}>
+          <div className="mb-4 flex justify-center">
+            <CustomLegend
+              subgroups={subgroupColors}
+              candidateSubgroup={items.candidates}
+              abstained={items.abstain}
+            />
+          </div>
+          <div className="grid grid-cols-1 gap-6 smm:grid-cols-2 lg:grid-cols-3">
+            {items.candidates.map((candidate: any, candidateIndex: number) => (
+              <div
+                key={candidateIndex}
+                className="flex flex-col items-center rounded-lg border border-border p-4"
+              >
+                {chartData &&
+                  chartData.length > index &&
+                  chartData[index][candidateIndex] && (
+                    <div className="relative mx-auto aspect-square w-full max-w-[240px]">
+                      <Pie
+                        //@ts-ignore
+                        options={{ ...option, responsive: true, maintainAspectRatio: false }}
+                        data={chartData[index][candidateIndex]}
+                        /** @ts-ignore */
+                        plugins={[ChartDataLabels]}
+                      />
+                    </div>
                   )}
-                </div>
+                <p className="mt-3 text-center font-semibold capitalize text-foreground">
+                  {candidate.candidateName}
+                </p>
               </div>
-            </div>
-          );
-        })}
-      </div>
-    </>
+            ))}
+          </div>
+        </PositionCard>
+      ))}
+    </div>
   );
 };
-
 export default MonitorSubGroupIndividualNumbers;

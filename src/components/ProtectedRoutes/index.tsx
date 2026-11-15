@@ -1,9 +1,11 @@
 import { useRouter } from "next/router";
 import { useEffect, useState, type ReactNode } from "react";
-import { getUserData } from "@/utils/api";
+import { useDispatch } from "react-redux";
+import { userApi } from "@/redux/api/userApi";
 import { useCurrentUser, useUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
 import Cookies from "universal-cookie";
+import PageLoader from "@/src/components/shared/PageLoader";
 
 type ProtectedRoutesProps = {
   children: ReactNode;
@@ -19,6 +21,7 @@ function ProtectedRoutes({
   const user = useCurrentUser();
   const profile = useUser();
   const router = useRouter();
+  const dispatch = useDispatch<any>();
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
   const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
@@ -62,7 +65,11 @@ function ProtectedRoutes({
         }
 
         try {
-          const { data } = await getUserData(userId);
+          // Shares the cached profile with the layout instead of refetching.
+          const request = dispatch(
+            userApi.endpoints.getUserProfile.initiate(userId),
+          );
+          const data = await request.unwrap().finally(request.unsubscribe);
           if (cancelled) return;
 
           const verified = data?.data?.email_verified === true;
@@ -89,18 +96,14 @@ function ProtectedRoutes({
     return () => {
       cancelled = true;
     };
-  }, [googletoken, requireVerifiedEmail, router, userId]);
+  }, [googletoken, requireVerifiedEmail, router, userId, dispatch]);
 
   const returnToSignIn = () => {
     window.location.href = "/signin";
   };
 
   if (loading || redirecting) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+    return <PageLoader message={redirecting ? "Taking you to sign in" : undefined} />;
   }
 
   if (verificationError || emailVerified === false) {

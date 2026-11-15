@@ -1,58 +1,86 @@
 import React, { useEffect, useRef } from "react";
 import { Collapse } from "react-collapse";
-import { IoCopy } from "react-icons/io5";
+import { ChevronDown, Link2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { cn } from "@/utils/cn";
 
-const AccordionItem = ({ children, curOpen, onOpen, num, title }: any) => {
+interface AccordionItemProps {
+  children: React.ReactNode;
+  curOpen: number | false;
+  onOpen: (value: number | false) => void;
+  num: number;
+  title: string;
+}
+
+/** One question. Opens on click/Enter/Space; #faq-<n> links open it directly. */
+const AccordionItem = ({ children, curOpen, onOpen, num, title }: AccordionItemProps) => {
   const isOpen = num === curOpen;
   const itemRef = useRef<HTMLDivElement | null>(null);
-  const handleToggle = () => {
-    onOpen(isOpen ? false : num);
+  const faqId = `faq-${num}`;
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/faq#${faqId}`);
+      toast.success("Link copied to clipboard!");
+    } catch {
+      toast.error("Couldn't copy the link.");
+    }
   };
 
-  const copyLink = () => {
-    const faqId = `faq-${num}`;
-    const link = `${window.location.origin}/faq#${faqId}`;
-    navigator.clipboard.writeText(link);
-    toast.success("Link copied to clipboard!");
-  };
-
+  // Opened from a shared link.
   useEffect(() => {
-    const faqId = `faq-${num}`;
     if (window.location.hash === `#${faqId}`) {
       onOpen(num);
-      itemRef.current?.scrollIntoView({ behavior: "smooth" });
+      window.setTimeout(
+        () => itemRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }),
+        100,
+      );
     }
-  }, [num, onOpen]);
+  }, [faqId, num, onOpen]);
+
   return (
-    <div className="mb-5 relative">
-      <div
-        onClick={handleToggle}
-        className={`cursor-pointer bg-[#F9F9F9] ssm:py-[25px] py-[20px] px-[20px] ssm:px-[38px] flex justify-between  ${
-          !isOpen ? "accordion-item" : ""
-        } `}
-      >
-        <div
-          className="absolute right-[45px] top-2 text-xs flex items-center gap-2"
-          onClick={(e) => {
-            e.stopPropagation();
-            copyLink();
-          }}
+    <div
+      ref={itemRef}
+      id={faqId}
+      className={cn(
+        "scroll-mt-28 overflow-hidden rounded-xl border transition-colors",
+        isOpen ? "border-[#015CE9]/30 bg-white shadow-sm" : "border-transparent bg-[#F9F9F9]",
+      )}
+    >
+      <div className="flex items-stretch">
+        <button
+          type="button"
+          onClick={() => onOpen(isOpen ? false : num)}
+          aria-expanded={isOpen}
+          aria-controls={`${faqId}-answer`}
+          className="flex flex-1 items-center justify-between gap-4 py-5 pl-5 text-left ssm:py-6 ssm:pl-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#015CE9]"
         >
-          Copy FAQ Link
-          <span>
-            <IoCopy />
-          </span>
-        </div>
-        <div className="lg:text-xl font-semibold ssm:text-[18px]">
-          <h2>{title}</h2>
-        </div>
-        <div className="toggle-sign">
-          <div className={`plus ${isOpen ? "checked" : ""}`}></div>
-        </div>
+          <h2 className="font-semibold ssm:text-[18px] lg:text-xl">{title}</h2>
+          <ChevronDown
+            className={cn(
+              "h-5 w-5 shrink-0 text-[#015CE9] transition-transform duration-300",
+              isOpen && "rotate-180",
+            )}
+            aria-hidden="true"
+          />
+        </button>
+        <button
+          type="button"
+          onClick={copyLink}
+          aria-label={`Copy a link to "${title}"`}
+          title="Copy link to this question"
+          className="flex shrink-0 items-center px-4 text-slate-400 transition-colors hover:text-[#015CE9] ssm:px-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#015CE9]"
+        >
+          <Link2 className="h-4 w-4" />
+        </button>
       </div>
       <Collapse isOpened={isOpen}>
-        <div className="leading-[1.6] ssm:py-[25px] py-[20px] px-[20px] ssm:px-[38px]">
+        <div
+          id={`${faqId}-answer`}
+          role="region"
+          aria-label={title}
+          className="px-5 pb-6 leading-[1.7] text-slate-700 ssm:px-8"
+        >
           <p>{children}</p>
         </div>
       </Collapse>

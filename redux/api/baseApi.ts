@@ -59,6 +59,6 @@ const axiosBaseQuery: BaseQueryFn<ApiRequest, unknown, ApiError> = async ({
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: axiosBaseQuery,
-  tagTypes: ["Elections", "Credit"],
+  tagTypes: ["Elections", "Credit", "User"],
   endpoints: () => ({}),
 });

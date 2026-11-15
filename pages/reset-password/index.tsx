@@ -13,19 +13,23 @@ const ResetPassword = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetchUser, setIsFetchUser] = useState(false);
+  const [linkError, setLinkError] = useState("");
   const [user, setUser] = useState("");
   const router = useRouter();
   const { t } = router.query;
 
+  // The rules listed on the page.
   const validatePassword = (password: string) => {
-    const personalInfo = ["username", "email"];
-
-    for (let info of personalInfo) {
-      if (password.toLowerCase().includes(info.toLowerCase())) {
-        return "Password contains personal information.";
-      }
+    if (password.length < 8) return "Password must have at least 8 characters.";
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password)) {
+      return "Password must have upper and lowercase letters.";
     }
-
+    if (!/\d/.test(password)) return "Password must include at least one number.";
+    const name = typeof user === "string" ? user.trim().toLowerCase() : "";
+    const personal = name.split(/\s+/).filter((part) => part.length >= 3);
+    if (personal.some((part) => password.toLowerCase().includes(part))) {
+      return "Password must not contain your name.";
+    }
     return null;
   };
 
@@ -64,10 +68,16 @@ const ResetPassword = () => {
           error.response.data.message) ||
         error.message ||
         error.toString();
-      toast.error(error.response.data.message || error.message);
+      toast.error(message);
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (router.isReady && !t) {
+      setLinkError("This reset link is incomplete.");
+    }
+  }, [router.isReady, t]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -89,7 +99,7 @@ const ResetPassword = () => {
             error.response.data.message) ||
           error.message ||
           error.toString();
-        toast.error(error.response.data.message || error.message);
+        setLinkError(message);
         setIsFetchUser(false);
       }
     };
@@ -100,6 +110,36 @@ const ResetPassword = () => {
     return (
       <div className="flex justify-center items-center h-screen">
         <CircularProgress size={20} style={{ color: "#2B77ED" }} />
+      </div>
+    );
+  }
+
+  if (linkError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-bold text-foreground">
+            This reset link can&apos;t be used
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {linkError} Reset links expire and can only be used once. Request a
+            new one and use the latest email.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push("/forgot-password")}
+            className="mt-6 h-12 w-full rounded bg-[#015CE9] font-semibold text-white"
+          >
+            Request a new link
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/signin")}
+            className="mt-2 h-11 w-full rounded font-medium text-[#015CE9]"
+          >
+            Back to sign in
+          </button>
+        </div>
       </div>
     );
   }
@@ -122,7 +162,7 @@ const ResetPassword = () => {
           <p className="pt-3">
             Please set up your new credentials in order to log in.
             <br />
-            Your new password must.
+            Your new password must:
           </p>
         </div>
 

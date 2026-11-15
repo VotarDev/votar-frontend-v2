@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Modal from "@/src/components/Modal";
-import { AnimatePresence } from "framer-motion";
+import { Loader2, Trash2 } from "lucide-react";
+import DialogShell from "@/src/components/shared/DialogShell";
+import { Button } from "@/src/components/ui/button";
 
 interface AdminRecord {
   _id: string;
@@ -14,6 +14,7 @@ interface DeleteDialogProps {
   isDeleting: boolean;
 }
 
+/** Delete button plus a confirmation dialog. */
 const DeleteDialog = ({ selectedAdmin, onDelete, isDeleting }: DeleteDialogProps) => {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -27,25 +28,43 @@ const DeleteDialog = ({ selectedAdmin, onDelete, isDeleting }: DeleteDialogProps
     }
   };
 
+  const titleId = `delete-admin-${selectedAdmin._id}`;
   return (
     <>
-      <button type="button" aria-label={`Delete ${selectedAdmin.username}`} onClick={() => setOpen(true)} className="cursor-pointer">
-        <DeleteIcon />
-      </button>
-      <AnimatePresence mode="wait">
-        {open && (
-          <Modal key="modal" handleClose={close}>
-            <div className="bg-white rounded-lg py-6 px-10 text-left text-xl text-slate-600">
-              <div className="pb-6">Delete admin “{selectedAdmin.username}”?</div>
-              <p className="pb-8 text-base">This removes the account and prevents future sign-ins.</p>
-              <div className="flex gap-5 text-white">
-                <button type="button" disabled={isDeleting} onClick={close} className="w-full h-12 bg-[#888888] rounded disabled:opacity-60">Cancel</button>
-                <button type="button" disabled={isDeleting} onClick={confirmDelete} className="w-full h-12 bg-red-500 rounded disabled:opacity-60">{isDeleting ? "Deleting…" : "Delete"}</button>
-              </div>
-            </div>
-          </Modal>
-        )}
-      </AnimatePresence>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        aria-label={`Delete ${selectedAdmin.username}`}
+        onClick={() => setOpen(true)}
+        className="h-9 w-9 text-muted-foreground hover:bg-red-50 hover:text-red-600"
+      >
+        <Trash2 />
+      </Button>
+      <DialogShell open={open} onClose={isDeleting ? () => {} : close} labelledBy={titleId}>
+        <div className="flex items-start gap-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <Trash2 className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h2 id={titleId} className="text-lg font-semibold text-foreground">
+              Delete “{selectedAdmin.username}”?
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              This removes the account and prevents future sign-ins.
+            </p>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-col-reverse gap-2 smm:flex-row smm:justify-end">
+          <Button type="button" variant="outline" disabled={isDeleting} onClick={close} className="h-11">
+            Cancel
+          </Button>
+          <Button type="button" variant="destructive" disabled={isDeleting} onClick={confirmDelete} className="h-11">
+            {isDeleting && <Loader2 className="animate-spin" />}
+            Delete admin
+          </Button>
+        </div>
+      </DialogShell>
     </>
   );
 };

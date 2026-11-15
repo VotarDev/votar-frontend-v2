@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
 import Cookies from "universal-cookie";
-import { Lock } from "lucide-react";
+import VotingLockNotice from "@/src/components/shared/VotingLockNotice";
 import { getElectionById } from "@/utils/api";
 import { useCurrentUser } from "@/utils/hooks";
 import setAuthToken from "@/utils/setAuthToken";
@@ -23,15 +23,6 @@ import DatePicker, {
 import TimePicker from "@/src/components/shared/form/TimePicker";
 import ColorSelect from "@/src/components/shared/form/ColorSelect";
 import ImageCropDialog from "@/src/components/shared/form/ImageCropDialog";
-
-// Unchanged: the saved time shown as "HH:mm" (read in the viewer's timezone).
-const formatTimeToHHMM = (dateString: string | undefined) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${hours}:${minutes}`;
-};
 
 const IMAGE_LIMIT_BYTES = 100 * 1024; // 100KB, as before
 const IMAGE_LIMIT_MESSAGE =
@@ -93,17 +84,8 @@ const DetailsPage = ({
 
             // Voting start, for locking fields that can't change once it begins.
             setTargetDateTime(parseElectionDate(electionData.start_date));
-
-            dispatch({
-              type: "SET_FIELD",
-              field: "start_time",
-              value: formatTimeToHHMM(electionData.start_date),
-            });
-            dispatch({
-              type: "SET_FIELD",
-              field: "end_time",
-              value: formatTimeToHHMM(electionData.end_date),
-            });
+            // SET_ELECTION fills the dates and times in the organiser's
+            // timezone (see toOrganiserDateTime).
             // Show the price when the election already charges per vote.
             setMonetizeElection(Number(electionData.price_per_vote) > 0);
           }
@@ -391,11 +373,11 @@ const DetailsPage = ({
 
         <FormSection title="Voting rules">
           {!isEditable && (
-            <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-              Voting has started, so the number of candidates per position can
-              no longer be changed.
-            </div>
+            <VotingLockNotice
+              endDate={election?.end_date}
+              subject="the number of candidates per position"
+              className="p-3"
+            />
           )}
           <SettingRow
             label="Max candidates per position"

@@ -3,7 +3,8 @@ import { adminPublishElection, getElectionById } from "@/utils/api";
 import Cookies from "universal-cookie";
 import toast from "react-hot-toast";
 import setAuthToken from "@/utils/setAuthToken";
-import { CircularProgress } from "@mui/material";
+import { Loader2 } from "lucide-react";
+import { Switch } from "@/src/components/ui/switch";
 
 interface SwitchButtonProps {
   id?: string | number;
@@ -53,8 +54,7 @@ const SwitchButton = ({
     getElectionDetails();
   }, []); // Empty dependency array - only run once on mount
 
-  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newStatus = event.target.checked;
+  const handleChange = async (newStatus: boolean) => {
     setIsUpdating(true);
 
     const cookies = new Cookies();
@@ -82,20 +82,21 @@ const SwitchButton = ({
   };
 
   return (
-    <div>
-      {isFetchElectionDetails || isUpdating ? (
-        <CircularProgress size={20} style={{ color: "#015CE9" }} />
+    <div className="inline-flex items-center gap-2">
+      {isFetchElectionDetails ? (
+        <Loader2 className="h-4 w-4 animate-spin text-primary" aria-label="Loading" />
       ) : (
-        <label className="toggle">
-          <input
-            className="toggle-checkbox"
-            type="checkbox"
-            onChange={handleChange}
+        <>
+          <Switch
             checked={electionStatus}
+            onCheckedChange={handleChange}
             disabled={isUpdating}
+            aria-label={electionStatus ? "Unpublish election" : "Publish election"}
           />
-          <div className="toggle-switch"></div>
-        </label>
+          {isUpdating && (
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+          )}
+        </>
       )}
     </div>
   );

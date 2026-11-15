@@ -1,11 +1,12 @@
 import React from "react";
 
-const Header = () => {
-  return (
-    <div className="font-bold lg:text-4xl text-2xl lg:pt-20 pt-28 max-w-[800px] mx-auto lg:w-full lg:mx-0 pb-10 lg:pb-0">
-      Frequently asked questions
-    </div>
-  );
-};
+const Header = () => (
+  <div className="pt-28 text-center lg:pt-20">
+    <h1 className="text-2xl font-bold lg:text-4xl">Frequently asked questions</h1>
+    <p className="mx-auto mt-3 max-w-xl text-base text-slate-600 lg:text-lg">
+      Everything you need to know about running and voting in elections on Votar.
+    </p>
+  </div>
+);
 
 export default Header;

@@ -5,20 +5,16 @@ import Button from "./HomePage/Button";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Divide as Hamburger } from "hamburger-react";
-import { BsArrowDown } from "react-icons/bs";
+import SignInMenu from "./SignInMenu";
 import { Collapse } from "react-collapse";
 
 const Nav = () => {
   const [toggle, setToggle] = useState(false);
-  const [signinDropDown, setSigninDropdown] = useState(false);
 
   const pathname = usePathname();
 
   const hamburgerHandler = () => {
     setToggle(!toggle);
-  };
-  const signinHandler = () => {
-    setSigninDropdown(!signinDropDown);
   };
 
   return (
@@ -71,21 +67,10 @@ const Nav = () => {
             </ul>
           </div>
           <div className="flex gap-5">
-            <div>
-              <button className="border border-[#015CE9] w-[154px] h-[52px] rounded text-[#015CE9] sign-hover relative">
-                Sign In
-                <div
-                  className={`opacity-0 invisible absolute transition ease-in-out delay-200 top-[43px]  px-4 py-5 rounded-lg bg-white text-[#015CE9] whitespace-nowrap mt-2 shadow-lg text-left`}
-                >
-                  <Link href="/signin">
-                    <p className="mb-3">Sign In to Dashboard</p>
-                  </Link>
-                  <Link href="/vote">
-                    <p>Sign In to Vote</p>
-                  </Link>
-                </div>
-              </button>
-            </div>
+            <SignInMenu
+              openOnHover
+              buttonClassName="border border-[#015CE9] w-[154px] h-[52px] rounded text-[#015CE9] transition-colors hover:bg-[#015CE9]/5"
+            />
             <div>
               <Link href="/signin?create-account=signup">
                 <Button className="bg-[#015CE9] text-white rounded-lg w-[221px] h-[52px] p-[14px] whitespace-nowrap">
@@ -107,29 +92,10 @@ const Nav = () => {
             </Link>
           </div>
 
-          <div className="relative">
-            <Button
-              className="bg-[#015CE9] text-white rounded-lg p-[10px] flex items-center gap-1"
-              onClick={signinHandler}
-            >
-              <p>Sign In</p>
-              <span>
-                <BsArrowDown className="font-bold" />
-              </span>
-            </Button>
-            <div
-              className={`${
-                signinDropDown ? "opacity-1 block" : "opacity-0 hidden"
-              } absolute transition ease-in-out delay-200 top-13  right-[0px] px-4 py-5 rounded-lg bg-white text-[#015CE9] whitespace-nowrap mt-2 shadow-lg`}
-            >
-              <Link href="/signin">
-                <div className="mb-3">Sign In to Dashboard</div>
-              </Link>
-              <Link href="/vote">
-                <div>Sign In to Vote</div>
-              </Link>
-            </div>
-          </div>
+          <SignInMenu
+            align="right"
+            buttonClassName="bg-[#015CE9] text-white rounded-lg p-[10px]"
+          />
         </div>
         <Collapse
           isOpened={toggle}

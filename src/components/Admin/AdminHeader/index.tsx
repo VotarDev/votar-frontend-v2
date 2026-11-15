@@ -17,7 +17,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { removeAdminData } from "@/redux/features/adminProfile/adminProfileSlice";
-import Cookies from "universal-cookie";
+import { clearAdminSession } from "@/utils/session";
+import setAuthToken from "@/utils/setAuthToken";
 import { AnimatePresence, motion } from "framer-motion";
 
 const AdminHeader = () => {
@@ -93,8 +94,8 @@ const AdminHeader = () => {
   const logoutHandler = () => {
     // Logout
     dispatch(removeAdminData());
-    const cookies = new Cookies();
-    cookies.remove("admin-token", { path: "/" });
+    clearAdminSession();
+    setAuthToken(null);
     router.push("/admin/login");
   };
 

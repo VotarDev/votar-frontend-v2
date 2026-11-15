@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import Cookies from "universal-cookie";
+import { Skeleton } from "@/src/components/ui/skeleton";
+import PositionCard from "../../PositionCard";
 import { Chart } from "chart.js/auto";
 import { Pie } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
@@ -179,14 +182,9 @@ const MonitorSubGroupTotalNumbers = ({
   useEffect(() => {
     const monitorElectionBySubgroup = async () => {
       setIsFetchSubGroup(true);
-      if (users?.data) {
-        setAuthToken(users.data.data.cookie);
-      } else {
-        if (typeof window !== "undefined") {
-          const tokenLocal = localStorage.getItem("token");
-          setAuthToken(tokenLocal);
-        }
-      }
+      // Use the signed-in token when there is one; never clear the header.
+      const token = new Cookies().get("user-token");
+      if (token) setAuthToken(token);
       try {
         const { data } = await monitorSubgroup(electionId);
         if (data.data) {
@@ -222,121 +220,36 @@ const MonitorSubGroupTotalNumbers = ({
 
   console.log(chartData);
 
-  if (isFetchSubGroup)
-    return (
-      <div className="text-center">
-        <CircularProgress size={30} style={{ color: "#015CE9" }} />
-      </div>
-    );
+  if (isFetchSubGroup) return <Skeleton className="h-96 w-full rounded-xl" />;
 
   return (
-    <div className="mb-20 lg:w-[1200px] mx-auto w-full bg-slate-50 flex flex-col gap-20 pb-20 justify-center">
-      <div className="w-[637px] mx-auto">
-        {chartData && (
+    <PositionCard title="Votes by sub-group">
+      {chartData ? (
+        <div className="relative mx-auto h-80 w-full max-w-xl lg:h-[420px]">
           <Pie
             data={chartData} // @ts-ignore
             options={{
+              responsive: true,
+              maintainAspectRatio: false,
               plugins: {
-                datalabels: {
-                  color: "#ffffff",
-                },
+                datalabels: { color: "#ffffff", font: { weight: "bold" } },
+                // Below the chart so it fits on phones.
                 legend: {
                   display: true,
-                  position: "right",
-                  align: "start",
-                  maxWidth: 200,
-                  labels: {
-                    boxWidth: 20,
-                    padding: 16,
-                    font: {
-                      size: 16,
-                    },
-                  },
+                  position: "bottom",
+                  labels: { boxWidth: 14, padding: 14, font: { size: 13 } },
                 },
               },
             }} // @ts-ignore
             plugins={[ChartDataLabels]}
           />
-        )}
-      </div>
-      {/* {candidateData?.map((candidate: any, index: number) => {
-        return (
-          <div key={index} className=" px-10 ">
-            <div className="text-center pt-20 text-slate-900 lg:text-[28px] text-base font-semibold flex items-center justify-center gap-2 uppercase">
-              <div>
-                <img src={leftline.src} alt="line" className="w-14 lg:w-full" />
-              </div>
-              <div>{candidate.position}</div>
-              <div>
-                <img
-                  src={rightline.src}
-                  alt="line"
-                  className="w-14 lg:w-full"
-                />
-              </div>
-            </div>
-            <div className="w-[600px] mx-auto">
-              <Pie
-                data={chartData[index]} // @ts-ignore
-                options={{
-                  plugins: {
-                    datalabels: {
-                      color: "#ffffff",
-                    },
-                    legend: {
-                      display: true,
-                      position: "right",
-                      align: "start",
-                      maxWidth: 200,
-                      labels: {
-                        boxWidth: 20,
-                        padding: 16,
-                        font: {
-                          size: 16,
-                        },
-                      },
-                    },
-                  },
-                }}
-                // @ts-ignore
-                plugins={[ChartDataLabels]}
-              />
-            </div>
-          </div>
-        );
-      })} */}
-
-      {/* <div className="w-[637px]">
-        {chartData && (
-          <Pie
-            data={chartData[1]} // @ts-ignore
-            options={{
-              plugins: {
-                datalabels: {
-                  color: "#ffffff",
-                },
-                legend: {
-                  display: true,
-                  position: "right",
-                  align: "start",
-                  maxWidth: 200,
-                  labels: {
-                    boxWidth: 20,
-                    padding: 16,
-                    font: {
-                      size: 16,
-                    },
-                  },
-                },
-              },
-            }}
-            // @ts-ignore
-            plugins={[ChartDataLabels]}
-          />
-        )}
-      </div> */}
-    </div>
+        </div>
+      ) : (
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          No sub-group results yet.
+        </p>
+      )}
+    </PositionCard>
   );
 };
-
 export default MonitorSubGroupTotalNumbers;

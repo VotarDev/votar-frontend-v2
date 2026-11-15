@@ -19,9 +19,9 @@ const DashboardOverview = ({ userId }: DashboardOverviewProps) => {
     isError,
     refetch,
   } = useGetElectionsQuery(userId ?? skipToken, {
-    // Elections are still created through the old axios calls, which don't
-    // update this cache, so refetch on every visit (cached data shows meanwhile).
-    refetchOnMountOrArgChange: true,
+    // Writes refresh this through invalidateOnWrite; otherwise reuse the
+    // cache for a minute when moving between pages.
+    refetchOnMountOrArgChange: 60,
   });
 
   // Until the user id is known (e.g. right after a Google sign-in), show the

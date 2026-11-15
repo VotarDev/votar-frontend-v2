@@ -137,7 +137,12 @@
 
   .tilt-inward-left {
     perspective: 1000px;
-    animation: tiltAnimation 5s linear infinite;
+    animation: tiltAnimation 5s ease-in-out infinite alternate;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tilt-inward-left {
+      animation: none;
+    }
   }
   .video-modal {
     background: rgba(0, 0, 0, 0.8);

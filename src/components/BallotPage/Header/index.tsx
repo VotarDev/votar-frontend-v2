@@ -58,7 +58,7 @@ const Header = ({
               </div>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight px-2 break-words">
               {electionDetails?.name_of_election}
             </h1>
 
@@ -182,7 +182,7 @@ const Header = ({
               </div>
 
               {/* Election Name */}
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide text-gray-900 leading-tight px-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide text-gray-900 leading-tight px-2 break-words">
                 {electionDetails?.name_of_election}
               </h1>
 
