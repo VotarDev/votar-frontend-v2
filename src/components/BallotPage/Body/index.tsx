@@ -416,7 +416,7 @@ function Body({
                       <Switch
                         checked={position.show_pictures}
                         disabled={!isEditable}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: boolean) =>
                           handleShowPicture(checked, positionIndex)
                         }
                       />
@@ -426,7 +426,7 @@ function Body({
                       <Switch
                         checked={position.allow_abstain}
                         disabled={!isEditable}
-                        onCheckedChange={(checked) =>
+                        onCheckedChange={(checked: boolean) =>
                           handleAllowAbstain(checked, positionIndex)
                         }
                       />

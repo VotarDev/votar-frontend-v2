@@ -161,7 +161,10 @@ const authSlice = createSlice({
         state.error = true;
         state.success = false;
         state.userData = null;
-        state.message = action.payload || action.error.message || "Signup failed.";
+        state.message =
+          (typeof action.payload === "string" && action.payload) ||
+          action.error.message ||
+          "Signup failed.";
       });
   },
 });
