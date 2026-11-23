@@ -1,23 +1,64 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import axios from "axios";
 import authService from "./authService";
 import setAuthToken from "@/utils/setAuthToken";
 import toast from "react-hot-toast";
 import Cookies from "universal-cookie";
 
-let users = null;
+type AuthUser = Record<string, unknown>;
 
-if (typeof window !== "undefined") {
-  const userObject = localStorage.getItem("user");
-  if (userObject) {
-    users = JSON.parse(userObject);
-  } else {
-    users = null;
-  }
+interface AuthState {
+  loading: boolean;
+  userData: AuthUser | null;
+  isVerified: boolean;
+  userToken: string | null;
+  error: boolean;
+  success: boolean;
+  message: string;
 }
 
-const initialState = {
+interface AuthApiResponse {
+  message?: string;
+  token?: string;
+  data?: {
+    message?: string;
+    data?: {
+      cookie?: string;
+      token?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+interface SignupPayload {
+  NIN: number;
+  userName: string;
+  phoneNumber: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+const getStoredUser = (): AuthUser | null => {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const userObject = localStorage.getItem("user");
+    return userObject ? (JSON.parse(userObject) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+};
+
+const initialState: AuthState = {
   loading: false,
-  userData: users ? users : null,
+  userData: getStoredUser(),
   isVerified: false,
   userToken: null,
   error: false,
@@ -25,7 +66,13 @@ const initialState = {
   message: "",
 };
 
-const getRequestErrorMessage = (error: any) => {
+const getRequestErrorMessage = (error: unknown): string => {
+  if (!axios.isAxiosError(error)) {
+    return error instanceof Error
+      ? error.message
+      : "The request could not be completed. Please try again.";
+  }
+
   const body = error?.response?.data;
   const message =
     body?.message ||
@@ -41,7 +88,11 @@ const getRequestErrorMessage = (error: any) => {
 
 //login user
 
-export const login = createAsyncThunk(
+export const login = createAsyncThunk<
+  AuthApiResponse,
+  { email: string; password: string },
+  { rejectValue: string }
+>(
   `${process.env.NEXT_PUBLIC_BASE_URL}/user/login`,
   async (userdata: { email: string; password: string }, thunkAPI) => {
     try {
@@ -58,10 +109,10 @@ export const login = createAsyncThunk(
         toast.success(data.data?.message);
       }
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = getRequestErrorMessage(error);
       if (
-        error.response?.status === 403 &&
+        (axios.isAxiosError(error) && error.response?.status === 403) &&
         message ===
           "Email not verified. A new verification code has been sent to your email."
       ) {
@@ -81,7 +132,11 @@ export const login = createAsyncThunk(
 
 // register user
 
-export const register = createAsyncThunk(
+export const register = createAsyncThunk<
+  AuthApiResponse,
+  SignupPayload,
+  { rejectValue: string }
+>(
   `${process.env.NEXT_PUBLIC_BASE_URL}/user/signup`,
   async (userdata, thunkAPI) => {
     try {
@@ -93,7 +148,7 @@ export const register = createAsyncThunk(
         toast.success(data.data?.message);
       }
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message = getRequestErrorMessage(error);
       toast.error(message);
       return thunkAPI.rejectWithValue(message);
@@ -116,10 +171,10 @@ const authSlice = createSlice({
       state.success = false;
       state.loading = false;
     },
-    googleAuth: (state, { payload }) => {
+    googleAuth: (state, { payload }: PayloadAction<AuthUser | null>) => {
       state.userData = payload;
     },
-    setCredentials: (state, { payload }) => {
+    setCredentials: (state, { payload }: PayloadAction<AuthUser | null>) => {
       state.userData = payload;
     },
   },
@@ -128,23 +183,28 @@ const authSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.loading = true;
       })
-      .addCase(login.fulfilled, (state, action: any) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
         state.isVerified = true;
-        //@ts-ignore
         state.userData = action.payload;
-        state.userToken = action.payload.token;
-        state.message = action.payload.message;
+        state.userToken =
+          action.payload.data?.data?.cookie ??
+          action.payload.data?.data?.token ??
+          action.payload.token ??
+          null;
+        state.message =
+          action.payload.data?.message ?? action.payload.message ?? "";
       })
-      .addCase(login.rejected, (state, action: any) => {
+      .addCase(login.rejected, (state, action) => {
         state.loading = false;
         state.error = true;
         state.isVerified = false;
         state.success = false;
         state.userData = null;
         state.userToken = null;
-        state.message = action.payload;
+        state.message =
+          action.payload ?? action.error.message ?? "Login failed.";
       })
       .addCase(register.pending, (state) => {
         state.loading = true;
@@ -154,6 +214,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.userData = action.payload;
+        state.message =
+          action.payload.data?.message ?? action.payload.message ?? "";
+        state.error = false;
       })
       .addCase(register.rejected, (state, action) => {
         state.isVerified = false;
@@ -170,4 +233,4 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
-export const { reset, logout, googleAuth } = authSlice.actions;
+export const { reset, logout, googleAuth, setCredentials } = authSlice.actions;
