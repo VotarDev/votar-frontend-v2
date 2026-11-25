@@ -143,9 +143,17 @@ export const register = createAsyncThunk<
       const { data } = await authService.signup(userdata);
 
       if (data) {
+        const signupDetails = data.data?.data;
+        const responseMessage = data.data?.message ?? "Account created.";
+
+        if (signupDetails?.verificationEmailQueued === false) {
+          toast.error(responseMessage);
+          return data;
+        }
+
         localStorage.setItem("user", JSON.stringify(data));
+        toast.success(responseMessage);
         window.location.href = "/signin/otp";
-        toast.success(data.data?.message);
       }
       return data;
     } catch (error: unknown) {
